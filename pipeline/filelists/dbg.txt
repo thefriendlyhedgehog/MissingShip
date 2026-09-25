@@ -34,7 +34,7 @@ mlfile_032
 object_ml_crackwall
 mlfile_034
 mlfile_035
-mlfile_036
+ml_object_bdoor
 mlfile_037
 mlfile_038
 mlfile_039
@@ -56,7 +56,7 @@ mlfile_054
 object_ml_ma1
 object_ml_gi_hourglass
 mlfile_057
-mlfile_058
+ml_object_jya_obj
 mlfile_059
 mlfile_060
 mlfile_061
@@ -349,14 +349,14 @@ mlfile_347
 mlfile_348
 object_ml_gkeep
 mlfile_350
-mlfile_351
+ml_gameplay_dangeon_keep
 object_ml_prologue
 object_ml_scrub
 object_ml_cucco
 mlfile_355
 object_ml_villager
 mlfile_357
-mlfile_358
+ml_object_box
 object_ml_gi_nutmilk
 mlfile_360
 mlfile_361
@@ -365,7 +365,7 @@ mlfile_363
 mlfile_364
 mlfile_365
 mlfile_366
-mlfile_367
+ml_object_bombf
 mlfile_368
 mlfile_369
 mlfile_370
@@ -393,7 +393,7 @@ object_ml_gi_soulsword
 mlfile_392
 mlfile_393
 mlfile_394
-mlfile_395
+ml_object_haka_door
 mlfile_396
 mlfile_397
 mlfile_398

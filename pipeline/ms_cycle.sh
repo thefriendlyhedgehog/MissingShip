@@ -40,6 +40,10 @@ ML_OBJECTS = {12: 'object_ml_fishpond',    # object slot 0x40 (OBJECT_JJ in vani
 ML_OBJECTS.update({82: 'ml_icon_item_static', 83: 'ml_icon_item_24_static', 84: 'ml_icon_item_field_static',
                    87: 'ml_icon_item_nes_static', 90: 'ml_item_name_static', 91: 'ml_map_name_static',
                    125: 'ml_parameter_static'})
+# Objects ML only re-textured (same size and layout as MQ debug's): named ml_* so inject_obj_textures.py can
+# extract them with texture-only copies of SoH's own XMLs and ship the redrawn textures under vanilla paths (MS-020).
+ML_OBJECTS.update({351: 'ml_gameplay_dangeon_keep', 358: 'ml_object_box', 367: 'ml_object_bombf',
+                   36: 'ml_object_bdoor', 395: 'ml_object_haka_door', 58: 'ml_object_jya_obj'})
 for _i, _n in ML_OBJECTS.items(): lines[_i] = _n
 # dma 114 is ML's `code` file, which holds the audio tables. Audio.xml looks it up BY NAME,
 # so the rewrite above must not leave it as mlfile_114 or ZAPD's ZAudio segfaults on a null file.
@@ -59,6 +63,7 @@ python3 "$MS_PIPE"/inject_minimaps.py
 python3 "$MS_PIPE"/inject_messages.py
 python3 "$MS_PIPE"/inject_objects.py
 python3 "$MS_PIPE"/inject_ui_textures.py
+python3 "$MS_PIPE"/inject_obj_textures.py
 python3 "$MS_PIPE"/inject_audio.py
 cp "$MS_PIPE"/ml.otr "$MS"/mod/MissingLink_Scenes.o2r
 pkill -x MissingShip 2>/dev/null || true
