@@ -6,7 +6,8 @@
 Each check prints PASS, FAIL or SKIP (a missing optional input, e.g. the debug ROM). Exits 1 if anything failed.
 
   compile    every script in tools/ and pipeline/ byte-compiles
-  engine     the engine fork has no uncommitted or unpushed work (docs/*.patch is generated from commits)
+  engine     the engine fork has no uncommitted or unpushed work (docs/*.patch is generated from commits), and
+             engine/ is at the commit MissingShip pins
   patches    docs/*.patch match the engine fork                     (tools/genpatch.py --check)
   ledger     every patched file is named in ENGINE_CHANGES.md        (tools/checkledger.py)
   exits      every ML exit remaps to the right SoH entrance          (tools/checkexits.py)
@@ -59,7 +60,11 @@ else:
         if ahead.isdigit() and int(ahead): problems.append(f'{label}: {ahead} unpushed commit(s)')
         branch = git(repo, 'branch', '--show-current')
         if branch != 'missingship': problems.append(f'{label}: on branch "{branch or "detached"}", expected missingship')
-    report('engine', 'FAIL' if problems else 'PASS', '; '.join(problems) or 'fork clean and pushed (missingship)')
+    if _os.path.realpath(SHIPWRIGHT) == _os.path.realpath(_os.path.join(ROOT, 'engine')):
+        pin = git(ROOT, 'submodule', 'status', 'engine')      # '+' = checked-out commit differs from the pinned one
+        if pin.startswith('+'):
+            problems.append('engine/ is not at the commit MissingShip pins: commit the pointer (git add engine)')
+    report('engine', 'FAIL' if problems else 'PASS', '; '.join(problems) or 'fork clean, pushed and pinned (missingship)')
 
 # patches / ledger ---------------------------------------------------------------------------------------------
 if engine:

@@ -16,11 +16,11 @@ Project memory notes from the local sessions are copied in `docs/notes/`. The pl
 - ML object table in code at +0x10A6C8 (8-byte {vromStart, vromEnd} entries).
 - Many "rewritten" actors are vanilla source recompiled with edits: diff with `tools/aligndiff.py <ml_id> [vanilla_id]`
   (second id when ML moved an actor to another slot), then copy SoH's source and apply the diff.
-- Engine: private fork `MissingShip-Shipwright` (branch `missingship` on tag 9.2.3; submodules MissingShip-libultraship /
-  MissingShip-ZAPDTR, branch `missingship`). Commit engine work there, then `tools/genpatch.py` refreshes docs/*.patch.
+- Engine: private fork `MissingShip-Shipwright`, the `engine/` submodule (branch `missingship` on tag 9.2.3; submodules MissingShip-libultraship /
+  MissingShip-ZAPDTR, branch `missingship`). Commit + push engine work there, then commit the `engine` pointer here; `tools/genpatch.py` refreshes docs/*.patch.
 - Before pushing: `python3 tools/check.py` (enable the hook once: `git config core.hooksPath .githooks`).
 - Paths: everything resolves through `pipeline/mspaths.py` / `mspaths.sh` (env overrides `MS_*`, see README).
-- New actor dirs need `cmake -S . -B build-ml` before building. Deploy: copy `build-ml/soh/soh-macos` over
+- New actor dirs need `cmake -S . -B build-ml` (in `engine/`) before building. Deploy: copy `engine/build-ml/soh/soh-macos` over
   `MissingShip.app/Contents/MacOS/MissingShip`, then `pipeline/ms_cycle.sh` (rebuilds the .o2r and relaunches).
 - New ML object: add `pipeline/xml/objects/object_ml_<name>.xml`, name its dma index in ML_OBJECTS in
   `ms_cycle.sh`, declare paths in `soh/assets/ml_assets.h`.

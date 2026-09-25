@@ -77,26 +77,29 @@ The batches from 2026-09-24/25 are built but not playtested (ROADMAP issue MS-01
 
 ### Engine
 
-The engine lives in a **private fork**, clone it next to this repo:
+The engine is a **private fork**, included in this repo as the `engine/` submodule (MS-014). One recursive clone gets everything at matching versions:
 
 | Repo | Branch | Contents |
 |---|---|---|
-| [MissingShip-Shipwright](https://github.com/thefriendlyhedgehog/MissingShip-Shipwright) | `missingship` | SoH 9.2.3 (tag `9.2.3`) + every engine change |
-| [MissingShip-libultraship](https://github.com/thefriendlyhedgehog/MissingShip-libultraship) | `missingship` | submodule: Metal zero-size texture guard |
-| [MissingShip-ZAPDTR](https://github.com/thefriendlyhedgehog/MissingShip-ZAPDTR) | `missingship` | submodule: ZAudio zero-size soundfont guard |
+| [MissingShip-Shipwright](https://github.com/thefriendlyhedgehog/MissingShip-Shipwright) (`engine/`) | `missingship` | SoH 9.2.3 (tag `9.2.3`) + every engine change |
+| [MissingShip-libultraship](https://github.com/thefriendlyhedgehog/MissingShip-libultraship) (`engine/libultraship`) | `missingship` | Metal zero-size texture guard |
+| [MissingShip-ZAPDTR](https://github.com/thefriendlyhedgehog/MissingShip-ZAPDTR) (`engine/ZAPDTR`) | `missingship` | ZAudio zero-size soundfont guard |
 
 These are private repos with SoH's full history rather than GitHub forks, because GitHub forks of public repos are always public and the engine carries ML-derived data.
 
 ```bash
-git clone --recursive https://github.com/thefriendlyhedgehog/MissingShip-Shipwright.git Shipwright
-cd Shipwright
+git clone --recursive https://github.com/thefriendlyhedgehog/MissingShip.git && cd MissingShip
+git config core.hooksPath .githooks                  # the pre-push check
+cd engine
+git switch missingship                              # submodules check out detached; work on the branch
 git remote add upstream https://github.com/HarbourMasters/Shipwright.git   # for SoH updates
-cmake -S . -B build-ml && cmake --build build-ml --target soh -j8
+cmake -S . -B build-ml -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build-ml --target soh ZAPD -j8         # the engine, and the ZAPD the pipeline uses
 ```
 
 - Copy `build-ml/soh/soh-macos` over `MissingShip.app/Contents/MacOS/MissingShip`.
 - A new actor directory needs the `cmake -S . -B build-ml` reconfigure.
-- **Engine changes are commits on `missingship`.** Then run `python3 tools/genpatch.py` to refresh the patches in `docs/` (see `docs/PORTING_ACTORS.md` step 6). The patches are generated review copies, not the source of truth; `tools/genpatch.py --check` fails if they're stale.
+- **Engine changes are commits on `missingship`** in `engine/`, pushed. Then MissingShip commits the new `engine` pointer, and `python3 tools/genpatch.py` refreshes the patches in `docs/` (see `docs/PORTING_ACTORS.md` step 6). The patches are generated review copies, not the source of truth; `tools/genpatch.py --check` fails if they're stale.
 - Taking a newer SoH release means merging its tag into `missingship` (`git fetch upstream --tags && git merge <tag>`), then rebuilding and replaying the tests.
 
 ### Mod archive
@@ -145,7 +148,7 @@ Override any path with an env var:
 | `MS_ML_ROM` | `pipeline/tml_2_0.z64` |
 | `MS_DEBUG_ROM` | `roms/oot-mq-debug-pal.z64` |
 | `MS_OOT_O2R` | `home/oot.o2r` |
-| `MS_SHIPWRIGHT` | `../Shipwright` (the engine fork checkout, next to this repo) |
+| `MS_SHIPWRIGHT` | `engine/` (the engine fork submodule) |
 | `MS_ZAPD`, `MS_ZAPD_CWD` | `$MS_SHIPWRIGHT/build-ml/ZAPD/ZAPD.out` (built with the engine, patched ZAPDTR), `$MS_SHIPWRIGHT/soh` |
 
 ZAPD's config (`pipeline/Config_ML.xml`) is a template; each run writes the filled-in copy to `pipeline/out/`.

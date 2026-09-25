@@ -8,7 +8,9 @@ metadata:
 https://github.com/thefriendlyhedgehog/MissingShip (private). Its own git repo nested in the AI_Projects repo.
 **Engine (MS-007, 2026-09-25): private repos MissingShip-Shipwright / MissingShip-libultraship / MissingShip-ZAPDTR,
 branch `missingship`** (full SoH history; base tag 9.2.3 = cb71e22; NOT GitHub forks -- forks of public repos are
-always public). Local ../Shipwright: remote `origin` = private fork, `upstream` = HarbourMasters. Engine work = commits
+always public). **Since MS-014 the engine is the `engine/` SUBMODULE of MissingShip** (MissingShip/engine; ../Shipwright is only a
+compat symlink to it; build dir engine/build-ml, Ninja Release). After committing+pushing in engine/, commit the
+`engine` pointer in MissingShip (check.py fails otherwise). Remotes in engine/: `origin` = private fork, `upstream` = HarbourMasters. Engine work = commits
 on missingship (MS-nnn subject) + push, then `tools/genpatch.py` regenerates docs/*.patch (generated, not the source
 of truth; `--check` for staleness). Submodule changes: commit+push in the submodule first, then the pointer.
 

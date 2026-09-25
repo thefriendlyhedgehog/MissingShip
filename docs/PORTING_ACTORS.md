@@ -94,7 +94,7 @@ decodes cleanly, it just decodes to noise.
 
 ### 3. Write the actor
 
-Create `soh/src/overlays/actors/ovl_<Name>/z_<name>.{c,h}` in Shipwright, following any vanilla
+Create `soh/src/overlays/actors/ovl_<Name>/z_<name>.{c,h}` in `engine/`, following any vanilla
 actor for style. Reference ML assets through `soh/assets/ml_assets.h`, which declares them the way
 `soh_assets.h` does:
 
@@ -130,17 +130,17 @@ Then copy `build-ml/soh/soh-macos` over `MissingShip.app/Contents/MacOS/MissingS
 
 ### 6. Commit, regenerate the patches, update the docs
 
-The engine is the private fork `MissingShip-Shipwright`, branch `missingship` (see the README). Commit the actor there,
-with the issue ID in the subject, and push:
+The engine is the private fork `MissingShip-Shipwright`, checked out as the `engine/` submodule on branch `missingship`
+(see the README). Commit the actor there with the issue ID in the subject, push, then pin the new commit in MissingShip:
 
 ```bash
-cd Shipwright
+cd engine
 git add soh/src/overlays/actors/ovl_<Name>/ soh/include/tables/actor_table.h soh/assets/ml_assets.h   # what you touched
 git commit -m "MS-0nn: port <Name>" && git push
-cd ../MissingShip && python3 tools/genpatch.py
+cd .. && python3 tools/genpatch.py && git add engine docs/*.patch     # commit with the docs changes below
 ```
 
-Only committed work reaches the patches. A change inside `libultraship` or `ZAPDTR` is committed and pushed in that
+Only committed work reaches the patches, and `tools/check.py` fails if `engine/` is not at the pinned commit. A change inside `libultraship` or `ZAPDTR` is committed and pushed in that
 submodule first (branch `missingship`), then the new submodule pointer is committed in the engine.
 
 Then:
