@@ -1,3 +1,6 @@
 {
-  "0x058": "Harmless (MS-095): ML 0x058 and 0x157 are identical entries (Lon Lon Ranch slot, spawn 0, flags 0x4183 / 0x4102), so they land on SoH 0x157 together. Ml_EventSpawner compares 0x058 only in its spot09 (Gerudo Valley slot) chase modes, and no route into spot09 leaves the entrance at a ranch value; Ml_Malon only writes 0x058 back as the ranch respawn after the race."
+  "0x058": "Harmless (MS-095): ML 0x058 and 0x157 are identical entries (Lon Lon Ranch slot, spawn 0, flags 0x4183 / 0x4102), so they land on SoH 0x157 together. Ml_EventSpawner compares 0x058 only in its spot09 (Gerudo Valley slot) chase modes, and no route into spot09 leaves the entrance at a ranch value; Ml_Malon only writes 0x058 back as the ranch respawn after the race.",
+  "raw": {
+    "src/overlays/actors/ovl_Ml_FogWall/z_ml_fogwall.c:94 ENTR_KOKIRI_FOREST_0": "Vanilla En_Holl code copied into ML's fog wall (credits check: Kokiri Forest entrance with scene layer 8). ML's copy compares ML 0x0EE, which maps to the same SoH 0x0EE; the extra ML entrances landing there (0x008-0x00B, ...) never use layer 8, so the check behaves the same."
+  }
 }
