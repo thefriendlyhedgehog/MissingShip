@@ -116,7 +116,7 @@ The 3, 5, 6 and 0x1F slots are ported. Still to do:
 | Opening (dma 99) | 3 words: new-game / attract-mode entrance and cutscene index. Not ported. |
 | map_mark_data (dma 103) | 58 data words: dungeon-map chest / boss markers. **Ported** (MS-023, with the kaleido pause-map markers ML also edited). |
 | map_i_static (dma 113), map_48x85_static (dma 112) | redrawn dungeon minimaps and pause dungeon maps. **Ported** (MS-022: 32 textures, the room + 190 index and ML's map tables). |
-| staff_message_data_static (dma 110) | ML's credits text. Not ported. |
+| staff_message_data_static (dma 110) | ML's credits text. **Ported** (MS-024: 11 of 48 credits rewritten by ML, via inject_messages.py). |
 | Skyboxes | `vr_fine1_static` and `vr_cloud2_static` (+ palettes) redrawn. Not ported. |
 | link_animetion (dma 146, 2.5 MB) | Link's animation data changed. Not ported (goes with the Link port). |
 | Entrance flags | 39 SoH entrances used by ML have different title-card / music / transition flags. Title cards are fixed; music and transitions are not. |
@@ -204,7 +204,7 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 | [MS-021](https://github.com/thefriendlyhedgehog/MissingShip/issues/14) | port | Beamos (object_vm) body and eyelid DLs, Saria right-hand limb (object_sa). | DL aliases shipped. |
 | [MS-022](https://github.com/thefriendlyhedgehog/MissingShip/issues/15) | port | Dungeon minimaps and pause dungeon maps (map_i_static dma 113, map_48x85_static dma 112), plus ML's minimap index (room + 190, 0x80080D20). | ML's maps show in ydan / HAKAdan / Bmori1. **Done:** 25 minimaps + 7 pause maps shipped, index and ML's map tables in the engine (ledger 48). In-game check pending. |
 | [MS-023](https://github.com/thefriendlyhedgehog/MissingShip/issues/16) | port | map_mark_data (dma 103, 58 data words): dungeon-map chest / boss markers. | Markers match ML. **Done:** ML's markers in SoH's MQ tables, MQ tables always used (ledger 49). In-game check pending. |
-| [MS-024](https://github.com/thefriendlyhedgehog/MissingShip/issues/17) | port | Credits text (staff_message_data_static, dma 110). | Injected as a resource. |
+| [MS-024](https://github.com/thefriendlyhedgehog/MissingShip/issues/17) | port | Credits text (staff_message_data_static, dma 110). | Injected as a resource. **Done:** the 11 credits ML rewrote ship in the mod's staff message resource. In-game check pending. |
 | [MS-025](https://github.com/thefriendlyhedgehog/MissingShip/issues/18) | port | Skyboxes `vr_fine1` and `vr_cloud2` (+ palettes; ML dma 128/129, 138/139). | Injected. |
 | [MS-026](https://github.com/thefriendlyhedgehog/MissingShip/issues/19) | port | gameplay_keep sword-turn animations (`kiruL_end`, `kiruR`, `kiruR_end`). | Injected under the vanilla names (check how they interact with Link's animations, MS-051). |
 | [MS-027](https://github.com/thefriendlyhedgehog/MissingShip/issues/20) | port | Entrance flags: 39 entrances with ML's music-continuity / transition-style flags. | A data override, or a small engine table plus a ledger row. |

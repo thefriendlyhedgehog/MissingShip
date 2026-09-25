@@ -15,8 +15,12 @@ ML keeps vanilla's message SYSTEM but rewrote most of the text:
 
 Messages are terminated by 0x02 (MSG_END); slicing to the next entry's offset would include padding,
 so each message is trimmed at its terminator before comparison and export.
+
+Credits (MS-024): `text/staff_message_data_static/staff_message_data_static`, same resource layout. ML's staff table
+(code 0x136908, 48 entries) is byte-identical to the MQ debug ROM's; its text blob is dma 110. A credit ships only if
+ML's text differs from the debug ROM's (the baseline ML was built from): 11 do, ML's own staff and thanks.
 """
-from mspaths import ML_ROM, OOT_O2R, PIPE
+from mspaths import DEBUG_ROM, ML_ROM, OOT_O2R, PIPE, SOH
 import zipfile, struct, sys, shutil, os
 sys.path.insert(0, PIPE)
 from yaz0 import get_file
@@ -80,10 +84,44 @@ for mid in order:
     body += struct.pack('<HBB', mid, typ, pos) + struct.pack('<I', len(txt)) + txt
 
 res = d[:0x40] + bytes(body)
+
+# ---- credits (MS-024) ----
+STAFF_RES = 'text/staff_message_data_static/staff_message_data_static'
+STAFF_TABLE, STAFF_NENT, STAFF_DMA = 0x136908, 48, 110
+dbg_rom = open(DEBUG_ROM, 'rb').read()
+dbg_names = open(os.path.join(SOH, 'assets', 'extractor', 'filelists', 'dbg.txt')).read().split('\n')
+def dbg_file(i):
+    return get_file(dbg_rom, *struct.unpack('>IIII', dbg_rom[0x12f70 + 16 * i:0x12f70 + 16 * i + 16]))
+dbg_code = dbg_file(dbg_names.index('code'))
+if code[STAFF_TABLE:STAFF_TABLE + 8 * STAFF_NENT] != dbg_code[STAFF_TABLE:STAFF_TABLE + 8 * STAFF_NENT]:
+    sys.exit('staff message table differs from the debug ROM: offsets would not line up')
+ml_staff, dbg_staff = get_file(rom, *E[STAFF_DMA]), dbg_file(dbg_names.index('staff_message_data_static'))
+stbl = [(struct.unpack('>H', code[STAFF_TABLE + 8 * k:STAFF_TABLE + 8 * k + 2])[0],
+         struct.unpack('>I', code[STAFF_TABLE + 8 * k + 4:STAFF_TABLE + 8 * k + 8])[0] & 0xFFFFFF) for k in range(STAFF_NENT)]
+staff_new = {}
+for i, (tid, seg) in enumerate(stbl):
+    end = stbl[i + 1][1] if i + 1 < len(stbl) else len(ml_staff)
+    if trim(ml_staff[seg:end]) != trim(dbg_staff[seg:end]):
+        staff_new[tid] = trim(ml_staff[seg:end])
+sd = z.read(STAFF_RES)
+scount = struct.unpack('<I', sd[0x40:0x44])[0]
+sbody, off = bytearray(struct.pack('<I', scount)), 0x44
+written = set()
+for _ in range(scount):
+    mid, typ, pos = struct.unpack('<HBB', sd[off:off+4])
+    ln = struct.unpack('<I', sd[off+4:off+8])[0]
+    txt = staff_new.get(mid, sd[off+8:off+8+ln]); off += 8 + ln
+    written.add(mid)
+    sbody += struct.pack('<HBB', mid, typ, pos) + struct.pack('<I', len(txt)) + txt
+if set(staff_new) - written:
+    sys.exit(f'credits with no stock message: {sorted(map(hex, set(staff_new) - written))}')
+staff_res = sd[:0x40] + bytes(sbody)
 shutil.copy(MOD, MOD + '.tmp')
 with zipfile.ZipFile(MOD + '.tmp', 'a', zipfile.ZIP_DEFLATED) as zz:
     if RES not in zz.namelist():
         zz.writestr(RES, res)
+    if STAFF_RES not in zz.namelist():
+        zz.writestr(STAFF_RES, staff_res)
 os.replace(MOD + '.tmp', MOD)
 print(f"message resource rebuilt: {count} messages, {replaced} replaced with ML text "
-      f"({len(res)} bytes vs vanilla {len(d)})")
+      f"({len(res)} bytes vs vanilla {len(d)}); credits: {len(staff_new)} of {scount} replaced with ML text")
