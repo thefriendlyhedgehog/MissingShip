@@ -1,0 +1,3 @@
+{
+  "0x058": "Harmless (MS-095): ML 0x058 and 0x157 are identical entries (Lon Lon Ranch slot, spawn 0, flags 0x4183 / 0x4102), so they land on SoH 0x157 together. Ml_EventSpawner compares 0x058 only in its spot09 (Gerudo Valley slot) chase modes, and no route into spot09 leaves the entrance at a ranch value; Ml_Malon only writes 0x058 back as the ranch respawn after the race."
+}

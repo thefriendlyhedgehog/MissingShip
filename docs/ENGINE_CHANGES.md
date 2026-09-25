@@ -236,6 +236,14 @@ Descriptions of unported targets are a first reading of the code; confirm them w
 | — | player +0x38CC | the boomerang throw's En_Boom spawn replaced by a flag write (0x80609FFF = 1): the Magic Hourglass trigger, with +0x378C (no aim hold) | **ported** (row 98) |
 | — | beam update | crystal switches vs. beam: invisible explosion (ML's gutted En_Bom clone in slot 0x0E) | ported as params 0xB0B0 of row 17 |
 
+### Entrance collisions (MS-095)
+
+`tools/checkentrances.py`, run by `check.py`, finds ML entrance groups that land on one SoH entrance while ported code
+tells them apart (every `== MlEntrance_ToSoh(0x...)`). It checks each against every route in: scene exits, cutscene
+destinations, ML's grotto table and code-set entrances. The Fishing Pond pair (0x41C / 0x420) was mapped apart in
+row 84. The one remaining overlap, 0x058 / 0x157 (identical ranch entries), is harmless and documented in
+`pipeline/entrance_collisions.json`.
+
 ### Entrance flags (ported, row 50)
 
 ML's entrance table carries its own title-card / keep-music / transition flags, but the pipeline remaps ML's exits

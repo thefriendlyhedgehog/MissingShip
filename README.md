@@ -126,6 +126,7 @@ It runs every automated check and prints PASS / FAIL / SKIP. A check whose input
 - `docs/*.patch` match the fork;
 - the change log names every patched file;
 - every ML exit remaps correctly;
+- no ML entrance that ported code compares collides with another route into the same SoH entrance, unless `pipeline/entrance_collisions.json` documents it (`checkentrances`);
 - every resource reference in the mod resolves, except the pipeline's deliberate skips;
 - the actor inventory matches the ROMs.
 

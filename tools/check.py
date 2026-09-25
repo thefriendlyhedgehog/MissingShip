@@ -84,6 +84,9 @@ if not _os.path.exists(ML_ROM) or not engine:
 else:
     rc, out = run(_os.path.join(TOOLS, 'checkexits.py'))
     report('exits', 'FAIL' if rc else 'PASS', last_line(out) if not rc else '; '.join(l for l in out.splitlines() if 'exit' in l)[:300])
+    rc, out = run(_os.path.join(TOOLS, 'checkentrances.py'))
+    report('entrances', 'FAIL' if rc else 'PASS', last_line(out) if not rc else
+           '; '.join(l for l in out.splitlines() if 'COLLISION' in l)[:300])
 
 mod = _os.path.join(PIPE, 'ml.otr')
 if not (_os.path.exists(mod) and _os.path.exists(OOT_O2R)):
