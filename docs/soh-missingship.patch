@@ -3899,98 +3899,339 @@ index 0000000000000000000000000000000000000000..9d0e8ccf604011cde8af25b6de10a23a
 +#endif
 diff --git a/soh/src/overlays/actors/ovl_Ml_EventSpawner/z_ml_eventspawner.c b/soh/src/overlays/actors/ovl_Ml_EventSpawner/z_ml_eventspawner.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..a7befaa1fdc66294b74ef052aade4e64d8696c30
+index 0000000000000000000000000000000000000000..ab70ed2f46b3b09c44ec402bc0a64353977f1715
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_EventSpawner/z_ml_eventspawner.c
-@@ -0,0 +1,74 @@
+@@ -0,0 +1,300 @@
 +/*
 + * File: z_ml_eventspawner.c
 + * Overlay: ovl_Ml_EventSpawner
-+ * Description: The Missing Link - scripted-event spawner (ML's rewrite of En_Fz, slot 0x121)
++ * Description: The Missing Link - scripted-event spawner and young Epona (ML's rewrite of En_Fz, slot 0x121)
 + *
-+ * ML turned the Freezard slot (ML dma 259, text 0xBA0) into an event helper whose params pick a mode:
-+ *   2, 4, 5, 6  only when Link arrives by ML entrance 0x138 or 0x058 (remapped: Gerudo Valley slot spawn 4 and
-+ *               Lon Lon Ranch slot spawn 0), spawn Bg_Umajump / En_Ma1 / a Deku Baba / a Tektite in place, then leave;
-+ *   7           stop the running timer (Deep Woods' grotto arena ends the chase);
-+ *   0, 1, 3     a creature on object 0xA0 and its chase / cutscene logic -- NOT PORTED YET (they leave at once,
-+ *               where SoH would otherwise spawn a vanilla Freezard).
-+ * Mode 4 spawns ML's rewritten En_Ma1, which is not ported either, so it is held back too.
++ * ML turned the Freezard slot (ML dma 259, text 0xBA0) into an event helper on object_horse_link_child. Its params
++ * pick a mode (ML function offsets in brackets):
++ *   0, 8+  young Epona standing still, blinking (spot20)                                            [+0xB10]
++ *   1      only when Link arrives by ML entrance 0x138 or 0x058: the horse chase (spot09). A short cutscene, then a
++ *          40-second timer while young Epona gallops along path 0; once she stops, the timer running out sends
++ *          Link to ML entrance 0x13C                                                                  [+0x424]
++ *   2, 4, 5, 6  only on the same two entrances: spawn Bg_Umajump / Ml_Malon / a Deku Baba / a Tektite in place,
++ *          then leave                                                                                 [+0x958..]
++ *   3      young Epona walking forward with Link riding her                                           [+0x88C]
++ *          Ml_Fishpond spawns it on ML entrance 0x420, which ML reaches after its reworked blue warp and actor
++ *          0x001; both are MS-037, and 0x420 shares SoH's fishing-pond entrance with 0x41C until then.
++ *   7      stop the running timer                                                                     [+0xAE4]
++ * ML's entrance numbers are remapped with MlEntrance_ToSoh.
 + */
 +
 +#include "z_ml_eventspawner.h"
++#include "objects/object_horse_link_child/object_horse_link_child.h"
++#include "code/ml_entrance_map.h"
 +
 +#define FLAGS ACTOR_FLAG_UPDATE_CULLING_DISABLED
 +
 +void MlEventSpawner_Init(Actor* thisx, PlayState* play);
 +void MlEventSpawner_Destroy(Actor* thisx, PlayState* play);
 +void MlEventSpawner_Update(Actor* thisx, PlayState* play);
++void MlEventSpawner_Draw(Actor* thisx, PlayState* play);
++
++void MlEventSpawner_Stand(MlEventSpawner* this, PlayState* play);
++void MlEventSpawner_ChaseIntro(MlEventSpawner* this, PlayState* play);
++void MlEventSpawner_Gallop(MlEventSpawner* this, PlayState* play);
++void MlEventSpawner_WaitForTimer(MlEventSpawner* this, PlayState* play);
++void MlEventSpawner_Ride(MlEventSpawner* this, PlayState* play);
 +
 +const ActorInit Ml_EventSpawner_InitVars = {
 +    ACTOR_EN_FZ,
 +    ACTORCAT_BG,
 +    FLAGS,
-+    OBJECT_GAMEPLAY_KEEP,
++    OBJECT_HORSE_LINK_CHILD, // like ML: every room that places it loads this object
 +    sizeof(MlEventSpawner),
 +    (ActorFunc)MlEventSpawner_Init,
 +    (ActorFunc)MlEventSpawner_Destroy,
 +    (ActorFunc)MlEventSpawner_Update,
-+    NULL,
++    (ActorFunc)MlEventSpawner_Draw,
 +    NULL,
 +};
++
++// ML's init bytes are laid out for Collider_SetCylinderType1 ({ 0x0A, 0x11, 0x09, 0x20, 0x01 }) but go to
++// Collider_SetCylinder, which reads a sixth byte: OC is off and the shape reads as a JntSph whose element count is
++// the toucher's damage flags (negative), so the collider never touches anything. Its dimensions still feed
++// Actor_UpdateBgCheckInfo, so it is kept for those and never registered with AT or OC.
++static ColliderCylinderInit sCylinderInit = {
++    { COLTYPE_NONE, AT_ON | AT_TYPE_ENEMY, AC_ON | AC_TYPE_PLAYER, OC1_TYPE_2, OC2_HIT_PLAYER, COLSHAPE_JNTSPH },
++    { ELEMTYPE_UNK0, { 0xFFCFFFFF, 0x04, 0x05 }, { 0xFFCFFFFF, 0x00, 0x00 }, TOUCH_ON, BUMP_ON, OCELEM_ON },
++    { 32, 128, 0, { 0, 0, 0 } },
++};
++
++static void* sEyeTextures[] = { gChildEponaEyeOpenTex, gChildEponaEyeHalfTex, gChildEponaEyeCloseTex };
++
++// ML keeps a flag in the overlay's data that lets the chase start once per overlay load; the overlay unloads when
++// its last instance goes. SoH's data lives for the session, so count instances and reset the flag with the last one.
++static s32 sChaseAllowed = true;
++static s32 sInstances = 0;
 +
 +static void MlEventSpawner_SpawnHere(Actor* thisx, PlayState* play, s16 actorId, s16 params) {
 +    Actor_Spawn(&play->actorCtx, play, actorId, thisx->world.pos.x, thisx->world.pos.y, thisx->world.pos.z,
 +                thisx->shape.rot.x, thisx->shape.rot.y, thisx->shape.rot.z, params);
 +}
 +
-+void MlEventSpawner_Init(Actor* thisx, PlayState* play) {
-+    bool eventEntrance = (gSaveContext.entranceIndex == ENTR_GERUDO_VALLEY_OUTSIDE_TENT) ||
-+                         (gSaveContext.entranceIndex == ENTR_LON_LON_RANCH_ENTRANCE);
++static void MlEventSpawner_InitSkin(MlEventSpawner* this, PlayState* play) {
++    Skin_Init(play, &this->skin, &gChildEponaSkel, &gChildEponaIdleAnim);
++    Animation_PlayOnceSetSpeed(&this->skin.skelAnime, &gChildEponaIdleAnim, 0.0f);
++    Animation_MorphToLoop(&this->skin.skelAnime, &gChildEponaIdleAnim, -5.0f);
++}
 +
++static void MlEventSpawner_StartChase(MlEventSpawner* this, PlayState* play) {
++    gSaveContext.entranceIndex = MlEntrance_ToSoh(0x058);
++    if (!sChaseAllowed) {
++        Actor_Kill(&this->actor);
++        return;
++    }
++    MlEventSpawner_InitSkin(this, play);
++    Audio_QueueSeqCmd(NA_BGM_HORSE);
++    func_80064520(play, &play->csCtx); // start a manual cutscene
++    sChaseAllowed = false;
++    this->path = Path_GetByIndex(play, 0, 0xFF);
++    this->actor.room = -1;
++    this->actor.colChkInfo.mass = MASS_IMMOVABLE;
++    this->waypoint = 0;
++    this->actor.gravity = -1.0f;
++    this->actionFunc = MlEventSpawner_ChaseIntro;
++}
++
++void MlEventSpawner_Init(Actor* thisx, PlayState* play) {
++    MlEventSpawner* this = (MlEventSpawner*)thisx;
++    s32 eventEntrance = (gSaveContext.entranceIndex == MlEntrance_ToSoh(0x138)) ||
++                        (gSaveContext.entranceIndex == MlEntrance_ToSoh(0x058));
++
++    sInstances++;
 +    switch ((u16)thisx->params) {
++        case 1:
++            if (!eventEntrance) {
++                Actor_Kill(thisx);
++                return;
++            }
++            MlEventSpawner_StartChase(this, play);
++            break;
 +        case 2:
-+            if (eventEntrance) {
-+                MlEventSpawner_SpawnHere(thisx, play, ACTOR_BG_UMAJUMP, 0);
-+            }
-+            break;
++        case 4:
 +        case 5:
-+            if (eventEntrance) {
-+                MlEventSpawner_SpawnHere(thisx, play, ACTOR_EN_DEKUBABA, 1);
-+            }
-+            break;
 +        case 6:
 +            if (eventEntrance) {
-+                MlEventSpawner_SpawnHere(thisx, play, ACTOR_EN_TITE, -1);
++                static const s16 sSpawns[][2] = {
++                    { ACTOR_BG_UMAJUMP, 0 }, { 0, 0 }, { ACTOR_EN_MA1, -1 }, { ACTOR_EN_DEKUBABA, 1 },
++                    { ACTOR_EN_TITE, -1 },
++                };
++                MlEventSpawner_SpawnHere(thisx, play, sSpawns[thisx->params - 2][0], sSpawns[thisx->params - 2][1]);
 +            }
++            Actor_Kill(thisx);
++            return;
++        case 3:
++            MlEventSpawner_InitSkin(this, play);
++            Animation_MorphToLoop(&this->skin.skelAnime, &gChildEponaGallopingAnim, -5.0f);
++            this->skin.skelAnime.playSpeed = 1.4f;
++            this->actionFunc = MlEventSpawner_Ride;
 +            break;
 +        case 7:
 +            gSaveContext.timerState = TIMER_STATE_STOP;
-+            break;
-+        default: // 0, 1, 3 (creature / chase) and 4 (ML's En_Ma1): not ported yet
++            Actor_Kill(thisx);
++            return;
++        default: // 0 and anything past 7
++            MlEventSpawner_InitSkin(this, play);
++            this->actionFunc = MlEventSpawner_Stand;
 +            break;
 +    }
-+    Actor_Kill(thisx);
++    Actor_SetScale(thisx, 0.0065f);
++    ActorShape_Init(&thisx->shape, 0.0f, ActorShadow_DrawHorse, 20.0f);
++    Collider_InitCylinder(play, &this->collider);
++    Collider_SetCylinder(play, &this->collider, thisx, &sCylinderInit);
++    this->colliderInit = true;
 +}
 +
 +void MlEventSpawner_Destroy(Actor* thisx, PlayState* play) {
++    MlEventSpawner* this = (MlEventSpawner*)thisx;
++
++    if (this->colliderInit) {
++        Collider_DestroyCylinder(play, &this->collider);
++    }
++    if (--sInstances == 0) {
++        sChaseAllowed = true;
++    }
++}
++
++void MlEventSpawner_Stand(MlEventSpawner* this, PlayState* play) {
++    Collider_UpdateCylinder(&this->actor, &this->collider);
++}
++
++// Once she has stopped, the chase is lost when the timer runs out.
++void MlEventSpawner_WaitForTimer(MlEventSpawner* this, PlayState* play) {
++    Collider_UpdateCylinder(&this->actor, &this->collider);
++    if (gSaveContext.timerSeconds == 0) {
++        gSaveContext.timerState = TIMER_STATE_STOP;
++        play->nextEntranceIndex = MlEntrance_ToSoh(0x13C);
++        play->transitionTrigger = TRANS_TRIGGER_START;
++    }
++}
++
++// Mode 3: walk forward carrying Link. ML plays sfx 0x2004, the EV-bank horse run without the 0x800 flag.
++void MlEventSpawner_Ride(MlEventSpawner* this, PlayState* play) {
++    Player* player = GET_PLAYER(play);
++
++    Player_PlaySfx(&this->actor, 0x2004);
++    this->actor.speedXZ = 4.5f;
++    Actor_MoveXZGravity(&this->actor);
++    player->actor.world.pos.x = this->actor.world.pos.x;
++    player->actor.world.pos.z = this->actor.world.pos.z;
++    player->actor.world.pos.y = this->actor.world.pos.y + 5.0f;
++    player->actor.gravity = 0.0f;
++    player->actor.shape.rot.y = this->actor.shape.rot.y;
++}
++
++static void MlEventSpawner_StartGallop(MlEventSpawner* this, PlayState* play) {
++    func_80064534(play, &play->csCtx); // end the manual cutscene
++    Interface_SetTimer(40);
++    Animation_MorphToLoop(&this->skin.skelAnime, &gChildEponaGallopingAnim, -5.0f);
++    Sfx_PlaySfxCentered(NA_SE_SY_START_SHOT);
++    this->timer = 0;
++    this->actionFunc = MlEventSpawner_Gallop;
++}
++
++void MlEventSpawner_ChaseIntro(MlEventSpawner* this, PlayState* play) {
++    if (this->timer > 40) {
++        MlEventSpawner_StartGallop(this, play);
++    } else {
++        Camera_ChangeDataIdx(&play->mainCamera, 4);
++        this->timer++;
++    }
++    if (this->timer == 25) {
++        Player_PlaySfx(&this->actor, NA_SE_EV_KID_HORSE_NEIGH);
++    }
++}
++
++static void MlEventSpawner_StopGallop(MlEventSpawner* this, PlayState* play) {
++    Animation_MorphToLoop(&this->skin.skelAnime, &gChildEponaIdleAnim, -5.0f);
++    this->actor.speedXZ = 0.0f;
++    this->skin.skelAnime.playSpeed = 1.0f;
++    Player_PlaySfx(&this->actor, NA_SE_EV_HORSE_SLIP);
++    this->actionFunc = MlEventSpawner_WaitForTimer;
++}
++
++static s32 MlEventSpawner_FollowPath(MlEventSpawner* this) {
++    s16 yaw;
++    f32 distSq = Path_OrientAndGetDistSq(&this->actor, this->path, this->waypoint, &yaw);
++
++    Math_SmoothStepToS(&this->actor.world.rot.y, yaw, 10, 1000, 1);
++    if ((distSq > 0.0f) && (distSq < 1000.0f)) {
++        this->waypoint++;
++        return true;
++    }
++    return false;
++}
++
++void MlEventSpawner_Gallop(MlEventSpawner* this, PlayState* play) {
++    f32 dustScale = Rand_ZeroFloat(13.0f);
++    f32 dustRadius = Rand_ZeroFloat(10.0f);
++    // ML passes an uninitialised stack halfword as the dust count, next to a Rand_S16Offset(.., 9) call whose result
++    // it discards; the random 0-8 that call looks meant to produce stands in for it.
++    s16 dustCount = Rand_S16Offset(0, 9);
++    f32* playSpeed = &this->skin.skelAnime.playSpeed;
++    s16 waypoint = this->waypoint;
++
++    Collider_UpdateCylinder(&this->actor, &this->collider);
++
++    // her gait by stretch of the path
++    if (waypoint < 3) {
++        Math_StepToF(playSpeed, 1.8f, 0.1f);
++    } else if ((waypoint < 6) || ((waypoint >= 15) && (waypoint < 19))) {
++        Math_StepToF(playSpeed, 1.3f, 0.2f);
++    } else if (waypoint < 9) {
++        Math_StepToF(playSpeed, 1.8f, 0.2f);
++    } else if (waypoint < 11) {
++        Math_StepToF(playSpeed, 1.6f, 0.1f);
++    } else if (waypoint < 15) {
++        Math_StepToF(playSpeed, 1.65f, 0.1f);
++    } else {
++        Math_StepToF(playSpeed, 1.5f, 0.1f);
++    }
++
++    MlEventSpawner_FollowPath(this);
++    if (this->waypoint >= this->path->count) {
++        MlEventSpawner_StopGallop(this, play);
++    } else {
++        this->actor.speedXZ = *playSpeed * 5.75f;
++        this->actor.shape.rot.y = this->actor.world.rot.y;
++        Actor_MoveXZGravity(&this->actor);
++    }
++
++    if (this->dustTimer == 4) {
++        func_80033480(play, &this->actor.world.pos, dustRadius + 40.0f, dustCount,
++                      (s16)(dustScale + 50.0f), (s16)(dustScale + 50.0f), 1);
++        this->dustTimer = 0;
++    } else {
++        this->dustTimer++;
++    }
++    Player_PlaySfx(&this->actor, 0x2004);
 +}
 +
 +void MlEventSpawner_Update(Actor* thisx, PlayState* play) {
++    MlEventSpawner* this = (MlEventSpawner*)thisx;
++
++    this->actionFunc(this, play);
++    Actor_UpdateBgCheckInfo(play, thisx, 20.0f, this->collider.dim.radius, this->collider.dim.height,
++                            5); // floor and walls, as ML passes
++    SkelAnime_Update(&this->skin.skelAnime);
++
++    if (this->blinkTimer == 0) {
++        this->blinkTimer = Rand_S16Offset(30, 30);
++    }
++    this->blinkTimer--;
++    this->eyeTex = sEyeTextures[(this->blinkTimer < 2) ? 2 - this->blinkTimer : 0];
++}
++
++s32 MlEventSpawner_OverrideLimbDraw(Actor* thisx, PlayState* play, s32 limbIndex, Skin* skin) {
++    MlEventSpawner* this = (MlEventSpawner*)thisx;
++
++    OPEN_DISPS(play->state.gfxCtx);
++    gSPSegment(POLY_OPA_DISP++, 0x08, SEGMENTED_TO_VIRTUAL(this->eyeTex));
++    gSPSegment(POLY_XLU_DISP++, 0x08, SEGMENTED_TO_VIRTUAL(this->eyeTex));
++    CLOSE_DISPS(play->state.gfxCtx);
++    return true;
++}
++
++void MlEventSpawner_Draw(Actor* thisx, PlayState* play) {
++    MlEventSpawner* this = (MlEventSpawner*)thisx;
++
++    func_800A6360(thisx, play, &this->skin, NULL, MlEventSpawner_OverrideLimbDraw, true);
 +}
 diff --git a/soh/src/overlays/actors/ovl_Ml_EventSpawner/z_ml_eventspawner.h b/soh/src/overlays/actors/ovl_Ml_EventSpawner/z_ml_eventspawner.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..51c0d67b4151d5d67dc750eb0503726ea337c250
+index 0000000000000000000000000000000000000000..30fbf93c13b8be170531df4a78dc086fe6916bd8
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_EventSpawner/z_ml_eventspawner.h
-@@ -0,0 +1,11 @@
+@@ -0,0 +1,26 @@
 +#ifndef Z_ML_EVENTSPAWNER_H
 +#define Z_ML_EVENTSPAWNER_H
 +
 +#include <libultraship/libultra.h>
 +#include "global.h"
 +
++struct MlEventSpawner;
++
++typedef void (*MlEventSpawnerActionFunc)(struct MlEventSpawner*, PlayState*);
++
++// ML's layout (size 0x240), for reference against its overlay; SoH's own offsets differ.
 +typedef struct MlEventSpawner {
-+    Actor actor;
++    /* 0x000 */ Actor actor;
++    /* 0x14C */ Skin skin;                  // young Epona (object_horse_link_child)
++    /* 0x1DC */ ColliderCylinder collider;
++    /* 0x228 */ MlEventSpawnerActionFunc actionFunc;
++    /* 0x22C */ s16 blinkTimer;
++    /* 0x230 */ void* eyeTex;
++    /* 0x234 */ s16 colliderInit;
++    /* 0x236 */ s16 timer;
++    /* 0x238 */ Path* path;
++    /* 0x23C */ s16 waypoint;
++    /* 0x23E */ s16 dustTimer;
 +} MlEventSpawner;
 +
 +#endif

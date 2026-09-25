@@ -53,7 +53,7 @@ Last full review: **2026-09-25**, with every ML file compared against PAL MQ Deb
 | `Bmori1` (dungeon) | En_Peehat, Boss_Dodongo ×2, En_Du ×3, En_Nb ×3, Bg_Jya_1flift |
 | `spot00` | En_Mag (title logo) |
 | `kakariko3` | Boss_Ganon2 |
-| Partial | En_Fz / Ml_EventSpawner (only modes 2, 5, 6, 7), En_Niw_Lady (certificate hand-in only), En_Hy (certificate offer only), En_Ko (shares Mido's hook 0x80602200; not done) |
+| Partial | none since MS-033: Ml_EventSpawner is complete (mode 3's trigger waits on MS-037), En_Niw_Lady and En_Hy were already complete, En_Ko was ported in MS-032 |
 
 ### B. Changed actors that are not placed but are spawned at runtime
 
@@ -218,7 +218,7 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 | [MS-030](https://github.com/thefriendlyhedgehog/MissingShip/issues/21) | port | **En_Elf (Navi)**: 4018 words + custom hook 0x80602000. She's in every scene, so this comes first. | Behaviour diffed and ported. **Done:** two real edits found and ported (ledger 51). In-game check pending. |
 | [MS-031](https://github.com/thefriendlyhedgehog/MissingShip/issues/22) | port | En_Nutsball: **built** (Hylian-Shield-only reflect; nuts break during swim_15step_up); needs playtest. | Ported, and the scrubs verified with it. |
 | [MS-032](https://github.com/thefriendlyhedgehog/MissingShip/issues/23) | port | En_Ko: **built** (11 after-the-sword text swaps, the Kokiri frown, two branch edits); needs playtest. | Ported. |
-| [MS-033](https://github.com/thefriendlyhedgehog/MissingShip/issues/24) | port | Finish the partial actors: En_Fz / Ml_EventSpawner (remaining modes), En_Niw_Lady, En_Hy. | Full behaviour. |
+| [MS-033](https://github.com/thefriendlyhedgehog/MissingShip/issues/24) | port | Finish the partial actors. **Built:** Ml_EventSpawner complete (young Epona standing, the horse chase, riding; mode 3 waits on MS-037). En_Hy and En_Niw_Lady were already complete (the certificate parts are ML\'s only edits). Needs playtest. | Full behaviour. |
 | [MS-034](https://github.com/thefriendlyhedgehog/MissingShip/issues/25) | port | `spot01`: En_Dodojr, Bg_Toki_Hikari, En_Rd, Bg_Po_Event, Bg_Spot02_Objects (+ object_spot02_objects), Bg_Spot16_Bombstone, En_Daiku, En_Hs, Obj_Makekinsuta. | One issue per actor when started. |
 | [MS-035](https://github.com/thefriendlyhedgehog/MissingShip/issues/26) | port | `night_shop`: En_Ossan + En_GirlA shop items (8 data words: prices?). | The shop works as in ML. |
 | [MS-036](https://github.com/thefriendlyhedgehog/MissingShip/issues/27) | port | `HAKAdan`: Boss_Tw slot ×26 (small ML rewrite + object_tw), ACTOR_UNSET_1A (custom), Bg_Hidan_Dalm, Bg_Mori_Elevator (+ object_mori_objects), En_Floormas, En_Kakasi (+ object_ka), En_Ssh, Bg_Mizu_Shutter. | The dungeon can be completed. |
