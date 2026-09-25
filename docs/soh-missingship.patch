@@ -1,6 +1,6 @@
 diff --git a/soh/assets/ml_assets.h b/soh/assets/ml_assets.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..31c03194addaac70a3266e591e6401efa0db33b8
+index 0000000000000000000000000000000000000000..05e4043db4ae57ee71deb778100cf6a6f45cbc38
 --- /dev/null
 +++ b/soh/assets/ml_assets.h
 @@ -0,0 +1,305 @@
@@ -193,7 +193,7 @@ index 0000000000000000000000000000000000000000..31c03194addaac70a3266e591e6401ef
 +static const ALIGN_ASSET(2) char gMlHakaLiftDL[] = dgMlHakaLiftDL;
 +
 +// ML object 0x15 (dma 6, object_link_child): the child's right fist holding ML's Hylian Shield (ML lets a child use it).
-+#define dgMlChildRightFistAndHylianShieldDL "__OTR__objects/object_ml_link_child/gMlChildRightFistAndHylianShieldDL"
++#define dgMlChildRightFistAndHylianShieldDL "__OTR__objects/object_link_child/gMlChildRightFistAndHylianShieldDL"
 +static const ALIGN_ASSET(2) char gMlChildRightFistAndHylianShieldDL[] = dgMlChildRightFistAndHylianShieldDL;
 +
 +
@@ -2734,7 +2734,7 @@ index f73d076de42c85067bb5f8d6fc0b4be7cf1e4ca8..297fb48ec15443187df2699339dd83bf
          }
  
 diff --git a/soh/src/code/z_player_lib.c b/soh/src/code/z_player_lib.c
-index 34750ed2cc7fc7cfc66f9999de6581ea2fc091b4..f3d1869ca551c1d33dae1d71cf3f84502eab9823 100644
+index 34750ed2cc7fc7cfc66f9999de6581ea2fc091b4..f284c4820e8ac2279131de089e907af4c89c8417 100644
 --- a/soh/src/code/z_player_lib.c
 +++ b/soh/src/code/z_player_lib.c
 @@ -1,4 +1,5 @@
@@ -2748,7 +2748,7 @@ index 34750ed2cc7fc7cfc66f9999de6581ea2fc091b4..f3d1869ca551c1d33dae1d71cf3f8450
      gLinkChildRightFistAndDekuShieldFarDL,
      // PLAYER_SHIELD_HYLIAN
 +    // MissingShip: ML gives the child a hand holding its Hylian Shield (one LOD for both), since ML lets a child use
-+    // it (see Player_IsChildWithHylianShield). ML also redrew the other child hands; those wait for MS-050.
++    // it (see Player_IsChildWithHylianShield). ML's other child hands ship under their vanilla names (MS-050).
      gLinkAdultRightHandHoldingHylianShieldNearDL,
 -    gLinkChildRightHandClosedNearDL,
 +    gMlChildRightFistAndHylianShieldDL,
@@ -2758,7 +2758,31 @@ index 34750ed2cc7fc7cfc66f9999de6581ea2fc091b4..f3d1869ca551c1d33dae1d71cf3f8450
      // PLAYER_SHIELD_MIRROR
      gLinkAdultRightHandHoldingMirrorShieldNearDL,
      gLinkChildRightHandClosedNearDL,
-@@ -526,7 +529,8 @@ s32 Player_CheckHostileLockOn(Player* this) {
+@@ -357,18 +360,19 @@ Gfx* sPlayerRightHandOotDLs[] = {
+     gLinkChildRightHandHoldingOOTFarDL,
+ };
+ 
++// MissingShip: ML's child entries in these two tables are the closed right hand and the left fist (MS-050).
+ Gfx* sPlayerRightHandHookshotDLs[] = {
+     gLinkAdultRightHandHoldingHookshotNearDL,
+-    gLinkChildRightHandNearDL,
++    gLinkChildRightHandClosedNearDL,
+     gLinkAdultRightHandHoldingHookshotNearDL, // The 'far' display list exists but is not used
+-    gLinkChildRightHandFarDL,
++    gLinkChildRightHandClosedFarDL,
+ };
+ 
+ Gfx* sPlayerLeftHandHammerDLs[] = {
+     gLinkAdultLeftHandHoldingHammerNearDL,
+-    gLinkChildLeftHandNearDL,
++    gLinkChildLeftFistNearDL,
+     gLinkAdultLeftHandHoldingHammerFarDL,
+-    gLinkChildLeftHandFarDL,
++    gLinkChildLeftFistFarDL,
+ };
+ 
+ Gfx* gPlayerLeftHandBoomerangDLs[] = {
+@@ -526,7 +530,8 @@ s32 Player_CheckHostileLockOn(Player* this) {
  }
  
  s32 Player_IsChildWithHylianShield(Player* this) {
@@ -2768,7 +2792,7 @@ index 34750ed2cc7fc7cfc66f9999de6581ea2fc091b4..f3d1869ca551c1d33dae1d71cf3f8450
  }
  
  s32 Player_ActionToModelGroup(Player* this, s32 actionParam) {
-@@ -773,7 +777,9 @@ s32 Player_IsBurningStickInRange(PlayState* play, Vec3f* pos, f32 xzRange, f32 y
+@@ -773,7 +778,9 @@ s32 Player_IsBurningStickInRange(PlayState* play, Vec3f* pos, f32 xzRange, f32 y
  }
  
  s32 Player_GetStrength(void) {

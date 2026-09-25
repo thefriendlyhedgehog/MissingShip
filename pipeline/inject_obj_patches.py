@@ -110,6 +110,36 @@ tex = bytearray(res)
 tex[0x50 + 0x180:0x50 + 0x260] = custom[0x2B00:0x2BE0]
 out['objects/object_kw1/gMlKw1MouthFrownTex'] = bytes(tex)
 
+# ML's child Link (MS-050): its model has one LOD, so each vanilla Far display list is the same DL as its Near one.
+# ZAPD can't declare two names at one offset, so the Far names ship as copies of the Near resources extracted from
+# xml/objects/object_link_child.xml.
+LC_ALIASES = {
+    'gLinkChildWaistFarDL': 'gLinkChildWaistNearDL',
+    'gLinkChildLeftHandFarDL': 'gLinkChildLeftHandNearDL',
+    'gLinkChildLeftFistFarDL': 'gLinkChildLeftFistNearDL',
+    'gLinkChildRightHandFarDL': 'gLinkChildRightHandNearDL',
+    'gLinkChildRightHandClosedFarDL': 'gLinkChildRightHandClosedNearDL',
+    'gLinkChildSheathFarDL': 'gLinkChildSheathNearDL',
+    'gLinkChildSwordAndSheathFarDL': 'gLinkChildSwordAndSheathNearDL',
+    'gLinkChildHylianShieldSwordAndSheathFarDL': 'gLinkChildHylianShieldSwordAndSheathNearDL',
+    'gLinkChildDekuShieldSwordAndSheathFarDL': 'gLinkChildDekuShieldSwordAndSheathNearDL',
+    'gLinkChildHylianShieldAndSheathFarDL': 'gLinkChildHylianShieldAndSheathNearDL',
+    'gLinkChildDekuShieldAndSheathFarDL': 'gLinkChildDekuShieldAndSheathNearDL',
+    'gLinkChildLeftFistAndKokiriSwordFarDL': 'gLinkChildLeftFistAndKokiriSwordNearDL',
+    'gLinkChildLeftFistAndBoomerangFarDL': 'gLinkChildLeftFistAndBoomerangNearDL',
+    'gLinkChildRightFistAndDekuShieldFarDL': 'gLinkChildRightFistAndDekuShieldNearDL',
+    'gLinkChildRightHandHoldingSlingshotFarDL': 'gLinkChildRightHandHoldingSlingshotNearDL',
+    'gLinkChildRightHandHoldingFairyOcarinaFarDL': 'gLinkChildRightHandHoldingFairyOcarinaNearDL',
+    'gLinkChildRightHandHoldingOOTFarDL': 'gLinkChildRightHandAndOotNearDL',
+}
+with zipfile.ZipFile(MOD) as src:
+    have = set(src.namelist())
+    for far, near in LC_ALIASES.items():
+        npath = f'objects/object_link_child/{near}'
+        if npath not in have:
+            fail(f'{npath}: missing from the mod (object_link_child.xml should declare it)')
+        out[f'objects/object_link_child/{far}'] = src.read(npath)
+
 with zipfile.ZipFile(MOD) as src, zipfile.ZipFile(MOD + '.tmp', 'w', zipfile.ZIP_DEFLATED) as z:
     for info in src.infolist():
         if info.filename not in out:
@@ -117,4 +147,4 @@ with zipfile.ZipFile(MOD) as src, zipfile.ZipFile(MOD + '.tmp', 'w', zipfile.ZIP
     for path, data in out.items():
         z.writestr(path, data)
 os.replace(MOD + '.tmp', MOD)
-print(f'object patches: {len(out)} stock resources patched as ML did ({", ".join(p.split("/")[-1] for p in out)})')
+print(f'object patches: {len(out)} resources patched or aliased as ML did ({", ".join(p.split("/")[-1] for p in out)})')

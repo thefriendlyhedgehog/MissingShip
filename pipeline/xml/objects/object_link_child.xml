@@ -1,0 +1,85 @@
+<Root>
+    <!-- ML's object_link_child (object 0x15, dma 6): ML redrew child Link inside the vanilla file and appended more
+         data, so every symbol moved. Shipped under the vanilla path and names so the engine draws ML's Link with its own
+         code. Offsets come from ML's own references at the same places in `code` (z_player_lib's tables, 0x108D14-
+         0x1092E4, plus the bracelet and Deku Stick lui/addiu pairs), the player overlay (the masks) and Item_Shield.
+         ML's model has one LOD, so each vanilla Near/Far pair is one DL: the Near name is declared here and
+         inject_obj_patches.py ships the Far name as a copy (LC_ALIASES there). Limb-only DLs keep ZAPD's names on
+         purpose: SoH's cosmetics editor patches the vanilla limb DLs at vanilla command indices (MS-050). -->
+    <File Name="object_link_child" Segment="6">
+        <!-- Eyes (segment 8) and mouth (segment 9): vanilla's offsets, ML's palettes. -->
+        <Texture Name="gLinkChildEyesOpenTex" OutName="eyes_open" Format="ci8" Width="64" Height="32" Offset="0x0" TlutOffset="0x6BF0"/>
+        <Texture Name="gLinkChildEyesHalfTex" OutName="eyes_half" Format="ci8" Width="64" Height="32" Offset="0x800" TlutOffset="0x6BF0"/>
+        <Texture Name="gLinkChildEyesClosedfTex" OutName="eyes_closed" Format="ci8" Width="64" Height="32" Offset="0x1000" TlutOffset="0x6BF0"/>
+        <Texture Name="gLinkChildEyesRollLeftTex" OutName="eyes_roll_left" Format="ci8" Width="64" Height="32" Offset="0x1800" TlutOffset="0x6BF0"/>
+        <Texture Name="gLinkChildEyesRollRightTex" OutName="eyes_roll_right" Format="ci8" Width="64" Height="32" Offset="0x2000" TlutOffset="0x6BF0"/>
+        <Texture Name="gLinkChildEyesShockTex" OutName="eyes_shock" Format="ci8" Width="64" Height="32" Offset="0x2800" TlutOffset="0x6BF0"/>
+        <Texture Name="gLinkChildEyesUnk1Tex" OutName="eyes_unk1" Format="ci8" Width="64" Height="32" Offset="0x3000" TlutOffset="0x6BF0"/>
+        <Texture Name="gLinkChildEyesUnk2Tex" OutName="eyes_unk2" Format="ci8" Width="64" Height="32" Offset="0x3800" TlutOffset="0x6BF0"/>
+        <Texture Name="gLinkChildMouth1Tex" OutName="mouth_1" Format="ci8" Width="32" Height="32" Offset="0x4000" TlutOffset="0x7A30"/>
+        <Texture Name="gLinkChildMouth2Tex" OutName="mouth_2" Format="ci8" Width="32" Height="32" Offset="0x4400" TlutOffset="0x7A30"/>
+        <Texture Name="gLinkChildMouth3Tex" OutName="mouth_3" Format="ci8" Width="32" Height="32" Offset="0x4800" TlutOffset="0x7A30"/>
+        <Texture Name="gLinkChildMouth4Tex" OutName="mouth_4" Format="ci8" Width="32" Height="32" Offset="0x4C00" TlutOffset="0x7A30"/>
+
+        <!-- The Bunny Hood's first texture reuses a tile set up earlier, so ZAPD can't size it on its own. -->
+        <Texture Name="gMlChildBunnyHoodTex" OutName="bunny_hood" Format="rgba16" Width="16" Height="16" Offset="0x13B50"/>
+
+        <Skeleton Name="gLinkChildSkel" Type="Flex" LimbType="LOD" Offset="0x23204"/>
+
+        <!-- z_player_lib's tables (the Near names; Far copies come from LC_ALIASES). -->
+        <DList Name="gLinkChildWaistNearDL" Offset="0x151D0"/>
+        <DList Name="gLinkChildRightShoulderNearDL" Offset="0x19770"/>
+        <DList Name="gLinkChildLeftHandNearDL" Offset="0x1AA18"/>
+        <DList Name="gLinkChildLeftFistNearDL" Offset="0x1ADD0"/>
+        <DList Name="gLinkChildLeftHandUpNearDL" Offset="0x1B180"/>
+        <DList Name="gLinkChildRightHandNearDL" Offset="0x1B468"/>
+        <DList Name="gLinkChildRightHandClosedNearDL" Offset="0x1B820"/>
+        <DList Name="gLinkChildSheathNearDL" Offset="0x1BA30"/>
+        <DList Name="gLinkChildBottleDL" Offset="0x1CE38"/>
+        <DList Name="gLinkChildSlinghotStringDL" Offset="0x22E18"/>
+        <DList Name="gLinkChildSwordAndSheathNearDL" Offset="0x22F38"/>
+        <DList Name="gLinkChildDekuShieldDL" Offset="0x22F58"/>
+        <DList Name="gLinkChildDekuShieldWithMatrixDL" Offset="0x22F68"/>
+        <DList Name="gLinkChildHylianShieldSwordAndSheathNearDL" Offset="0x22F88"/>
+        <DList Name="gLinkChildDekuShieldSwordAndSheathNearDL" Offset="0x22F98"/>
+        <DList Name="gLinkChildHylianShieldAndSheathNearDL" Offset="0x22FA8"/>
+        <DList Name="gLinkChildDekuShieldAndSheathNearDL" Offset="0x22FB8"/>
+        <DList Name="gLinkChildLeftFistAndKokiriSwordNearDL" Offset="0x22FC8"/>
+        <DList Name="gLinkChildLeftHandHoldingMasterSwordDL" Offset="0x22FE0"/>
+        <DList Name="gLinkChildLeftFistAndBoomerangNearDL" Offset="0x22FF0"/>
+        <DList Name="gLinkChildRightFistAndDekuShieldNearDL" Offset="0x23000"/>
+        <DList Name="gLinkChildRightHandHoldingSlingshotNearDL" Offset="0x23010"/>
+        <DList Name="gLinkChildRightHandHoldingFairyOcarinaNearDL" Offset="0x23020"/>
+        <DList Name="gLinkChildRightHandAndOotNearDL" Offset="0x23030"/>
+        <DList Name="gMlChildRightFistAndHylianShieldDL" Offset="0x23040"/>
+        <DList Name="gLinkChildRightArmStretchedSlingshotDL" Offset="0x23050"/>
+
+        <!-- The item models the wrappers above call. Vanilla has no names for them, but ZAPD resolves a call to an
+             undeclared DL as a null hash, so without these every held and sheathed item draws nothing (MS-050). -->
+        <DList Name="gMlChildKokiriSwordHiltDL" Offset="0x1BD58"/>
+        <DList Name="gMlChildKokiriSwordBladeDL" Offset="0x1C008"/>
+        <DList Name="gMlChildMasterSwordDL" Offset="0x1C958"/>
+        <DList Name="gMlChildBoomerangDL" Offset="0x6360"/>
+        <DList Name="gMlChildDekuShieldModelDL" Offset="0x1D250"/>
+        <DList Name="gMlChildHylianShieldModelDL" Offset="0x1D618"/>
+        <DList Name="gMlChildHylianShieldWithMatrixDL" Offset="0x22F78"/>
+        <DList Name="gMlChildSlingshotDL" Offset="0x1DB80"/>
+        <DList Name="gMlChildFairyOcarinaDL" Offset="0x1DE88"/>
+        <DList Name="gMlChildOcarinaOfTimeDL" Offset="0x1E110"/>
+        <DList Name="gMlChildRightArmStretchedDL" Offset="0x22A60"/>
+
+        <!-- Built with lui/addiu in code: the Goron's Bracelet and the Deku Stick. -->
+        <DList Name="gLinkChildLinkDekuStickDL" Offset="0x1E440"/>
+        <DList Name="gLinkChildGoronBraceletDL" Offset="0x1E718"/>
+
+        <!-- The player overlay's mask table. -->
+        <DList Name="gLinkChildSkullMaskDL" Offset="0x1ECC8"/>
+        <DList Name="gLinkChildSpookyMaskDL" Offset="0x1F0B8"/>
+        <DList Name="gLinkChildKeatonMaskDL" Offset="0x1F558"/>
+        <DList Name="gLinkChildMaskOfTruthDL" Offset="0x1F988"/>
+        <DList Name="gLinkChildGoronMaskDL" Offset="0x1FE48"/>
+        <DList Name="gLinkChildZoraMaskDL" Offset="0x20398"/>
+        <DList Name="gLinkChildGerudoMaskDL" Offset="0x20DE0"/>
+        <DList Name="gLinkChildBunnyHoodDL" Offset="0x21730"/>
+    </File>
+</Root>

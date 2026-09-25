@@ -93,7 +93,7 @@ Actors living in `code` (En_Item00, En_A_Obj) and slots ML deleted are left out;
 | `0x057` Ml_MThunder (was En_M_Thunder) | REWRITTEN (text 0x9a0 vs 0x1420) | — | custom code, player | ported (Blade Beam, ledger row 17) | no |
 | `0x05d` Door_Warp1 | 5 text / 0 data words differ | — | Ml_BossVa | ported (MS-037) | no |
 | `0x08a` En_Vm | 0 text / 1 data words differ | — | Ml_BossVa | ported (MS-037) | no |
-| `0x0ee` Item_Shield | 1 text / 0 data words differ | — | player | vanilla behaviour: its one edit is object_link_child's moved Deku Shield DL, which follows MS-050 | no |
+| `0x0ee` Item_Shield | 1 text / 0 data words differ | — | player | vanilla behaviour: its one edit is object_link_child's moved Deku Shield DL, shipped under its vanilla name by MS-050 | no |
 | `0x193` En_Nutsball | REWRITTEN (text 0x590 vs 0x550) | — | En_Dekunuts, En_Shopnuts | ported (MS-031) | no |
 
 ## Changed, but no placement or spawner found (7)

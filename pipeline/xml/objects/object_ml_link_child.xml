@@ -1,7 +1,0 @@
-<Root>
-    <File Name="object_ml_link_child" Segment="6">
-        <DList Name="gMlChildHylianShieldModelDL" Offset="0x1D618"/>
-        <DList Name="gMlChildRightFistDL" Offset="0x1B820"/>
-        <DList Name="gMlChildRightFistAndHylianShieldDL" Offset="0x23040"/>
-    </File>
-</Root>

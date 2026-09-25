@@ -67,7 +67,7 @@ The old inventory only surveyed placed actors, so it missed these. A spawn scan 
 | Door_Warp1 (blue warp) | 5 text words | **Ported** (MS-037): blue warps go to the Fishing Pond (ML entrance 0x41C) |
 | En_Vm (Beamos) | 1 data word; object DLs changed | **Ported** (MS-037: never Z-targetable; the DLs in MS-021). Boss_Va spawns three |
 | En_Bom_Chu | 974 text words (a shift) + hook `0x80607A00` | **Ported** (MS-139): the hook is a HAKAdan-only Bombchu rail |
-| Item_Shield | 1 text word | Vanilla behaviour: the word is object_link_child's moved Deku Shield DL (follows MS-050) |
+| Item_Shield | 1 text word | Vanilla behaviour: the word is object_link_child's moved Deku Shield DL, which ships under its vanilla name (MS-050) |
 | Bg_Dy_Yoseizo, Bg_Haka_Huta | rewritten | Bg_Dy_Yoseizo: an unplaced scenery prop, unreachable. Bg_Haka_Huta: relocation noise only (MS-040) |
 | En_Dodongo (0x12) | rewritten (0x840 vs 0x2570) | **Ported** (MS-138): ML's ending card, in `spot10` room 1's cutscene header |
 | En_Ishi (rocks), En_Karebaba, Obj_Ice_Poly | data / 1 word | En_Ishi: vanilla code, dead ML code in its data padding. En_Karebaba (not hostile) and Obj_Ice_Poly (no AT) ported but unreachable (MS-040) |
@@ -87,7 +87,7 @@ All eight are ported: 3, 5, 6 and 0x1F earlier, 0x1A in MS-036, and the boss fig
 
 | Object | What ML changed | Kind of work |
 |---|---|---|
-| object_link_child (0x15) | 35,836 words; Link's model | big: the "Link object port" |
+| object_link_child (0x15) | 35,836 words; Link's model | **Ported** (MS-050): ML's whole child Link ships under the vanilla path and names; the cosmetics editor's item colours are MS-140 |
 | object_tw, object_nb, object_du, object_mag, object_ganon2, object_ka, object_spot02_objects, object_mori_objects | redrawn for their rewritten actors | with each actor |
 | gameplay_keep | sword-turn recoveries `link_fighter_turn_kiruL_end` / `kiruR_end` (frames 16 → 13 / 14, ML's frames) done (MS-026; `kiruR` is unchanged); unused shape DLs; drop-bomb texture and grotto hole are done | data (animations) |
 | gameplay_dangeon_keep | push-block textures | **data only**: texture aliases |
@@ -111,7 +111,7 @@ All eight are ported: 3, 5, 6 and 0x1F earlier, 0x1A in MS-036, and the boss fig
 | map_i_static (dma 113), map_48x85_static (dma 112) | redrawn dungeon minimaps and pause dungeon maps. **Ported** (MS-022: 32 textures, the room + 190 index and ML's map tables). |
 | staff_message_data_static (dma 110) | ML's credits text. **Ported** (MS-024: 11 of 48 credits rewritten by ML, via inject_messages.py). |
 | Skyboxes | `vr_fine1_static` and `vr_cloud2_static` (+ palettes) redrawn. **Ported** (MS-025: all 12 resources, via inject_minimaps.py). |
-| link_animetion (dma 146, 2.5 MB) | Link's animation data changed. Not ported (goes with the Link port, MS-050), except the two sword-turn recoveries MS-026 needed (`gPlayerAnimData_114420` / `_114FB0`). |
+| link_animetion (dma 146, 2.5 MB) | Link's animation data changed. **Nothing more to port** (MS-050): ML's only changes are the two sword-turn recoveries MS-026 already ships (`gPlayerAnimData_114420` / `_114FB0`) and their two headers. |
 | Entrance flags | ML's title-card / music / transition flags. **Ported** (MS-027): 184 SoH entrance slots take ML's flags; 4 day-fade colours are a known deviation. |
 
 ### F. ML custom code (dma 507) still unported
@@ -227,7 +227,7 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 
 | ID | Type | Issue | Done when |
 |---|---|---|---|
-| [MS-050](https://github.com/thefriendlyhedgehog/MissingShip/issues/32) | port | object_link_child (35,836 words changed) and link_animetion (dma 146). | ML's Link model and animations in game. |
+| [MS-050](https://github.com/thefriendlyhedgehog/MissingShip/issues/32) | port | object_link_child (35,836 words changed) and link_animetion (dma 146). | **Built** (needs playtest): ML's child Link ships under the vanilla names; body, sword and Hylian Shield checked in game. link_animetion needed nothing beyond MS-026. Cosmetics editor item colours: MS-140 #104. |
 | [MS-051](https://github.com/thefriendlyhedgehog/MissingShip/issues/33) | port | Link animation override 0x806023E0 (30 call sites in the player overlay, 5 in `code`). | Ported. |
 | [MS-052](https://github.com/thefriendlyhedgehog/MissingShip/issues/34) | port | The other player-overlay edits (see E): fairy-release flag, removed spawn, scene-gated audio block, custom hooks 0x80606BA0 / 0x80606BC8 / 0x80600480 / 0x80600D90, forced branches, constants. | Each one identified and ported. |
 | [MS-053](https://github.com/thefriendlyhedgehog/MissingShip/issues/35) | port | Magic Hourglass: ring-buffer rewind (0x80600E00 / 0x80601000 / 0x80601680) + actor 0x18A. Right now the item throws a vanilla boomerang. | The item works as in ML. |
