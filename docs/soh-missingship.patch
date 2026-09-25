@@ -799,6 +799,23 @@ index 70ea29675e664b080ecb268571ea6d0f1249d208..bf614774bc192b32459b7ed9fa075645
      { ACTOR_OBJ_HAMISHI, "Bronze Boulder" },
      { ACTOR_EN_ZL4, "Zelda (Child)" },
      { ACTOR_EN_MM2, "Running Man (Adult Era)" },
+diff --git a/soh/soh/Enhancements/Presets/Presets.cpp b/soh/soh/Enhancements/Presets/Presets.cpp
+index 12354dce415ff53f9f9f4493ffa2ac92162204bd..2eb752c01849455fe165beb30e8ecb1bb2cb22c8 100644
+--- a/soh/soh/Enhancements/Presets/Presets.cpp
++++ b/soh/soh/Enhancements/Presets/Presets.cpp
+@@ -1,3 +1,4 @@
++#include "soh/Enhancements/bootcommands.h"
+ #include "Presets.h"
+ #include <string>
+ #include <fstream>
+@@ -127,6 +128,7 @@ void applyPreset(std::string presetName, std::vector<PresetSection> includeSecti
+             }
+         }
+     }
++    MissingShip_ClearRetiredOptions(); // MS-145
+     ShipInit::InitAll();
+     OTRGlobals::Instance->ScaleImGui();
+ }
 diff --git a/soh/soh/Enhancements/RemoveSpinAttackDarkness.cpp b/soh/soh/Enhancements/RemoveSpinAttackDarkness.cpp
 index 96581703010c097c8dc647f7035abbe334eda9ce..5922381972ce8419855aede989ea4a894cf83c8c 100644
 --- a/soh/soh/Enhancements/RemoveSpinAttackDarkness.cpp
@@ -813,6 +830,75 @@ index 96581703010c097c8dc647f7035abbe334eda9ce..5922381972ce8419855aede989ea4a89
      EnMThunder* enMThunder = (EnMThunder*)thunder;
      enMThunder->actor.update = Custom_EnMThunder_Update;
  }
+diff --git a/soh/soh/Enhancements/TimeDisplay/TimeDisplay.cpp b/soh/soh/Enhancements/TimeDisplay/TimeDisplay.cpp
+index 5e213d26d3b86035539a646ebad81c16273a2c18..93dfea96cbe8cef2386b814dca231066a23ba81d 100644
+--- a/soh/soh/Enhancements/TimeDisplay/TimeDisplay.cpp
++++ b/soh/soh/Enhancements/TimeDisplay/TimeDisplay.cpp
+@@ -40,7 +40,8 @@ const std::vector<TimeObject> timeDisplayList = {
+     { DISPLAY_IN_GAME_TIMER, "Display Gameplay Timer", CVAR_TIME_DISPLAY("Timers.InGameTimer") },
+     { DISPLAY_TIME_OF_DAY, "Display Time of Day", CVAR_TIME_DISPLAY("Timers.TimeofDay") },
+     { DISPLAY_CONDITIONAL_TIMER, "Display Conditional Timer", CVAR_TIME_DISPLAY("Timers.HotWater") },
+-    { DISPLAY_NAVI_TIMER, "Display Navi Timer", CVAR_TIME_DISPLAY("Timers.NaviTimer") }
++    // MissingShip (MS-145): no Navi timer -- ML has no Navi. The conditional timer stays: ML's race uses the timer.
++    // { DISPLAY_NAVI_TIMER, "Display Navi Timer", CVAR_TIME_DISPLAY("Timers.NaviTimer") }
+ };
+ 
+ static std::vector<TimeObject> activeTimers;
+diff --git a/soh/soh/Enhancements/bootcommands.c b/soh/soh/Enhancements/bootcommands.c
+index b9838cf66ad00fe4a7e4cfc4c6f11eaa38edbc3d..c80b9e4e02fb316971b9bd55edefbdf8df500fe2 100644
+--- a/soh/soh/Enhancements/bootcommands.c
++++ b/soh/soh/Enhancements/bootcommands.c
+@@ -15,3 +15,31 @@ void BootCommands_Init() {
+     CVarRegisterInteger(CVAR_IMGUI_CONTROLLER_NAV, 1); // always enable controller nav on switch/wii u
+ #endif
+ }
++
++// MissingShip (MS-145): SoH options removed from the menu because they don't apply to ML or would change ML's design
++// (the Bunny Hood speed boost is ML's own). Cleared before ShipInit so an old config or a preset can't leave them on.
++static const char* sMissingShipRetiredOptions[] = {
++    CVAR_ENHANCEMENT("ResetNaviTimer"), CVAR_TIME_DISPLAY("Timers.NaviTimer"), CVAR_ENHANCEMENT("MMBunnyHood"),
++    // Minigames sidebar
++    CVAR_ENHANCEMENT("CustomizeShootingGallery"), CVAR_ENHANCEMENT("InstantShootingGalleryWin"),
++    CVAR_ENHANCEMENT("ConstantAdultGallery"), CVAR_ENHANCEMENT("ShootingGalleryAmmoChild"),
++    CVAR_ENHANCEMENT("ShootingGalleryAmmoAdult"), CVAR_ENHANCEMENT("CustomizeBombchuBowling"),
++    CVAR_ENHANCEMENT("BombchuBowlingNoSmallCucco"), CVAR_ENHANCEMENT("BombchuBowlingNoBigCucco"),
++    CVAR_ENHANCEMENT("BombchuBowlingAmmo"), CVAR_ENHANCEMENT("CustomizeFrogsOcarinaGame"),
++    CVAR_ENHANCEMENT("InstantFrogsGameWin"), CVAR_ENHANCEMENT("FrogsUnlimitedFailTime"),
++    CVAR_ENHANCEMENT("FrogsModifyFailTime"), CVAR_ENHANCEMENT("CustomizeOcarinaGame"),
++    CVAR_ENHANCEMENT("InstantOcarinaGameWin"), CVAR_ENHANCEMENT("OcarinaGame.NoteSpeed"),
++    CVAR_ENHANCEMENT("OcarinaUnlimitedFailTime"), CVAR_ENHANCEMENT("OcarinaGame.StartingNotes"),
++    CVAR_ENHANCEMENT("OcarinaGame.RoundOneNotes"), CVAR_ENHANCEMENT("OcarinaGame.RoundTwoNotes"),
++    CVAR_ENHANCEMENT("OcarinaGame.RoundThreeNotes"), CVAR_ENHANCEMENT("SkipAmyPuzzle"),
++    CVAR_ENHANCEMENT("CustomizeFishing"), CVAR_ENHANCEMENT("InstantFishing"), CVAR_ENHANCEMENT("GuaranteeFishingBite"),
++    CVAR_ENHANCEMENT("FishNeverEscape"), CVAR_ENHANCEMENT("LoachesAlwaysAppear"),
++    CVAR_ENHANCEMENT("SkipKeepConfirmation"), CVAR_ENHANCEMENT("AllHyruleLoaches"),
++    CVAR_ENHANCEMENT("MinimumFishWeightChild"), CVAR_ENHANCEMENT("MinimumFishWeightAdult"),
++};
++
++void MissingShip_ClearRetiredOptions() {
++    for (size_t i = 0; i < sizeof(sMissingShipRetiredOptions) / sizeof(sMissingShipRetiredOptions[0]); i++) {
++        CVarClear(sMissingShipRetiredOptions[i]);
++    }
++}
+diff --git a/soh/soh/Enhancements/bootcommands.h b/soh/soh/Enhancements/bootcommands.h
+index 48b361b13e633a9036aa7a1c65a8266c7341f97d..047e325c47cee9bf8a6edb00c40ebaa9af90c5e1 100644
+--- a/soh/soh/Enhancements/bootcommands.h
++++ b/soh/soh/Enhancements/bootcommands.h
+@@ -1,6 +1,13 @@
+ #ifndef _BOOTCOMMANDS_H_
+ #define _BOOTCOMMANDS_H_
+ 
++#ifdef __cplusplus
++extern "C" {
++#endif
+ void BootCommands_Init();
++void MissingShip_ClearRetiredOptions();
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif
+\ No newline at end of file
 diff --git a/soh/soh/Enhancements/debugger/actorViewer.cpp b/soh/soh/Enhancements/debugger/actorViewer.cpp
 index a47a404ad1d016684eeb3b62538266483182bf1e..cab299d59cdb352159e39f47234d33f9bc6b7760 100644
 --- a/soh/soh/Enhancements/debugger/actorViewer.cpp
@@ -832,8 +918,25 @@ index a47a404ad1d016684eeb3b62538266483182bf1e..cab299d59cdb352159e39f47234d33f9
      ACTOR_UNSET_31,
      ACTOR_UNSET_36,
      ACTOR_UNSET_53,
+diff --git a/soh/soh/OTRGlobals.cpp b/soh/soh/OTRGlobals.cpp
+index 39f04ddbbd3a3894ac268a4364b3b7b711b3edee..ed9201e52a84271f28ff10417db4cac3d26cbff7 100644
+--- a/soh/soh/OTRGlobals.cpp
++++ b/soh/soh/OTRGlobals.cpp
+@@ -1,3 +1,4 @@
++#include "soh/Enhancements/bootcommands.h"
+ #include "OTRGlobals.h"
+ #include "OTRAudio.h"
+ #include <algorithm>
+@@ -1529,6 +1530,7 @@ extern "C" void InitOTR(int argc, char* argv[]) {
+     if (CVarGetInteger(CVAR_REMOTE_ANCHOR("Enabled"), 0)) {
+         Anchor::Instance->Enable();
+     }
++    MissingShip_ClearRetiredOptions(); // MS-145
+     ShipInit::InitAll();
+     Rando::StaticData::InitHashMaps();
+     OTRGlobals::Instance->gRandoContext->AddExcludedOptions();
 diff --git a/soh/soh/SohGui/SohMenuEnhancements.cpp b/soh/soh/SohGui/SohMenuEnhancements.cpp
-index 4cf7305373689a1e3d9a084f91a1a2693902dfde..e8d1c4d81768b3427d480c54603b6e9dc661ffbd 100644
+index 4cf7305373689a1e3d9a084f91a1a2693902dfde..8aeae663b0929066a1fbec1f432d9955c4ba7a70 100644
 --- a/soh/soh/SohGui/SohMenuEnhancements.cpp
 +++ b/soh/soh/SohGui/SohMenuEnhancements.cpp
 @@ -9,6 +9,7 @@
@@ -859,7 +962,20 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..e8d1c4d81768b3427d480c54603b6e9d
  static std::map<int32_t, const char*> bunnyHoodEffectMap = {
      { BUNNY_HOOD_VANILLA, "Vanilla" },
      { BUNNY_HOOD_FAST, "Faster Run" },
-@@ -436,7 +445,7 @@ void SohMenu::AddMenuEnhancements() {
+@@ -304,11 +313,7 @@ void SohMenu::AddMenuEnhancements() {
+     AddWidget(path, "Instant Putaway", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("InstantPutaway"))
+         .Options(CheckboxOptions().Tooltip("Allow Link to put items away without having to wait around."));
+-    AddWidget(path, "Navi Timer Resets on Scene Change", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("ResetNaviTimer"))
+-        .Options(
+-            CheckboxOptions().Tooltip("Resets the Navi timer on scene change. If you have already talked to her, "
+-                                      "she will try and talk to you again, instead of needing a save warp or death."));
++    // MissingShip (MS-145): "Navi Timer Resets on Scene Change" removed -- ML has no Navi.
+     AddWidget(path, "Link's Cow in Both Time Periods", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("CowOfTime"))
+         .Options(CheckboxOptions().Tooltip(
+@@ -436,7 +441,7 @@ void SohMenu::AddMenuEnhancements() {
          .Options(CheckboxOptions().Tooltip("Holding down B skips text."));
      AddWidget(path, "Text Speed: %dx", WIDGET_CVAR_SLIDER_INT)
          .CVar(CVAR_ENHANCEMENT("TextSpeed"))
@@ -868,7 +984,236 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..e8d1c4d81768b3427d480c54603b6e9d
      AddWidget(path, "Slow Text Speed: %dx", WIDGET_CVAR_SLIDER_INT)
          .CVar(CVAR_ENHANCEMENT("SlowTextSpeed"))
          .Options(IntSliderOptions().Min(1).Max(5).DefaultValue(1).Format("%dx").Tooltip(
-@@ -1926,6 +1935,56 @@ void SohMenu::AddMenuEnhancements() {
+@@ -824,14 +829,7 @@ void SohMenu::AddMenuEnhancements() {
+                               " - Not within range of Ocarina Playing spots"));
+ 
+     AddWidget(path, "Masks", WIDGET_SEPARATOR_TEXT);
+-    AddWidget(path, "Bunny Hood Effect", WIDGET_CVAR_COMBOBOX)
+-        .CVar(CVAR_ENHANCEMENT("MMBunnyHood"))
+-        .Options(ComboboxOptions()
+-                     .ComboMap(bunnyHoodEffectMap)
+-                     .Tooltip("Wearing the Bunny Hood grants a speed and jump boost like in Majora's Mask.\n"
+-                              "Can also be limited to only the speed boost.\n"
+-                              "The effects of either option are not accounted for in Randomizer logic.\n"
+-                              "Also disables NPC's reactions to wearing the Bunny Hood."));
++    // MissingShip (MS-145): "Bunny Hood Effect" removed -- ML's Bunny Hood speed boost is its own design.
+     AddWidget(path, "Masks Equippable as Adult", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("AdultMasks"))
+         .Options(CheckboxOptions().Tooltip("Allows masks to be equipped normally from the pause menu as adult."));
+@@ -1364,210 +1362,8 @@ void SohMenu::AddMenuEnhancements() {
+                      .Format("%d seconds")
+                      .Tooltip("The time between groups of Leevers spawning."));
+ 
+-    // Minigames
+-    path.sidebarName = "Minigames";
+-    AddSidebarEntry("Enhancements", path.sidebarName, 3);
+-    path.column = SECTION_COLUMN_1;
+-
+-    AddWidget(path, "Shooting Gallery", WIDGET_SEPARATOR_TEXT);
+-    auto shootingGalleryDisabledFunc = [](WidgetInfo& info) {
+-        info.options->disabled = !CVarGetInteger(CVAR_ENHANCEMENT("CustomizeShootingGallery"), 0);
+-        info.options->disabledTooltip = "This option is disabled because \"Customize Behavior\" is turned off.";
+-    };
+-    AddWidget(path, "Customize Behavior##Shooting", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("CustomizeShootingGallery"))
+-        .Options(CheckboxOptions().Tooltip("Turn on/off changes to the shooting gallery behavior."));
+-    AddWidget(path, "Instant Win", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("InstantShootingGalleryWin"))
+-        .PreFunc(shootingGalleryDisabledFunc)
+-        .Options(CheckboxOptions().Tooltip("Skips the Shooting Gallery minigame."));
+-    AddWidget(path, "No Rupee Randomization", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("ConstantAdultGallery"))
+-        .PreFunc(shootingGalleryDisabledFunc)
+-        .Options(CheckboxOptions().Tooltip(
+-            "Forces the rupee order to not be randomized as adult, making it the same as child."));
+-    AddWidget(path, "Child Starting Ammunition: %d seeds", WIDGET_CVAR_SLIDER_INT)
+-        .CVar(CVAR_ENHANCEMENT("ShootingGalleryAmmoChild"))
+-        .PreFunc(shootingGalleryDisabledFunc)
+-        .Options(IntSliderOptions()
+-                     .Min(10)
+-                     .Max(30)
+-                     .DefaultValue(15)
+-                     .Format("%d seeds")
+-                     .Tooltip("The ammunition at the start of the Shooting Gallery minigame as Child."));
+-    AddWidget(path, "Adult Starting Ammunition: %d arrows", WIDGET_CVAR_SLIDER_INT)
+-        .CVar(CVAR_ENHANCEMENT("ShootingGalleryAmmoAdult"))
+-        .PreFunc(shootingGalleryDisabledFunc)
+-        .Options(IntSliderOptions()
+-                     .Min(10)
+-                     .Max(30)
+-                     .DefaultValue(15)
+-                     .Format("%d arrows")
+-                     .Tooltip("The ammunition at the start of the Shooting Gallery minigame as Adult."));
+-
+-    AddWidget(path, "Bombchu Bowling", WIDGET_SEPARATOR_TEXT);
+-    AddWidget(path, "Customize Behavior##Bowling", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("CustomizeBombchuBowling"))
+-        .Options(CheckboxOptions().Tooltip("Turn on/off changes to the Bombchu Bowling behavior."));
+-    auto bombchuBowlingDisabledFunc = [](WidgetInfo& info) {
+-        info.options->disabled = CVarGetInteger(CVAR_ENHANCEMENT("CustomizeBombchuBowling"), 0) == 0;
+-        info.options->disabledTooltip = "This option is disabled because \"Customize Behavior\" is turned off.";
+-    };
+-    AddWidget(path, "Remove Small Cucco", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("BombchuBowlingNoSmallCucco"))
+-        .PreFunc(bombchuBowlingDisabledFunc)
+-        .Options(CheckboxOptions().Tooltip("Prevents the small Cucco from appearing in the Bombchu Bowling minigame."));
+-    AddWidget(path, "Remove Big Cucco", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("BombchuBowlingNoBigCucco"))
+-        .PreFunc(bombchuBowlingDisabledFunc)
+-        .Options(CheckboxOptions().Tooltip("Prevents the big Cucco from appearing in the Bombchu Bowling minigame."));
+-    AddWidget(path, "Bombchu Count: %d bombchus", WIDGET_CVAR_SLIDER_INT)
+-        .CVar(CVAR_ENHANCEMENT("BombchuBowlingAmmo"))
+-        .PreFunc(bombchuBowlingDisabledFunc)
+-        .Options(IntSliderOptions()
+-                     .Min(3)
+-                     .Max(20)
+-                     .DefaultValue(10)
+-                     .Format("%d bombchus")
+-                     .Tooltip("The number of Bombchus available at the start of the Bombchu Bowling minigame."));
+-    AddWidget(path, "Frogs' Ocarina Game", WIDGET_SEPARATOR_TEXT);
+-    AddWidget(path, "Customize Behavior##Frogs", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("CustomizeFrogsOcarinaGame"))
+-        .Options(CheckboxOptions().Tooltip("Turn on/off changes to the Frogs' Ocarina Game behavior."));
+-    auto frogsOcarinaGameDisabledFunc = [](WidgetInfo& info) {
+-        info.options->disabled = CVarGetInteger(CVAR_ENHANCEMENT("CustomizeFrogsOcarinaGame"), 0) == 0;
+-        info.options->disabledTooltip = "This option is disabled because \"Customize Behavior\" is turned off.";
+-    };
+-    AddWidget(path, "Instant Win##Frogs", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("InstantFrogsGameWin"))
+-        .PreFunc(frogsOcarinaGameDisabledFunc)
+-        .Options(CheckboxOptions().Tooltip("Skips the Frogs' Ocarina Game."));
+-    AddWidget(path, "Unlimited Playback Time##Frogs", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("FrogsUnlimitedFailTime"))
+-        .PreFunc(frogsOcarinaGameDisabledFunc)
+-        .Options(CheckboxOptions().Tooltip("Removes the timer to play back the song."));
+-    AddWidget(path, "Modify Note Timer: %dx", WIDGET_CVAR_SLIDER_INT)
+-        .CVar(CVAR_ENHANCEMENT("FrogsModifyFailTime"))
+-        .PreFunc([](WidgetInfo& info) {
+-            info.options->disabled = !CVarGetInteger(CVAR_ENHANCEMENT("CustomizeFrogsOcarinaGame"), 0) ||
+-                                     CVarGetInteger(CVAR_ENHANCEMENT("FrogsUnlimitedFailTime"), 0);
+-            info.options->disabledTooltip = "This option is disabled because \"Customize Behavior\" is turned off or "
+-                                            "\"Unlimited Playback Time\" is on.";
+-        })
+-        .Options(IntSliderOptions().Min(1).Max(5).DefaultValue(1).Format("%dx").Tooltip(
+-            "Adjusts the time allowed for playback before failing."));
+-
+-    path.column = SECTION_COLUMN_2;
+-    AddWidget(path, "Lost Woods Ocarina Game", WIDGET_SEPARATOR_TEXT);
+-    AddWidget(path, "Customize Behavior##LostWoods", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("CustomizeOcarinaGame"))
+-        .Options(CheckboxOptions().Tooltip("Turn on/off changes to the Lost Woods Ocarina Game behavior."));
+-    auto ocarinaMemoryGameDisabledFunc = [](WidgetInfo& info) {
+-        info.options->disabled = CVarGetInteger(CVAR_ENHANCEMENT("CustomizeOcarinaGame"), 0) == 0;
+-        info.options->disabledTooltip = "This option is disabled because \"Customize Behavior\" is turned off.";
+-    };
+-    AddWidget(path, "Instant Win##LostWoods", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("InstantOcarinaGameWin"))
+-        .PreFunc(ocarinaMemoryGameDisabledFunc)
+-        .Options(CheckboxOptions().Tooltip("Skips the Lost Woods Ocarina Memory Game."));
+-    AddWidget(path, "Note Play Speed: %dx", WIDGET_CVAR_SLIDER_INT)
+-        .CVar(CVAR_ENHANCEMENT("OcarinaGame.NoteSpeed"))
+-        .PreFunc(ocarinaMemoryGameDisabledFunc)
+-        .Options(IntSliderOptions().Min(1).Max(5).DefaultValue(1).Format("%dx").Tooltip(
+-            "Adjust the speed that the Skull Kids play the notes."));
+-    AddWidget(path, "Unlimited Playback Time##LostWoods", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("OcarinaUnlimitedFailTime"))
+-        .PreFunc(ocarinaMemoryGameDisabledFunc)
+-        .Options(CheckboxOptions().Tooltip("Removes the timer to play back the song."));
+-    AddWidget(path, "Number of Starting Notes: %d notes", WIDGET_CVAR_SLIDER_INT)
+-        .CVar(CVAR_ENHANCEMENT("OcarinaGame.StartingNotes"))
+-        .PreFunc(ocarinaMemoryGameDisabledFunc)
+-        .Options(IntSliderOptions()
+-                     .Min(1)
+-                     .Max(8)
+-                     .DefaultValue(3)
+-                     .Format("%d notes")
+-                     .Tooltip("Adjust the number of notes the Skull Kids play to start the first round."));
+-    int roundMin = CVarGetInteger(CVAR_ENHANCEMENT("OcarinaGame.StartingNotes"), 3);
+-    AddWidget(path, "Round One Notes: %d notes", WIDGET_CVAR_SLIDER_INT)
+-        .CVar(CVAR_ENHANCEMENT("OcarinaGame.RoundOneNotes"))
+-        .PreFunc(ocarinaMemoryGameDisabledFunc)
+-        .Options(IntSliderOptions()
+-                     .Min(roundMin)
+-                     .Max(8)
+-                     .DefaultValue(5)
+-                     .Format("%d notes")
+-                     .Tooltip("Adjust the number of notes you need to play to end the first round."));
+-    AddWidget(path, "Round Two Notes: %d notes", WIDGET_CVAR_SLIDER_INT)
+-        .CVar(CVAR_ENHANCEMENT("OcarinaGame.RoundTwoNotes"))
+-        .PreFunc(ocarinaMemoryGameDisabledFunc)
+-        .Options(IntSliderOptions()
+-                     .Min(roundMin)
+-                     .Max(8)
+-                     .DefaultValue(6)
+-                     .Format("%d notes")
+-                     .Tooltip("Adjust the number of notes you need to play to end the second round."));
+-    AddWidget(path, "Round Three Notes: %d notes", WIDGET_CVAR_SLIDER_INT)
+-        .CVar(CVAR_ENHANCEMENT("OcarinaGame.RoundThreeNotes"))
+-        .PreFunc(ocarinaMemoryGameDisabledFunc)
+-        .Options(IntSliderOptions()
+-                     .Min(roundMin)
+-                     .Max(8)
+-                     .DefaultValue(8)
+-                     .Format("%d notes")
+-                     .Tooltip("Adjust the number of notes you need to play to end the third round."));
+-
+-    AddWidget(path, "Forest Temple", WIDGET_SEPARATOR_TEXT);
+-    AddWidget(path, "Solve Amy's Puzzle", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("SkipAmyPuzzle"))
+-        .Options(CheckboxOptions().Tooltip("Amy's block pushing puzzle instantly solved."));
+-
+-    path.column = SECTION_COLUMN_3;
+-    AddWidget(path, "Fishing", WIDGET_SEPARATOR_TEXT);
+-    AddWidget(path, "Customize Behavior##Fishing", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("CustomizeFishing"))
+-        .Options(CheckboxOptions().Tooltip("Turn on/off changes to the Fishing behavior."));
+-    auto fishingDisabledFunc = [](WidgetInfo& info) {
+-        info.options->disabled = CVarGetInteger(CVAR_ENHANCEMENT("CustomizeFishing"), 0) == 0;
+-        info.options->disabledTooltip = "This option is disabled because \"Customize Behavior\" is turned off.";
+-    };
+-    AddWidget(path, "Instant Fishing", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("InstantFishing"))
+-        .PreFunc(fishingDisabledFunc)
+-        .Options(CheckboxOptions().Tooltip("All fish will be caught instantly."));
+-    AddWidget(path, "Guarantee Bite", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("GuaranteeFishingBite"))
+-        .PreFunc(fishingDisabledFunc)
+-        .Options(CheckboxOptions().Tooltip("When a line is stable, guarantee bite. Otherwise use Default logic."));
+-    AddWidget(path, "Fish never Escape", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("FishNeverEscape"))
+-        .PreFunc(fishingDisabledFunc)
+-        .Options(CheckboxOptions().Tooltip("Once a hook as been set, Fish will never let go while being reeled in."));
+-    AddWidget(path, "Loaches always Appear", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("LoachesAlwaysAppear"))
+-        .PreFunc(fishingDisabledFunc)
+-        .Options(
+-            CheckboxOptions().Tooltip("Loaches will always appear in the fishing pond instead of every four visits."));
+-    AddWidget(path, "Skip Keep Confirmation", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("SkipKeepConfirmation"))
+-        .PreFunc(fishingDisabledFunc)
+-        .Options(
+-            CheckboxOptions().Tooltip("The Pond Owner will not ask to confirm if you want to keep a smaller Fish."));
+-    AddWidget(path, "All Fish are Hyrule Loaches", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("AllHyruleLoaches"))
+-        .PreFunc(fishingDisabledFunc)
+-        .Options(CheckboxOptions().Tooltip("Every fish in the Fishing Pond will always be a Hyrule Loach.\n\n"
+-                                           "NOTE: This requires reloading the area."));
+-    AddWidget(path, "Child Minimum Weight: %d lbs.", WIDGET_CVAR_SLIDER_INT)
+-        .CVar(CVAR_ENHANCEMENT("MinimumFishWeightChild"))
+-        .PreFunc(fishingDisabledFunc)
+-        .Options(IntSliderOptions().Min(3).Max(10).DefaultValue(10).Format("%d lbs.").Tooltip(
+-            "The minimum weight for the unique Fishing Reward as a child."));
+-    AddWidget(path, "Adult Minimum Weight: %d lbs.", WIDGET_CVAR_SLIDER_INT)
+-        .CVar(CVAR_ENHANCEMENT("MinimumFishWeightAdult"))
+-        .PreFunc(fishingDisabledFunc)
+-        .Options(IntSliderOptions().Min(6).Max(13).DefaultValue(13).Format("%d lbs.").Tooltip(
+-            "The minimum weight for the unique fishing reward as an adult."));
++    // MissingShip (MS-145): the Minigames sidebar is removed -- its options tune vanilla minigames ML doesn't have
++    // as vanilla. Their CVars are cleared at boot (MissingShip_ClearRetiredOptions).
+ 
+     // Extra Modes
+     path.sidebarName = "Extra Modes";
+@@ -1926,6 +1722,56 @@ void SohMenu::AddMenuEnhancements() {
              .CVar(timer.timeEnable)
              .Callback([](WidgetInfo& info) { TimeDisplayUpdateDisplayOptions(); });
      }
