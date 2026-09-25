@@ -56,12 +56,12 @@ Not named yet, because they have no title card and no clear parent area: `ydan`,
   - about 35 system files.
 - ML **deleted** 261 vanilla objects and many vanilla actors (Hookshot, Epona, …). These need no work unless something spawns them.
 
-### A. Actors placed in ML scenes (26 todo + 4 partial)
+### A. Actors placed in ML scenes (all built; awaiting playtest)
 
 | Scene | Unported actors |
 |---|---|
 | `spot01` (Kakariko slot) | **Built (MS-034):** En_Dodojr ×4, Bg_Toki_Hikari, En_Rd ×6, Bg_Po_Event ×2, Bg_Spot02_Objects ×3, Bg_Spot16_Bombstone, En_Daiku ×2, En_Hs, Obj_Makekinsuta |
-| `night_shop` | En_Ossan (shopkeeper; also spawns En_GirlA, see B); En_Rd and Bg_Po_Event built in MS-034 |
+| `night_shop` (Bombchu Shop) | **Built (MS-035):** En_Ossan and En_GirlA's Bombchu prices; En_Rd and Bg_Po_Event built in MS-034 |
 | `hairal_niwa2` | Bg_Po_Event ×2 (built in MS-034) |
 | `HAKAdan` (dungeon) | **Built (MS-036):** Boss_Tw ×26 (Ml_SlideBlock), ACTOR_UNSET_1A (Ml_RoomClearSwitch), Bg_Hidan_Dalm (Ml_ElevatorSpawner), Bg_Mori_Elevator (Ml_HakaLift), En_Floormas (giant), En_Kakasi ×2 (Ml_Elevator), En_Ssh ×4, Bg_Mizu_Shutter |
 | `HAKAdan_bs` (boss room) | **Built (MS-037):** Boss_Va (Ml_BossVa, ML's own boss on object_ml_bv) with Ml_BossVaShot, Ml_Elf, Ml_Light, En_Vm and Door_Warp1 |
@@ -78,7 +78,7 @@ The old inventory only surveyed placed actors, so it missed these. A spawn scan 
 |---|---|---|
 | **En_Elf (Navi)** | 4018 text words (a recompile) + hook `0x80602000` | **Ported** (MS-030): ML never draws Navi, and hides the other fairies after the Soul-Charged sword. |
 | En_Nutsball (Deku nut projectile) | rewritten (0x590 vs 0x550) | Deku Scrubs, already ported |
-| En_GirlA (shop items) | 8 data words (prices / items?) | En_Ossan |
+| En_GirlA (shop items) | 8 data words | **Ported** (MS-035): Bombchu prices 40 / 80 |
 | Door_Warp1 (blue warp) | 5 text words | **Ported** (MS-037): blue warps go to the Fishing Pond (ML entrance 0x41C) |
 | En_Vm (Beamos) | 1 data word; object DLs changed | **Ported** (MS-037: never Z-targetable; the DLs in MS-021). Boss_Va spawns three |
 | En_Bom_Chu | 974 text words (a shift) + hook `0x80607A00` | **Ported** (MS-139): the hook is a HAKAdan-only Bombchu rail |
