@@ -1,0 +1,9 @@
+<Root>
+    <!-- ML dma 159 is ML's overlay for actor slot 0x12 (vanilla En_Dodongo), the ending card; it carries its three IA8
+         text images in its own data. Shipped for ovl_Ml_Ending (offsets are file offsets: vram 0x80800000). -->
+    <File Name="ml_ovl_ending" Segment="6">
+        <Texture Name="gMlEndingTheEndTex" OutName="the_end" Format="ia8" Width="80" Height="24" Offset="0x8D0"/>
+        <Texture Name="gMlEndingTitleRightTex" OutName="title_right" Format="ia8" Width="72" Height="32" Offset="0x1050"/>
+        <Texture Name="gMlEndingTitleLeftTex" OutName="title_left" Format="ia8" Width="72" Height="32" Offset="0x1950"/>
+    </File>
+</Root>

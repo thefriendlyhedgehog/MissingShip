@@ -66,11 +66,11 @@ The old inventory only surveyed placed actors, so it missed these. A spawn scan 
 | En_GirlA (shop items) | 8 data words (prices / items?) | En_Ossan |
 | Door_Warp1 (blue warp) | 5 text words | **Ported** (MS-037): blue warps go to the Fishing Pond (ML entrance 0x41C) |
 | En_Vm (Beamos) | 1 data word; object DLs changed | **Ported** (MS-037: never Z-targetable; the DLs in MS-021). Boss_Va spawns three |
-| En_Bom_Chu | 974 text words + hook `0x80607A00` | Player (Bombchus exist; cap 20 is ported) |
-| Item_Shield | 1 text word | Player (dropped or burnt shield) |
-| Bg_Dy_Yoseizo, Bg_Haka_Huta | rewritten | spawner not found yet |
-| En_Dodongo (0x12) | rewritten (0x840 vs 0x2570) | **placed once in `spot10`** (found by `survey_actors.py`; the first survey missed it) |
-| En_Ishi (rocks), En_Karebaba, Obj_Ice_Poly, En_GirlA | data / 1 word | spawner not found yet |
+| En_Bom_Chu | 974 text words (a shift) + hook `0x80607A00` | **Ported** (MS-139): the hook is a HAKAdan-only Bombchu rail |
+| Item_Shield | 1 text word | Vanilla behaviour: the word is object_link_child's moved Deku Shield DL (follows MS-050) |
+| Bg_Dy_Yoseizo, Bg_Haka_Huta | rewritten | Bg_Dy_Yoseizo: an unplaced scenery prop, unreachable. Bg_Haka_Huta: relocation noise only (MS-040) |
+| En_Dodongo (0x12) | rewritten (0x840 vs 0x2570) | **Ported** (MS-138): ML's ending card, in `spot10` room 1's cutscene header |
+| En_Ishi (rocks), En_Karebaba, Obj_Ice_Poly | data / 1 word | En_Ishi: vanilla code, dead ML code in its data padding. En_Karebaba (not hostile) and Obj_Ice_Poly (no AT) ported but unreachable (MS-040) |
 
 ### C. ML custom actors in slots vanilla leaves empty
 
@@ -221,7 +221,7 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 | [MS-037](https://github.com/thefriendlyhedgehog/MissingShip/issues/28) | port | **Boss fight** (`HAKAdan_bs`): Boss_Va + object_bv + custom actors 0x01, 0x17, 0x22 + En_Vm + Door_Warp1. | **Built:** ported as MS-121..126 (#85-#90): ML's two-phase Shadow boss and its projectile, the Ml_Elf/Ml_Light copies, untargetable Beamos, and blue warps to the Fishing Pond (with ML's patched pond cutscene destination and a new 8-entry pond entrance group); needs playtest. |
 | [MS-038](https://github.com/thefriendlyhedgehog/MissingShip/issues/29) | port | `Bmori1`: En_Peehat, Boss_Dodongo, En_Du (+ object_du), En_Nb (+ object_nb), Bg_Jya_1flift. | **Built:** ported as MS-131..135 (#95-#99): ML's torch copy (Ml_Torch), the switch pillars (Ml_Pillar) and thieves (Ml_Thief) on ML's own objects with the thieves' leaving cutscene, the sliding platform, and the Peahat's mini-boss music; needs playtest. |
 | [MS-039](https://github.com/thefriendlyhedgehog/MissingShip/issues/30) | port | `kakariko3`: Boss_Ganon2 (+ object_ganon2). `spot00`: En_Mag (+ object_mag). | **Built:** ported as MS-136..137 (#100-#101): ML's title screen (verified by screenshot) and the kakariko3 push block that carries its note (ML's "Boss_Ganon2" is an Obj_Oshihiki copy); needs playtest. |
-| [MS-040](https://github.com/thefriendlyhedgehog/MissingShip/issues/31) | port | Port En_Dodongo (0x12; rewritten, placed in `spot10`). Find the spawners of Bg_Dy_Yoseizo, Bg_Haka_Huta, En_Ishi, En_Karebaba, Obj_Ice_Poly, Item_Shield, En_Bom_Chu (hook 0x80607A00). | Each one ported, or recorded as unreachable. |
+| [MS-040](https://github.com/thefriendlyhedgehog/MissingShip/issues/31) | port | Port En_Dodongo (0x12; rewritten, placed in `spot10`). Find the spawners of Bg_Dy_Yoseizo, Bg_Haka_Huta, En_Ishi, En_Karebaba, Obj_Ice_Poly, Item_Shield, En_Bom_Chu (hook 0x80607A00). | **Built:** En_Dodongo is ML's ending card (Ml_Ending, MS-138 #102) and En_Bom_Chu's hook a HAKAdan Bombchu rail (MS-139 #103), both needing playtest. En_Karebaba (not hostile) and Obj_Ice_Poly (no AT) ported but unreachable; Bg_Dy_Yoseizo unreachable (an unplaced prop); Bg_Haka_Huta and Item_Shield effectively vanilla; En_Ishi's changed data is dead ML code. |
 
 ### M4: Link
 

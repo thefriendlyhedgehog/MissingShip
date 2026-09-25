@@ -44,7 +44,8 @@ ML_OBJECTS = {12: 'object_ml_fishpond',    # object slot 0x40 (OBJECT_JJ in vani
               30: 'object_ml_du',              # object slot 0x9D (object_du; ML's Bmori1 pillars, actor 0x98)
               38: 'object_ml_nb',              # object slot 0xB3 (object_nb; ML's Bmori1 thieves, actor 0xC3)
               378: 'object_ml_mag',            # object slot 0x14A (object_mag; ML's own title screen layout, actor 0x171)
-              379: 'object_ml_ganon2'}         # object slot 0x153 (object_ganon2; ML's kakariko3 push block, actor 0x17A)
+              379: 'object_ml_ganon2',         # object slot 0x153 (object_ganon2; ML's kakariko3 push block, actor 0x17A)
+              159: 'ml_ovl_ending'}            # actor 0x12's overlay (ML's ending card): its text images live in its data
 # ML's pause/HUD texture files, same layout as MQ's but redrawn. Named ml_* because dma 7-16 still carry
 # the vanilla names over unrelated ML data; inject_ui_textures.py maps the output back to vanilla paths.
 ML_OBJECTS.update({82: 'ml_icon_item_static', 83: 'ml_icon_item_24_static', 84: 'ml_icon_item_field_static',

@@ -1,9 +1,9 @@
 diff --git a/soh/assets/ml_assets.h b/soh/assets/ml_assets.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..c9cece4f9cfc6bdc92e871c27b96f7578735ae09
+index 0000000000000000000000000000000000000000..31c03194addaac70a3266e591e6401efa0db33b8
 --- /dev/null
 +++ b/soh/assets/ml_assets.h
-@@ -0,0 +1,297 @@
+@@ -0,0 +1,305 @@
 +#ifndef ML_ASSETS_H
 +#define ML_ASSETS_H
 +
@@ -300,12 +300,20 @@ index 0000000000000000000000000000000000000000..c9cece4f9cfc6bdc92e871c27b96f757
 +#define dgMlPushBlockDL "__OTR__objects/object_ml_ganon2/gMlPushBlockDL"
 +static const ALIGN_ASSET(2) char gMlPushBlockDL[] = dgMlPushBlockDL;
 +
++// ml_ovl_ending
++#define dgMlEndingTheEndTex "__OTR__objects/ml_ovl_ending/gMlEndingTheEndTex"
++static const ALIGN_ASSET(2) char gMlEndingTheEndTex[] = dgMlEndingTheEndTex;
++#define dgMlEndingTitleRightTex "__OTR__objects/ml_ovl_ending/gMlEndingTitleRightTex"
++static const ALIGN_ASSET(2) char gMlEndingTitleRightTex[] = dgMlEndingTitleRightTex;
++#define dgMlEndingTitleLeftTex "__OTR__objects/ml_ovl_ending/gMlEndingTitleLeftTex"
++static const ALIGN_ASSET(2) char gMlEndingTitleLeftTex[] = dgMlEndingTitleLeftTex;
++
 +#endif
 diff --git a/soh/include/tables/actor_table.h b/soh/include/tables/actor_table.h
-index d05085f4d07788d84b76c9ab9a6d32b623c2cd42..f7a70c53e1de249d12b01fece9eab392949d316c 100644
+index d05085f4d07788d84b76c9ab9a6d32b623c2cd42..cdb893786c4be6462d09fac779a030cbf6f7e447 100644
 --- a/soh/include/tables/actor_table.h
 +++ b/soh/include/tables/actor_table.h
-@@ -11,19 +11,19 @@
+@@ -11,45 +11,45 @@
   * DEFINE_ACTOR_UNSET is needed to define empty entries from the original game
   */
  /* 0x0000 */ DEFINE_ACTOR_INTERNAL(Player, ACTOR_PLAYER, ALLOCTYPE_NORMAL)
@@ -330,7 +338,10 @@ index d05085f4d07788d84b76c9ab9a6d32b623c2cd42..f7a70c53e1de249d12b01fece9eab392
  /* 0x000E */ DEFINE_ACTOR(En_Okuta, ACTOR_EN_OKUTA, ALLOCTYPE_NORMAL)
  /* 0x000F */ DEFINE_ACTOR(Bg_Ydan_Sp, ACTOR_BG_YDAN_SP, ALLOCTYPE_NORMAL)
  /* 0x0010 */ DEFINE_ACTOR(En_Bom, ACTOR_EN_BOM, ALLOCTYPE_PERMANENT)
-@@ -33,23 +33,23 @@
+ /* 0x0011 */ DEFINE_ACTOR(En_Wallmas, ACTOR_EN_WALLMAS, ALLOCTYPE_NORMAL)
+-/* 0x0012 */ DEFINE_ACTOR(En_Dodongo, ACTOR_EN_DODONGO, ALLOCTYPE_NORMAL)
++/* 0x0012 */ DEFINE_ACTOR(Ml_Ending, ACTOR_EN_DODONGO, ALLOCTYPE_NORMAL) // MissingShip: ML rewrite
+ /* 0x0013 */ DEFINE_ACTOR(En_Firefly, ACTOR_EN_FIREFLY, ALLOCTYPE_NORMAL)
  /* 0x0014 */ DEFINE_ACTOR(En_Horse, ACTOR_EN_HORSE, ALLOCTYPE_NORMAL)
  /* 0x0015 */ DEFINE_ACTOR_INTERNAL(En_Item00, ACTOR_EN_ITEM00, ALLOCTYPE_NORMAL)
  /* 0x0016 */ DEFINE_ACTOR(En_Arrow, ACTOR_EN_ARROW, ALLOCTYPE_PERMANENT)
@@ -3435,6 +3446,54 @@ index de29331a6d25055ea0a24af7f396b6f17e7acbf3..0399cdce60ed0cd2ab4e778b1eb1c44e
                  } else {
                      play->nextEntranceIndex = ENTR_GRAVEYARD_SHADOW_TEMPLE_BLUE_WARP;
                  }
+diff --git a/soh/src/overlays/actors/ovl_En_Bom_Chu/z_en_bom_chu.c b/soh/src/overlays/actors/ovl_En_Bom_Chu/z_en_bom_chu.c
+index bc1d9a58d706848f129883191b4f827355fa9bfd..33f08f605526b34d2c0370c5580b1b9ac82c7a57 100644
+--- a/soh/src/overlays/actors/ovl_En_Bom_Chu/z_en_bom_chu.c
++++ b/soh/src/overlays/actors/ovl_En_Bom_Chu/z_en_bom_chu.c
+@@ -6,6 +6,34 @@
+ 
+ #define BOMBCHU_SCALE 0.01f
+ 
++// MissingShip: ML's custom code 0x80607A00, called at the end of Update. In HAKAdan (scene slot 7) a Bombchu that
++// reaches either end of the gap at z 1920-2192, y >= 692 is snapped onto the rail at y 692, z 2080 and turned to
++// head across it: from x >= -342 it heads -x (from x -71 at most, moved 20 on), from x < -588 it heads +x (from at
++// least x -888, moved 20 on).
++static void EnBomChu_MlRail(EnBomChu* this, PlayState* play) {
++    Actor* thisx = &this->actor;
++
++    if (play->sceneNum != SCENE_SHADOW_TEMPLE) {
++        return;
++    }
++    if ((thisx->world.pos.z >= 1920.0f) && (thisx->world.pos.z < 2192.0f) && (thisx->world.pos.y >= 692.0f) &&
++        (thisx->world.pos.x >= -342.0f)) {
++        thisx->world.pos.x = ((thisx->world.pos.x < -71.0f) ? thisx->world.pos.x : -71.0f) - 20.0f;
++        thisx->world.pos.y = 692.0f;
++        thisx->world.pos.z = 2080.0f;
++        thisx->world.rot.x = thisx->world.rot.z = 0;
++        thisx->world.rot.y = -0x4000;
++    }
++    if ((thisx->world.pos.z >= 1920.0f) && (thisx->world.pos.z < 2192.0f) && (thisx->world.pos.y >= 692.0f) &&
++        (thisx->world.pos.x < -588.0f)) {
++        thisx->world.pos.x = ((thisx->world.pos.x > -888.0f) ? thisx->world.pos.x : -888.0f) + 20.0f;
++        thisx->world.pos.y = 692.0f;
++        thisx->world.pos.z = 2080.0f;
++        thisx->world.rot.x = thisx->world.rot.z = 0;
++        thisx->world.rot.y = 0x4000;
++    }
++}
++
+ void EnBomChu_Init(Actor* thisx, PlayState* play);
+ void EnBomChu_Destroy(Actor* thisx, PlayState* play);
+ void EnBomChu_Update(Actor* thisx, PlayState* play);
+@@ -479,6 +507,8 @@ void EnBomChu_Update(Actor* thisx, PlayState* play2) {
+             this->actor.yDistToWater = BGCHECK_Y_MIN;
+         }
+     }
++
++    EnBomChu_MlRail(this, play); // MissingShip: ML's hook 0x80607A00
+ }
+ 
+ const Color_RGB8 BombchuColorOriginal = { 209, 34, -35 };
 diff --git a/soh/src/overlays/actors/ovl_En_Cow/z_en_cow.c b/soh/src/overlays/actors/ovl_En_Cow/z_en_cow.c
 index 0009c25dd094f41645f493e86c140b126c28d306..94ae7f8ed07c8aab6b6453b532878e7eec4b241c 100644
 --- a/soh/src/overlays/actors/ovl_En_Cow/z_en_cow.c
@@ -4035,6 +4094,20 @@ index bcd1f362d0efca401ebfc3042ea2f041307255ff..30269610e7b913c76b0baf5829f99e0f
                      }
                      break;
                  case 0x70F0:
+diff --git a/soh/src/overlays/actors/ovl_En_Karebaba/z_en_karebaba.c b/soh/src/overlays/actors/ovl_En_Karebaba/z_en_karebaba.c
+index 0b1e6de23ed171723f4db915c3d99d142ffded54..0e834cdffdbeba4f2a1df3775efd3062c35cc2dd 100644
+--- a/soh/src/overlays/actors/ovl_En_Karebaba/z_en_karebaba.c
++++ b/soh/src/overlays/actors/ovl_En_Karebaba/z_en_karebaba.c
+@@ -11,7 +11,8 @@
+ #include "soh/Enhancements/game-interactor/GameInteractor_Hooks.h"
+ #include "soh/ResourceManagerHelpers.h"
+ 
+-#define FLAGS (ACTOR_FLAG_ATTENTION_ENABLED | ACTOR_FLAG_HOSTILE)
++// MissingShip: ML drops ACTOR_FLAG_HOSTILE (InitVars flags 5 -> 1).
++#define FLAGS ACTOR_FLAG_ATTENTION_ENABLED
+ 
+ void EnKarebaba_Init(Actor* thisx, PlayState* play);
+ void EnKarebaba_Destroy(Actor* thisx, PlayState* play);
 diff --git a/soh/src/overlays/actors/ovl_En_Ko/z_en_ko.c b/soh/src/overlays/actors/ovl_En_Ko/z_en_ko.c
 index 4b2280d7edae762faee252338785a24cab9bacee..d70f805ad724085337ad934fa56be26efc6da002 100644
 --- a/soh/src/overlays/actors/ovl_En_Ko/z_en_ko.c
@@ -6827,6 +6900,169 @@ index 0000000000000000000000000000000000000000..96294bd2625a25b7c07d73a143461b0e
 +    /* 0x000 */ Actor actor;
 +    /* 0x14C */ u8 found;
 +} MlElevatorSpawner; // size = 0x150
++
++#endif
+diff --git a/soh/src/overlays/actors/ovl_Ml_Ending/z_ml_ending.c b/soh/src/overlays/actors/ovl_Ml_Ending/z_ml_ending.c
+new file mode 100644
+index 0000000000000000000000000000000000000000..d9e982ca869b5e2e0465c7d0e7d28928de60ceac
+--- /dev/null
++++ b/soh/src/overlays/actors/ovl_Ml_Ending/z_ml_ending.c
+@@ -0,0 +1,131 @@
++/*
++ * File: z_ml_ending.c
++ * Overlay: ovl_Ml_Ending
++ * Description: The Missing Link - the ending card in spot10 (ML's rewrite of En_Dodongo, slot 0x012)
++ *
++ * Source overlay: ML dma 159, text 0x840, on object_sa. Saria plays her ocarina, eyes closed, translucent (alpha 200).
++ * After 250 frames she fades out at 5 a frame; from frame 349 "The End" and "The Legend of Zelda: - The Missing
++ * Link -" fade in, tinted (170, 130, 95), and the timer stops at 400. The three text images are IA8 pictures in the
++ * overlay's own data (shipped as ml_ovl_ending).
++ */
++
++#include "z_ml_ending.h"
++#include "objects/object_sa/object_sa.h"
++#include "assets/ml_assets.h"
++
++#define FLAGS (ACTOR_FLAG_UPDATE_CULLING_DISABLED | ACTOR_FLAG_DRAW_CULLING_DISABLED)
++
++void MlEnding_Init(Actor* thisx, PlayState* play);
++void MlEnding_Destroy(Actor* thisx, PlayState* play);
++void MlEnding_Update(Actor* thisx, PlayState* play);
++void MlEnding_Draw(Actor* thisx, PlayState* play);
++
++const ActorInit Ml_Ending_InitVars = {
++    ACTOR_EN_DODONGO,
++    ACTORCAT_NPC,
++    FLAGS,
++    OBJECT_SA,
++    sizeof(MlEnding),
++    (ActorFunc)MlEnding_Init,
++    (ActorFunc)MlEnding_Destroy,
++    (ActorFunc)MlEnding_Update,
++    (ActorFunc)MlEnding_Draw,
++    NULL,
++};
++
++typedef struct {
++    /* 0x00 */ f32 x;
++    /* 0x04 */ f32 y;
++    /* 0x08 */ const char* texture;
++    /* 0x0C */ s16 width;
++    /* 0x0E */ s16 height;
++} MlEndingText;
++
++// ML draws them in this order; the title's two halves sit side by side at y 188.
++static MlEndingText sTexts[] = {
++    { 88.0f, 188.0f, gMlEndingTitleLeftTex, 72, 32 },
++    { 160.0f, 188.0f, gMlEndingTitleRightTex, 72, 32 },
++    { 120.0f, 108.0f, gMlEndingTheEndTex, 80, 24 },
++};
++
++void MlEnding_Init(Actor* thisx, PlayState* play) {
++    MlEnding* this = (MlEnding*)thisx;
++
++    SkelAnime_InitFlex(play, &this->skelAnime, (FlexSkeletonHeader*)gSariaSkel, (AnimationHeader*)gSariaPlayingOcarinaAnim,
++                       this->jointTable, this->morphTable, ML_ENDING_LIMB_MAX);
++    this->alpha = 200;
++    this->textColor = 0xAA825F00;
++}
++
++void MlEnding_Destroy(Actor* thisx, PlayState* play) {
++}
++
++void MlEnding_Update(Actor* thisx, PlayState* play) {
++    MlEnding* this = (MlEnding*)thisx;
++
++    SkelAnime_Update(&this->skelAnime);
++    if (this->timer < 250) {
++        this->timer++;
++        return;
++    }
++    if (this->alpha != 0) {
++        Math_StepToS(&this->alpha, 0, 5);
++    }
++    if (this->timer < 349) {
++        this->timer++;
++        return;
++    }
++    if ((this->textColor & 0xFF) != 0xFF) {
++        this->textColor += 5;
++    }
++    if (this->timer != 400) {
++        this->timer++;
++    }
++}
++
++// ML's sprite helper (+0xFC), at the scale ML uses (1:1, top-left anchored).
++static Gfx* MlEnding_DrawText(Gfx* gfx, MlEndingText* text, u32 color) {
++    s32 x = (s32)text->x;
++    s32 y = (s32)text->y;
++
++    Gfx_SetupDL_39Ptr(&gfx);
++    gDPSetCombineLERP(gfx++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE,
++                      ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0, 0, PRIMITIVE, 0);
++    gDPSetPrimColor(gfx++, 0, 0, (color >> 24) & 0xFF, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF);
++    gDPSetEnvColor(gfx++, 0, 0, 0, 255);
++    gDPPipeSync(gfx++);
++    gDPLoadTextureBlock(gfx++, text->texture, G_IM_FMT_IA, G_IM_SIZ_8b, text->width, text->height, 0,
++                        G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
++                        G_TX_NOLOD);
++    gSPTextureRectangle(gfx++, x << 2, y << 2, (x + text->width) << 2, (y + text->height) << 2, G_TX_RENDERTILE, 0, 0,
++                        1 << 10, 1 << 10);
++    return gfx;
++}
++
++void MlEnding_Draw(Actor* thisx, PlayState* play) {
++    MlEnding* this = (MlEnding*)thisx;
++    s32 i;
++
++    OPEN_DISPS(play->state.gfxCtx);
++
++    gSPSegment(POLY_OPA_DISP++, 0x08, SEGMENTED_TO_VIRTUAL(gSariaEyeClosedTex));
++    gSPSegment(POLY_OPA_DISP++, 0x09, SEGMENTED_TO_VIRTUAL(gSariaEyeClosedTex));
++    gSPSegment(POLY_OPA_DISP++, 0x0A, SEGMENTED_TO_VIRTUAL(gSariaMouthClosed2Tex));
++    gSPSegment(POLY_XLU_DISP++, 0x08, SEGMENTED_TO_VIRTUAL(gSariaEyeClosedTex));
++    gSPSegment(POLY_XLU_DISP++, 0x09, SEGMENTED_TO_VIRTUAL(gSariaEyeClosedTex));
++    gSPSegment(POLY_XLU_DISP++, 0x0A, SEGMENTED_TO_VIRTUAL(gSariaMouthClosed2Tex));
++
++    if (this->alpha == 255) {
++        func_80034BA0(play, &this->skelAnime, NULL, NULL, &this->actor, this->alpha);
++    } else if (this->alpha != 0) {
++        func_80034CC4(play, &this->skelAnime, NULL, NULL, &this->actor, this->alpha);
++    }
++
++    if ((this->textColor & 0xFF) != 0) {
++        for (i = 0; i < ARRAY_COUNT(sTexts); i++) {
++            OVERLAY_DISP = MlEnding_DrawText(OVERLAY_DISP, &sTexts[i], this->textColor);
++        }
++    }
++
++    CLOSE_DISPS(play->state.gfxCtx);
++}
+diff --git a/soh/src/overlays/actors/ovl_Ml_Ending/z_ml_ending.h b/soh/src/overlays/actors/ovl_Ml_Ending/z_ml_ending.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..33452a760878a65be4627b5183662c4845cf86cd
+--- /dev/null
++++ b/soh/src/overlays/actors/ovl_Ml_Ending/z_ml_ending.h
+@@ -0,0 +1,20 @@
++#ifndef Z_ML_ENDING_H
++#define Z_ML_ENDING_H
++
++#include <libultraship/libultra.h>
++#include "global.h"
++
++#define ML_ENDING_LIMB_MAX 17
++
++// ML's layout (size 0x270), for reference against its overlay; SoH's own offsets differ.
++typedef struct MlEnding {
++    /* 0x000 */ Actor actor;
++    /* 0x14C */ SkelAnime skelAnime;
++    /* 0x18C */ Vec3s jointTable[ML_ENDING_LIMB_MAX];
++    /* 0x1F2 */ Vec3s morphTable[ML_ENDING_LIMB_MAX];
++    /* 0x258 */ s16 alpha;      // Saria's, 200 then fading to 0
++    /* 0x25C */ u32 textColor;  // RGBA; the text fades in through the low byte
++    /* 0x260 */ u32 timer;
++} MlEnding;
 +
 +#endif
 diff --git a/soh/src/overlays/actors/ovl_Ml_EventSpawner/z_ml_eventspawner.c b/soh/src/overlays/actors/ovl_Ml_EventSpawner/z_ml_eventspawner.c
@@ -11075,6 +11311,19 @@ index 602236816e00bd47b23243d5ec9de20a1f425c29..028cd295a5fb5ac8870d08d4a13fd437
  
  void ObjBombiwa_Init(Actor* thisx, PlayState* play);
  void ObjBombiwa_InitCollision(Actor* thisx, PlayState* play);
+diff --git a/soh/src/overlays/actors/ovl_Obj_Ice_Poly/z_obj_ice_poly.c b/soh/src/overlays/actors/ovl_Obj_Ice_Poly/z_obj_ice_poly.c
+index 101191147ee807a3c41fd86f830f1a38913ff411..0ce8a1408cbe2e6ec5cc505f36f38a012e0a5f3c 100644
+--- a/soh/src/overlays/actors/ovl_Obj_Ice_Poly/z_obj_ice_poly.c
++++ b/soh/src/overlays/actors/ovl_Obj_Ice_Poly/z_obj_ice_poly.c
+@@ -124,7 +124,7 @@ void ObjIcePoly_Idle(ObjIcePoly* this, PlayState* play) {
+         this->actionFunc = ObjIcePoly_Melt;
+     } else if (this->actor.parent != NULL) {
+         this->actor.parent->freezeTimer = 40;
+-        CollisionCheck_SetAT(play, &play->colChkCtx, &this->colliderIce.base);
++        // MissingShip: ML nops the ice's AT (touching it does not hurt or freeze Link).
+         CollisionCheck_SetAC(play, &play->colChkCtx, &this->colliderIce.base);
+         CollisionCheck_SetOC(play, &play->colChkCtx, &this->colliderIce.base);
+         CollisionCheck_SetAC(play, &play->colChkCtx, &this->colliderHard.base);
 diff --git a/soh/src/overlays/actors/ovl_Obj_Makekinsuta/z_obj_makekinsuta.c b/soh/src/overlays/actors/ovl_Obj_Makekinsuta/z_obj_makekinsuta.c
 index e7f72f7f6d23836251000e1e44500884ea6f15a2..8f8e52a137846a9277f21c1e76329162b9269ea7 100644
 --- a/soh/src/overlays/actors/ovl_Obj_Makekinsuta/z_obj_makekinsuta.c

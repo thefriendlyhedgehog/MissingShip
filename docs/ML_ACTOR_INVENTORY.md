@@ -20,7 +20,7 @@ Actors living in `code` (En_Item00, En_A_Obj) and slots ML deleted are left out;
 | `0x003` Ml_Fishpond | ML custom (0x1f0 bytes) | turibori ×13 | — | ported | yes (2026-09-23) |
 | `0x005` Ml_TreeBridge | ML custom (0x840 bytes) | spot04 | — | ported | no |
 | `0x006` Ml_Villager | ML custom (0x390 bytes) | spot01 ×3 | — | ported | yes (2026-09-23) |
-| `0x012` En_Dodongo | REWRITTEN (text 0x840 vs 0x2570) | spot10 | — | todo: new find, placed in spot10 (missing from the old inventory) — MS-040 | no |
+| `0x012` Ml_Ending (was En_Dodongo) | REWRITTEN (text 0x840 vs 0x2570) | spot10 | — | ported (Ml_Ending: ML's ending card, spot10 room 1 cutscene header; MS-138) | no |
 | `0x013` En_Firefly | 0 text / 1 data words differ | HAKAdan ×7, kakariko ×6, spot00 ×4, spot10 ×10, ydan ×2 | — | ported | no |
 | `0x019` En_Niw | 0 text / 1 data words differ | malon_stable ×4, spot20 ×4 | En_Niw_Girl | no change (padding byte) | no |
 | `0x01a` Ml_RoomClearSwitch | ML custom (0x2b0 bytes) | HAKAdan | — | ported (Ml_RoomClearSwitch, MS-108) | no |
@@ -93,7 +93,7 @@ Actors living in `code` (En_Item00, En_A_Obj) and slots ML deleted are left out;
 | `0x057` Ml_MThunder (was En_M_Thunder) | REWRITTEN (text 0x9a0 vs 0x1420) | — | custom code, player | ported (Blade Beam, ledger row 17) | no |
 | `0x05d` Door_Warp1 | 5 text / 0 data words differ | — | Ml_BossVa | ported (MS-037) | no |
 | `0x08a` En_Vm | 0 text / 1 data words differ | — | Ml_BossVa | ported (MS-037) | no |
-| `0x0ee` Item_Shield | 1 text / 0 data words differ | — | player | todo: MS-040 | no |
+| `0x0ee` Item_Shield | 1 text / 0 data words differ | — | player | vanilla behaviour: its one edit is object_link_child's moved Deku Shield DL, which follows MS-050 | no |
 | `0x193` En_Nutsball | REWRITTEN (text 0x590 vs 0x550) | — | En_Dekunuts, En_Shopnuts | ported (MS-031) | no |
 
 ## Changed, but no placement or spawner found (7)
@@ -103,12 +103,12 @@ These may be spawned with a computed id, from a cutscene, or not at all. Check b
 | Actor | ML change vs MQ Debug | Placed in (unique entries) | Spawned by | Status | Verified |
 |---|---|---|---|---|---|
 | `0x004` En_GirlA | 0 text / 8 data words differ | — | — | ported (MS-035) | no |
-| `0x00b` Bg_Dy_Yoseizo | REWRITTEN (text 0xa0 vs 0x2c10) | — | — | todo: MS-040 | no |
-| `0x0bd` Bg_Haka_Huta | REWRITTEN (text 0x940 vs 0x960) | — | — | todo: MS-040 | no |
-| `0x0c7` En_Karebaba | 0 text / 1 data words differ | — | — | todo: MS-040 | no |
-| `0x0da` En_Bom_Chu | 974 text / 0 data words differ  hooks ['0x80607a00'] | — | — | todo: MS-040 | no |
-| `0x11e` Obj_Ice_Poly | 1 text / 0 data words differ | — | — | todo: MS-040 | no |
-| `0x14e` En_Ishi | 0 text / 2495 data words differ | — | — | todo: MS-040 | no |
+| `0x00b` Bg_Dy_Yoseizo | REWRITTEN (text 0xa0 vs 0x2c10) | — | — | unreachable: ML made it a 4-DL scenery prop on object 0x40 (dma 12), but nothing places or spawns it (MS-040) | no |
+| `0x0bd` Bg_Haka_Huta | REWRITTEN (text 0x940 vs 0x960) | — | — | vanilla: relocation noise only (ML's code data shifted 0x20) (MS-040) | no |
+| `0x0c7` En_Karebaba | 0 text / 1 data words differ | — | — | ported (not hostile), but unreachable: not placed or spawned (MS-040) | no |
+| `0x0da` En_Bom_Chu | 974 text / 0 data words differ  hooks ['0x80607a00'] | — | — | ported (HAKAdan Bombchu rail, hook 0x80607A00; MS-139) | no |
+| `0x11e` Obj_Ice_Poly | 1 text / 0 data words differ | — | — | ported (no AT), but unreachable: not placed or spawned (MS-040) | no |
+| `0x14e` En_Ishi | 0 text / 2495 data words differ | — | — | vanilla code; its data padding holds 10 KB of unreferenced ML code (dead, not ported) (MS-040) | no |
 
 ## Warnings
 
