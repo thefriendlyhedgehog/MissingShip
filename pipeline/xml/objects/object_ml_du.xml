@@ -1,0 +1,9 @@
+<Root>
+    <!-- ML object 0x9D (dma 30; vanilla's object_du is Darunia): the switch-raised stone pillars for ovl_Ml_Pillar
+         (actor slot 0x98, En_Du in vanilla) in Bmori1. -->
+    <File Name="object_ml_du" Segment="6">
+        <Collision Name="gMlPillarCol" Offset="0x600"/>
+        <DList Name="gMlPillarTallDL" Offset="0x720"/>
+        <DList Name="gMlPillarDL" Offset="0x840"/>
+    </File>
+</Root>

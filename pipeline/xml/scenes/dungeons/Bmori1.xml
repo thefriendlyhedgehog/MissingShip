@@ -1,5 +1,6 @@
 <Root>
     <File Name="Bmori1_scene" Segment="2">
+        <Cutscene Name="gMlBmori1ThievesLeaveCs" Offset="0x350"/>
         <Texture Name="Bmori1_sceneTex_003AE0" OutName="Bmori1_sceneTex_003AE0" Format="ci4" Width="64" Height="64" Offset="0x3AE0" AddedByScript="true"/>
         <Texture Name="Bmori1_sceneTex_004300" OutName="Bmori1_sceneTex_004300" Format="i8" Width="32" Height="32" Offset="0x4300" AddedByScript="true"/>
         <Texture Name="Bmori1_sceneTex_004700" OutName="Bmori1_sceneTex_004700" Format="i8" Width="32" Height="32" Offset="0x4700" AddedByScript="true"/>

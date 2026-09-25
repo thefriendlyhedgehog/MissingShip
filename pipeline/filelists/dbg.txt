@@ -28,7 +28,7 @@ object_ml_bv
 map_48x85_static
 mlfile_028
 mlfile_029
-mlfile_030
+object_ml_du
 mlfile_031
 object_ml_spot02
 object_ml_crackwall
@@ -36,7 +36,7 @@ mlfile_034
 mlfile_035
 ml_object_bdoor
 mlfile_037
-mlfile_038
+object_ml_nb
 mlfile_039
 mlfile_040
 mlfile_041

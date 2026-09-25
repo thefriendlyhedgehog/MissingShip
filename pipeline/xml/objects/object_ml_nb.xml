@@ -1,0 +1,14 @@
+<Root>
+    <!-- ML object 0xB3 (dma 38; vanilla's object_nb is Nabooru): the three thieves in Bmori1 for ovl_Ml_Thief
+         (actor slot 0xC3, En_Nb in vanilla). -->
+    <File Name="object_ml_nb" Segment="6">
+        <Animation Name="gMlThiefIdleAnim" Offset="0x14CC"/>
+        <Animation Name="gMlThiefRunAnim" Offset="0x1DFC"/>
+        <Texture Name="gMlThiefEyeTLUT" OutName="eye_tlut" Format="rgba16" Width="16" Height="16" Offset="0x60E0"/>
+        <Texture Name="gMlThiefEyeOpenTex" OutName="eye_open" Format="ci8" Width="32" Height="32" Offset="0x6398" TlutOffset="0x60E0"/>
+        <Texture Name="gMlThiefEyeHalfTex" OutName="eye_half" Format="ci8" Width="32" Height="32" Offset="0x6958" TlutOffset="0x60E0"/>
+        <Texture Name="gMlThiefEyeClosedTex" OutName="eye_closed" Format="ci8" Width="32" Height="32" Offset="0x70D8" TlutOffset="0x60E0"/>
+        <Skeleton Name="gMlThiefSkel" Type="Flex" LimbType="Standard" Offset="0xA808"/>
+        <Animation Name="gMlThiefGuardAnim" Offset="0xAA8C"/>
+    </File>
+</Root>

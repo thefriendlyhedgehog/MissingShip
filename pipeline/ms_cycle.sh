@@ -40,7 +40,9 @@ ML_OBJECTS = {12: 'object_ml_fishpond',    # object slot 0x40 (OBJECT_JJ in vani
               380: 'object_ml_elevator',       # object slot 0x154 (object_ka: ML's elevators, actor 0x17B)
               22: 'object_ml_hakalift',        # object slot 0x72 (object_mori_objects: ML's room 2 lift, actor 0x87)
               6: 'object_ml_link_child',       # object slot 0x15 (object_link_child: only the child's Hylian Shield hand so far; MS-050 ports the rest)
-              26: 'object_ml_bv'}              # object slot 0x8C (object_bv; ML's own Shadow Temple boss, actors 0xBA and 0x17)
+              26: 'object_ml_bv',              # object slot 0x8C (object_bv; ML's own Shadow Temple boss, actors 0xBA and 0x17)
+              30: 'object_ml_du',              # object slot 0x9D (object_du; ML's Bmori1 pillars, actor 0x98)
+              38: 'object_ml_nb'}              # object slot 0xB3 (object_nb; ML's Bmori1 thieves, actor 0xC3)
 # ML's pause/HUD texture files, same layout as MQ's but redrawn. Named ml_* because dma 7-16 still carry
 # the vanilla names over unrelated ML data; inject_ui_textures.py maps the output back to vanilla paths.
 ML_OBJECTS.update({82: 'ml_icon_item_static', 83: 'ml_icon_item_24_static', 84: 'ml_icon_item_field_static',

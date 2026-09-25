@@ -107,7 +107,8 @@ ENTRANCE_CS = {'spot10': [(0x260, 'gMlSpot10IntroCs')], 'spot05': [(0x0E0, 'gMlS
 # Cutscenes an actor starts itself with Cutscene_SetSegment, exported under a name its C code can use.
 ACTOR_CS = {'HAKAdan_bs': [(0x168, 'gMlHakadanBsIntroCs'),       # Ml_BossVa: the boss wakes (also the header's)
                            (0xACF0, 'gMlHakadanBsDeathCs'),      # Ml_BossVa: phase 1 health 0
-                           (0xB050, 'gMlHakadanBsKnockdownCs')]} # Ml_BossVa: phase 0 health 0
+                           (0xB050, 'gMlHakadanBsKnockdownCs')], # Ml_BossVa: phase 0 health 0
+            'Bmori1': [(0x350, 'gMlBmori1ThievesLeaveCs')]}                # Ml_Thief: switch 7, the thieves run off
 
 
 def _destination_codes():

@@ -25,9 +25,9 @@ Actors living in `code` (En_Item00, En_A_Obj) and slots ML deleted are left out;
 | `0x019` En_Niw | 0 text / 1 data words differ | malon_stable ×4, spot20 ×4 | En_Niw_Girl | no change (padding byte) | no |
 | `0x01a` Ml_RoomClearSwitch | ML custom (0x2b0 bytes) | HAKAdan | — | ported (Ml_RoomClearSwitch, MS-108) | no |
 | `0x01c` Ml_BeamHeart (was En_Reeba) | REWRITTEN (text 0x130 vs 0x1890) | spot09 | En_Encount1 | ported (Ml_BeamHeart: Blade Beam Piece of Heart) | no |
-| `0x01d` En_Peehat | REWRITTEN (text 0x3290 vs 0x3280) | Bmori1 | — | todo: MS-038 | no |
+| `0x01d` En_Peehat | REWRITTEN (text 0x3290 vs 0x3280) | Bmori1 | — | ported (mini-boss music, MS-038) | no |
 | `0x01f` Ml_Prologue | ML custom (0x4b0 bytes) | link_home | — | ported (Ml_Prologue) | no |
-| `0x027` Boss_Dodongo | REWRITTEN (text 0xb40 vs 0x5e50) | Bmori1 ×2 | — | todo: MS-038 | no |
+| `0x027` Ml_Torch (was Boss_Dodongo) | REWRITTEN (text 0xb40 vs 0x5e50) | Bmori1 ×2 | — | ported (Ml_Torch in z_obj_syokudai.c, MS-038) | no |
 | `0x02f` En_Dodojr | REWRITTEN (text 0x1ac0 vs 0x1ad0) | spot01 ×4 | — | ported (MS-097) | no |
 | `0x037` En_St | 0 text / 1 data words differ | HAKAdan ×8, spot12 | — | ported (not hostile) | no |
 | `0x03d` En_Ossan | 5818 text / 0 data words differ | night_shop | — | ported (MS-035) | no |
@@ -38,14 +38,14 @@ Actors living in `code` (En_Item00, En_A_Obj) and slots ML deleted are left out;
 | `0x06a` Ml_TalkSpot (was Bg_Toki_Hikari) | REWRITTEN (text 0x80 vs 0xd50) | spot01 | — | ported (Ml_TalkSpot, MS-103) | no |
 | `0x087` Ml_HakaLift (was Bg_Mori_Elevator) | REWRITTEN (text 0x280 vs 0xa10) | HAKAdan | — | ported (Ml_HakaLift, MS-111) | no |
 | `0x08e` En_Floormas | REWRITTEN (text 0x32e0 vs 0x2f40) | HAKAdan | — | ported (giant variant, MS-112) | no |
-| `0x090` En_Rd | REWRITTEN (text 0x2490 vs 0x24a0) | night_shop, spot01 ×6 | En_Nb | ported (MS-099) | no |
+| `0x090` En_Rd | REWRITTEN (text 0x2490 vs 0x24a0) | night_shop, spot01 ×6 | Ml_Thief | ported (MS-099) | no |
 | `0x093` Ml_BgmTrigger (was Bg_Po_Event) | REWRITTEN (text 0x170 vs 0x1aa0) | hairal_niwa2 ×2, night_shop, spot01 ×2 | — | ported (Ml_BgmTrigger, MS-104) | no |
 | `0x095` En_Sw | 0 text / 1 data words differ | HAKAdan ×8 | En_Wood02, Obj_Kibako2 | ported (not hostile) | no |
-| `0x098` En_Du | REWRITTEN (text 0x2e0 vs 0x15e0) | Bmori1 ×3 | — | todo: MS-038 | no |
+| `0x098` Ml_Pillar (was En_Du) | REWRITTEN (text 0x2e0 vs 0x15e0) | Bmori1 ×3 | — | ported (Ml_Pillar, object_ml_du, MS-038) | no |
 | `0x09b` Door_Ana | 3 text / 8 data words differ | spot09, spot10 ×3, spot12 ×3 | — | ported | no |
 | `0x09c` Bg_Spot02_Objects | 1131 text / 4 data words differ | spot01 ×3 | — | ported (MS-101, object_ml_spot02) | no |
-| `0x0ba` Ml_BossVa (was Boss_Va) | REWRITTEN (text 0x2c00 vs 0xcc80) | HAKAdan_bs | — | todo: MS-037 | no |
-| `0x0c3` En_Nb | REWRITTEN (text 0x590 vs 0x3550) | Bmori1 ×3 | — | todo: MS-038 | no |
+| `0x0ba` Ml_BossVa (was Boss_Va) | REWRITTEN (text 0x2c00 vs 0xcc80) | HAKAdan_bs | — | ported (Ml_BossVa, MS-037) | no |
+| `0x0c3` Ml_Thief (was En_Nb) | REWRITTEN (text 0x590 vs 0x3550) | Bmori1 ×3 | — | ported (Ml_Thief, object_ml_nb, MS-038) | no |
 | `0x0cd` Bg_Spot16_Bombstone | 322 text / 0 data words differ | spot01 | — | ported (MS-096) | no |
 | `0x0cf` Bg_Hidan_Kowarerukabe | 0 text / 7 data words differ | ydan | — | ported (object_ml_crackwall) | no |
 | `0x0dc` Ml_SlideBlock (was Boss_Tw) | REWRITTEN (text 0x490 vs 0x11ae0) | HAKAdan ×26 | — | ported (Ml_SlideBlock, MS-107) | no |
@@ -73,7 +73,7 @@ Actors living in `code` (En_Item00, En_A_Obj) and slots ML deleted are left out;
 | `0x17b` Ml_Elevator (was En_Kakasi) | REWRITTEN (text 0x390 vs 0xc70) | HAKAdan ×2 | Ml_ElevatorSpawner | ported (Ml_Elevator, MS-110) | no |
 | `0x188` En_Ssh | REWRITTEN (text 0x20e0 vs 0x2150) | HAKAdan ×4 | — | ported (MS-113) | no |
 | `0x18c` Ml_HoleScrub (was En_Weiyer) | REWRITTEN (text 0x1910 vs 0x17e0) | ydan | — | ported (Ml_HoleScrub: hole-hopping scrub) | no |
-| `0x18e` Bg_Jya_1flift | REWRITTEN (text 0x540 vs 0x580) | Bmori1 | — | todo: MS-038 | no |
+| `0x18e` Bg_Jya_1flift | REWRITTEN (text 0x540 vs 0x580) | Bmori1 | — | ported (ML sliding platform, MS-038) | no |
 | `0x192` Ml_HintNuts (was En_Hintnuts) | REWRITTEN (text 0x7f0 vs 0x17e0) | spot09 ×3, spot10 ×2, spot12, ydan ×2 | — | ported | no |
 | `0x1bb` Bg_Mizu_Shutter | 252 text / 0 data words differ | HAKAdan | — | ported (MS-114) | no |
 | `0x1c6` En_Cow | 1 text / 0 data words differ | spot01, spot20 | — | ported (limb 5 drawn) | no |
@@ -84,15 +84,15 @@ Actors living in `code` (En_Item00, En_A_Obj) and slots ML deleted are left out;
 
 | Actor | ML change vs MQ Debug | Placed in (unique entries) | Spawned by | Status | Verified |
 |---|---|---|---|---|---|
-| `0x001` Ml_Elf | ML custom (0x4ae0 bytes) | — | Ml_BossVa, Ml_Fishpond | todo: MS-037 | no |
+| `0x001` Ml_Elf | ML custom (0x4ae0 bytes) | — | Ml_BossVa, Ml_Fishpond | ported (Ml_Elf in z_en_elf.c, MS-037) | no |
 | `0x00d` Ml_Cucco (was En_Poh) | REWRITTEN (text 0x2e50 vs 0x3d00) | — | En_Wonder_Talk, Ml_Malon | ported (Ml_Cucco: En_Niw variant, health 0x77, no CRY_M/CRY_A) | no |
 | `0x00e` En_Okuta | REWRITTEN (text 0xd40 vs 0x21a0) | — | Ml_MThunder | stand-in: Ml_MThunder params 0xB0B0 (ML's gutted En_Bom clone for crystal switches) | no |
-| `0x017` Ml_BossVaShot | ML custom (0x470 bytes) | — | Ml_BossVa | todo: MS-037 | no |
+| `0x017` Ml_BossVaShot | ML custom (0x470 bytes) | — | Ml_BossVa | ported (Ml_BossVaShot, MS-037) | no |
 | `0x018` En_Elf | 4018 text / 0 data words differ  hooks ['0x80602000'] | — | En_Butte, En_Ko, En_Md, En_Ossan, En_Sa, Ml_Elf, code | ported (MS-030: Navi never drawn; other fairies parked once Link has the Soul-Charged sword; sounds muted in code) | no |
-| `0x022` Ml_Light | ML custom (0xe90 bytes) | — | Ml_BossVa | todo: MS-037 | no |
+| `0x022` Ml_Light | ML custom (0xe90 bytes) | — | Ml_BossVa | ported (Ml_Light in z_en_light.c, MS-037) | no |
 | `0x057` Ml_MThunder (was En_M_Thunder) | REWRITTEN (text 0x9a0 vs 0x1420) | — | custom code, player | ported (Blade Beam, ledger row 17) | no |
-| `0x05d` Door_Warp1 | 5 text / 0 data words differ | — | Ml_BossVa | todo: MS-037 | no |
-| `0x08a` En_Vm | 0 text / 1 data words differ | — | Ml_BossVa | todo: MS-037 | no |
+| `0x05d` Door_Warp1 | 5 text / 0 data words differ | — | Ml_BossVa | ported (MS-037) | no |
+| `0x08a` En_Vm | 0 text / 1 data words differ | — | Ml_BossVa | ported (MS-037) | no |
 | `0x0ee` Item_Shield | 1 text / 0 data words differ | — | player | todo: MS-040 | no |
 | `0x193` En_Nutsball | REWRITTEN (text 0x590 vs 0x550) | — | En_Dekunuts, En_Shopnuts | ported (MS-031) | no |
 
