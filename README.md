@@ -105,7 +105,7 @@ cmake -S . -B build-ml && cmake --build build-ml --target soh -j8
 ./pipeline/ms_cycle.sh      # rebuild ROM → ZAPD → inject text/audio/objects/UI → install → relaunch
 ```
 
-- **Inputs:** `pipeline/tml_2_0.z64` (the ML v2.0 ROM), `home/oot.o2r`, and a built ZAPD.
+- **Inputs:** `pipeline/tml_2_0.z64` (the ML v2.0 ROM), `home/oot.o2r`, and the engine checkout. Every step uses the engine's own ZAPD (`build-ml/ZAPD/ZAPD.out`, from our patched ZAPDTR, built with the engine) and its tables; nothing else is needed.
 - **Analysis tools:** `tools/*.py` also need the OoT **PAL MQ Debug** ROM at `roms/oot-mq-debug-pal.z64`.
 - **Knobs:** set these env vars to restore old workarounds; the defaults are correct: `ML_STRIP_ACTORS`, `ML_REMAP_OBJECTS`, `ML_FIX_SETTIMG_FMT`, `ML_SCRUB`, `ML_STRIP_CS`, `ML_SKIP_FMT`, `ML_SKIP_SLOTS`, `ML_NO_START_FIX`.
 
@@ -145,10 +145,8 @@ Override any path with an env var:
 | `MS_ML_ROM` | `pipeline/tml_2_0.z64` |
 | `MS_DEBUG_ROM` | `roms/oot-mq-debug-pal.z64` |
 | `MS_OOT_O2R` | `home/oot.o2r` |
-| `MS_SHIPWRIGHT` | `../Shipwright` (patched engine checkout, next to this repo) |
-| `MS_SOHCOMBO` | `../SOHCombo` (its ZAPD builds scenes, objects and UI textures) |
-| `MS_ZAPD`, `MS_ZAPD_CWD` | `$MS_SOHCOMBO/build-macos-sdl2/ZAPD/ZAPD.out`, `$MS_SOHCOMBO/soh` |
-| `MS_ZAPD_AUDIO` | `$MS_SHIPWRIGHT/build-ml/ZAPD/ZAPD.out` (needs our ZAudio patch) |
+| `MS_SHIPWRIGHT` | `../Shipwright` (the engine fork checkout, next to this repo) |
+| `MS_ZAPD`, `MS_ZAPD_CWD` | `$MS_SHIPWRIGHT/build-ml/ZAPD/ZAPD.out` (built with the engine, patched ZAPDTR), `$MS_SHIPWRIGHT/soh` |
 
 ZAPD's config (`pipeline/Config_ML.xml`) is a template; each run writes the filled-in copy to `pipeline/out/`.
 

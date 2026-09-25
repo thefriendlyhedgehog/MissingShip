@@ -10,6 +10,15 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 APP="$HERE/MissingShip.app"
 export SHIP_HOME="$HERE/home"
 
+# Double-clicking the app takes SHIP_HOME from Info.plist (LSEnvironment). Keep it pointing at THIS checkout's home,
+# so a clone on another machine works by double-click after one scripted launch (MS-009). Info.plist is not part of
+# the ad-hoc signature, so editing it is safe; lsregister refreshes Launch Services' cached copy.
+PLIST="$APP/Contents/Info.plist"
+if [ "$(plutil -extract LSEnvironment.SHIP_HOME raw "$PLIST" 2>/dev/null)" != "$SHIP_HOME" ]; then
+  plutil -replace LSEnvironment.SHIP_HOME -string "$SHIP_HOME" "$PLIST"
+  /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "$APP" 2>/dev/null || true
+fi
+
 mkdir -p "$SHIP_HOME/mods"
 [ -f "$SHIP_HOME/shipofharkinian.json" ] || cp "$HERE/profile/shipofharkinian.json" "$SHIP_HOME/"
 cp "$HERE/mod/MissingLink_Scenes.o2r" "$SHIP_HOME/mods/"

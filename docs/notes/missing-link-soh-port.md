@@ -49,7 +49,7 @@ mod o2r degrades gracefully and is the tractable path.
 6. A custom `Config_ML.xml` — **must contain at least one `<ExternalFile>` entry** or ZAPD silently
    extracts nothing (HandleExtract's whole ExtractDirectory body sits inside
    `for (auto& extFile : cfg.externalFiles)`).
-7. Invocation (from `SOHCombo/soh/`, using the already-built ZAPD):
+7. Invocation (HISTORICAL: since MS-009, 2026-09-25, the pipeline runs the engine fork's own ZAPD from `Shipwright/soh/` via `pipeline/mspaths.py`; SOHCombo is no longer used. Old form, from `SOHCombo/soh/`):
    `../build-macos-sdl2/ZAPD/ZAPD.out ed -se OTR --otrfile <out.otr> --portVer 9.1.1
     -i <xmldir>/scenes -b <patched rom> -fl <filelistdir> -o <tmp> -osf <tmp> -gsf 0 -rconf Config_ML.xml`
    ("Unsupported argument: --otrfile/--portVer" is a harmless warning — ZAPD prints it, then

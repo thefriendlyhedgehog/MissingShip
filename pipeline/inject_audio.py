@@ -16,11 +16,10 @@ Audiobank/Audioseq/Audiotable names.
 Needs the ZAudio zero-size-soundfont guard (see docs/zapd-missingship.patch): ML zeroes out unused
 soundfonts while leaving their instrument counts, which crashed the stock extractor.
 """
-from mspaths import PIPE, SOH, ZAPD_AUDIO, zapd_config
+from mspaths import PIPE, ZAPD, ZAPD_CWD, zapd_config
 import subprocess, zipfile, shutil, os, sys
 
-ZAPD = ZAPD_AUDIO
-CWD  = SOH
+CWD  = ZAPD_CWD
 OUT  = PIPE + '/ml_audio.otr'
 MOD  = PIPE + '/ml.otr'
 

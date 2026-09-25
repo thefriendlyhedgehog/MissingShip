@@ -8,7 +8,7 @@ verbatim -- same format and dimensions, only the pixels change.
 Resources live at textures/g_pn_XX/<Name>ENGTex and ...JPNTex; the g_pn_XX name for a scene id comes
 from scene_table.h's second DEFINE_SCENE argument.
 """
-from mspaths import ML_ROM, OOT_O2R, PIPE, SOHCOMBO_SOH
+from mspaths import ML_ROM, OOT_O2R, PIPE, SOH
 import struct, sys, json, re, zipfile, shutil, os
 sys.path.insert(0, PIPE)
 from yaz0 import get_file
@@ -24,7 +24,7 @@ while True:
     if a == 0 and b == 0 and c == 0 and d == 0: break
     E.append((a, b, c, d)); p += 16
 
-sc = open(SOHCOMBO_SOH + '/include/tables/scene_table.h').read()
+sc = open(SOH + '/include/tables/scene_table.h').read()
 titles = {int(m.group(1), 16): m.group(3)
           for m in re.finditer(r'/\* 0x([0-9A-Fa-f]{2}) \*/ DEFINE_SCENE\((\w+),\s*(\w+),', sc)}
 
