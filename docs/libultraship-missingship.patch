@@ -18,3 +18,18 @@ index 9f9ea33905e73fdc95f76f7bf4de1b67c693ded4..fd23962f9fd611b08603881b95857d6b
      TextureDataMetal* texture_data = &mTextures[mCurrentTextureIds[mCurrentTile]];
  
      NS::AutoreleasePool* autorelease_pool = NS::AutoreleasePool::alloc()->init();
+diff --git a/src/fast/interpreter.cpp b/src/fast/interpreter.cpp
+index 73a293360f019921da52caa5fc8a12e8f7072aa1..a1b11c4c9f97dc6bc4dd9448c5079cd6e26af2e6 100644
+--- a/src/fast/interpreter.cpp
++++ b/src/fast/interpreter.cpp
+@@ -2092,7 +2092,9 @@ void Interpreter::GfxDpLoadBlock(uint8_t tile, uint32_t uls, uint32_t ult, uint3
+     SUPPORT_CHECK(ult == 0);
+ 
+     // The lrs field rather seems to be number of pixels to load
+-    uint32_t word_size_shift = 0;
++    // Signed: 4b loads use -1 (half a byte per texel). As uint32_t it became 0xFFFFFFFF, so `> 0` was true and the
++    // size came out as (lrs + 1) << 0xFFFFFFFF, i.e. 0 bytes, giving a zero-height texture.
++    int32_t word_size_shift = 0;
+     switch (mRdp->texture_to_load.siz) {
+         case G_IM_SIZ_4b:
+             word_size_shift = -1;

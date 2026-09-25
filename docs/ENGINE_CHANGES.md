@@ -71,6 +71,7 @@ over ML's Saria's house) · raw gameplay_keep texture pointers in ML display lis
 | 41 | `z_en_st.c`, `z_en_sw.c`: `ACTOR_FLAG_HOSTILE` dropped | ML's Skulltulas / Skullwalltulas don't count as enemies (flags 0x35→0x31, 0x15→0x11) | **Needs mod code** |
 | 42 | `z_obj_bombiwa.c`: `ACTOR_FLAG_UPDATE_CULLING_DISABLED` | ML's InitVars flags 0 → 0x10 | **Needs mod code** |
 | 43 | `soh/assets/ml_assets.h` | resource paths of every ML object the ported actors draw (all shipped in `MissingLink_Scenes.o2r`) | Goes away with the actors that use it |
+| 44 | libultraship `interpreter.cpp` `GfxDpLoadBlock`: `word_size_shift` made `int32_t` (MS-016) | as `uint32_t`, the -1 for 4-bit loads became 0xFFFFFFFF and the size came out 0 bytes (a zero-height texture). ML doesn't hit it; any mod that block-loads with SETTIMG siz=4b would | **Upstream as a bugfix**: Kenix3/libultraship `main` still has it |
 | — | Scene draw configs set to ML's (`pipeline/gen_scene_config.py` → `scene_table.h`, 17 slots) | ML changed the draw config of most slots it uses (grotto scenes → SDC_GROTTOS, Deep Woods/Deku Road → SDC_DEKU_TREE, ...). Vanilla's left segment 8 unset in the grotto scenes, so their DLs ran a rupee texture as commands (crash entering the Colossus-slot grotto) | engine table: the scene table is code, so a drop-in .o2r cannot change it; needs a SoH hook that lets a scene resource override its draw config |
 | — | Pipeline: `remap_exits` no longer stops at entrance 0 | ML entrance 0 is real (Deep Woods spawn 0); 6 scenes had later exits left unmapped (Deku Road's last three, the grotto arena's, ...). Each list is now bounded by the next header data block: without the 0 terminator the scan ran into tokinoma's player entries and rewrote Player's actor id 0, so Player never spawned after the prologue (crash in `func_800304DC`). `tools/checkexits.py` verifies all 104 real exit slots end to end | data (fixed) |
 | — | ZAPD `ZAudio.cpp`: zero-size soundfont guard | pipeline only, never shipped | Upstream as a bugfix (optional) |
@@ -80,7 +81,7 @@ over ML's Saria's house) · raw gameplay_keep texture pointers in ML display lis
 ## The hard wall: actor logic
 
 ML rewrote a large set of vanilla actors (see `placed_actor_status.json`) and added its own in vanilla's
-unused actor slots. Every row marked **Needs mod code** above is one of these (26 of 43 so far). None can be pure data in
+unused actor slots. Every row marked **Needs mod code** above is one of these (26 of 44 so far). None can be pure data in
 stock SoH. Realistic long-run options, to decide with the user:
 
 - **Upstream a mod-code mechanism** into SoH (plugin API or scripting) — the only route to a true
