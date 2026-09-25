@@ -101,17 +101,16 @@ def strip_actors(d):
             d[off:off+8]=b'\x16'+b'\x00'*7; n+=1
     return bytes(d), n
 
-# Formats excluded from scene-texture inlining. Some ML room DLs pair a SETTIMG with a
-# LOADBLOCK/SETTILE combination whose sizeBytes < lineBytes; interpreter.cpp then computes
-# height = sizeBytes / widthBytes == 0 and stock SoH 9.2.3 hands that straight to Metal
-# (no zero-dimension guard), aborting. Before inlining these never resolved at all, so the
-# importer bailed early and the bug stayed hidden.
+# Formats excluded from scene-texture inlining (ML_SKIP_FMT="fmt:siz,..."). None by default since MS-015.
+# I4 (4:0) used to be skipped: inlining it once aborted Metal on a zero-height texture. The cause was the old
+# SETTIMG width rewrite (see the NOTE in inline_scene_textures), not I4. ML's I4 scene textures use the standard
+# 16b LOADBLOCK form (SETTIMG siz=16b width=1, lrs=1023), which the importer sizes correctly: 2048 bytes / a
+# 32- or 16-byte render line = 64x64 or 32x128. The skip hid four real textures in spot01, spot04 and tokinoma.
 SKIP_FMT=set()
 # ML_SKIP_RANGE="a:b" skips inlining for per-room texture ordinals a <= i < b (bisect helper).
 _sr=os.environ.get('ML_SKIP_RANGE','')
 SKIP_RANGE=(int(_sr.split(':')[0]), int(_sr.split(':')[1])) if ':' in _sr else None
-# i4 (fmt=4,siz=0) is skipped by default; its LOADBLOCK/SETTILE pairing yields sizeBytes < lineBytes.
-for _p in os.environ.get('ML_SKIP_FMT','4:0').split(','):
+for _p in os.environ.get('ML_SKIP_FMT','').split(','):
     if ':' in _p:
         _f,_z=_p.split(':'); SKIP_FMT.add((int(_f),int(_z)))
 

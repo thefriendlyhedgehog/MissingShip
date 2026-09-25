@@ -11,8 +11,8 @@ Each check prints PASS, FAIL or SKIP (a missing optional input, e.g. the debug R
   patches    docs/*.patch match the engine fork                     (tools/genpatch.py --check)
   ledger     every patched file is named in ENGINE_CHANGES.md        (tools/checkledger.py)
   exits      every ML exit remaps to the right SoH entrance          (tools/checkexits.py)
-  hashes     every resource reference in the mod archive resolves, except the textures the pipeline skips on
-             purpose (pipeline/unresolved.json, MS-015)             (tools/checkhashes.py)
+  hashes     every resource reference in the mod archive resolves, except any texture the pipeline records as
+             deliberately skipped in pipeline/unresolved.json (none since MS-015)   (tools/checkhashes.py)
   inventory  ML_ACTOR_INVENTORY.md matches the ROMs                  (tools/survey_actors.py --check; needs the debug ROM)
   build      the engine builds                                       (--build only)
 """
@@ -98,7 +98,7 @@ else:
     if extra:
         report('hashes', 'FAIL', f'unexpected unresolved references: {dict(extra)}')
     else:
-        report('hashes', 'PASS', last_line(out).replace(' unresolved', f' unresolved, all {total} skipped on purpose (MS-015)'
+        report('hashes', 'PASS', last_line(out).replace(' unresolved', f' unresolved, all {total} listed in pipeline/unresolved.json'
                                                          if total else ' unresolved'))
 
 # inventory ----------------------------------------------------------------------------------------------------

@@ -204,7 +204,7 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 | [MS-025](https://github.com/thefriendlyhedgehog/MissingShip/issues/18) | port | Skyboxes `vr_fine1` and `vr_cloud2` (+ palettes; ML dma 128/129, 138/139). | Injected. |
 | [MS-026](https://github.com/thefriendlyhedgehog/MissingShip/issues/19) | port | gameplay_keep sword-turn animations (`kiruL_end`, `kiruR`, `kiruR_end`). | Injected under the vanilla names (check how they interact with Link's animations, MS-051). |
 | [MS-027](https://github.com/thefriendlyhedgehog/MissingShip/issues/20) | port | Entrance flags: 39 entrances with ML's music-continuity / transition-style flags. | A data override, or a small engine table plus a ledger row. |
-| [MS-015](https://github.com/thefriendlyhedgehog/MissingShip/issues/53) | port | 9 IA4 scene texture references (spot01 ×7, spot04, tokinoma) are skipped on purpose (`ML_SKIP_FMT=4:0`, listed in `pipeline/unresolved.json`) because they once crashed Metal; the zero-size guard now exists. | The three rooms draw their IA4 textures; `unresolved.json` empty or explained. |
+| [MS-015](https://github.com/thefriendlyhedgehog/MissingShip/issues/53) | port | 9 **I4** scene texture references (spot01 ×7, spot04, tokinoma) were skipped (`ML_SKIP_FMT=4:0`). **Built:** skip removed; they are 4 real textures in the standard 16b block-load form that SoH sizes correctly; 0 unresolved. Awaiting an in-game look (MS-010 checklist). | The three rooms draw their I4 textures; `unresolved.json` empty. |
 
 ### M3: Actors, by scene
 
@@ -247,6 +247,7 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 | ID | Type | Issue | Done when |
 |---|---|---|---|
 | [MS-070](https://github.com/thefriendlyhedgehog/MissingShip/issues/42) | infra | Go through `ENGINE_CHANGES.md` and turn each row that can move into a data-side or upstream proposal: Metal texture guard, bgcheck NULL guard, Oceff widescreen fix (bugfixes); entrance table, cutscene / grotto / new-save tables, draw configs (data-driven features). | A proposal list, and the bugfix PRs upstream. |
+| [MS-016](https://github.com/thefriendlyhedgehog/MissingShip/issues/54) | bug | libultraship `GfxDpLoadBlock`: `uint32_t word_size_shift = -1` for 4-bit loads makes the size `(lrs+1) << 0xFFFFFFFF`. ML and vanilla don't hit it; any mod that block-loads with SETTIMG siz=4b would. | Fixed on `missingship`, logged, proposed upstream with MS-070. |
 
 ### Platforms (long-term; macOS is the test platform for now)
 

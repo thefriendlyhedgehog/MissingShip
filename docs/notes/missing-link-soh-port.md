@@ -423,6 +423,7 @@ that ZAPD failed to auto-discover. They are not an inlining problem at all — t
 2 -> 0. **Note the segment in a texDecl PTR before assuming it is a scene texture** — `0x03......`
 means room-local.
 
+**SUPERSEDED by MS-015 (2026-09-25): I4 is NO LONGER skipped.** The crash blamed on I4 came from the old SETTIMG width rewrite; ML's I4 textures use the standard 16b LOADBLOCK form and import correctly (4 real textures in spot01/spot04/tokinoma; 0 unresolved). Old text:
 **The two remaining unresolved refs are i4 and must stay skipped (verified by experiment):**
 `spot00_room_0 @ 0x8880` and `labo_room_0 @ 0x4D50`. Re-enabling i4 inlining (`ML_SKIP_FMT=""`)
 reproduces the Metal height-zero abort immediately — their LOADBLOCK/SETTILE pairing genuinely

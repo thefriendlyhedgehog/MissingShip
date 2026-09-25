@@ -59,24 +59,26 @@
         <Texture Name="spot01_room_0_tlut_013940" OutName="spot01_room_0_tlut_013940" Format="rgba16" Width="256" Height="1" Offset="0x13940" AddedByScript="true"/>
         <Texture Name="spot01_room_0_tex_013B40" OutName="spot01_room_0_tex_013B40" Format="ci8" Width="64" Height="16" Offset="0x13B40" TlutOffset="0x13940" AddedByScript="true"/>
         <Texture Name="spot01_room_0_tex_013F40" OutName="spot01_room_0_tex_013F40" Format="i8" Width="32" Height="32" Offset="0x13F40" AddedByScript="true"/>
-        <Texture Name="spot01_room_0_tex_014340" OutName="spot01_room_0_tex_014340" Format="rgba16" Width="32" Height="32" Offset="0x14340" AddedByScript="true"/>
-        <Texture Name="spot01_room_0_tlut_014B40" OutName="spot01_room_0_tlut_014B40" Format="rgba16" Width="256" Height="1" Offset="0x14B40" AddedByScript="true"/>
-        <Texture Name="spot01_room_0_tex_014D40" OutName="spot01_room_0_tex_014D40" Format="ci8" Width="32" Height="32" Offset="0x14D40" TlutOffset="0x14B40" AddedByScript="true"/>
-        <Texture Name="spot01_room_0_tex_015140" OutName="spot01_room_0_tex_015140" Format="rgba16" Width="32" Height="32" Offset="0x15140" AddedByScript="true"/>
-        <Texture Name="spot01_room_0_tex_015940" OutName="spot01_room_0_tex_015940" Format="rgba16" Width="32" Height="64" Offset="0x15940" AddedByScript="true"/>
-        <Texture Name="spot01_room_0_tex_016940" OutName="spot01_room_0_tex_016940" Format="rgba16" Width="32" Height="32" Offset="0x16940" AddedByScript="true"/>
-        <Texture Name="spot01_room_0_tex_017140" OutName="spot01_room_0_tex_017140" Format="rgba16" Width="32" Height="32" Offset="0x17140" AddedByScript="true"/>
+        <Texture Name="spot01_room_0_tex_014340" OutName="spot01_room_0_tex_014340" Format="i4" Width="64" Height="64" Offset="0x14340" AddedByScript="true"/>
+        <Texture Name="spot01_room_0_tex_014B40" OutName="spot01_room_0_tex_014B40" Format="i4" Width="32" Height="128" Offset="0x14B40" AddedByScript="true"/>
+        <Texture Name="spot01_room_0_tex_015340" OutName="spot01_room_0_tex_015340" Format="rgba16" Width="32" Height="32" Offset="0x15340" AddedByScript="true"/>
+        <Texture Name="spot01_room_0_tlut_015B40" OutName="spot01_room_0_tlut_015B40" Format="rgba16" Width="256" Height="1" Offset="0x15B40" AddedByScript="true"/>
+        <Texture Name="spot01_room_0_tex_015D40" OutName="spot01_room_0_tex_015D40" Format="ci8" Width="32" Height="32" Offset="0x15D40" TlutOffset="0x15B40" AddedByScript="true"/>
+        <Texture Name="spot01_room_0_tex_016140" OutName="spot01_room_0_tex_016140" Format="rgba16" Width="32" Height="32" Offset="0x16140" AddedByScript="true"/>
+        <Texture Name="spot01_room_0_tex_016940" OutName="spot01_room_0_tex_016940" Format="rgba16" Width="32" Height="64" Offset="0x16940" AddedByScript="true"/>
         <Texture Name="spot01_room_0_tex_017940" OutName="spot01_room_0_tex_017940" Format="rgba16" Width="32" Height="32" Offset="0x17940" AddedByScript="true"/>
         <Texture Name="spot01_room_0_tex_018140" OutName="spot01_room_0_tex_018140" Format="rgba16" Width="32" Height="32" Offset="0x18140" AddedByScript="true"/>
         <Texture Name="spot01_room_0_tex_018940" OutName="spot01_room_0_tex_018940" Format="rgba16" Width="32" Height="32" Offset="0x18940" AddedByScript="true"/>
-        <Texture Name="spot01_room_0_tex_019140" OutName="spot01_room_0_tex_019140" Format="rgba16" Width="32" Height="64" Offset="0x19140" AddedByScript="true"/>
+        <Texture Name="spot01_room_0_tex_019140" OutName="spot01_room_0_tex_019140" Format="rgba16" Width="32" Height="32" Offset="0x19140" AddedByScript="true"/>
+        <Texture Name="spot01_room_0_tex_019940" OutName="spot01_room_0_tex_019940" Format="rgba16" Width="32" Height="32" Offset="0x19940" AddedByScript="true"/>
         <Texture Name="spot01_room_0_tex_01A140" OutName="spot01_room_0_tex_01A140" Format="rgba16" Width="32" Height="64" Offset="0x1A140" AddedByScript="true"/>
         <Texture Name="spot01_room_0_tex_01B140" OutName="spot01_room_0_tex_01B140" Format="rgba16" Width="32" Height="64" Offset="0x1B140" AddedByScript="true"/>
-        <Texture Name="spot01_room_0_tlut_01C140" OutName="spot01_room_0_tlut_01C140" Format="rgba16" Width="16" Height="1" Offset="0x1C140" AddedByScript="true"/>
-        <Texture Name="spot01_room_0_tex_01C160" OutName="spot01_room_0_tex_01C160" Format="ci4" Width="64" Height="64" Offset="0x1C160" TlutOffset="0x1C140" AddedByScript="true"/>
-        <Texture Name="spot01_room_0_tex_01C960" OutName="spot01_room_0_tex_01C960" Format="rgba16" Width="32" Height="64" Offset="0x1C960" AddedByScript="true"/>
-        <Texture Name="spot01_room_0_tex_01D960" OutName="spot01_room_0_tex_01D960" Format="rgba16" Width="64" Height="32" Offset="0x1D960" AddedByScript="true"/>
+        <Texture Name="spot01_room_0_tex_01C140" OutName="spot01_room_0_tex_01C140" Format="rgba16" Width="32" Height="64" Offset="0x1C140" AddedByScript="true"/>
+        <Texture Name="spot01_room_0_tlut_01D140" OutName="spot01_room_0_tlut_01D140" Format="rgba16" Width="16" Height="1" Offset="0x1D140" AddedByScript="true"/>
+        <Texture Name="spot01_room_0_tex_01D160" OutName="spot01_room_0_tex_01D160" Format="ci4" Width="64" Height="64" Offset="0x1D160" TlutOffset="0x1D140" AddedByScript="true"/>
+        <Texture Name="spot01_room_0_tex_01D960" OutName="spot01_room_0_tex_01D960" Format="rgba16" Width="32" Height="64" Offset="0x1D960" AddedByScript="true"/>
         <Texture Name="spot01_room_0_tex_01E960" OutName="spot01_room_0_tex_01E960" Format="rgba16" Width="64" Height="32" Offset="0x1E960" AddedByScript="true"/>
+        <Texture Name="spot01_room_0_tex_01F960" OutName="spot01_room_0_tex_01F960" Format="rgba16" Width="64" Height="32" Offset="0x1F960" AddedByScript="true"/>
         <Room Name="spot01_room_0" Offset="0x0"/>
     </File>
     <File Name="spot01_room_1" Segment="3">
