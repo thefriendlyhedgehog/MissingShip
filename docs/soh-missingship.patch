@@ -951,10 +951,10 @@ index d9e08b3dafe51861746db65ae542f04b4d8ba83d..e9f32c61f4af5ae0f8c48e02844fe31f
              }
          }
 diff --git a/soh/soh/Enhancements/bootcommands.c b/soh/soh/Enhancements/bootcommands.c
-index b9838cf66ad00fe4a7e4cfc4c6f11eaa38edbc3d..c80b9e4e02fb316971b9bd55edefbdf8df500fe2 100644
+index b9838cf66ad00fe4a7e4cfc4c6f11eaa38edbc3d..e6bb75be5d566b3a3452307fbf070a2cdc8ae2c7 100644
 --- a/soh/soh/Enhancements/bootcommands.c
 +++ b/soh/soh/Enhancements/bootcommands.c
-@@ -15,3 +15,31 @@ void BootCommands_Init() {
+@@ -15,3 +15,42 @@ void BootCommands_Init() {
      CVarRegisterInteger(CVAR_IMGUI_CONTROLLER_NAV, 1); // always enable controller nav on switch/wii u
  #endif
  }
@@ -979,6 +979,17 @@ index b9838cf66ad00fe4a7e4cfc4c6f11eaa38edbc3d..c80b9e4e02fb316971b9bd55edefbdf8
 +    CVAR_ENHANCEMENT("FishNeverEscape"), CVAR_ENHANCEMENT("LoachesAlwaysAppear"),
 +    CVAR_ENHANCEMENT("SkipKeepConfirmation"), CVAR_ENHANCEMENT("AllHyruleLoaches"),
 +    CVAR_ENHANCEMENT("MinimumFishWeightChild"), CVAR_ENHANCEMENT("MinimumFishWeightAdult"),
++    // Fixes sidebar: fixes whose target ML doesn't have
++    CVAR_ENHANCEMENT("GravediggingTourFix"), CVAR_ENHANCEMENT("FixDampeGoingBackwards"),
++    CVAR_ENHANCEMENT("FixKokiriForestQuestState"), CVAR_ENHANCEMENT("FixFloorSwitches"),
++    CVAR_ENHANCEMENT("FixZoraHintDialogue"), CVAR_ENHANCEMENT("FixSawSoftlock"), CVAR_ENHANCEMENT("AnubisFix"),
++    CVAR_ENHANCEMENT("GCDoorsAfterFireFix"), CVAR_ENHANCEMENT("DekuNutUpgradeFix"),
++    CVAR_ENHANCEMENT("CrouchStabHammerFix"), CVAR_ENHANCEMENT("CrouchStabFix"), CVAR_ENHANCEMENT("FixBrokenGiantsKnife"),
++    CVAR_ENHANCEMENT("TwoHandedIdle"), CVAR_ENHANCEMENT("NaviTextFix"), CVAR_ENHANCEMENT("GerudoWarriorClothingFix"),
++    CVAR_ENHANCEMENT("FixHammerHand"), CVAR_ENHANCEMENT("SilverRupeeJingleExtend"),
++    CVAR_ENHANCEMENT("FixDaruniaDanceSpeed"), CVAR_ENHANCEMENT("CreditsFix"), CVAR_ENHANCEMENT("RedGanonBlood"),
++    CVAR_ENHANCEMENT("HoverFishing"), CVAR_ENHANCEMENT("QuickBongoKill"), CVAR_ENHANCEMENT("EarlyEyeballFrog"),
++    CVAR_ENHANCEMENT("GraveHoles"),
 +};
 +
 +void MissingShip_ClearRetiredOptions() {
@@ -1407,7 +1418,7 @@ index 39f04ddbbd3a3894ac268a4364b3b7b711b3edee..ed9201e52a84271f28ff10417db4cac3
      Rando::StaticData::InitHashMaps();
      OTRGlobals::Instance->gRandoContext->AddExcludedOptions();
 diff --git a/soh/soh/SohGui/SohMenuEnhancements.cpp b/soh/soh/SohGui/SohMenuEnhancements.cpp
-index 4cf7305373689a1e3d9a084f91a1a2693902dfde..8aeae663b0929066a1fbec1f432d9955c4ba7a70 100644
+index 4cf7305373689a1e3d9a084f91a1a2693902dfde..97bfa462229f7b176a39eef6e5d51b19d255c355 100644
 --- a/soh/soh/SohGui/SohMenuEnhancements.cpp
 +++ b/soh/soh/SohGui/SohMenuEnhancements.cpp
 @@ -9,6 +9,7 @@
@@ -1471,7 +1482,216 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..8aeae663b0929066a1fbec1f432d9955
      AddWidget(path, "Masks Equippable as Adult", WIDGET_CVAR_CHECKBOX)
          .CVar(CVAR_ENHANCEMENT("AdultMasks"))
          .Options(CheckboxOptions().Tooltip("Allows masks to be equipped normally from the pause menu as adult."));
-@@ -1364,210 +1362,8 @@ void SohMenu::AddMenuEnhancements() {
+@@ -980,36 +978,14 @@ void SohMenu::AddMenuEnhancements() {
+         .Options(CheckboxOptions().Tooltip("Blue Fire dropped from bottle can be bottled."));
+ 
+     // Fixes
++    // MissingShip (MS-145): Fixes and restorations whose target ML doesn't have are removed (graveyard, Zoras, Gerudo,
++    // Anubis, adult weapons, Navi, vanilla's credits; ML reuses the Darunia, Ganon and Bongo Bongo slots for its own
++    // actors). "Remove Power Crouch Stab" goes with the hammer fix it depends on. Their CVars are cleared at boot
++    // (MissingShip_ClearRetiredOptions).
+     path.sidebarName = "Fixes";
+     AddSidebarEntry("Enhancements", path.sidebarName, 3);
+     path.column = SECTION_COLUMN_1;
+     AddWidget(path, "Gameplay Fixes", WIDGET_SEPARATOR_TEXT);
+-    AddWidget(path, "Fix the Gravedigging Tour Glitch", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("GravediggingTourFix"))
+-        .PreFunc([](WidgetInfo& info) {
+-            info.options->disabled = IS_RANDO && GameInteractor::IsSaveLoaded(true);
+-            info.options->disabledTooltip = "This setting is always enabled in randomized save files.";
+-        })
+-        .Options(CheckboxOptions().Tooltip(
+-            "Fixes a bug where the Gravedigging Tour Heart Piece disappears if the area reloads."));
+-    AddWidget(path, "Fix Dampé Going Backwards", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("FixDampeGoingBackwards"))
+-        .Options(CheckboxOptions().Tooltip(
+-            "Fixes Dampé going backwards in certain circumstances when the player is going backwards."));
+-    AddWidget(path, "Fix Kokiri Forest Quest State", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("FixKokiriForestQuestState"))
+-        .Options(CheckboxOptions().Tooltip("Fixes kokiri animation state to match their text state when getting "
+-                                           "Zelda's Letter before Kokiri Emerald."));
+-    AddWidget(path, "Fix Raised Floor Switches", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("FixFloorSwitches"))
+-        .Options(CheckboxOptions().Tooltip(
+-            "Fixes the two raised floor switches, the one in Forest Temple Basement and the one at the top of Fire "
+-            "Temple. This will lower them, making activating them easier."));
+-    AddWidget(path, "Fix Zora Hint Dialogue", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("FixZoraHintDialogue"))
+-        .Options(CheckboxOptions().Tooltip(
+-            "Fixes one Zora's dialogue giving a hint about bringing Ruto's Letter to King Zora to properly occur "
+-            "before moving King Zora rather than after."));
+     AddWidget(path, "Fix Falling from Vine Edges", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("FixVineFall"))
+         .Options(
+@@ -1023,60 +999,6 @@ void SohMenu::AddMenuEnhancements() {
+         .Options(CheckboxOptions().Tooltip(
+             "Causes respawning enemies, like Stalchildren, to appear on land near bodies of water. "
+             "Fixes an incorrect calculation that acted like water underneath ground was above it."));
+-    AddWidget(path, "Fix Poacher's Saw Softlock", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("FixSawSoftlock"))
+-        .PreFunc([](WidgetInfo& info) {
+-            info.options->disabled = CVarGetInteger(CVAR_ENHANCEMENT("SkipText"), 0) == 1;
+-            info.options->disabledTooltip = "This option is forced on when Skip Text is enabled.";
+-        })
+-        .Options(CheckboxOptions().Tooltip(
+-            "Prevents the Poacher's Saw softlock from mashing through the text, or with Skip Text enabled."));
+-    AddWidget(path, "Fix Anubis Fireballs", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("AnubisFix"))
+-        .Options(CheckboxOptions().Tooltip(
+-            "Make Anubis Fireballs do Fire damage when reflected back at them with the Mirror Shield."));
+-    AddWidget(path, "Fix Goron City Doors After Fire Temple", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("GCDoorsAfterFireFix"))
+-        .Options(CheckboxOptions().Tooltip(
+-            "Forces Goron City doors open if you somehow complete Fire Temple without talking to Goron Link "
+-            " and receiving the Goron Tunic."));
+-
+-    AddWidget(path, "Item-related Fixes", WIDGET_SEPARATOR_TEXT);
+-    AddWidget(path, "Fix Deku Nut Upgrade", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("DekuNutUpgradeFix"))
+-        .Options(CheckboxOptions().Tooltip("Prevents the Forest Stage Deku Nut upgrade from becoming unobtainable "
+-                                           "after receiving the Poacher's Saw."));
+-    AddWidget(path, "Fix Megaton Hammer Crouch Stab", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("CrouchStabHammerFix"))
+-        .Callback([](WidgetInfo& info) {
+-            if (!CVarGetInteger(CVAR_ENHANCEMENT("CrouchStabHammerFix"), 0)) {
+-                CVarClear(CVAR_ENHANCEMENT("CrouchStabFix"));
+-            }
+-        })
+-        .Options(CheckboxOptions().Tooltip(
+-            "Make the Megaton Hammer's crouch stab able to destroy rocks without first swinging it normally."));
+-    AddWidget(path, "Remove Power Crouch Stab", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("CrouchStabFix"))
+-        .PreFunc(
+-            [](WidgetInfo& info) { info.isHidden = CVarGetInteger(CVAR_ENHANCEMENT("CrouchStabHammerFix"), 0) == 0; })
+-        .Options(CheckboxOptions().Tooltip("Make crouch stabbing always do the same damage as a regular slash."));
+-    AddWidget(path, "Fix Broken Giant's Knife Bug", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("FixBrokenGiantsKnife"))
+-        .PreFunc([](WidgetInfo& info) {
+-            info.options->disabled = IS_RANDO && GameInteractor::IsSaveLoaded(true);
+-            info.options->disabledTooltip = "This setting is forcefully enabled when you are playing a Randomizer.";
+-        })
+-        .Callback([](WidgetInfo& info) {
+-            bool hasGiantsKnife = CHECK_OWNED_EQUIP(EQUIP_TYPE_SWORD, EQUIP_INV_SWORD_BIGGORON);
+-            bool hasBrokenKnife = CHECK_OWNED_EQUIP_ALT(EQUIP_TYPE_SWORD, EQUIP_INV_SWORD_BROKENGIANTKNIFE);
+-            bool knifeIsBroken = gSaveContext.swordHealth == 0.0f;
+-
+-            if (hasGiantsKnife && (hasBrokenKnife != knifeIsBroken)) {
+-                func_800849EC(gPlayState);
+-            }
+-        })
+-        .Options(
+-            CheckboxOptions().Tooltip("Fixes the Broken Giant's Knife flag not being reset when Medigoron fixes it."));
+ 
+     AddWidget(path, "Camera Fixes", WIDGET_SEPARATOR_TEXT);
+     AddWidget(path, "Fix Camera Drift", WIDGET_CVAR_CHECKBOX)
+@@ -1105,22 +1027,6 @@ void SohMenu::AddMenuEnhancements() {
+         .Options(CheckboxOptions().Tooltip(
+             "Removes the Dungeon Entrance icon on the top-left corner of the screen when no dungeon is present on the "
+             "current map."));
+-    AddWidget(path, "Fix Two-Handed Idle Animations", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("TwoHandedIdle"))
+-        .RaceDisable(false)
+-        .Options(CheckboxOptions().Tooltip(
+-            "Re-Enables the two-handed idle animation, a seemingly finished animation that was disabled on accident "
+-            "in the original game."));
+-    AddWidget(path, "Fix Navi Text HUD Position", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("NaviTextFix"))
+-        .RaceDisable(false)
+-        .Options(CheckboxOptions().Tooltip("Correctly centers the Navi text prompt on the HUD's C-Up button."));
+-    AddWidget(path, "Fix Gerudo Warrior's Clothing Colors", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("GerudoWarriorClothingFix"))
+-        .RaceDisable(false)
+-        .Options(CheckboxOptions().Tooltip(
+-            "Prevent the Gerudo Warrior's clothes changing color when changing Link's tunic or "
+-            "using bombs in front of her."));
+     AddWidget(path, "Fix Out of Bounds Textures", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("FixTexturesOOB"))
+         .Callback([](WidgetInfo& info) { ApplyAuthenticGfxPatches(); })
+@@ -1131,11 +1037,6 @@ void SohMenu::AddMenuEnhancements() {
+         .RaceDisable(false)
+         .Options(CheckboxOptions().Tooltip(
+             "Fixes Link's eyes being open in the opening cutscene when he is supposed to be sleeping."));
+-    AddWidget(path, "Fix Hand Holding Hammer", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("FixHammerHand"))
+-        .RaceDisable(false)
+-        .Options(CheckboxOptions().Tooltip(
+-            "Fixes Adult Link having a backwards Left hand when holding the Megaton Hammer."));
+     AddWidget(path, "Fix Vanishing Paths", WIDGET_CVAR_COMBOBOX)
+         .CVar(CVAR_ENHANCEMENT("SceneSpecificDirtPathFix"))
+         .RaceDisable(false)
+@@ -1148,33 +1049,8 @@ void SohMenu::AddMenuEnhancements() {
+                          "No Vanish: Paths do not vanish, Link seems to sink in to some paths.\n"
+                          "This might affect other decal effects."));
+ 
+-    AddWidget(path, "Audio Fixes", WIDGET_SEPARATOR_TEXT);
+-    AddWidget(path, "Fix Missing Jingle after 5 Silver Rupees", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("SilverRupeeJingleExtend"))
+-        .RaceDisable(false)
+-        .Options(CheckboxOptions().Tooltip(
+-            "Adds 5 higher pitches for the Silver Rupee Jingle for the rooms with more than 5 Silver Rupees. "
+-            "Only relevant for playthroughs involving Master Quest Dungeons."));
+-
+-    AddWidget(path, "Desync Fixes", WIDGET_SEPARATOR_TEXT);
+-    AddWidget(path, "Fix Darunia Dancing too Fast", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("FixDaruniaDanceSpeed"))
+-        .RaceDisable(false)
+-        .Options(CheckboxOptions().Tooltip(
+-            "Fixes Darunia's dancing speed so he dances to the beat of Saria's Song, like in the Original Game."));
+-    AddWidget(path, "Fix Credits Timing (PAL)", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("CreditsFix"))
+-        .RaceDisable(false)
+-        .Options(CheckboxOptions().Tooltip(
+-            "Extend certain credits scenes so the music lines up properly with the visuals. (PAL only)"));
+-
+     path.column = SECTION_COLUMN_3;
+     AddWidget(path, "Graphical Restorations", WIDGET_SEPARATOR_TEXT);
+-    AddWidget(path, "Red Ganon Blood", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("RedGanonBlood"))
+-        .RaceDisable(false)
+-        .Options(
+-            CheckboxOptions().Tooltip("Restore the original red blood from NTSC 1.0/1.1. Disable for Green blood."));
+     AddWidget(path, "Restore Old Gold Skulltula Cutscene", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("GSCutscene"))
+         .Options(CheckboxOptions().Tooltip(
+@@ -1186,10 +1062,6 @@ void SohMenu::AddMenuEnhancements() {
+             "Restores an unfinished feature to pulsate the boss room icon when you are in the boss room."));
+ 
+     AddWidget(path, "Glitch Restorations", WIDGET_SEPARATOR_TEXT);
+-    AddWidget(path, "Fish while Hovering", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("HoverFishing"))
+-        .Options(CheckboxOptions().Tooltip(
+-            "Restore a bug from NTSC 1.0 that allows casting the Fishing Rod while using the Hover Boots."));
+     AddWidget(path, "N64 Weird Frames", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("N64WeirdFrames"))
+         .Options(CheckboxOptions().Tooltip(
+@@ -1203,15 +1075,6 @@ void SohMenu::AddMenuEnhancements() {
+         .Options(CheckboxOptions().Tooltip(
+             "Restore a bug from NTSC 1.0 that allows putting away an item without an animation and performing "
+             "Putaway Ocarina Items."));
+-    AddWidget(path, "Quick Bongo Kill", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("QuickBongoKill"))
+-        .Options(CheckboxOptions().Tooltip(
+-            "Restore a bug from NTSC 1.0 that allows bypassing Bongo Bongo's intro cutscene to quickly kill him."));
+-    AddWidget(path, "Early Eyeball Frog", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("EarlyEyeballFrog"))
+-        .Options(CheckboxOptions().Tooltip(
+-            "Restores a bug from NTSC 1.0/1.1 that allows you to obtain the eyeball frog from King Zora "
+-            "instead of the Zora Tunic by Holding Shield."));
+ 
+     AddWidget(path, "Misc Restorations", WIDGET_SEPARATOR_TEXT);
+     AddWidget(path, "Fix L&Z Page Switch in Pause Menu", WIDGET_CVAR_CHECKBOX)
+@@ -1222,10 +1085,6 @@ void SohMenu::AddMenuEnhancements() {
+         .CVar(CVAR_ENHANCEMENT("WideShutterDoorRange"))
+         .Options(CheckboxOptions().Tooltip("Restores the wider range of certain shutter doors from NTSC 1.0.\n"
+                                            "Notably affects Jabu-Jabu and boss doors."));
+-    AddWidget(path, "Grave Hole Jumps", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("GraveHoles"))
+-        .Options(CheckboxOptions().Tooltip(
+-            "Restores NTSC 1.0 behavior where Link jumps over grave holes and grabs the ledges."));
+ 
+     // Difficulty Options
+     path.sidebarName = "Difficulty";
+@@ -1364,210 +1223,8 @@ void SohMenu::AddMenuEnhancements() {
                       .Format("%d seconds")
                       .Tooltip("The time between groups of Leevers spawning."));
  
@@ -1684,7 +1904,7 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..8aeae663b0929066a1fbec1f432d9955
  
      // Extra Modes
      path.sidebarName = "Extra Modes";
-@@ -1926,6 +1722,56 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1926,6 +1583,56 @@ void SohMenu::AddMenuEnhancements() {
              .CVar(timer.timeEnable)
              .Callback([](WidgetInfo& info) { TimeDisplayUpdateDisplayOptions(); });
      }
