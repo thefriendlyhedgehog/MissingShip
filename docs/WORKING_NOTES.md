@@ -43,4 +43,4 @@ Project memory notes from the local sessions are copied in `docs/notes/`. The pl
 - Actor todo list: `docs/ML_ACTOR_INVENTORY.md` (rows marked todo).
 - HUD restyle (ML 0x80604E30 / 0x806053E0, colour 0x80089180); dungeon minimap textures (room + 190).
 - Magic Hourglass (0x80600E00, not ported). Link object/animation port.
-- Crate freeze in malon_stable room 3 (Bg_Spot15_Rrbox, possible OOB read of D_808B45C4 with switch 0 set) -- low priority.
+- Crate freeze in malon_stable room 3 (MS-011): not reproduced, nothing in the vanilla crate code can hang; waiting on a repro (checklist #9). If it freezes, `sample MissingShip` on the live process.
