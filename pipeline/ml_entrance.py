@@ -103,7 +103,10 @@ ENTRANCE_CS = {'spot10': [(0x260, 'gMlSpot10IntroCs')], 'spot05': [(0x0E0, 'gMlS
                'spot20': [(0x3D8, 'gMlSpot20IntroCs')], 'spot12': [(0x3A0, 'gMlSpot12IntroCs')],
                'link_home': [(0x0D8, 'gMlLinkHomeIntroCs')], 'spot09': [(0x428, 'gMlSpot09IntroCs')],
                'turibori': [(0xFB90, 'gMlTuriboriIntroCs')], 'spot04': [(0x210, 'gMlSpot04IntroCs')],
-               'tokinoma': [(0x1A0, 'gMlTokinomaIntroCs')]}
+               'tokinoma': [(0x1A0, 'gMlTokinomaIntroCs')],
+               # ML 0x03C (Monktown Valley from the Deep Woods maze), flag 0xA9: the row after the table's first
+               # 0xFFFF entry, missed until MS-152. Its flag also shows world-map point 9.
+               'spot01': [(0x290, 'gMlSpot01IntroCs')]}
 # Cutscenes an actor starts itself with Cutscene_SetSegment, exported under a name its C code can use.
 ACTOR_CS = {'HAKAdan_bs': [(0x168, 'gMlHakadanBsIntroCs'),       # Ml_BossVa: the boss wakes (also the header's)
                            (0xACF0, 'gMlHakadanBsDeathCs'),      # Ml_BossVa: phase 1 health 0
@@ -134,17 +137,34 @@ def _destination_codes():
         block = parts[i + 1].split('break;')[0]
         # SoH wraps some targets in randomizer overrides: Entrance_OverrideNextIndex(ENTR_X) means ENTR_X.
         names = re.findall(r'nextEntranceIndex = (?:Entrance_OverrideNextIndex\()?(ENTR_\w+)', block)
+        cs = re.search(r'cutsceneIndex = 0xFFF([0-9A-Fa-f])', block)
         for label in re.findall(r'case (\d+):', parts[i]):
             if names:
                 codes[int(label)] = ids[names[0]]
+                if cs:
+                    CODE_LAYER[int(label)] = int(cs.group(1), 16) + 4
     return codes
 
 
+# Scene layer a destination case selects (cutsceneIndex 0xFFFn -> layer n + 4). The entrance system then reads the
+# entrance table at entrance + layer, so ML lands on its own row there (MS-151).
+CODE_LAYER = {}
 CODE_TO_ENTRANCE = _destination_codes()
-# Destination cases ML itself patched; the engine's switch reproduces them, so their codes are left alone.
-# 56: Kakariko gate (0xFFF4) -> ML entrance 0x420 with cutscene 0xFFF0 (code 0x80066050); only the
-# Fishing Pond intro uses it.
-ML_PATCHED_CODES = {56}
+# Destination cases ML itself patched (code diff vs the MQ debug ROM at 0x80066000-0x80066B48): code -> the ML row it
+# lands on (entrance + layer 4; every one sets cutsceneIndex 0xFFF0). The engine's switch reproduces them with
+# MissingShip entrance groups, so their codes are left alone.
+# 56: the Fishing Pond intro -> 0x420 (pond). 55: the pond's second cutscene -> 0x3FC (Cluck Cluck Ranch).
+# 61: the ranch's -> 0x400 (Deku Road). 65, 73: -> 0x40C (Kokiri Forest). 105: Kokiri Forest's -> 0x410 (the Deep
+# Woods grotto). Before MS-151 only 56 was known, and the rest were rewritten to vanilla targets.
+ML_PATCHED_CODES = {56: 0x424, 55: 0x400, 61: 0x404, 65: 0x410, 73: 0x410, 105: 0x414}
+
+
+def cs_destination(code):
+    """The ML entrance row a CS_DESTINATION code lands on (entrance + scene layer), or None."""
+    if code in ML_PATCHED_CODES:
+        return ML_PATCHED_CODES[code]
+    e = CODE_TO_ENTRANCE.get(code)
+    return None if e is None else e + CODE_LAYER.get(code, 0)
 
 
 def _cutscene_terminators(d, cs):
@@ -185,25 +205,40 @@ def fix_cutscene_destinations(d, populated, name=None):
     with bit 15 set; the engine patch's `default:` case treats that as a literal entrance index, so it
     can never collide with a destination code. Covers header cutscenes and ML's entrance intros.
 
-    Known loss: a destination case can also set state (e.g. case 119 sets noon and a white fade);
-    the bit-15 path only transitions. Previously this read `base` as an ML ENTRANCE, which sent the
+    Known loss: a destination case can also set state (e.g. case 119 sets noon and a white fade; 22 gives
+    Requiem of Spirit) and a cutscene layer; the bit-15 path only transitions. The target is ML's row at entrance +
+    layer (MS-151), which is right wherever that scene has no header for the layer; the cases that do reach one are
+    ML's patched ones, reproduced in the engine. Previously this read `base` as an ML ENTRANCE, which sent the
     opening prologue (code 119 -> ML 0x5F0 -> tokinoma) to ML entrance 119 = the Lon Lon stable.
     """
     d = bytearray(d); fixed = 0; unresolved = []
     offs = set(o for o, _ in ENTRANCE_CS.get(name, []) + ACTOR_CS.get(name, []))
+    heads = [0]
     off = 0
-    while off + 8 <= len(d):
-        if d[off] == 0x14:
-            break
-        if d[off] == 0x17:
-            offs.add(struct.unpack('>I', d[off+4:off+8])[0] & 0xFFFFFF)
+    while off + 8 <= len(d) and d[off] != 0x14:
+        if d[off] == 0x18:                                 # alternate headers: their cutscenes too (MS-151)
+            lst = struct.unpack('>I', d[off+4:off+8])[0] & 0xFFFFFF
+            for k in range(15):
+                if lst + 4 * k + 4 > len(d):
+                    break
+                ptr = struct.unpack('>I', d[lst+4*k:lst+4*k+4])[0]
+                if ptr >> 24 == 2 and (ptr & 0xFFFFFF) < len(d):
+                    heads.append(ptr & 0xFFFFFF)
         off += 8
+    for h in heads:
+        off = h
+        while off + 8 <= len(d) and d[off] != 0x14:
+            if d[off] == 0x17:
+                offs.add(struct.unpack('>I', d[off+4:off+8])[0] & 0xFFFFFF)
+            off += 8
     for cs in sorted(o for o in offs if o and o + 8 <= len(d)):
         for at in _cutscene_terminators(d, cs):
             code = struct.unpack('>H', d[at:at+2])[0]
             if code & 0x8000 or code in ML_PATCHED_CODES:
                 continue                                   # already rewritten, or ML's own case
             e = CODE_TO_ENTRANCE.get(code)
+            if e is not None:
+                e += CODE_LAYER.get(code, 0)                # ML's row at entrance + layer (MS-151)
             if e is None or e >= len(ML):
                 unresolved.append((cs, code, 'no destination case')); continue
             scene, spawn, _ = ML[e]

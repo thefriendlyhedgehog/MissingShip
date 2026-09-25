@@ -90,8 +90,8 @@ for slot, (dma, name) in by_slot.items():
         if cs and cs + 8 <= len(d):
             for at in m._cutscene_terminators(d, cs):
                 code = struct.unpack('>H', d[at:at+2])[0]
-                if code in m.ML_PATCHED_CODES: continue  # ML's own case; its entrance is an MlEntrance_ToSoh literal
-                e = m.CODE_TO_ENTRANCE.get(code)
+                if code in m.ML_PATCHED_CODES: continue  # ML's own case, reproduced in the engine
+                e = m.cs_destination(code)
                 if e is not None: used[e] += 1
 rom = open(ML_ROM, 'rb').read()
 code = open(PIPE + '/ml_code.bin', 'rb').read()

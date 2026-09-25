@@ -67,12 +67,12 @@ for k, v in sm.items():
             if c == 0x17:                                          # header cutscene
                 for at in m._cutscene_terminators(d, w & 0xFFFFFF):
                     code = struct.unpack('>H', d[at:at+2])[0]
-                    e = 0x420 if code in m.ML_PATCHED_CODES else m.CODE_TO_ENTRANCE.get(code)
+                    e = m.cs_destination(code)
                     if e is not None: add(e, f'cutscene destination {code} in {name}')
     for cs, _ in m.ENTRANCE_CS.get(name, []) + m.ACTOR_CS.get(name, []):
         for at in m._cutscene_terminators(d, cs):
             code = struct.unpack('>H', d[at:at+2])[0]
-            e = 0x420 if code in m.ML_PATCHED_CODES else m.CODE_TO_ENTRANCE.get(code)
+            e = m.cs_destination(code)
             if e is not None: add(e, f'cutscene destination {code} in {name} @{cs:#x}')
 
 d = load_pair(0x9B)[0][0]                    # ML's Door_Ana overlay: its grotto table is at file offset 0x5FC, ends at -1

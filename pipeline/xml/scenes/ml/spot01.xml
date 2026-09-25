@@ -1,5 +1,6 @@
 <Root>
     <File Name="spot01_scene" Segment="2">
+        <Cutscene Name="gMlSpot01IntroCs" Offset="0x290"/>
         <Texture Name="spot01_sceneTex_007910" OutName="spot01_sceneTex_007910" Format="rgba16" Width="32" Height="32" Offset="0x7910" AddedByScript="true"/>
         <Texture Name="spot01_sceneTex_008110" OutName="spot01_sceneTex_008110" Format="i8" Width="32" Height="32" Offset="0x8110" AddedByScript="true"/>
         <Texture Name="spot01_sceneTex_008510" OutName="spot01_sceneTex_008510" Format="ia8" Width="8" Height="8" Offset="0x8510" AddedByScript="true"/>

@@ -1,9 +1,9 @@
 diff --git a/soh/assets/ml_assets.h b/soh/assets/ml_assets.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..b32576f9e295ba7f31f067f9505ef0a1587d8d28
+index 0000000000000000000000000000000000000000..320d2595f2d0e7d46226ca44c9fc8438a1604b51
 --- /dev/null
 +++ b/soh/assets/ml_assets.h
-@@ -0,0 +1,317 @@
+@@ -0,0 +1,320 @@
 +#ifndef ML_ASSETS_H
 +#define ML_ASSETS_H
 +
@@ -51,6 +51,9 @@ index 0000000000000000000000000000000000000000..b32576f9e295ba7f31f067f9505ef0a1
 +
 +#define dgMlSpot12IntroCs "__OTR__scenes/shared/spot12_scene/gMlSpot12IntroCs"
 +static const ALIGN_ASSET(2) char gMlSpot12IntroCs[] = dgMlSpot12IntroCs;
++
++#define dgMlSpot01IntroCs "__OTR__scenes/shared/spot01_scene/gMlSpot01IntroCs"
++static const ALIGN_ASSET(2) char gMlSpot01IntroCs[] = dgMlSpot01IntroCs;
 +
 +#define dgMlLinkHomeIntroCs "__OTR__scenes/shared/link_home_scene/gMlLinkHomeIntroCs"
 +static const ALIGN_ASSET(2) char gMlLinkHomeIntroCs[] = dgMlLinkHomeIntroCs;
@@ -550,10 +553,10 @@ index d05085f4d07788d84b76c9ab9a6d32b623c2cd42..cdb893786c4be6462d09fac779a030cb
  /* 0x01D3 */ DEFINE_ACTOR(En_Zl4, ACTOR_EN_ZL4, ALLOCTYPE_NORMAL)
  /* 0x01D4 */ DEFINE_ACTOR(En_Mm2, ACTOR_EN_MM2, ALLOCTYPE_NORMAL)
 diff --git a/soh/include/tables/entrance_table.h b/soh/include/tables/entrance_table.h
-index fe62e632b60506329faa58be591cf1adf70e643a..38f099c9430b66a364973cf599e052e37ef8a6a3 100644
+index fe62e632b60506329faa58be591cf1adf70e643a..eddbca7d8032f5494234fffde52e7f403e64463a 100644
 --- a/soh/include/tables/entrance_table.h
 +++ b/soh/include/tables/entrance_table.h
-@@ -1931,4 +1931,69 @@
+@@ -1931,4 +1931,113 @@
  /* 0x610 */ DEFINE_ENTRANCE(ENTR_DESERT_COLOSSUS_SPIRIT_TEMPLE_BLUE_WARP, SCENE_DESERT_COLOSSUS, 8, false, true, TRANS_TYPE_FADE_WHITE, TRANS_TYPE_FADE_WHITE)
  /* 0x611 */ DEFINE_ENTRANCE(ENTR_DESERT_COLOSSUS_8_1, SCENE_DESERT_COLOSSUS, 8, false, true, TRANS_TYPE_FADE_WHITE, TRANS_TYPE_FADE_WHITE)
  /* 0x612 */ DEFINE_ENTRANCE(ENTR_DESERT_COLOSSUS_8_2, SCENE_DESERT_COLOSSUS, 8, false, true, TRANS_TYPE_FADE_WHITE, TRANS_TYPE_FADE_WHITE)
@@ -625,6 +628,50 @@ index fe62e632b60506329faa58be591cf1adf70e643a..38f099c9430b66a364973cf599e052e3
 +/* 0x63B */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_FISHING_POND_EVENT_5, SCENE_FISHING_POND, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
 +/* 0x63C */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_FISHING_POND_EVENT_6, SCENE_FISHING_POND, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
 +/* 0x63D */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_FISHING_POND_EVENT_7, SCENE_FISHING_POND, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++
++// MissingShip (MS-151): ML's patched cutscene destination 55 sets ML entrance 0x3FC with cutsceneIndex 0xFFF0, so ML lands on its row
++// 0x400 (Cluck Cluck Ranch, spawn 0), flags 0xC102, on scene layer 4. Eight identical entries so base + layer 4 lands here too.
++/* 0x63E */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_LON_LON_RANCH_EVENT, SCENE_LON_LON_RANCH, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x63F */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_LON_LON_RANCH_EVENT_1, SCENE_LON_LON_RANCH, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x640 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_LON_LON_RANCH_EVENT_2, SCENE_LON_LON_RANCH, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x641 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_LON_LON_RANCH_EVENT_3, SCENE_LON_LON_RANCH, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x642 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_LON_LON_RANCH_EVENT_4, SCENE_LON_LON_RANCH, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x643 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_LON_LON_RANCH_EVENT_5, SCENE_LON_LON_RANCH, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x644 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_LON_LON_RANCH_EVENT_6, SCENE_LON_LON_RANCH, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x645 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_LON_LON_RANCH_EVENT_7, SCENE_LON_LON_RANCH, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++
++// MissingShip (MS-151): ML's patched cutscene destination 61 sets ML entrance 0x400 with cutsceneIndex 0xFFF0, so ML lands on its row
++// 0x404 (Deku Road, spawn 0), flags 0xC102, on scene layer 4. Eight identical entries so base + layer 4 lands here too.
++/* 0x646 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_GERUDO_VALLEY_EVENT, SCENE_GERUDO_VALLEY, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x647 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_GERUDO_VALLEY_EVENT_1, SCENE_GERUDO_VALLEY, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x648 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_GERUDO_VALLEY_EVENT_2, SCENE_GERUDO_VALLEY, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x649 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_GERUDO_VALLEY_EVENT_3, SCENE_GERUDO_VALLEY, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x64A */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_GERUDO_VALLEY_EVENT_4, SCENE_GERUDO_VALLEY, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x64B */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_GERUDO_VALLEY_EVENT_5, SCENE_GERUDO_VALLEY, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x64C */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_GERUDO_VALLEY_EVENT_6, SCENE_GERUDO_VALLEY, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x64D */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_GERUDO_VALLEY_EVENT_7, SCENE_GERUDO_VALLEY, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++
++// MissingShip (MS-151): ML's patched cutscene destinations 65 and 73 set ML entrance 0x40C with cutsceneIndex 0xFFF0, so ML lands on its row
++// 0x410 (Kokiri Forest, spawn 0), flags 0xC102, on scene layer 4. Eight identical entries so base + layer 4 lands here too.
++/* 0x64E */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_KOKIRI_FOREST_EVENT, SCENE_KOKIRI_FOREST, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x64F */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_KOKIRI_FOREST_EVENT_1, SCENE_KOKIRI_FOREST, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x650 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_KOKIRI_FOREST_EVENT_2, SCENE_KOKIRI_FOREST, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x651 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_KOKIRI_FOREST_EVENT_3, SCENE_KOKIRI_FOREST, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x652 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_KOKIRI_FOREST_EVENT_4, SCENE_KOKIRI_FOREST, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x653 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_KOKIRI_FOREST_EVENT_5, SCENE_KOKIRI_FOREST, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x654 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_KOKIRI_FOREST_EVENT_6, SCENE_KOKIRI_FOREST, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x655 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_KOKIRI_FOREST_EVENT_7, SCENE_KOKIRI_FOREST, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++
++// MissingShip (MS-151): ML's patched cutscene destination 105 sets ML entrance 0x410 with cutsceneIndex 0xFFF0, so ML lands on its row
++// 0x414 (Deep Woods grotto, spawn 0), flags 0xC102, on scene layer 4. Eight identical entries so base + layer 4 lands here too.
++/* 0x656 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_DEKU_TREE_EVENT, SCENE_DEKU_TREE, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x657 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_DEKU_TREE_EVENT_1, SCENE_DEKU_TREE, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x658 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_DEKU_TREE_EVENT_2, SCENE_DEKU_TREE, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x659 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_DEKU_TREE_EVENT_3, SCENE_DEKU_TREE, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x65A */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_DEKU_TREE_EVENT_4, SCENE_DEKU_TREE, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x65B */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_DEKU_TREE_EVENT_5, SCENE_DEKU_TREE, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x65C */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_DEKU_TREE_EVENT_6, SCENE_DEKU_TREE, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x65D */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_DEKU_TREE_EVENT_7, SCENE_DEKU_TREE, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
 diff --git a/soh/include/tables/scene_table.h b/soh/include/tables/scene_table.h
 index da290bd00d8cd90dccf06eb83f0540363564cc65..45a4f13b9f05bd5c5f2f38287e02a131521d4a77 100644
 --- a/soh/include/tables/scene_table.h
@@ -2460,7 +2507,7 @@ index f0ad28568bbc8ef2223b7330fa4300a1b1a6b0e9..c0ecf8d8ee231df0dee3d951bcbbdb92
      }
      return (Vec3s*)SEGMENTED_TO_VIRTUAL(cameraDataList[camId].camPosData);
 diff --git a/soh/src/code/z_demo.c b/soh/src/code/z_demo.c
-index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..e098f687d804a7d51ec2b4a30ed868bcb1940a8e 100644
+index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..d41aec8433916d3034c9d5ff4ff75dcde5a5a5f9 100644
 --- a/soh/src/code/z_demo.c
 +++ b/soh/src/code/z_demo.c
 @@ -1,5 +1,7 @@
@@ -2471,7 +2518,7 @@ index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..e098f687d804a7d51ec2b4a30ed868bc
  
  #include <string.h>
  
-@@ -58,41 +60,24 @@ CutsceneStateHandler sCsStateHandlers2[] = {
+@@ -58,41 +60,25 @@ CutsceneStateHandler sCsStateHandlers2[] = {
  
  u8 sTitleCsState = 0;
  
@@ -2520,6 +2567,7 @@ index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..e098f687d804a7d51ec2b4a30ed868bc
 -    { ENTR_KOKIRI_FOREST_12, 2, 0xC6, gKokiriForestDekuSproutCs },
 +    { ENTR_LOST_WOODS_SOUTH_EXIT, 2, 0xA5, gMlSpot10IntroCs },           // ML 0x010
 +    { ENTR_SACRED_FOREST_MEADOW_SOUTH_EXIT, 2, 0xA4, gMlSpot05IntroCs }, // ML 0x020
++    { ENTR_KAKARIKO_VILLAGE_FRONT_GATE, 2, 0xA9, gMlSpot01IntroCs },     // ML 0x03C (MS-152)
 +    { ENTR_LON_LON_RANCH_ENTRANCE, 2, 0xA7, gMlSpot20IntroCs },          // ML 0x058
 +    { ENTR_GERUDOS_FORTRESS_EAST_EXIT, 2, 0xA8, gMlSpot12IntroCs },      // ML 0x05C
 +    { ENTR_LINKS_HOUSE_CHILD_SPAWN, 2, 0xA0, gMlLinkHomeIntroCs },       // ML 0x0BB
@@ -2530,7 +2578,7 @@ index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..e098f687d804a7d51ec2b4a30ed868bc
  };
  
  // Unused, seems to be an early list of dungeon entrance cutscene locations
-@@ -315,7 +300,8 @@ void func_80064824(PlayState* play, CutsceneContext* csCtx, CsCmdBase* cmd) {
+@@ -315,7 +301,8 @@ void func_80064824(PlayState* play, CutsceneContext* csCtx, CsCmdBase* cmd) {
              break;
          case 15:
              if (sp3F != 0) {
@@ -2540,7 +2588,7 @@ index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..e098f687d804a7d51ec2b4a30ed868bc
              }
              break;
          case 16:
-@@ -581,6 +567,7 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
+@@ -581,6 +568,7 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
              gSaveContext.forceRisingButtonAlphas = 1;
          }
  
@@ -2548,7 +2596,16 @@ index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..e098f687d804a7d51ec2b4a30ed868bc
          gSaveContext.cutsceneIndex = 0;
  
          switch (cmd->base) {
-@@ -926,8 +913,10 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
+@@ -920,14 +908,17 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
+                 play->transitionType = TRANS_TYPE_FADE_BLACK;
+                 break;
+             case 55:
+-                play->nextEntranceIndex = ENTR_GERUDOS_FORTRESS_EAST_EXIT;
+-                gSaveContext.cutsceneIndex = 0xFFF1;
++                // MissingShip (MS-151): ML patches this case (code 0x80066014): ML entrance 0x3FC + layer 4, Cluck Cluck Ranch.
++                play->nextEntranceIndex = ENTR_MISSINGSHIP_LON_LON_RANCH_EVENT;
++                gSaveContext.cutsceneIndex = 0xFFF0;
+                 play->transitionTrigger = TRANS_TRIGGER_START;
                  play->transitionType = TRANS_TYPE_FADE_BLACK;
                  break;
              case 56:
@@ -2561,7 +2618,55 @@ index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..e098f687d804a7d51ec2b4a30ed868bc
                  play->transitionTrigger = TRANS_TRIGGER_START;
                  play->transitionType = TRANS_TYPE_FADE_BLACK;
                  break;
-@@ -1317,6 +1306,28 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
+@@ -956,7 +947,8 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
+                 play->transitionType = TRANS_TYPE_FADE_BLACK;
+                 break;
+             case 61:
+-                play->nextEntranceIndex = ENTR_ZORAS_DOMAIN_ENTRANCE;
++                // MissingShip (MS-151): ML patches this case (0x8006617C): ML entrance 0x400 + layer 4, Deku Road.
++                play->nextEntranceIndex = ENTR_MISSINGSHIP_GERUDO_VALLEY_EVENT;
+                 gSaveContext.cutsceneIndex = 0xFFF0;
+                 play->transitionTrigger = TRANS_TRIGGER_START;
+                 play->transitionType = TRANS_TYPE_FADE_BLACK;
+@@ -982,8 +974,9 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
+                 break;
+             case 65:
+                 play->linkAgeOnLoad = 1;
+-                play->nextEntranceIndex = ENTR_LON_LON_RANCH_ENTRANCE;
+-                gSaveContext.cutsceneIndex = 0xFFF2;
++                // MissingShip (MS-151): ML patches this case: ML entrance 0x40C + layer 4, Kokiri Forest. ML keeps the adult age.
++                play->nextEntranceIndex = ENTR_MISSINGSHIP_KOKIRI_FOREST_EVENT;
++                gSaveContext.cutsceneIndex = 0xFFF0;
+                 play->transitionTrigger = TRANS_TRIGGER_START;
+                 play->transitionType = TRANS_TYPE_FADE_BLACK;
+                 break;
+@@ -1035,9 +1028,10 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
+                 break;
+             case 73:
+                 play->linkAgeOnLoad = 1;
+-                play->nextEntranceIndex = ENTR_LON_LON_RANCH_ENTRANCE;
++                // MissingShip (MS-151): ML patches this case: ML entrance 0x40C + layer 4, Kokiri Forest. ML keeps the adult age.
++                play->nextEntranceIndex = ENTR_MISSINGSHIP_KOKIRI_FOREST_EVENT;
+                 play->transitionTrigger = TRANS_TRIGGER_START;
+-                gSaveContext.cutsceneIndex = 0xFFF2;
++                gSaveContext.cutsceneIndex = 0xFFF0;
+                 play->transitionType = TRANS_TYPE_FADE_BLACK;
+                 break;
+             case 74:
+@@ -1215,9 +1209,10 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
+                 }
+                 break;
+             case 105:
+-                play->nextEntranceIndex = ENTR_GRAVEYARD_ENTRANCE;
++                // MissingShip (MS-151): ML patches this case (0x80066B30): ML entrance 0x410 + layer 4, the Deep Woods grotto.
++                play->nextEntranceIndex = ENTR_MISSINGSHIP_DEKU_TREE_EVENT;
+                 play->transitionTrigger = TRANS_TRIGGER_START;
+-                gSaveContext.cutsceneIndex = 0xFFF1;
++                gSaveContext.cutsceneIndex = 0xFFF0;
+                 play->transitionType = TRANS_TYPE_FADE_BLACK;
+                 break;
+             case 106:
+@@ -1317,6 +1312,28 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
                  play->transitionTrigger = TRANS_TRIGGER_START;
                  play->transitionType = TRANS_TYPE_FADE_WHITE;
                  break;
@@ -2590,7 +2695,7 @@ index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..e098f687d804a7d51ec2b4a30ed868bc
          }
      }
  }
-@@ -2198,6 +2209,7 @@ void Cutscene_HandleEntranceTriggers(PlayState* play) {
+@@ -2198,6 +2215,7 @@ void Cutscene_HandleEntranceTriggers(PlayState* play) {
              (!Flags_GetEventChkInf(entranceCutscene->flag) || (entranceCutscene->flag == EVENTCHKINF_EPONA_OBTAINED)) &&
              (gSaveContext.cutsceneIndex < 0xFFF0) && ((u8)gSaveContext.linkAge == requiredAge) &&
              (gSaveContext.respawnFlag <= 0)) {
@@ -2598,7 +2703,7 @@ index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..e098f687d804a7d51ec2b4a30ed868bc
              Flags_SetEventChkInf(entranceCutscene->flag);
              if (GameInteractor_Should(VB_PLAY_ENTRANCE_CS, true, entranceCutscene->flag, entranceCutscene->entrance)) {
                  Cutscene_SetSegment(play, entranceCutscene->segAddr);
-@@ -2261,6 +2273,7 @@ void Cutscene_HandleConditionalTriggers(PlayState* play) {
+@@ -2261,6 +2279,7 @@ void Cutscene_HandleConditionalTriggers(PlayState* play) {
  }
  
  void Cutscene_SetSegment(PlayState* play, void* segment) {
@@ -10077,10 +10182,10 @@ index 0000000000000000000000000000000000000000..6b618fcef761cadd302b6be4d31eccae
 +#endif
 diff --git a/soh/src/overlays/actors/ovl_Ml_MThunder/z_ml_mthunder.c b/soh/src/overlays/actors/ovl_Ml_MThunder/z_ml_mthunder.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..df243ecff69f85949adb370e50cfab3caac26820
+index 0000000000000000000000000000000000000000..64f06d0e1dcaab44bff9f84c0c5b4d964f5a840d
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_MThunder/z_ml_mthunder.c
-@@ -0,0 +1,292 @@
+@@ -0,0 +1,295 @@
 +/*
 + * File: z_ml_mthunder.c
 + * Overlay: ovl_Ml_MThunder
@@ -10322,9 +10427,12 @@ index 0000000000000000000000000000000000000000..df243ecff69f85949adb370e50cfab3c
 +// SoH asset symbols are per-translation-unit copies, so the pointer only matches inside the file that set it.
 +void MlMThunder_PlayerUpdate(Player* player, PlayState* play, bool unsheathing) {
 +    // ML clears the sword marker while gSaveContext.entranceIndex == 0x400 in ML's own numbering (custom code
-+    // 0x80602F94). Nothing in ML reaches 0x400: only cutscene destination 72 sets it, and no ML cutscene uses 72;
-+    // no exit, grotto or code does either. It is not ported: 0x400 shares SoH's ranch entrance (0x157) with ML's
-+    // ordinary ranch entrances, so the check fired on every ranch visit and took the sword away (MS-148).
++    // 0x80602F94). ML's patched cutscene destination 61 sets it: the Cluck Cluck Ranch cutscene after the Hollow Root
++    // Keep boss continues on Deku Road's cutscene layer, and the sword loses its charge there. SoH reaches that
++    // layer through its own entrance group, so this can't fire on ordinary ranch visits (MS-148, MS-151).
++    if (gSaveContext.entranceIndex == ENTR_MISSINGSHIP_GERUDO_VALLEY_EVENT) {
++        gSaveContext.inventory.ammo[SLOT_SLINGSHOT] = 0;
++    }
 +
 +    if (gSaveContext.inventory.ammo[SLOT_SLINGSHOT] != 40) {
 +        return;
