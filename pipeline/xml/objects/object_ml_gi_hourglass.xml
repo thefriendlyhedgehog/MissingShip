@@ -1,5 +1,15 @@
 <Root>
+    <!-- ML's Magic Hourglass get-item model (object slot 0xE8, the Boomerang's; ML points the GI draw entry at 0x1530).
+         Its CI8 palettes are only as long as the textures need (32 and 64 colours), with the vertices right after them,
+         but each palette load reads 256. Left to itself ZAPD sizes both palettes at 256 colours, they overlap the first
+         44 vertices (0xDE0-0x10A0), and those never ship: the model drew half and left stale geometry (MS-129). -->
     <File Name="object_ml_gi_hourglass" Segment="6">
+        <Texture Name="gMlGiHourglassFrameTex" OutName="frame" Format="ci4" Width="64" Height="64" Offset="0x0" TlutOffset="0xD00"/>
+        <Texture Name="gMlGiHourglassCapTex" OutName="cap" Format="ci8" Width="32" Height="32" Offset="0x800" TlutOffset="0xD20"/>
+        <Texture Name="gMlGiHourglassGlassTex" OutName="glass" Format="ci8" Width="16" Height="16" Offset="0xC00" TlutOffset="0xD60"/>
+        <Texture Name="gMlGiHourglassFrameTLUT" OutName="frame_tlut" Format="rgba16" Width="4" Height="4" Offset="0xD00"/>
+        <Texture Name="gMlGiHourglassCapTLUT" OutName="cap_tlut" Format="rgba16" Width="8" Height="4" Offset="0xD20"/>
+        <Texture Name="gMlGiHourglassGlassTLUT" OutName="glass_tlut" Format="rgba16" Width="8" Height="8" Offset="0xD60"/>
         <DList Name="gMlGiHourglassDL" Offset="0x1530"/>
     </File>
 </Root>

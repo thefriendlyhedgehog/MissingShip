@@ -74,6 +74,16 @@
         <DList Name="gMlChildSoulSwordHiltDL" Offset="0x2D9E8"/>
         <DList Name="gMlChildSoulSwordBladeDL" Offset="0x2DE80"/>
 
+        <!-- The boomerang's textures and palettes (the hourglass pickup's layout, 0x5000 up). The palettes are 16, 32 and
+             64 colours with the vertices right after; declared, so ZAPD doesn't size them at 256 and swallow the first
+             vertices (MS-129). -->
+        <Texture Name="gMlChildBoomerangFrameTex" OutName="boomerang_frame" Format="ci4" Width="64" Height="64" Offset="0x5000" TlutOffset="0x5D00"/>
+        <Texture Name="gMlChildBoomerangCapTex" OutName="boomerang_cap" Format="ci8" Width="32" Height="32" Offset="0x5800" TlutOffset="0x5D20"/>
+        <Texture Name="gMlChildBoomerangGlassTex" OutName="boomerang_glass" Format="ci8" Width="16" Height="16" Offset="0x5C00" TlutOffset="0x5D60"/>
+        <Texture Name="gMlChildBoomerangFrameTLUT" OutName="boomerang_frame_tlut" Format="rgba16" Width="4" Height="4" Offset="0x5D00"/>
+        <Texture Name="gMlChildBoomerangCapTLUT" OutName="boomerang_cap_tlut" Format="rgba16" Width="8" Height="4" Offset="0x5D20"/>
+        <Texture Name="gMlChildBoomerangGlassTLUT" OutName="boomerang_glass_tlut" Format="rgba16" Width="8" Height="8" Offset="0x5D60"/>
+
         <!-- Built with lui/addiu in code: the Goron's Bracelet and the Deku Stick. -->
         <DList Name="gLinkChildLinkDekuStickDL" Offset="0x1E440"/>
         <DList Name="gLinkChildGoronBraceletDL" Offset="0x1E718"/>

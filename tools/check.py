@@ -91,7 +91,8 @@ if not (_os.path.exists(mod) and _os.path.exists(OOT_O2R)):
 else:
     rc, out = run(_os.path.join(TOOLS, 'checkhashes.py'), mod, '')
     found = collections.Counter(m.group(1) for m in re.finditer(r'^UNRESOLVED \S*?/(\w+_room_\d+)DL', out, flags=re.M))
-    other = [l for l in out.splitlines() if l.startswith('UNRESOLVED') and not re.search(r'/\w+_room_\d+DL', l)]
+    other = [l for l in out.splitlines() if (l.startswith('UNRESOLVED') and not re.search(r'/\w+_room_\d+DL', l))
+             or l.startswith('NOT A VERTEX ARRAY')]   # a vertex load landing on a palette (MS-129)
     skipped = json.load(open(_os.path.join(PIPE, 'unresolved.json')))
     allowed = collections.Counter({room: len(v) for room, v in skipped.items()})
     extra = (found - allowed) + collections.Counter({l: 1 for l in other})

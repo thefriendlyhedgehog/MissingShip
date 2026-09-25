@@ -2,6 +2,15 @@
     <!-- ML object 0x8C (dma 26, ML-only; vanilla's object_bv is Barinade): the Shadow Temple boss for ovl_Ml_BossVa
          and its projectile ovl_Ml_BossVaShot. -->
     <File Name="object_ml_bv" Segment="6">
+        <!-- Three CI8 palettes packed back to back (40, 128 and 66 colours) with the vertices right after, each loaded as
+             256. Left at 256, ZAPD's palettes swallow the vertices at 0x63D8 and a body limb loses its first vertex
+             load (MS-129; tools/checkhashes.py flags this). -->
+        <Texture Name="gMlBossVaTex_004900" OutName="tex_004900" Format="ci8" Width="32" Height="16" Offset="0x4900" TlutOffset="0x6200"/>
+        <Texture Name="gMlBossVaTex_004B00" OutName="tex_004B00" Format="ci8" Width="16" Height="64" Offset="0x4B00" TlutOffset="0x6250"/>
+        <Texture Name="gMlBossVaTex_004F00" OutName="tex_004F00" Format="ci8" Width="32" Height="64" Offset="0x4F00" TlutOffset="0x6350"/>
+        <Texture Name="gMlBossVaTLUT_006200" OutName="tlut_006200" Format="rgba16" Width="8" Height="5" Offset="0x6200"/>
+        <Texture Name="gMlBossVaTLUT_006250" OutName="tlut_006250" Format="rgba16" Width="16" Height="8" Offset="0x6250"/>
+        <Texture Name="gMlBossVaTLUT_006350" OutName="tlut_006350" Format="rgba16" Width="6" Height="11" Offset="0x6350"/>
         <Animation Name="gMlBossVaRiseAnim" Offset="0x18070"/>
         <Animation Name="gMlBossVaLungeHoldAnim" Offset="0x192D8"/>
         <Animation Name="gMlBossVaShootAnim" Offset="0x1A450"/>
