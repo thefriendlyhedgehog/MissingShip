@@ -119,7 +119,7 @@ The 3, 5, 6 and 0x1F slots are ported. Still to do:
 | staff_message_data_static (dma 110) | ML's credits text. **Ported** (MS-024: 11 of 48 credits rewritten by ML, via inject_messages.py). |
 | Skyboxes | `vr_fine1_static` and `vr_cloud2_static` (+ palettes) redrawn. **Ported** (MS-025: all 12 resources, via inject_minimaps.py). |
 | link_animetion (dma 146, 2.5 MB) | Link's animation data changed. Not ported (goes with the Link port, MS-050), except the two sword-turn recoveries MS-026 needed (`gPlayerAnimData_114420` / `_114FB0`). |
-| Entrance flags | 39 SoH entrances used by ML have different title-card / music / transition flags. Title cards are fixed; music and transitions are not. |
+| Entrance flags | ML's title-card / music / transition flags. **Ported** (MS-027): 184 SoH entrance slots take ML's flags; 4 day-fade colours are a known deviation. |
 
 ### F. ML custom code (dma 507) still unported
 
@@ -207,7 +207,7 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 | [MS-024](https://github.com/thefriendlyhedgehog/MissingShip/issues/17) | port | Credits text (staff_message_data_static, dma 110). | Injected as a resource. **Done:** the 11 credits ML rewrote ship in the mod's staff message resource. In-game check pending. |
 | [MS-025](https://github.com/thefriendlyhedgehog/MissingShip/issues/18) | port | Skyboxes `vr_fine1` and `vr_cloud2` (+ palettes; ML dma 128/129, 138/139). | Injected. **Done:** day and overcast-sunset skies plus palettes ship under vanilla paths. In-game check pending. |
 | [MS-026](https://github.com/thefriendlyhedgehog/MissingShip/issues/19) | port | gameplay_keep sword-turn animations (`kiruL_end`, `kiruR`, `kiruR_end`). | Injected under the vanilla names (check how they interact with Link's animations, MS-051). **Done:** the two changed headers (`kiruL_end` 16 → 13 frames, `kiruR_end` 16 → 14) and the frames ML re-animated, patched into stock (inject_obj_patches.py). In-game check pending. |
-| [MS-027](https://github.com/thefriendlyhedgehog/MissingShip/issues/20) | port | Entrance flags: 39 entrances with ML's music-continuity / transition-style flags. | A data override, or a small engine table plus a ledger row. |
+| [MS-027](https://github.com/thefriendlyhedgehog/MissingShip/issues/20) | port | Entrance flags: 39 entrances with ML's music-continuity / transition-style flags. | A data override, or a small engine table plus a ledger row. **Done:** generated engine table (ledger 50), 184 slots. In-game check pending. |
 | [MS-015](https://github.com/thefriendlyhedgehog/MissingShip/issues/53) | port | 9 **I4** scene texture references (spot01 ×7, spot04, tokinoma) were skipped (`ML_SKIP_FMT=4:0`). **Built:** skip removed; they are 4 real textures in the standard 16b block-load form that SoH sizes correctly; 0 unresolved. Awaiting an in-game look (MS-010 checklist). | The three rooms draw their I4 textures; `unresolved.json` empty. |
 
 ### M3: Actors, by scene
