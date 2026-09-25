@@ -979,6 +979,38 @@ index 48b361b13e633a9036aa7a1c65a8266c7341f97d..047e325c47cee9bf8a6edb00c40ebaa9
  
  #endif
 \ No newline at end of file
+diff --git a/soh/soh/Enhancements/debugconsole.cpp b/soh/soh/Enhancements/debugconsole.cpp
+index 7fecad83ac29e55d056f5111a471a4dd55372fce..a0e8bceabc6ea1d4ced5e74570fd7886d2c9a1bf 100644
+--- a/soh/soh/Enhancements/debugconsole.cpp
++++ b/soh/soh/Enhancements/debugconsole.cpp
+@@ -420,6 +420,15 @@ static bool EntranceHandler(std::shared_ptr<Ship::Console> Console, const std::v
+     }
+ 
+     gPlayState->nextEntranceIndex = entrance;
++    // MissingShip (MS-151): optional cutscene index (hex, e.g. fff0) to land on a scene's cutscene layer.
++    if (args.size() > 2) {
++        try {
++            gSaveContext.cutsceneIndex = std::stoi(args[2], nullptr, 16);
++        } catch (std::invalid_argument const& ex) {
++            ERROR_MESSAGE("[SOH] Cutscene index must be a Hex number.");
++            return 1;
++        }
++    }
+     gPlayState->transitionTrigger = TRANS_TRIGGER_START;
+     gPlayState->transitionType = TRANS_TYPE_INSTANT;
+     gSaveContext.nextTransitionType = TRANS_TYPE_INSTANT;
+@@ -1533,9 +1542,10 @@ void DebugConsole_Init(void) {
+                              { "clear|warp|backup", Ship::ArgumentType::TEXT },
+                          } });
+     CMD_REGISTER("entrance", { EntranceHandler,
+-                               "Sends player to the entered entrance (hex)",
++                               "Sends player to the entered entrance (hex), optionally with a cutscene index (hex)",
+                                {
+                                    { "entrance", Ship::ArgumentType::NUMBER },
++                                   { "cutscene", Ship::ArgumentType::NUMBER, true },
+                                } });
+ 
+     // Gameplay
 diff --git a/soh/soh/Enhancements/debugger/actorViewer.cpp b/soh/soh/Enhancements/debugger/actorViewer.cpp
 index a47a404ad1d016684eeb3b62538266483182bf1e..cab299d59cdb352159e39f47234d33f9bc6b7760 100644
 --- a/soh/soh/Enhancements/debugger/actorViewer.cpp
@@ -1660,6 +1692,39 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..8aeae663b0929066a1fbec1f432d9955
  }
  
  } // namespace SohGui
+diff --git a/soh/soh/z_scene_otr.cpp b/soh/soh/z_scene_otr.cpp
+index 2ac7b8e3839e20d97f49866280004382915182df..3ad525f36dd8f002066a374788826e25cd1f6879 100644
+--- a/soh/soh/z_scene_otr.cpp
++++ b/soh/soh/z_scene_otr.cpp
+@@ -340,9 +340,16 @@ bool Scene_CommandAlternateHeaderList(PlayState* play, SOH::ISceneCommand* cmd)
+     // osSyncPrintf("\n[ZU]sceneset time   =[%X]", ((void)0, gSaveContext.cutsceneIndex));
+     // osSyncPrintf("\n[ZU]sceneset counter=[%X]", ((void)0, gSaveContext.sceneSetupIndex));
+ 
++    // MissingShip (MS-151): bounds-check the list. The ROM's lists are sized to the scene, and ML's are shorter
++    // than vanilla's (credits layer only), so e.g. cutscene 0xFFF1 on a 4-entry list read past the end.
++    // A missing entry takes the null path below: fall back to the main header, as N64 does for a null entry.
++    auto altHeader = [cmdHeaders](size_t i) -> SOH::Scene* {
++        return i < cmdHeaders->headers.size() ? std::static_pointer_cast<SOH::Scene>(cmdHeaders->headers[i]).get()
++                                              : nullptr;
++    };
++
+     if (gSaveContext.sceneSetupIndex != 0) {
+-        SOH::Scene* desiredHeader =
+-            std::static_pointer_cast<SOH::Scene>(cmdHeaders->headers[gSaveContext.sceneSetupIndex - 1]).get();
++        SOH::Scene* desiredHeader = altHeader(gSaveContext.sceneSetupIndex - 1);
+ 
+         if (desiredHeader != nullptr) {
+             OTRScene_ExecuteCommands(play, desiredHeader);
+@@ -352,8 +359,7 @@ bool Scene_CommandAlternateHeaderList(PlayState* play, SOH::ISceneCommand* cmd)
+             osSyncPrintf("\nげぼはっ！ 指定されたデータがないでええっす！");
+ 
+             if (gSaveContext.sceneSetupIndex == 3) {
+-                SOH::Scene* desiredHeader =
+-                    std::static_pointer_cast<SOH::Scene>(cmdHeaders->headers[gSaveContext.sceneSetupIndex - 2]).get();
++                SOH::Scene* desiredHeader = altHeader(gSaveContext.sceneSetupIndex - 2);
+ 
+                 // "Using adult day data there!"
+                 osSyncPrintf("\nそこで、大人の昼データを使用するでええっす！！");
 diff --git a/soh/src/code/code_800F7260.c b/soh/src/code/code_800F7260.c
 index 94f13de7f2b1030991d72a3fe4c44a160c7e2569..3d3d8106194405a9919ca5109dc6c87f0f6fb9e3 100644
 --- a/soh/src/code/code_800F7260.c

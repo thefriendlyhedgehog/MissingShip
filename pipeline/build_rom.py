@@ -450,8 +450,13 @@ for s,rooms in TARGETS.items():
         if isroom:
             d,n=mesh0_to_mesh2(d)
             if n: note.append(f"mesh0->2({n})")
-        d,k=fix_altheaders(d, 0x03 if isroom else 0x02)
-        if k: note.append(f"altheaders={k}")
+        # OFF BY DEFAULT (MS-151). The lists hold ML's credits-tour layer (setup 4: the ending cutscenes and
+        # their room actors); stripping them sent every tour stop to the main header, which has no cutscene.
+        # The crash this worked around was the engine indexing the list without a bounds check, now guarded
+        # (Scene_CommandAlternateHeaderList). Set ML_STRIP_ALTHEADERS=1 to strip them again.
+        if os.environ.get('ML_STRIP_ALTHEADERS'):
+            d,k=fix_altheaders(d, 0x03 if isroom else 0x02)
+            if k: note.append(f"altheaders={k}")
         # ML's room object IDs are VANILLA ids (verified: 5=OBJECT_CROW, 124=OBJECT_BV,
         # 241=OBJECT_MASTERKOKIRIHEAD, 273=OBJECT_NWC; 80 distinct, max 399, SoH ships 404).
         # ML only ADDS 18 custom objects on top. The old blanket remap to gameplay_keep was
