@@ -951,10 +951,10 @@ index d9e08b3dafe51861746db65ae542f04b4d8ba83d..e9f32c61f4af5ae0f8c48e02844fe31f
              }
          }
 diff --git a/soh/soh/Enhancements/bootcommands.c b/soh/soh/Enhancements/bootcommands.c
-index b9838cf66ad00fe4a7e4cfc4c6f11eaa38edbc3d..fd42fe66e84e0c1babae4b5470e1e2d56eddf3f0 100644
+index b9838cf66ad00fe4a7e4cfc4c6f11eaa38edbc3d..938ed9b104f2af0c7c193b7b702d3833a66332aa 100644
 --- a/soh/soh/Enhancements/bootcommands.c
 +++ b/soh/soh/Enhancements/bootcommands.c
-@@ -15,3 +15,52 @@ void BootCommands_Init() {
+@@ -15,3 +15,60 @@ void BootCommands_Init() {
      CVarRegisterInteger(CVAR_IMGUI_CONTROLLER_NAV, 1); // always enable controller nav on switch/wii u
  #endif
  }
@@ -1000,6 +1000,14 @@ index b9838cf66ad00fe4a7e4cfc4c6f11eaa38edbc3d..fd42fe66e84e0c1babae4b5470e1e2d5
 +    CVAR_ENHANCEMENT("FasterHeavyBlockLift"), CVAR_ENHANCEMENT("FasterShadowShip"), CVAR_ENHANCEMENT("MweepSpeed"),
 +    CVAR_ENHANCEMENT("TimeSavers.SkipChildStealth"), CVAR_ENHANCEMENT("TimeSavers.SkipTowerEscape"),
 +    CVAR_ENHANCEMENT("InstantScarecrow"), CVAR_ENHANCEMENT("ForgeTime"),
++    // Difficulty, Extra Modes, Cheats and Graphics
++    CVAR_ENHANCEMENT("DampeDropRate"), CVAR_ENHANCEMENT("GoronPot"), CVAR_ENHANCEMENT("DampeWin"),
++    CVAR_ENHANCEMENT("AllDogsRichard"), CVAR_ENHANCEMENT("GuardVision"), CVAR_ENHANCEMENT("CuccosToReturn"),
++    CVAR_ENHANCEMENT("DogFollowsEverywhere"), CVAR_CHEAT("InfiniteNayru"), CVAR_CHEAT("InfiniteEponaBoost"),
++    CVAR_CHEAT("SuperTunic"), CVAR_CHEAT("ShieldTwoHanded"), CVAR_CHEAT("HookshotEverything"),
++    CVAR_CHEAT("HookshotReachMultiplier"), CVAR_CHEAT("DisableSandstorm"), CVAR_CHEAT("EnableBetaQuest"),
++    CVAR_CHEAT("BetaQuestWorld"), CVAR_ENHANCEMENT("FirstPersonGauntlets"), CVAR_ENHANCEMENT("ToTMedallionsColors"),
++    CVAR_ENHANCEMENT("DisableLinkSpinWithGoronPot"), CVAR_ENHANCEMENT("VisualAgony"),
 +};
 +
 +void MissingShip_ClearRetiredOptions() {
@@ -1428,7 +1436,7 @@ index 39f04ddbbd3a3894ac268a4364b3b7b711b3edee..ed9201e52a84271f28ff10417db4cac3
      Rando::StaticData::InitHashMaps();
      OTRGlobals::Instance->gRandoContext->AddExcludedOptions();
 diff --git a/soh/soh/SohGui/SohMenuEnhancements.cpp b/soh/soh/SohGui/SohMenuEnhancements.cpp
-index 4cf7305373689a1e3d9a084f91a1a2693902dfde..7ff3bb4da0117721140f011b4370550a05676e03 100644
+index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7b3b41d7a 100644
 --- a/soh/soh/SohGui/SohMenuEnhancements.cpp
 +++ b/soh/soh/SohGui/SohMenuEnhancements.cpp
 @@ -9,6 +9,7 @@
@@ -1698,7 +1706,50 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..7ff3bb4da0117721140f011b4370550a
  
      // Graphics
      path.sidebarName = "Graphics";
-@@ -824,14 +707,7 @@ void SohMenu::AddMenuEnhancements() {
+@@ -615,19 +498,9 @@ void SohMenu::AddMenuEnhancements() {
+         .Options(CheckboxOptions().Tooltip(
+             "Scales all of the Adult Equipment, as well as moving some a bit, to fit on Child Link better. May "
+             "not work properly with some mods."));
+-    AddWidget(path, "Show Gauntlets in First-Person", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("FirstPersonGauntlets"))
+-        .RaceDisable(false)
+-        .Options(CheckboxOptions().Tooltip("Renders Gauntlets when using the Bow and Hookshot like in OoT3D."));
+     AddWidget(path, "Show Chains on Both Sides of Locked Doors", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("ShowDoorLocksOnBothSides"))
+         .RaceDisable(false);
+-    AddWidget(path, "Color Temple of Time's Medallions", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("ToTMedallionsColors"))
+-        .RaceDisable(false)
+-        .Options(CheckboxOptions().Tooltip(
+-            "When Medallions are collected, the Medallion imprints around the Master Sword Pedestal in the Temple "
+-            "of Time will become colored-in."));
+ 
+     path.column = SECTION_COLUMN_2;
+     AddWidget(path, "UI", WIDGET_SEPARATOR_TEXT);
+@@ -645,11 +518,6 @@ void SohMenu::AddMenuEnhancements() {
+         .Options(CheckboxOptions().Tooltip(
+             "Preserve the minimap visibility state when going between areas rather than default it to \"on\" "
+             "when going through loading zones."));
+-    AddWidget(path, "Visual Stone of Agony", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("VisualAgony"))
+-        .RaceDisable(false)
+-        .Options(CheckboxOptions().Tooltip(
+-            "Displays an icon and plays a sound when Stone of Agony should be activated, for those without rumble."));
+     AddWidget(path, "Disable HUD Heart Animations", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("NoHUDHeartAnimation"))
+         .RaceDisable(false)
+@@ -701,10 +569,6 @@ void SohMenu::AddMenuEnhancements() {
+         .CVar(CVAR_ENHANCEMENT("RemoveSpinAttackDarkness"))
+         .RaceDisable(false)
+         .Options(CheckboxOptions().Tooltip("Remove the Darkness that appears when charging a Spin Attack."));
+-    AddWidget(path, "Disable Link Spinning With Goron Pot", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("DisableLinkSpinWithGoronPot"))
+-        .RaceDisable(false)
+-        .Options(CheckboxOptions().Tooltip("Link will not spin when the Goron Pot starts to spin."));
+     AddWidget(path, "Draw Distance", WIDGET_SEPARATOR_TEXT).RaceDisable(false);
+     AddWidget(path, "Increase Actor Draw Distance: %dx", WIDGET_CVAR_SLIDER_INT)
+         .CVar(CVAR_ENHANCEMENT("DisableDrawDistance"))
+@@ -824,14 +688,7 @@ void SohMenu::AddMenuEnhancements() {
                                " - Not within range of Ocarina Playing spots"));
  
      AddWidget(path, "Masks", WIDGET_SEPARATOR_TEXT);
@@ -1714,7 +1765,7 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..7ff3bb4da0117721140f011b4370550a
      AddWidget(path, "Masks Equippable as Adult", WIDGET_CVAR_CHECKBOX)
          .CVar(CVAR_ENHANCEMENT("AdultMasks"))
          .Options(CheckboxOptions().Tooltip("Allows masks to be equipped normally from the pause menu as adult."));
-@@ -980,36 +856,14 @@ void SohMenu::AddMenuEnhancements() {
+@@ -980,36 +837,14 @@ void SohMenu::AddMenuEnhancements() {
          .Options(CheckboxOptions().Tooltip("Blue Fire dropped from bottle can be bottled."));
  
      // Fixes
@@ -1755,7 +1806,7 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..7ff3bb4da0117721140f011b4370550a
      AddWidget(path, "Fix Falling from Vine Edges", WIDGET_CVAR_CHECKBOX)
          .CVar(CVAR_ENHANCEMENT("FixVineFall"))
          .Options(
-@@ -1023,60 +877,6 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1023,60 +858,6 @@ void SohMenu::AddMenuEnhancements() {
          .Options(CheckboxOptions().Tooltip(
              "Causes respawning enemies, like Stalchildren, to appear on land near bodies of water. "
              "Fixes an incorrect calculation that acted like water underneath ground was above it."));
@@ -1816,7 +1867,7 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..7ff3bb4da0117721140f011b4370550a
  
      AddWidget(path, "Camera Fixes", WIDGET_SEPARATOR_TEXT);
      AddWidget(path, "Fix Camera Drift", WIDGET_CVAR_CHECKBOX)
-@@ -1105,22 +905,6 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1105,22 +886,6 @@ void SohMenu::AddMenuEnhancements() {
          .Options(CheckboxOptions().Tooltip(
              "Removes the Dungeon Entrance icon on the top-left corner of the screen when no dungeon is present on the "
              "current map."));
@@ -1839,7 +1890,7 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..7ff3bb4da0117721140f011b4370550a
      AddWidget(path, "Fix Out of Bounds Textures", WIDGET_CVAR_CHECKBOX)
          .CVar(CVAR_ENHANCEMENT("FixTexturesOOB"))
          .Callback([](WidgetInfo& info) { ApplyAuthenticGfxPatches(); })
-@@ -1131,11 +915,6 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1131,11 +896,6 @@ void SohMenu::AddMenuEnhancements() {
          .RaceDisable(false)
          .Options(CheckboxOptions().Tooltip(
              "Fixes Link's eyes being open in the opening cutscene when he is supposed to be sleeping."));
@@ -1851,7 +1902,7 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..7ff3bb4da0117721140f011b4370550a
      AddWidget(path, "Fix Vanishing Paths", WIDGET_CVAR_COMBOBOX)
          .CVar(CVAR_ENHANCEMENT("SceneSpecificDirtPathFix"))
          .RaceDisable(false)
-@@ -1148,33 +927,8 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1148,33 +908,8 @@ void SohMenu::AddMenuEnhancements() {
                           "No Vanish: Paths do not vanish, Link seems to sink in to some paths.\n"
                           "This might affect other decal effects."));
  
@@ -1885,7 +1936,7 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..7ff3bb4da0117721140f011b4370550a
      AddWidget(path, "Restore Old Gold Skulltula Cutscene", WIDGET_CVAR_CHECKBOX)
          .CVar(CVAR_ENHANCEMENT("GSCutscene"))
          .Options(CheckboxOptions().Tooltip(
-@@ -1186,10 +940,6 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1186,10 +921,6 @@ void SohMenu::AddMenuEnhancements() {
              "Restores an unfinished feature to pulsate the boss room icon when you are in the boss room."));
  
      AddWidget(path, "Glitch Restorations", WIDGET_SEPARATOR_TEXT);
@@ -1896,7 +1947,7 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..7ff3bb4da0117721140f011b4370550a
      AddWidget(path, "N64 Weird Frames", WIDGET_CVAR_CHECKBOX)
          .CVar(CVAR_ENHANCEMENT("N64WeirdFrames"))
          .Options(CheckboxOptions().Tooltip(
-@@ -1203,15 +953,6 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1203,15 +934,6 @@ void SohMenu::AddMenuEnhancements() {
          .Options(CheckboxOptions().Tooltip(
              "Restore a bug from NTSC 1.0 that allows putting away an item without an animation and performing "
              "Putaway Ocarina Items."));
@@ -1912,7 +1963,7 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..7ff3bb4da0117721140f011b4370550a
  
      AddWidget(path, "Misc Restorations", WIDGET_SEPARATOR_TEXT);
      AddWidget(path, "Fix L&Z Page Switch in Pause Menu", WIDGET_CVAR_CHECKBOX)
-@@ -1222,10 +963,6 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1222,12 +944,13 @@ void SohMenu::AddMenuEnhancements() {
          .CVar(CVAR_ENHANCEMENT("WideShutterDoorRange"))
          .Options(CheckboxOptions().Tooltip("Restores the wider range of certain shutter doors from NTSC 1.0.\n"
                                             "Notably affects Jabu-Jabu and boss doors."));
@@ -1922,8 +1973,62 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..7ff3bb4da0117721140f011b4370550a
 -            "Restores NTSC 1.0 behavior where Link jumps over grave holes and grabs the ledges."));
  
      // Difficulty Options
++    // MissingShip (MS-145): Difficulty, Extra Modes, Cheats and Graphics options whose target ML doesn't have are
++    // removed (Dampé, Goron Pot, dogs, castle guards, the cucco count ML deleted, Nayru's Love, Epona, tunics, Hookshot,
++    // Bow, the wasteland, the Temple of Time), as are Beta Quest (it remaps the world onto vanilla's scenes) and Visual
++    // Stone of Agony (that slot is ML's Birth Certificate). Their CVars are cleared at boot
++    // (MissingShip_ClearRetiredOptions).
      path.sidebarName = "Difficulty";
-@@ -1364,210 +1101,8 @@ void SohMenu::AddMenuEnhancements() {
+     AddSidebarEntry("Enhancements", path.sidebarName, 3);
+     path.column = SECTION_COLUMN_1;
+@@ -1307,12 +1030,6 @@ void SohMenu::AddMenuEnhancements() {
+         .CVar(CVAR_ENHANCEMENT("TreesDropSticks"))
+         .Options(CheckboxOptions().Tooltip(
+             "Bonking into Trees will have a chance to drop up to 3 Sticks. Must have obtained sticks previously."));
+-    AddWidget(path, "Dampe Drop Rate", WIDGET_CVAR_COMBOBOX)
+-        .CVar(CVAR_ENHANCEMENT("DampeDropRate"))
+-        .Options(ComboboxOptions()
+-                     .ComboMap(dampeDropRates)
+-                     .DefaultIndex(DAMPE_NORMAL)
+-                     .Tooltip("Adjusts rate Dampe drops flames during race."));
+ 
+     AddWidget(path, "Miscellaneous", WIDGET_SEPARATOR_TEXT);
+     AddWidget(path, "Delete File on Death", WIDGET_CVAR_CHECKBOX)
+@@ -1325,25 +1042,10 @@ void SohMenu::AddMenuEnhancements() {
+         .Options(IntSliderOptions().Min(-5).Max(5).DefaultValue(0).Format("%+d").Tooltip(
+             "-5 will be half as much time, +5 will be 6x as much time. Affects timed switches, torches, GTG statue "
+             "eyes, & doors in race with Dampe."));
+-    AddWidget(path, "Always Win Goron Pot", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("GoronPot"))
+-        .Options(CheckboxOptions().Tooltip("Always get the Heart Piece/Purple Rupee from the Spinning Goron Pot."));
+-    AddWidget(path, "Always Win Dampe Digging Game", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("DampeWin"))
+-        .Options(CheckboxOptions().Tooltip(
+-            "Always win the Heart Piece/Purple Rupee on the first dig in Dampe's Grave Digging game. "
+-            "In a Randomizer file, this defaults to on if this enhancement has never been changed."));
+-    AddWidget(path, "All Dogs are Richard", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("AllDogsRichard"))
+-        .Options(CheckboxOptions().Tooltip("All dogs can be traded in and will count as Richard."));
+     AddWidget(path, "Cuccos Stay Put Multiplier: %dx", WIDGET_CVAR_SLIDER_INT)
+         .CVar(CVAR_ENHANCEMENT("CuccoStayDurationMult"))
+         .Options(IntSliderOptions().Min(1).Max(5).DefaultValue(1).Format("%dx").Tooltip(
+             "Cuccos will stay in place longer after putting them down, by a multiple of the value of the slider."));
+-    AddWidget(path, "Cuccos Needed By Anju: %d", WIDGET_CVAR_SLIDER_INT)
+-        .CVar(CVAR_ENHANCEMENT("CuccosToReturn"))
+-        .Options(IntSliderOptions().Min(0).Max(7).DefaultValue(7).Format("%d").Tooltip(
+-            "The amount of cuccos needed to receive bottle from Anju the Cucco Lady."));
+ 
+     path.column = SECTION_COLUMN_3;
+     AddWidget(path, "Enemies", WIDGET_SEPARATOR_TEXT);
+@@ -1354,7 +1056,6 @@ void SohMenu::AddMenuEnhancements() {
+     AddWidget(path, "Hyper Enemies", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("HyperEnemies"))
+         .Options(CheckboxOptions().Tooltip("All Regular Enemies and Mini-Bosses move and act twice as fast."));
+-    AddWidget(path, "Enable Visual Guard Vision", WIDGET_CVAR_CHECKBOX).CVar(CVAR_ENHANCEMENT("GuardVision"));
+     AddWidget(path, "Leever Spawn Rate: %d seconds", WIDGET_CVAR_SLIDER_INT)
+         .CVar(CVAR_ENHANCEMENT("LeeverSpawnRate"))
+         .Options(IntSliderOptions()
+@@ -1364,210 +1065,8 @@ void SohMenu::AddMenuEnhancements() {
                       .Format("%d seconds")
                       .Tooltip("The time between groups of Leevers spawning."));
  
@@ -2136,7 +2241,102 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..7ff3bb4da0117721140f011b4370550a
  
      // Extra Modes
      path.sidebarName = "Extra Modes";
-@@ -1926,6 +1461,56 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1600,9 +1099,6 @@ void SohMenu::AddMenuEnhancements() {
+         .Options(CheckboxOptions().Tooltip(
+             "Enables Ivan the Fairy upon the next map change. Player 2 can control Ivan and press the C-Buttons to "
+             "use items and mess with Player 1!"));
+-    AddWidget(path, "Dogs Follow You Everywhere", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("DogFollowsEverywhere"))
+-        .Options(CheckboxOptions().Tooltip("Allows dogs to follow you anywhere you go, even if you leave the Market."));
+     AddWidget(path, "Rupee Dash Mode", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("RupeeDash"))
+         .Options(CheckboxOptions().Tooltip("Rupees reduce over time, Link suffers damage when the count hits 0."));
+@@ -1689,8 +1185,6 @@ void SohMenu::AddMenuEnhancements() {
+     AddWidget(path, "Health", WIDGET_CVAR_CHECKBOX).CVar(CVAR_CHEAT("InfiniteHealth"));
+     AddWidget(path, "Ammo", WIDGET_CVAR_CHECKBOX).CVar(CVAR_CHEAT("InfiniteAmmo"));
+     AddWidget(path, "Magic", WIDGET_CVAR_CHECKBOX).CVar(CVAR_CHEAT("InfiniteMagic"));
+-    AddWidget(path, "Nayru's Love", WIDGET_CVAR_CHECKBOX).CVar(CVAR_CHEAT("InfiniteNayru"));
+-    AddWidget(path, "Epona Boost", WIDGET_CVAR_CHECKBOX).CVar(CVAR_CHEAT("InfiniteEponaBoost"));
+ 
+     AddWidget(path, "Items", WIDGET_SEPARATOR_TEXT);
+     AddWidget(path, "Timeless Equipment", WIDGET_CVAR_CHECKBOX)
+@@ -1700,28 +1194,15 @@ void SohMenu::AddMenuEnhancements() {
+     AddWidget(path, "Unrestricted Items", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_CHEAT("NoRestrictItems"))
+         .Options(CheckboxOptions().Tooltip("Allows you to use any item at any location"));
+-    AddWidget(path, "Super Tunic", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_CHEAT("SuperTunic"))
+-        .Options(CheckboxOptions().Tooltip("Makes every tunic have the effects of every other tunic."));
+     AddWidget(path, "Fireproof Deku Shield", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_CHEAT("FireproofDekuShield"))
+         .Options(CheckboxOptions().Tooltip("Prevents the Deku Shield from burning on contact with fire."));
+-    AddWidget(path, "Shield with Two-Handed Weapons", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_CHEAT("ShieldTwoHanded"))
+-        .Options(CheckboxOptions().Tooltip(
+-            "This allows you to put up for shield with any two-handed weapon in hand except for Deku Sticks."));
+     AddWidget(path, "Deku Sticks:", WIDGET_CVAR_COMBOBOX)
+         .CVar(CVAR_CHEAT("DekuStick"))
+         .Options(ComboboxOptions().ComboMap(dekuStickCheat).DefaultIndex(DEKU_STICK_NORMAL));
+     AddWidget(path, "Bomb Timer Multiplier: %.2fx", WIDGET_CVAR_SLIDER_FLOAT)
+         .CVar(CVAR_CHEAT("BombTimerMultiplier"))
+         .Options(FloatSliderOptions().Format("%.2f").Min(0.1f).Max(5.0f).DefaultValue(1.0f));
+-    AddWidget(path, "Hookshot Everything", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_CHEAT("HookshotEverything"))
+-        .Options(CheckboxOptions().Tooltip("Makes every surface in the game hookshotable."));
+-    AddWidget(path, "Hookshot Reach Multiplier: %.2fx", WIDGET_CVAR_SLIDER_FLOAT)
+-        .CVar(CVAR_CHEAT("HookshotReachMultiplier"))
+-        .Options(FloatSliderOptions().Format("%.2f").Min(1.0f).Max(5.0f));
+ 
+     path.column = SECTION_COLUMN_2;
+     AddWidget(path, "Misc", WIDGET_SEPARATOR_TEXT);
+@@ -1743,9 +1224,6 @@ void SohMenu::AddMenuEnhancements() {
+         .Options(CheckboxOptions().Tooltip(
+             "Keese and Guay no longer target you and simply ignore you as if you were wearing the "
+             "Skull Mask."));
+-    AddWidget(path, "Disable Haunted Wasteland Sandstorm", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_CHEAT("DisableSandstorm"))
+-        .Options(CheckboxOptions().Tooltip("Disables sandstorm effect in Haunted Wasteland."));
+     AddWidget(path, "Targetable Gold Skulltula", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_CHEAT("GSTargetable"))
+         .Options(CheckboxOptions().Tooltip("Allows Z-Targeting Gold Skulltulas."));
+@@ -1831,36 +1309,6 @@ void SohMenu::AddMenuEnhancements() {
+         .CVar(CVAR_CHEAT("SaveStatesEnabled"))
+         .Options(CheckboxOptions().Tooltip("F5 to save, F6 to change slots, F7 to load"));
+ 
+-    AddWidget(path, "Beta Quest", WIDGET_SEPARATOR_TEXT);
+-    AddWidget(path, "Enable Beta Quest", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_CHEAT("EnableBetaQuest"))
+-        .PreFunc([](WidgetInfo& info) { info.options->disabled = !isBetaQuestEnabled; })
+-        .Callback([](WidgetInfo& info) {
+-            if (CVarGetInteger(CVAR_CHEAT("EnableBetaQuest"), 0) == 0) {
+-                CVarClear(CVAR_CHEAT("BetaQuestWorld"));
+-            } else {
+-                CVarSetInteger(CVAR_CHEAT("BetaQuestWorld"), 0);
+-            }
+-            std::reinterpret_pointer_cast<Ship::ConsoleWindow>(
+-                Ship::Context::GetInstance()->GetWindow()->GetGui()->GetGuiWindow("Console"))
+-                ->Dispatch("reset");
+-            Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesNextFrame();
+-        })
+-        .Options(CheckboxOptions().Tooltip("Turns on OoT Beta Quest. *WARNING*: This will reset your game!"));
+-    AddWidget(path, "Beta Quest World: %d", WIDGET_CVAR_SLIDER_INT)
+-        .CVar(CVAR_CHEAT("BetaQuestWorld"))
+-        .PreFunc([](WidgetInfo& info) {
+-            info.options->disabled = info.isHidden = CVarGetInteger(CVAR_CHEAT("EnableBetaQuest"), 0) == 0;
+-        })
+-        .Callback([](WidgetInfo& info) {
+-            std::reinterpret_pointer_cast<Ship::ConsoleWindow>(
+-                Ship::Context::GetInstance()->GetWindow()->GetGui()->GetGuiWindow("Console"))
+-                ->Dispatch("reset");
+-            Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesNextFrame();
+-        })
+-        .Options(IntSliderOptions().DefaultValue(0).Min(0).Max(8).Tooltip(
+-            "Set the Beta Quest world to explore. *WARNING*: Changing this will reset your game!\n"
+-            "Ctrl+Click to type in a value."));
+ 
+     // Cosmetics Editor
+     path.sidebarName = "Cosmetics Editor";
+@@ -1926,6 +1374,56 @@ void SohMenu::AddMenuEnhancements() {
              .CVar(timer.timeEnable)
              .Callback([](WidgetInfo& info) { TimeDisplayUpdateDisplayOptions(); });
      }
