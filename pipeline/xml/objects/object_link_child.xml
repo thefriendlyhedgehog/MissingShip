@@ -68,6 +68,12 @@
         <DList Name="gMlChildOcarinaOfTimeDL" Offset="0x1E110"/>
         <DList Name="gMlChildRightArmStretchedDL" Offset="0x22A60"/>
 
+        <!-- The Soul-Charged Kokiri Sword, appended by ML: its custom code (0x80602DE0) points the sheath, hilt and blade
+             above at these once slingshot ammo is 40, and pulses the blade's 8 prim colours (MS-054). -->
+        <DList Name="gMlChildSoulSheathDL" Offset="0x2D660"/>
+        <DList Name="gMlChildSoulSwordHiltDL" Offset="0x2D9E8"/>
+        <DList Name="gMlChildSoulSwordBladeDL" Offset="0x2DE80"/>
+
         <!-- Built with lui/addiu in code: the Goron's Bracelet and the Deku Stick. -->
         <DList Name="gLinkChildLinkDekuStickDL" Offset="0x1E440"/>
         <DList Name="gLinkChildGoronBraceletDL" Offset="0x1E718"/>

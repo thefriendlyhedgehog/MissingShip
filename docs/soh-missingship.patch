@@ -1,9 +1,9 @@
 diff --git a/soh/assets/ml_assets.h b/soh/assets/ml_assets.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..05e4043db4ae57ee71deb778100cf6a6f45cbc38
+index 0000000000000000000000000000000000000000..b32576f9e295ba7f31f067f9505ef0a1587d8d28
 --- /dev/null
 +++ b/soh/assets/ml_assets.h
-@@ -0,0 +1,305 @@
+@@ -0,0 +1,317 @@
 +#ifndef ML_ASSETS_H
 +#define ML_ASSETS_H
 +
@@ -307,6 +307,18 @@ index 0000000000000000000000000000000000000000..05e4043db4ae57ee71deb778100cf6a6
 +static const ALIGN_ASSET(2) char gMlEndingTitleRightTex[] = dgMlEndingTitleRightTex;
 +#define dgMlEndingTitleLeftTex "__OTR__objects/ml_ovl_ending/gMlEndingTitleLeftTex"
 +static const ALIGN_ASSET(2) char gMlEndingTitleLeftTex[] = dgMlEndingTitleLeftTex;
++
++// ML object 0x15 (dma 6, object_link_child): the Kokiri sword parts ML repoints, and the Soul-Charged sword (MS-054).
++#define dgMlChildKokiriSwordHiltDL "__OTR__objects/object_link_child/gMlChildKokiriSwordHiltDL"
++static const ALIGN_ASSET(2) char gMlChildKokiriSwordHiltDL[] = dgMlChildKokiriSwordHiltDL;
++#define dgMlChildKokiriSwordBladeDL "__OTR__objects/object_link_child/gMlChildKokiriSwordBladeDL"
++static const ALIGN_ASSET(2) char gMlChildKokiriSwordBladeDL[] = dgMlChildKokiriSwordBladeDL;
++#define dgMlChildSoulSheathDL "__OTR__objects/object_link_child/gMlChildSoulSheathDL"
++static const ALIGN_ASSET(2) char gMlChildSoulSheathDL[] = dgMlChildSoulSheathDL;
++#define dgMlChildSoulSwordHiltDL "__OTR__objects/object_link_child/gMlChildSoulSwordHiltDL"
++static const ALIGN_ASSET(2) char gMlChildSoulSwordHiltDL[] = dgMlChildSoulSwordHiltDL;
++#define dgMlChildSoulSwordBladeDL "__OTR__objects/object_link_child/gMlChildSoulSwordBladeDL"
++static const ALIGN_ASSET(2) char gMlChildSoulSwordBladeDL[] = dgMlChildSoulSwordBladeDL;
 +
 +#endif
 diff --git a/soh/include/tables/actor_table.h b/soh/include/tables/actor_table.h
@@ -1485,14 +1497,16 @@ index 0000000000000000000000000000000000000000..b3e5a87f7eed1795dea7fb1abc931997
 +#endif
 diff --git a/soh/src/code/ml_state.c b/soh/src/code/ml_state.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..e3d05225693cb82afe3e6560beb625ce3cc61d12
+index 0000000000000000000000000000000000000000..f357f73ac2b2f1093ab930e96a866677abb630c9
 --- /dev/null
 +++ b/soh/src/code/ml_state.c
-@@ -0,0 +1,220 @@
+@@ -0,0 +1,301 @@
 +#include "ml_state.h"
 +#include "ml_entrance_map.h"
 +#include "objects/gameplay_keep/gameplay_keep.h"
 +#include "soh/ResourceManagerHelpers.h"
++#include "objects/object_link_child/object_link_child.h"
++#include "assets/ml_assets.h"
 +#include <string.h>
 +
 +// MissingShip: ML's per-frame bookkeeping from its custom code.
@@ -1709,12 +1723,91 @@ index 0000000000000000000000000000000000000000..e3d05225693cb82afe3e6560beb625ce
 +        }
 +    }
 +}
++
++// ML's Soul-Charged Kokiri Sword (the middle of 0x80602DE0, hooked into the player draw). ML marks the upgrade with
++// slingshot ammo 40. While it is set, ML rewrites object_link_child every frame: the sheath, hilt and blade DLs call
++// the soul sword it appended instead, and the blade's 8 prim colours pulse green while the sword is powered (charging a
++// spin, a combo swing at full health, or normal2fighter_free); otherwise they are white. SoH's DLs are shared
++// resources, so the same edits are patches, undone when the ammo marker is gone.
++static s32 sMlSoulPatched = false;
++static s8 sMlSoulGlowOn = false; // 0x80603610
++static u32 sMlSoulGlowTimer = 0; // 0x8060360C
++static u8 sMlSoulGlow[3] = { 255, 255, 255 }; // 0x80603600
++
++static void MlSoulSword_Redirect(const char* dl, const char* to, s32 on) {
++    if (on) {
++        ResourceMgr_PatchCustomGfxByName(dl, "mlSoulSword0", 0, (Gfx)gsSPDisplayListOTRFilePath(to));
++        ResourceMgr_PatchCustomGfxByName(dl, "mlSoulSword1", 1, (Gfx)gsSPEndDisplayList());
++    } else {
++        ResourceMgr_UnpatchGfxByName(dl, "mlSoulSword0");
++        ResourceMgr_UnpatchGfxByName(dl, "mlSoulSword1");
++    }
++}
++
++static void MlSoulSword_SetBladeColor(u8 r, u8 g, u8 b) {
++    static const char* sPatchNames[] = { "mlSoulGlow0", "mlSoulGlow1", "mlSoulGlow2", "mlSoulGlow3",
++                                         "mlSoulGlow4", "mlSoulGlow5", "mlSoulGlow6", "mlSoulGlow7" };
++    Gfx* gfx = ResourceMgr_LoadGfxByName(gMlChildSoulSwordBladeDL);
++    s32 n = 0;
++
++    if (gfx == NULL) {
++        return;
++    }
++    for (s32 i = 0; (n < ARRAY_COUNT(sPatchNames)) && ((gfx[i].words.w0 >> 24) != G_ENDDL); i++) {
++        u32 op = gfx[i].words.w0 >> 24;
++
++        if (op == G_SETPRIMCOLOR) {
++            ResourceMgr_PatchCustomGfxByName(gMlChildSoulSwordBladeDL, sPatchNames[n++], i,
++                                             (Gfx)gsDPSetPrimColor(0, 0x80, r, g, b, 255));
++        } else if ((op == 0x20) || (op == 0x31) || (op == 0x32) || (op == 0x33) || (op == 0x35) || (op == 0x36) ||
++                   (op == 0x42)) {
++            i++; // LUS's two-word commands
++        }
++    }
++}
++
++void MlSoulSword_Update(Player* player, PlayState* play, s32 inFreeStance) {
++    s32 on = (AMMO(ITEM_SLINGSHOT) == 40);
++    s32 powered;
++
++    if (on != sMlSoulPatched) {
++        MlSoulSword_Redirect(gLinkChildSheathNearDL, gMlChildSoulSheathDL, on);
++        MlSoulSword_Redirect(gMlChildKokiriSwordHiltDL, gMlChildSoulSwordHiltDL, on);
++        MlSoulSword_Redirect(gMlChildKokiriSwordBladeDL, gMlChildSoulSwordBladeDL, on);
++        sMlSoulPatched = on;
++    }
++    if (!on) {
++        return;
++    }
++
++    powered = (player->stateFlags1 & PLAYER_STATE1_CHARGING_SPIN_ATTACK) ||
++              ((player->unk_845 & 1) && (gSaveContext.healthCapacity == gSaveContext.health)) || inFreeStance;
++    if (!powered) {
++        sMlSoulGlow[0] = sMlSoulGlow[1] = sMlSoulGlow[2] = 255;
++        sMlSoulGlowTimer = 0;
++        sMlSoulGlowOn = false;
++    } else if (!sMlSoulGlowOn) {
++        sMlSoulGlow[0] = 0;
++        sMlSoulGlow[1] = 255;
++        sMlSoulGlow[2] = 150;
++        sMlSoulGlowOn = true;
++    } else {
++        s8 step = (sMlSoulGlowTimer < 10) ? -8 : 8;
++
++        sMlSoulGlow[1] += step;
++        sMlSoulGlow[2] += step;
++        if (++sMlSoulGlowTimer == 20) {
++            sMlSoulGlowTimer = 0;
++        }
++    }
++    MlSoulSword_SetBladeColor(sMlSoulGlow[0], sMlSoulGlow[1], sMlSoulGlow[2]);
++}
 diff --git a/soh/src/code/ml_state.h b/soh/src/code/ml_state.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..5d8e3479956eb7fd3941f9638d6603eb8e2781dc
+index 0000000000000000000000000000000000000000..147e94717cd310830aa37c7fde6ef25a81f22294
 --- /dev/null
 +++ b/soh/src/code/ml_state.h
-@@ -0,0 +1,19 @@
+@@ -0,0 +1,20 @@
 +#ifndef ML_STATE_H
 +#define ML_STATE_H
 +
@@ -1729,6 +1822,7 @@ index 0000000000000000000000000000000000000000..5d8e3479956eb7fd3941f9638d6603eb
 +s32 MlState_PlayerFrame(Player* player, PlayState* play);
 +void MlState_PlayerFrameEnd(Player* player, PlayState* play);
 +void MlState_VoidOut(PlayState* play);
++void MlSoulSword_Update(Player* player, PlayState* play, s32 inFreeStance);
 +void MlState_LinkAnimation(LinkAnimationHeader** animation, f32* endFrame);
 +void MlState_JumpUpdate(Player* player);
 +s32 MlState_SkipWallPush(PlayState* play);
@@ -2724,7 +2818,7 @@ index ce09fe27168d77ea579150b2f6249f7eed9b523b..3c95700a277824bc3b3b331aa1badbca
      } else if (msgCtx->textDelayTimer <= gSlowTextSpeed) {
          msgCtx->textDelayTimer = 0;
 diff --git a/soh/src/code/z_parameter.c b/soh/src/code/z_parameter.c
-index 4b782d9540cfa2f235048c04c7811502db9225bd..361b996abc52ea52a78d86c004b52508a25dc43e 100644
+index 4b782d9540cfa2f235048c04c7811502db9225bd..0a87c7a75f8525cf47f8dc97c1a218337d88e856 100644
 --- a/soh/src/code/z_parameter.c
 +++ b/soh/src/code/z_parameter.c
 @@ -49,13 +49,15 @@ typedef struct {
@@ -2893,6 +2987,21 @@ index 4b782d9540cfa2f235048c04c7811502db9225bd..361b996abc52ea52a78d86c004b52508
                     ((i == ITEM_BEAN) && (ammo == 15)) || GameInteractor_Should(VB_COLOR_AMMO_GREEN, false, i)) {
              gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 120, 255, 0, alpha);
          }
+@@ -5442,7 +5445,13 @@ void Interface_Draw(PlayState* play) {
+             // B Button Icon & Ammo Count
+             if (gSaveContext.equips.buttonItems[0] != ITEM_NONE) {
+                 if (fullUi) {
+-                    Interface_DrawItemIconTexture(play, gItemIcons[gSaveContext.equips.buttonItems[0]], 0);
++                    // MissingShip: with the Soul-Charged sword (slingshot ammo 40) ML swaps the Kokiri Sword's B icon
++                    // for its own, which it keeps in the Bullet Bag 40 icon slot (0x80602DE0's DMA from icon_item_static).
++                    if ((gSaveContext.equips.buttonItems[0] == ITEM_SWORD_KOKIRI) && (AMMO(ITEM_SLINGSHOT) == 40)) {
++                        Interface_DrawItemIconTexture(play, gItemIcons[ITEM_BULLET_BAG_40], 0);
++                    } else {
++                        Interface_DrawItemIconTexture(play, gItemIcons[gSaveContext.equips.buttonItems[0]], 0);
++                    }
+                 }
+ 
+                 if ((player->stateFlags1 & PLAYER_STATE1_ON_HORSE) || (play->shootingGalleryStatus > 1) ||
 diff --git a/soh/src/code/z_play.c b/soh/src/code/z_play.c
 index f73d076de42c85067bb5f8d6fc0b4be7cf1e4ca8..297fb48ec15443187df2699339dd83bf7c72ac03 100644
 --- a/soh/src/code/z_play.c
@@ -11993,7 +12102,7 @@ index f0cf6dad0bee6c91a54576f87a18a1cbc02c741f..749055c3a78e1b2b72acfd278839a00a
  
      gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 diff --git a/soh/src/overlays/actors/ovl_player_actor/z_player.c b/soh/src/overlays/actors/ovl_player_actor/z_player.c
-index 5aa9d947048cdc4670e6c76ac55913860b7c4535..4c71dd1ef9ff73dc8ee02d9ecf2c78c1217d5ade 100644
+index 5aa9d947048cdc4670e6c76ac55913860b7c4535..d6ffea40ca3a146fe2bb57589dbd6874f69cbf1d 100644
 --- a/soh/src/overlays/actors/ovl_player_actor/z_player.c
 +++ b/soh/src/overlays/actors/ovl_player_actor/z_player.c
 @@ -6,6 +6,7 @@
@@ -12164,7 +12273,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..4c71dd1ef9ff73dc8ee02d9ecf2c78c1
          }
  
          sInvWaterSpeedFactor = 1.0f / sWaterSpeedFactor;
-@@ -12319,9 +12358,20 @@ void Player_Update(Actor* thisx, PlayState* play) {
+@@ -12319,9 +12358,23 @@ void Player_Update(Actor* thisx, PlayState* play) {
              }
          }
  
@@ -12182,11 +12291,14 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..4c71dd1ef9ff73dc8ee02d9ecf2c78c1
 +    // MissingShip: ML's Blade Beam spawner (its custom code at 0x80602DE0, hooked into the player draw).
 +    MlMThunder_PlayerUpdate(this, play,
 +                            (void*)this->skelAnime.animation == (void*)gPlayerAnim_link_normal_normal2fighter_free);
++    // MissingShip: the Soul-Charged sword's model and glow, from the same ML routine (MS-054).
++    MlSoulSword_Update(this, play,
++                       (void*)this->skelAnime.animation == (void*)gPlayerAnim_link_normal_normal2fighter_free);
 +
      MREG(52) = this->actor.world.pos.x;
      MREG(53) = this->actor.world.pos.y;
      MREG(54) = this->actor.world.pos.z;
-@@ -12541,6 +12591,7 @@ void Player_Draw(Actor* thisx, PlayState* play2) {
+@@ -12541,6 +12594,7 @@ void Player_Draw(Actor* thisx, PlayState* play2) {
          if (CVarGetInteger(CVAR_ENHANCEMENT("DisableLOD"), 0)) {
              lod = 0;
          }
@@ -12194,7 +12306,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..4c71dd1ef9ff73dc8ee02d9ecf2c78c1
  
          func_80093C80(play);
          Gfx_SetupDL_25Xlu(play->state.gfxCtx);
-@@ -13002,7 +13053,9 @@ void Player_Action_Talk(Player* this, PlayState* play) {
+@@ -13002,7 +13056,9 @@ void Player_Action_Talk(Player* this, PlayState* play) {
      if (Message_GetState(&play->msgCtx) == TEXT_STATE_CLOSING) {
          this->actor.flags &= ~ACTOR_FLAG_TALK;
  
@@ -12205,7 +12317,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..4c71dd1ef9ff73dc8ee02d9ecf2c78c1
              this->stateFlags2 &= ~PLAYER_STATE2_LOCK_ON_WITH_SWITCH;
          }
  
-@@ -14316,12 +14369,16 @@ void Player_Action_8084E3C4(Player* this, PlayState* play) {
+@@ -14316,12 +14372,16 @@ void Player_Action_8084E3C4(Player* this, PlayState* play) {
      if (play->msgCtx.ocarinaMode == OCARINA_MODE_04) {
          func_8005B1A4(Play_GetCamera(play, 0));
  
@@ -12224,7 +12336,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..4c71dd1ef9ff73dc8ee02d9ecf2c78c1
          } else if (!Player_ActionHandler_13(this, play)) {
              func_8083A098(this, &gPlayerAnim_link_normal_okarina_end, play);
          }
-@@ -14392,7 +14449,11 @@ void Player_Action_8084E6D4(Player* this, PlayState* play) {
+@@ -14392,7 +14452,11 @@ void Player_Action_8084E6D4(Player* this, PlayState* play) {
                          this->exchangeItemId = EXCH_ITEM_NONE;
  
                          if (func_8084B4D4(play, this) == 0) {
@@ -12237,7 +12349,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..4c71dd1ef9ff73dc8ee02d9ecf2c78c1
                          }
                      } else {
                          func_8084DFAC(play, this);
-@@ -14715,7 +14776,12 @@ void Player_Action_ExchangeItem(Player* this, PlayState* play) {
+@@ -14715,7 +14779,12 @@ void Player_Action_ExchangeItem(Player* this, PlayState* play) {
                  this->actor.flags |= ACTOR_FLAG_TALK;
              }
  
@@ -12251,7 +12363,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..4c71dd1ef9ff73dc8ee02d9ecf2c78c1
          } else {
              GetItemEntry giEntry = ItemTable_Retrieve(D_80854528[this->exchangeItemId - 1]);
  
-@@ -14900,6 +14966,7 @@ void Player_Action_8084F88C(Player* this, PlayState* play) {
+@@ -14900,6 +14969,7 @@ void Player_Action_8084F88C(Player* this, PlayState* play) {
                      Grotto_ForceRegularVoidOut();
                  }
              } else if (GameInteractor_Should(VB_TRIGGER_VOIDOUT, true, this)) {
@@ -12259,7 +12371,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..4c71dd1ef9ff73dc8ee02d9ecf2c78c1
                  Play_TriggerVoidOut(play);
              }
  
-@@ -14908,7 +14975,7 @@ void Player_Action_8084F88C(Player* this, PlayState* play) {
+@@ -14908,7 +14978,7 @@ void Player_Action_8084F88C(Player* this, PlayState* play) {
          } else {
              play->transitionType = TRANS_TYPE_FADE_BLACK;
              gSaveContext.nextTransitionType = TRANS_TYPE_FADE_WHITE;
@@ -12268,7 +12380,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..4c71dd1ef9ff73dc8ee02d9ecf2c78c1
              gSaveContext.natureAmbienceId = 0xFF;
          }
  
-@@ -16642,12 +16709,17 @@ void Player_StartTalking(PlayState* play, Actor* actor) {
+@@ -16642,12 +16712,17 @@ void Player_StartTalking(PlayState* play, Actor* actor) {
      Player* this = GET_PLAYER(play);
      s32 pad;
  
