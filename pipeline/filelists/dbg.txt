@@ -30,7 +30,7 @@ mlfile_028
 mlfile_029
 mlfile_030
 mlfile_031
-mlfile_032
+object_ml_spot02
 object_ml_crackwall
 mlfile_034
 mlfile_035

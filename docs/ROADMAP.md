@@ -45,9 +45,9 @@ Last full review: **2026-09-25**, with every ML file compared against PAL MQ Deb
 
 | Scene | Unported actors |
 |---|---|
-| `spot01` (Kakariko slot) | En_Dodojr ×4, Bg_Toki_Hikari, En_Rd ×6, Bg_Po_Event ×2, Bg_Spot02_Objects ×3, Bg_Spot16_Bombstone, En_Daiku ×2, En_Hs, Obj_Makekinsuta |
-| `night_shop` | En_Ossan (shopkeeper; also spawns En_GirlA, see B), En_Rd, Bg_Po_Event |
-| `hairal_niwa2` | Bg_Po_Event ×2 |
+| `spot01` (Kakariko slot) | **Built (MS-034):** En_Dodojr ×4, Bg_Toki_Hikari, En_Rd ×6, Bg_Po_Event ×2, Bg_Spot02_Objects ×3, Bg_Spot16_Bombstone, En_Daiku ×2, En_Hs, Obj_Makekinsuta |
+| `night_shop` | En_Ossan (shopkeeper; also spawns En_GirlA, see B); En_Rd and Bg_Po_Event built in MS-034 |
+| `hairal_niwa2` | Bg_Po_Event ×2 (built in MS-034) |
 | `HAKAdan` (dungeon) | **Boss_Tw ×26** (ML reuses the slot for something small: 0x490 bytes vs 0x11AE0), ACTOR_UNSET_1A (ML custom), Bg_Hidan_Dalm, Bg_Mori_Elevator, En_Floormas, En_Kakasi ×2, En_Ssh ×4, Bg_Mizu_Shutter |
 | `HAKAdan_bs` (boss room) | **Boss_Va**: the whole boss fight, see C |
 | `Bmori1` (dungeon) | En_Peehat, Boss_Dodongo ×2, En_Du ×3, En_Nb ×3, Bg_Jya_1flift |
@@ -193,6 +193,9 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 | [MS-012](https://github.com/thefriendlyhedgehog/MissingShip/issues/11) | bug? | "Deep Woods sometimes doesn't load the next zone." Probably fixed by the wall-skip port (ML's 0x80602C80). | Confirmed fixed in play, or reopened with a repro. |
 | [MS-013](https://github.com/thefriendlyhedgehog/MissingShip/issues/12) | port | Where is Malon's race? The finish-line Malon (params 0xFFFF) and ML entrances 0x138 / 0x13C aren't placed on the scene map yet. | The race is located and played start to finish. |
 | [MS-094](https://github.com/thefriendlyhedgehog/MissingShip/issues/58) | bug | Area title text sat 4 px low on ML's ribbon (texture padded 4 rows down, drawn at ML's y 68). | **Fixed** (drawn at y 64). Verified in play. |
+| [MS-095](https://github.com/thefriendlyhedgehog/MissingShip/issues/59) | bug | Entrance collisions: ML entrance groups that collapse onto one SoH entrance (e.g. fishing pond 0x41C/0x420 → 0x45F) can't be told apart by ML code that compares `entranceIndex`. | A pre-push checker lists every collision; each one is mapped apart or documented as harmless. |
+| [MS-105](https://github.com/thefriendlyhedgehog/MissingShip/issues/69) | bug | Blank green title card entering scenes ML doesn't title (Deep Woods grotto). | **Built:** card gated to ML's titled slots; needs playtest. |
+| [MS-106](https://github.com/thefriendlyhedgehog/MissingShip/issues/70) | bug | Rain in Kokiri Forest: the Song of Storms still spawned the rain actor ML deleted. | **Built:** spawn removed; needs playtest (unconfirmed if this was the source). |
 | [MS-017](https://github.com/thefriendlyhedgehog/MissingShip/issues/55) | bug | Saria's Song at the song-block door shows vanilla's "talk to Saria?" prompt (Navi text 0xE0) before the door cutscene; ML skips it in its player hook 0x80600D90 (player +0x20F38). | No prompt at the door; the hook is ported and logged. Verified in play. |
 | [MS-018](https://github.com/thefriendlyhedgehog/MissingShip/issues/56) | enhancement | B should answer No / close yes-no prompts (at least the Saria prompt), not need another A. | B cancels safely on choice prompts; logged. |
 | [MS-019](https://github.com/thefriendlyhedgehog/MissingShip/issues/57) | enhancement | New games put the Ocarina on D-Down *and* C-Left; D-pad ocarina playback was off; MissingShip options weren't in the SoH menu. | **Done:** Enhancements > MissingShip page, Starting Ocarina Button (D-Down default), Dpad Ocarina Playback on. Verified in play. |
@@ -219,7 +222,7 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 | [MS-031](https://github.com/thefriendlyhedgehog/MissingShip/issues/22) | port | En_Nutsball: **built** (Hylian-Shield-only reflect; nuts break during swim_15step_up); needs playtest. | Ported, and the scrubs verified with it. |
 | [MS-032](https://github.com/thefriendlyhedgehog/MissingShip/issues/23) | port | En_Ko: **built** (11 after-the-sword text swaps, the Kokiri frown, two branch edits); needs playtest. | Ported. |
 | [MS-033](https://github.com/thefriendlyhedgehog/MissingShip/issues/24) | port | Finish the partial actors. **Built:** Ml_EventSpawner complete (young Epona standing, the horse chase, riding; mode 3 waits on MS-037). En_Hy and En_Niw_Lady were already complete (the certificate parts are ML\'s only edits). Needs playtest. | Full behaviour. |
-| [MS-034](https://github.com/thefriendlyhedgehog/MissingShip/issues/25) | port | `spot01`: En_Dodojr, Bg_Toki_Hikari, En_Rd, Bg_Po_Event, Bg_Spot02_Objects (+ object_spot02_objects), Bg_Spot16_Bombstone, En_Daiku, En_Hs, Obj_Makekinsuta. | One issue per actor when started. |
+| [MS-034](https://github.com/thefriendlyhedgehog/MissingShip/issues/25) | port | `spot01`: En_Dodojr, Bg_Toki_Hikari, En_Rd, Bg_Po_Event, Bg_Spot02_Objects (+ object_spot02_objects), Bg_Spot16_Bombstone, En_Daiku, En_Hs, Obj_Makekinsuta. | **Built:** all nine ported as MS-096..104 (#60-#68); needs playtest. |
 | [MS-035](https://github.com/thefriendlyhedgehog/MissingShip/issues/26) | port | `night_shop`: En_Ossan + En_GirlA shop items (8 data words: prices?). | The shop works as in ML. |
 | [MS-036](https://github.com/thefriendlyhedgehog/MissingShip/issues/27) | port | `HAKAdan`: Boss_Tw slot ×26 (small ML rewrite + object_tw), ACTOR_UNSET_1A (custom), Bg_Hidan_Dalm, Bg_Mori_Elevator (+ object_mori_objects), En_Floormas, En_Kakasi (+ object_ka), En_Ssh, Bg_Mizu_Shutter. | The dungeon can be completed. |
 | [MS-037](https://github.com/thefriendlyhedgehog/MissingShip/issues/28) | port | **Boss fight** (`HAKAdan_bs`): Boss_Va + object_bv + custom actors 0x01, 0x17, 0x22 + En_Vm + Door_Warp1. | The boss can be beaten and the warp works. |

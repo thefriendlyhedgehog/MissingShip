@@ -34,7 +34,8 @@ ML_OBJECTS = {12: 'object_ml_fishpond',    # object slot 0x40 (OBJECT_JJ in vani
               33: 'object_ml_crackwall',       # object slot 0xA3 (object_ru1: ML's breakable wall for Bg_Hidan_Kowarerukabe)
               349: 'object_ml_gkeep',          # object slot 0x01 (gameplay_keep: ML's grotto hole + redrawn bomb drop)
               353: 'object_ml_scrub',          # object slot 0x05 (ML-only: Deep Woods hint scrubs)
-              352: 'object_ml_prologue'}       # object slot 0x04 (ML-only: prologue illustrations, actor 0x01F)
+              352: 'object_ml_prologue',       # object slot 0x04 (ML-only: prologue illustrations, actor 0x01F)
+              32: 'object_ml_spot02'}          # object slot 0xA1 (object_spot02_objects: ML's own model for Bg_Spot02_Objects)
 # ML's pause/HUD texture files, same layout as MQ's but redrawn. Named ml_* because dma 7-16 still carry
 # the vanilla names over unrelated ML data; inject_ui_textures.py maps the output back to vanilla paths.
 ML_OBJECTS.update({82: 'ml_icon_item_static', 83: 'ml_icon_item_24_static', 84: 'ml_icon_item_field_static',

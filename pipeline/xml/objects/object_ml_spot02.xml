@@ -1,0 +1,6 @@
+<Root>
+    <File Name="object_ml_spot02" Segment="6">
+        <DList Name="gMlSpot02DL" Offset="0x1BB0"/>
+        <Collision Name="gMlSpot02Col" Offset="0x1800"/>
+    </File>
+</Root>

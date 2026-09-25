@@ -28,25 +28,25 @@ Actors living in `code` (En_Item00, En_A_Obj) and slots ML deleted are left out;
 | `0x01d` En_Peehat | REWRITTEN (text 0x3290 vs 0x3280) | Bmori1 | — | todo: MS-038 | no |
 | `0x01f` Ml_Prologue | ML custom (0x4b0 bytes) | link_home | — | ported (Ml_Prologue) | no |
 | `0x027` Boss_Dodongo | REWRITTEN (text 0xb40 vs 0x5e50) | Bmori1 ×2 | — | todo: MS-038 | no |
-| `0x02f` En_Dodojr | REWRITTEN (text 0x1ac0 vs 0x1ad0) | spot01 ×4 | — | todo: MS-034 | no |
+| `0x02f` En_Dodojr | REWRITTEN (text 0x1ac0 vs 0x1ad0) | spot01 ×4 | — | ported (MS-097) | no |
 | `0x037` En_St | 0 text / 1 data words differ | HAKAdan ×8, spot12 | — | ported (not hostile) | no |
 | `0x03d` En_Ossan | 5818 text / 0 data words differ | night_shop | — | todo: MS-035 | no |
 | `0x03e` Bg_Treemouth | REWRITTEN (text 0x230 vs 0x920) | spot00, spot10 ×6 | — | ported | no |
 | `0x040` Bg_Hidan_Dalm | REWRITTEN (text 0x100 vs 0x660) | HAKAdan | — | todo: MS-036 | no |
 | `0x055` En_Dekubaba | 1 text / 1 data words differ | HAKAdan ×12, spot09 ×5, spot10 ×4, spot12 ×9, testroom ×2, ydan ×5 | Ml_EventSpawner | ported | no |
 | `0x060` En_Dekunuts | 1 text / 0 data words differ  hooks ['0x806008e0'] | spot10 ×3, ydan ×3 | — | ported | no |
-| `0x06a` Bg_Toki_Hikari | REWRITTEN (text 0x80 vs 0xd50) | spot01 | — | todo: MS-034 | no |
+| `0x06a` Ml_TalkSpot (was Bg_Toki_Hikari) | REWRITTEN (text 0x80 vs 0xd50) | spot01 | — | ported (Ml_TalkSpot, MS-103) | no |
 | `0x087` Bg_Mori_Elevator | REWRITTEN (text 0x280 vs 0xa10) | HAKAdan | — | todo: MS-036 | no |
 | `0x08e` En_Floormas | REWRITTEN (text 0x32e0 vs 0x2f40) | HAKAdan | — | todo: MS-036 | no |
-| `0x090` En_Rd | REWRITTEN (text 0x2490 vs 0x24a0) | night_shop, spot01 ×6 | En_Nb | todo: MS-034 | no |
-| `0x093` Bg_Po_Event | REWRITTEN (text 0x170 vs 0x1aa0) | hairal_niwa2 ×2, night_shop, spot01 ×2 | — | todo: MS-034 | no |
+| `0x090` En_Rd | REWRITTEN (text 0x2490 vs 0x24a0) | night_shop, spot01 ×6 | En_Nb | ported (MS-099) | no |
+| `0x093` Ml_BgmTrigger (was Bg_Po_Event) | REWRITTEN (text 0x170 vs 0x1aa0) | hairal_niwa2 ×2, night_shop, spot01 ×2 | — | ported (Ml_BgmTrigger, MS-104) | no |
 | `0x095` En_Sw | 0 text / 1 data words differ | HAKAdan ×8 | En_Wood02, Obj_Kibako2 | ported (not hostile) | no |
 | `0x098` En_Du | REWRITTEN (text 0x2e0 vs 0x15e0) | Bmori1 ×3 | — | todo: MS-038 | no |
 | `0x09b` Door_Ana | 3 text / 8 data words differ | spot09, spot10 ×3, spot12 ×3 | — | ported | no |
-| `0x09c` Bg_Spot02_Objects | 1131 text / 4 data words differ | spot01 ×3 | — | todo: MS-034 | no |
+| `0x09c` Bg_Spot02_Objects | 1131 text / 4 data words differ | spot01 ×3 | — | ported (MS-101, object_ml_spot02) | no |
 | `0x0ba` Boss_Va | REWRITTEN (text 0x2c00 vs 0xcc80) | HAKAdan_bs | — | todo: MS-037 | no |
 | `0x0c3` En_Nb | REWRITTEN (text 0x590 vs 0x3550) | Bmori1 ×3 | — | todo: MS-038 | no |
-| `0x0cd` Bg_Spot16_Bombstone | 322 text / 0 data words differ | spot01 | — | todo: MS-034 | no |
+| `0x0cd` Bg_Spot16_Bombstone | 322 text / 0 data words differ | spot01 | — | ported (MS-096) | no |
 | `0x0cf` Bg_Hidan_Kowarerukabe | 0 text / 7 data words differ | ydan | — | ported (object_ml_crackwall) | no |
 | `0x0dc` Boss_Tw | REWRITTEN (text 0x490 vs 0x11ae0) | HAKAdan ×26 | — | todo: MS-036 | no |
 | `0x0e3` Ml_LiftBlock (was Bg_Mori_Hashira4) | REWRITTEN (text 0x130 vs 0x540) | spot10 | — | ported | no |
@@ -58,10 +58,10 @@ Actors living in `code` (En_Item00, En_A_Obj) and slots ML deleted are left out;
 | `0x121` Ml_EventSpawner (was En_Fz) | REWRITTEN (text 0xba0 vs 0x1db0) | spot09 ×11, spot20, testroom | Ml_Fishpond | ported (Ml_EventSpawner, all modes; mode 3 waits on MS-037's entrance 0x420) | no |
 | `0x127` Obj_Bombiwa | 0 text / 1 data words differ | spot01 ×4, spot09 | — | ported (update-culling off) | no |
 | `0x12c` Ml_Lift (was Obj_Lift) | REWRITTEN (text 0x270 vs 0x8d0) | HAKAdan ×2, spot10 ×2, spot12 | — | ported | no |
-| `0x133` En_Daiku | REWRITTEN (text 0x1500 vs 0x1510) | spot01 ×2 | — | todo: MS-034 | no |
+| `0x133` En_Daiku | REWRITTEN (text 0x1500 vs 0x1510) | spot01 ×2 | — | ported (MS-100) | no |
 | `0x13c` En_Niw_Lady | REWRITTEN (text 0x16d0 vs 0x1740) | spot10 | — | ported (the certificate hand-in is ML's only edit) | no |
 | `0x13e` En_Ms | 342 text / 0 data words differ | spot12 | — | ported (Bunny Hood for Deku Nuts) | no |
-| `0x13f` En_Hs | 546 text / 0 data words differ | spot01 | — | todo: MS-034 | no |
+| `0x13f` En_Hs | 546 text / 0 data words differ | spot01 | — | ported (MS-098) | no |
 | `0x147` En_Wonder_Talk | REWRITTEN (text 0x5f0 vs 0x860) | kakariko3 ×7, kokiri_home4 | — | ported (text = params + 0x300, no kill, no follow-up). Vanilla's Poe spawn (slot 0x0D) is kept but unreachable from ML's Init; it would now spawn Ml_Cucco | no |
 | `0x163` En_Ko | 544 text / 0 data words differ  hooks ['0x80602200'] | spot04 ×5 | — | ported (MS-032) | no |
 | `0x165` En_Weather_Tag | REWRITTEN (text 0xdb0 vs 0xe00) | spot12 | Ml_TreeBridge | ported (no story-flag kills) | no |
@@ -77,7 +77,7 @@ Actors living in `code` (En_Item00, En_A_Obj) and slots ML deleted are left out;
 | `0x192` Ml_HintNuts (was En_Hintnuts) | REWRITTEN (text 0x7f0 vs 0x17e0) | spot09 ×3, spot10 ×2, spot12, ydan ×2 | — | ported | no |
 | `0x1bb` Bg_Mizu_Shutter | 252 text / 0 data words differ | HAKAdan | — | todo: MS-036 | no |
 | `0x1c6` En_Cow | 1 text / 0 data words differ | spot01, spot20 | — | ported (limb 5 drawn) | no |
-| `0x1cf` Obj_Makekinsuta | REWRITTEN (text 0x1a0 vs 0x1a0) | spot01 | — | todo: MS-034 | no |
+| `0x1cf` Obj_Makekinsuta | REWRITTEN (text 0x1a0 vs 0x1a0) | spot01 | — | ported (MS-102) | no |
 | `0x1d1` Ml_SongBlock (was Obj_Timeblock) | REWRITTEN (text 0x260 vs 0xb30) | spot04 | — | ported | no |
 
 ## Not placed, spawned at runtime (11)

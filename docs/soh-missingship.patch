@@ -1,9 +1,9 @@
 diff --git a/soh/assets/ml_assets.h b/soh/assets/ml_assets.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..02792f36eb8084bada7d2dd0ee774d652e930cf9
+index 0000000000000000000000000000000000000000..2ec593c2fb46493a0621fd89e190edc4be68e97c
 --- /dev/null
 +++ b/soh/assets/ml_assets.h
-@@ -0,0 +1,147 @@
+@@ -0,0 +1,153 @@
 +#ifndef ML_ASSETS_H
 +#define ML_ASSETS_H
 +
@@ -122,6 +122,12 @@ index 0000000000000000000000000000000000000000..02792f36eb8084bada7d2dd0ee774d65
 +#define dgMlCrackWallCol "__OTR__objects/object_ml_crackwall/gMlCrackWallCol"
 +static const ALIGN_ASSET(2) char gMlCrackWallCol[] = dgMlCrackWallCol;
 +
++// ML object 0xA1 (dma 32, vanilla object_spot02_objects' slot): Bg_Spot02_Objects' model and collision in spot01.
++#define dgMlSpot02DL "__OTR__objects/object_ml_spot02/gMlSpot02DL"
++static const ALIGN_ASSET(2) char gMlSpot02DL[] = dgMlSpot02DL;
++#define dgMlSpot02Col "__OTR__objects/object_ml_spot02/gMlSpot02Col"
++static const ALIGN_ASSET(2) char gMlSpot02Col[] = dgMlSpot02Col;
++
 +// ML object 0x09 (dma 354, vanilla object_poh's slot): a recoloured object_niw for ML's cucco in actor slot 0x0D.
 +#define dgMlCuccoSkel "__OTR__objects/object_ml_cucco/gMlCuccoSkel"
 +static const ALIGN_ASSET(2) char gMlCuccoSkel[] = dgMlCuccoSkel;
@@ -152,7 +158,7 @@ index 0000000000000000000000000000000000000000..02792f36eb8084bada7d2dd0ee774d65
 +
 +#endif
 diff --git a/soh/include/tables/actor_table.h b/soh/include/tables/actor_table.h
-index d05085f4d07788d84b76c9ab9a6d32b623c2cd42..4fa7716bb682dd24623c8ed0267fe00262fca227 100644
+index d05085f4d07788d84b76c9ab9a6d32b623c2cd42..f30b07fd93a090892959dec0f9bce63103eddce0 100644
 --- a/soh/include/tables/actor_table.h
 +++ b/soh/include/tables/actor_table.h
 @@ -13,17 +13,17 @@
@@ -199,6 +205,24 @@ index d05085f4d07788d84b76c9ab9a6d32b623c2cd42..4fa7716bb682dd24623c8ed0267fe002
  /* 0x0058 */ DEFINE_ACTOR(Bg_Ddan_Jd, ACTOR_BG_DDAN_JD, ALLOCTYPE_NORMAL)
  /* 0x0059 */ DEFINE_ACTOR(Bg_Breakwall, ACTOR_BG_BREAKWALL, ALLOCTYPE_NORMAL)
  /* 0x005A */ DEFINE_ACTOR(En_Jj, ACTOR_EN_JJ, ALLOCTYPE_NORMAL)
+@@ -116,7 +116,7 @@
+ /* 0x0067 */ DEFINE_ACTOR(En_fHG, ACTOR_EN_FHG, ALLOCTYPE_NORMAL)
+ /* 0x0068 */ DEFINE_ACTOR(Bg_Mori_Hineri, ACTOR_BG_MORI_HINERI, ALLOCTYPE_NORMAL)
+ /* 0x0069 */ DEFINE_ACTOR(En_Bb, ACTOR_EN_BB, ALLOCTYPE_NORMAL)
+-/* 0x006A */ DEFINE_ACTOR(Bg_Toki_Hikari, ACTOR_BG_TOKI_HIKARI, ALLOCTYPE_NORMAL)
++/* 0x006A */ DEFINE_ACTOR(Ml_TalkSpot, ACTOR_BG_TOKI_HIKARI, ALLOCTYPE_NORMAL) // MissingShip: ML rewrite
+ /* 0x006B */ DEFINE_ACTOR(En_Yukabyun, ACTOR_EN_YUKABYUN, ALLOCTYPE_NORMAL)
+ /* 0x006C */ DEFINE_ACTOR(Bg_Toki_Swd, ACTOR_BG_TOKI_SWD, ALLOCTYPE_NORMAL)
+ /* 0x006D */ DEFINE_ACTOR(En_Fhg_Fire, ACTOR_EN_FHG_FIRE, ALLOCTYPE_NORMAL)
+@@ -157,7 +157,7 @@
+ /* 0x0090 */ DEFINE_ACTOR(En_Rd, ACTOR_EN_RD, ALLOCTYPE_NORMAL)
+ /* 0x0091 */ DEFINE_ACTOR(En_Po_Sisters, ACTOR_EN_PO_SISTERS, ALLOCTYPE_NORMAL)
+ /* 0x0092 */ DEFINE_ACTOR(Bg_Heavy_Block, ACTOR_BG_HEAVY_BLOCK, ALLOCTYPE_NORMAL)
+-/* 0x0093 */ DEFINE_ACTOR(Bg_Po_Event, ACTOR_BG_PO_EVENT, ALLOCTYPE_NORMAL)
++/* 0x0093 */ DEFINE_ACTOR(Ml_BgmTrigger, ACTOR_BG_PO_EVENT, ALLOCTYPE_NORMAL) // MissingShip: ML rewrite
+ /* 0x0094 */ DEFINE_ACTOR(Obj_Mure, ACTOR_OBJ_MURE, ALLOCTYPE_NORMAL)
+ /* 0x0095 */ DEFINE_ACTOR(En_Sw, ACTOR_EN_SW, ALLOCTYPE_NORMAL)
+ /* 0x0096 */ DEFINE_ACTOR(Boss_Fd, ACTOR_BOSS_FD, ALLOCTYPE_NORMAL)
 @@ -237,11 +237,11 @@
  /* 0x00E0 */ DEFINE_ACTOR(En_Anubice, ACTOR_EN_ANUBICE, ALLOCTYPE_NORMAL)
  /* 0x00E1 */ DEFINE_ACTOR(En_Anubice_Fire, ACTOR_EN_ANUBICE_FIRE, ALLOCTYPE_NORMAL)
@@ -1265,7 +1289,7 @@ index 0000000000000000000000000000000000000000..6e1151951b893dfd773edc4f5470296c
 +
 +#endif
 diff --git a/soh/src/code/z_actor.c b/soh/src/code/z_actor.c
-index 54c33e2cfa96fdcc53dc1cea4544383cfe034f0c..26249cfb40eb60572ad8828b6384f9368372f6c9 100644
+index 54c33e2cfa96fdcc53dc1cea4544383cfe034f0c..a3915910cd8e49ad406090a62adac7cd35279fc6 100644
 --- a/soh/src/code/z_actor.c
 +++ b/soh/src/code/z_actor.c
 @@ -1,4 +1,5 @@
@@ -1274,7 +1298,35 @@ index 54c33e2cfa96fdcc53dc1cea4544383cfe034f0c..26249cfb40eb60572ad8828b6384f936
  #include "vt.h"
  
  #include "overlays/actors/ovl_Arms_Hook/z_arms_hook.h"
-@@ -1123,6 +1124,62 @@ void TitleCard_Update(PlayState* play, TitleCardContext* titleCtx) {
+@@ -878,6 +879,27 @@ void TitleCard_InitPlaceName(PlayState* play, TitleCardContext* titleCtx, void*
+                              s32 height, s32 delay) {
+     SceneTableEntry* loadedScene = play->loadedScene;
+     //  size_t size = loadedScene->titleFile.vromEnd - loadedScene->titleFile.vromStart;
++
++    // MissingShip (MS-105): like vanilla, ML shows a place-name card only when the scene's titleFile is non-empty, and
++    // its scene table gives one to just these slots. SoH dropped that size check, so an entrance with the card flag
++    // (ML's flags, row 50) into any other slot drew ML's ribbon with a blank title (e.g. Deep Woods' grottos).
++    switch (play->sceneNum) {
++        case 0x03: // Bmori1
++        case 0x07: // HAKAdan
++        case 0x2B: // kakariko3 (no vanilla card to carry ML's title yet)
++        case 0x32: // night_shop
++        case 0x52: // spot01
++        case 0x55: // spot04
++        case 0x5A: // spot09
++        case 0x5B: // spot10
++        case 0x5D: // spot12
++        case 0x63: // spot20
++            break;
++        default:
++            titleCtx->texture = NULL;
++            return;
++    }
++
+     switch (play->sceneNum) {
+         case SCENE_DEKU_TREE:
+             texture = gDekuTreeTitleCardENGTex;
+@@ -1123,6 +1145,62 @@ void TitleCard_Update(PlayState* play, TitleCardContext* titleCtx) {
      }
  }
  
@@ -1337,7 +1389,7 @@ index 54c33e2cfa96fdcc53dc1cea4544383cfe034f0c..26249cfb40eb60572ad8828b6384f936
  void TitleCard_Draw(PlayState* play, TitleCardContext* titleCtx) {
      s32 width;
      s32 height;
-@@ -1130,6 +1187,10 @@ void TitleCard_Draw(PlayState* play, TitleCardContext* titleCtx) {
+@@ -1130,6 +1208,10 @@ void TitleCard_Draw(PlayState* play, TitleCardContext* titleCtx) {
      s32 doubleWidth;
      s32 titleY;
  
@@ -1348,7 +1400,7 @@ index 54c33e2cfa96fdcc53dc1cea4544383cfe034f0c..26249cfb40eb60572ad8828b6384f936
      if (titleCtx->alpha != 0) {
          width = titleCtx->width;
          height = titleCtx->height;
-@@ -1697,7 +1758,9 @@ void Actor_UpdateBgCheckInfo(PlayState* play, Actor* actor, f32 wallCheckHeight,
+@@ -1697,7 +1779,9 @@ void Actor_UpdateBgCheckInfo(PlayState* play, Actor* actor, f32 wallCheckHeight,
               BgCheck_EntitySphVsWall4(&play->colCtx, &sp64, &actor->world.pos, &actor->prevPos, wallCheckRadius,
                                        &actor->wallPoly, &bgId, actor, wallCheckHeight))) {
              wallPoly = actor->wallPoly;
@@ -2709,6 +2761,178 @@ index 0625c6ab87d330ebf312f7a9e25f5038c5b8e543..fecae2ace76a2b41539dc73b0619d2d9
      };
      s32 pad;
      CollisionHeader* colHeader = NULL;
+diff --git a/soh/src/overlays/actors/ovl_Bg_Spot02_Objects/z_bg_spot02_objects.c b/soh/src/overlays/actors/ovl_Bg_Spot02_Objects/z_bg_spot02_objects.c
+index d649f7d95bfe807feb71413d94c17265c8c4c4c7..3aec11b2f1de0aa1ab3b4969fb4c27b7f883d488 100644
+--- a/soh/src/overlays/actors/ovl_Bg_Spot02_Objects/z_bg_spot02_objects.c
++++ b/soh/src/overlays/actors/ovl_Bg_Spot02_Objects/z_bg_spot02_objects.c
+@@ -7,6 +7,7 @@
+ #include "z_bg_spot02_objects.h"
+ #include "objects/object_spot02_objects/object_spot02_objects.h"
+ #include "soh/Enhancements/game-interactor/GameInteractor_Hooks.h"
++#include "assets/ml_assets.h"
+ 
+ #define FLAGS (ACTOR_FLAG_UPDATE_CULLING_DISABLED | ACTOR_FLAG_DRAW_CULLING_DISABLED)
+ 
+@@ -49,71 +50,62 @@ static InitChainEntry sInitChain[] = {
+     ICHAIN_VEC3F_DIV1000(scale, 100, ICHAIN_STOP),
+ };
+ 
++// MissingShip (MS-101): ML hand-patched Init and replaced Draw, and refilled object 0xA1 with its own small model
++// (object_ml_spot02). ML keeps params whole (vanilla splits off a switch flag in the high byte) and always runs the
++// setup of types 0-2: 0 and 1 as vanilla, anything else takes ML's collision. A non-zero high byte skips the
++// collision. ML then stores 0x80 in colChkInfo.health (read by its Draw), and uses switch flag params & 0x1F: with
++// the flag clear, a high byte of 0 sinks the object 200 units and zeroes health; with it set, a non-zero high byte
++// removes it. spot01 places params 0x002, 0x202 and 0xF0F.
+ void BgSpot02Objects_Init(Actor* thisx, PlayState* play) {
+     s32 pad;
+     BgSpot02Objects* this = (BgSpot02Objects*)thisx;
+     CollisionHeader* colHeader = NULL;
++    u8 high = (u16)thisx->params >> 8;
+ 
+     DynaPolyActor_Init(&this->dyna, 0);
+-    this->unk_16B = (u16)(thisx->params >> 8);
+-    thisx->params = (u16)(thisx->params & 0xFF);
+-
+-    switch (thisx->params) {
+-        case 0:
+-        case 1:
+-        case 2:
+-            Actor_ProcessInitChain(thisx, sInitChain);
+-
+-            if (thisx->params == 0) {
+-                if (Flags_GetSwitch(play, this->unk_16B)) {
+-                    this->actionFunc = func_808AC8FC;
+-                    thisx->world.pos.y += 255.0f;
+-                } else {
+-                    this->actionFunc = func_808ACAFC;
+-                }
+-
+-                CollisionHeader_GetVirtual(&object_spot02_objects_Col_012BA4, &colHeader);
+-            } else if (thisx->params == 1) {
+-                this->actionFunc = func_808AC8FC;
+-                CollisionHeader_GetVirtual(&object_spot02_objects_Col_0128D8, &colHeader);
+-                thisx->flags |= ACTOR_FLAG_IGNORE_POINTLIGHTS;
+-            } else {
+-                if (play->sceneNum == SCENE_GRAVEYARD) {
+-                    this->actionFunc = func_808AC908;
+-                } else {
+-                    this->actionFunc = func_808AC8FC;
+-                }
++    Actor_ProcessInitChain(thisx, sInitChain);
+ 
+-                CollisionHeader_GetVirtual(&object_spot02_objects_Col_0133EC, &colHeader);
+-            }
++    if (thisx->params == 0) {
++        if (Flags_GetSwitch(play, this->unk_16B)) { // never set in ML, so switch flag 0
++            this->actionFunc = func_808AC8FC;
++            thisx->world.pos.y += 255.0f;
++        } else {
++            this->actionFunc = func_808ACAFC;
++        }
+ 
+-            this->dyna.bgId = DynaPoly_SetBgActor(play, &play->colCtx.dyna, thisx, colHeader);
++        CollisionHeader_GetVirtual(&object_spot02_objects_Col_012BA4, &colHeader);
++    } else if (thisx->params == 1) {
++        this->actionFunc = func_808AC8FC;
++        CollisionHeader_GetVirtual(&object_spot02_objects_Col_0128D8, &colHeader);
++        thisx->flags |= ACTOR_FLAG_IGNORE_POINTLIGHTS;
++    } else {
++        if (play->sceneNum == SCENE_GRAVEYARD) {
++            this->actionFunc = func_808AC908;
++        } else {
++            this->actionFunc = func_808AC8FC;
++        }
+ 
+-            if (((Flags_GetEventChkInf(EVENTCHKINF_DESTROYED_ROYAL_FAMILY_TOMB)) &&
+-                 (play->sceneNum == SCENE_GRAVEYARD) && (thisx->params == 2)) ||
+-                (LINK_IS_ADULT && (thisx->params == 1))) {
+-                Actor_Kill(thisx);
+-            }
+-            break;
++        CollisionHeader_GetVirtual(gMlSpot02Col, &colHeader);
++    }
+ 
+-        case 3:
+-            this->unk_16A = 0;
+-            Actor_ChangeCategory(play, &play->actorCtx, thisx, ACTORCAT_ITEMACTION);
+-            this->actionFunc = func_808ACC34;
+-            thisx->draw = func_808ACCB8;
++    if (high == 0) {
++        this->dyna.bgId = DynaPoly_SetBgActor(play, &play->colCtx.dyna, thisx, colHeader);
+ 
+-            if (Flags_GetEventChkInf(EVENTCHKINF_DESTROYED_ROYAL_FAMILY_TOMB)) {
+-                Actor_Kill(thisx);
+-            }
+-            break;
+-
+-        case 4:
+-            this->timer = -12;
+-            this->unk_170 = 0xFFFF;
+-            Actor_ChangeCategory(play, &play->actorCtx, thisx, ACTORCAT_ITEMACTION);
+-            this->actionFunc = func_808AD3D4;
+-            thisx->draw = func_808AD450;
+-            break;
++        if (((Flags_GetEventChkInf(EVENTCHKINF_DESTROYED_ROYAL_FAMILY_TOMB)) && (play->sceneNum == SCENE_GRAVEYARD) &&
++             (thisx->params == 2)) ||
++            (LINK_IS_ADULT && (thisx->params == 1))) {
++            Actor_Kill(thisx);
++        }
++    }
++
++    thisx->colChkInfo.health = 0x80;
++    if (!Flags_GetSwitch(play, thisx->params & 0x1F)) {
++        if (high == 0) {
++            thisx->colChkInfo.health = 0;
++            thisx->world.pos.y -= 200.0f;
++        }
++    } else if (high != 0) {
++        Actor_Kill(thisx);
+     }
+ }
+ 
+@@ -196,14 +188,13 @@ void BgSpot02Objects_Update(Actor* thisx, PlayState* play) {
+     this->actionFunc(this, play);
+ }
+ 
++// MissingShip (MS-101): ML's Draw. A high byte of 0xF draws nothing; 0 draws ML's model. Anything else would scroll
++// the texture of eight vertices in ML's object (+0x1980) and draw its second display list (+0x1A00), but only while
++// (colChkInfo.health & 0x7F) != 0, and Init only ever stores 0x80 or 0, so that branch never draws and is left out.
+ void BgSpot02Objects_Draw(Actor* thisx, PlayState* play) {
+-    static Gfx* dLists[] = {
+-        object_spot02_objects_DL_012A50,
+-        object_spot02_objects_DL_0127C0,
+-        object_spot02_objects_DL_0130B0,
+-    };
+-
+-    Gfx_DrawDListOpa(play, dLists[thisx->params]);
++    if (((u16)thisx->params >> 8) == 0) {
++        Gfx_DrawDListOpa(play, (Gfx*)gMlSpot02DL);
++    }
+ }
+ 
+ void func_808ACC34(BgSpot02Objects* this, PlayState* play) {
+diff --git a/soh/src/overlays/actors/ovl_Bg_Spot16_Bombstone/z_bg_spot16_bombstone.c b/soh/src/overlays/actors/ovl_Bg_Spot16_Bombstone/z_bg_spot16_bombstone.c
+index 067fd9ae9c1dd26014f0abd8ea7011fa9914c03a..b606fbcb2afea7f2de3d9d8e05690b373e779b5b 100644
+--- a/soh/src/overlays/actors/ovl_Bg_Spot16_Bombstone/z_bg_spot16_bombstone.c
++++ b/soh/src/overlays/actors/ovl_Bg_Spot16_Bombstone/z_bg_spot16_bombstone.c
+@@ -407,7 +407,7 @@ void func_808B57E0(BgSpot16Bombstone* this, PlayState* play) {
+             currentBomb = sPlayerBomb;
+             if (currentBomb->timer > 0) {
+                 sTimer = currentBomb->timer + 20;
+-                OnePointCutscene_Init(play, 4180, sTimer, NULL, MAIN_CAM);
++                // MissingShip (MS-096): ML drops this camera cut (and the one when the boulder is hit).
+             }
+         }
+     } else if (player->stateFlags1 & PLAYER_STATE1_CARRYING_ACTOR) {
+@@ -437,7 +437,7 @@ void func_808B5950(BgSpot16Bombstone* this, PlayState* play) {
+ 
+         func_808B561C(this, play);
+ 
+-        OnePointCutscene_Init(play, 4180, 50, NULL, MAIN_CAM);
++        // MissingShip (MS-096): no OnePointCutscene_Init(play, 4180, 50, ...) here in ML.
+ 
+         Flags_SetSwitch(play, this->switchFlag);
+         Flags_SetEventChkInf(EVENTCHKINF_BOMBED_DODONGOS_CAVERN_ENTRANCE);
 diff --git a/soh/src/overlays/actors/ovl_Bg_Treemouth/z_bg_treemouth.c b/soh/src/overlays/actors/ovl_Bg_Treemouth/z_bg_treemouth.c
 index 9c7bbb4e0c240418d1c08ac306c94170c55ad493..af47561820a051e28624ea677f4b0ad7b3986b1f 100644
 --- a/soh/src/overlays/actors/ovl_Bg_Treemouth/z_bg_treemouth.c
@@ -2803,6 +3027,88 @@ index 0009c25dd094f41645f493e86c140b126c28d306..94ae7f8ed07c8aab6b6453b532878e7e
      return false;
  }
  
+diff --git a/soh/src/overlays/actors/ovl_En_Daiku/z_en_daiku.c b/soh/src/overlays/actors/ovl_En_Daiku/z_en_daiku.c
+index 73133dcec8cc00ffbeba0a509c53ab6c79f0977e..1baab3ba6dc5aaaa1b8eb71810f9ad8858b2b73f 100644
+--- a/soh/src/overlays/actors/ovl_En_Daiku/z_en_daiku.c
++++ b/soh/src/overlays/actors/ovl_En_Daiku/z_en_daiku.c
+@@ -165,9 +165,8 @@ void EnDaiku_Init(Actor* thisx, PlayState* play) {
+         isFree = true;
+     }
+ 
+-    if (isFree == true && play->sceneNum == SCENE_THIEVES_HIDEOUT) {
+-        noKill = false;
+-    } else if (isFree == false && play->sceneNum == SCENE_CARPENTERS_TENT) {
++    // MissingShip (MS-100): ML never removes a freed carpenter (its Thieves' Hideout test is dead code).
++    if (isFree == false && play->sceneNum == SCENE_CARPENTERS_TENT) {
+         noKill = false;
+     }
+ 
+@@ -198,22 +197,17 @@ void EnDaiku_Init(Actor* thisx, PlayState* play) {
+     this->initRot = this->actor.world.rot;
+     this->initPos = this->actor.world.pos;
+ 
+-    if (play->sceneNum == SCENE_THIEVES_HIDEOUT) {
+-        EnDaiku_ChangeAnim(this, ENDAIKU_ANIM_STAND, &this->currentAnimIndex);
+-        this->stateFlags |= ENDAIKU_STATEFLAG_1 | ENDAIKU_STATEFLAG_2;
+-        this->actionFunc = EnDaiku_Jailed;
++    // MissingShip (MS-100): ML drops the Thieves' Hideout (jailed) setup; every carpenter idles as in the tent.
++    if ((this->actor.params & 3) == 1 || (this->actor.params & 3) == 3) {
++        EnDaiku_ChangeAnim(this, ENDAIKU_ANIM_SIT, &this->currentAnimIndex);
++        this->stateFlags |= ENDAIKU_STATEFLAG_1;
+     } else {
+-        if ((this->actor.params & 3) == 1 || (this->actor.params & 3) == 3) {
+-            EnDaiku_ChangeAnim(this, ENDAIKU_ANIM_SIT, &this->currentAnimIndex);
+-            this->stateFlags |= ENDAIKU_STATEFLAG_1;
+-        } else {
+-            EnDaiku_ChangeAnim(this, ENDAIKU_ANIM_SHOUT, &this->currentAnimIndex);
+-            this->stateFlags |= ENDAIKU_STATEFLAG_1 | ENDAIKU_STATEFLAG_2;
+-        }
+-
+-        this->skelAnime.curFrame = (s32)(Rand_ZeroOne() * this->skelAnime.endFrame);
+-        this->actionFunc = EnDaiku_TentIdle;
++        EnDaiku_ChangeAnim(this, ENDAIKU_ANIM_SHOUT, &this->currentAnimIndex);
++        this->stateFlags |= ENDAIKU_STATEFLAG_1 | ENDAIKU_STATEFLAG_2;
+     }
++
++    this->skelAnime.curFrame = (s32)(Rand_ZeroOne() * this->skelAnime.endFrame);
++    this->actionFunc = EnDaiku_TentIdle;
+ }
+ 
+ void EnDaiku_Destroy(Actor* thisx, PlayState* play) {
+@@ -238,7 +232,7 @@ s32 EnDaiku_UpdateTalking(EnDaiku* this, PlayState* play) {
+                     newTalkState = ENDAIKU_STATE_NO_TALK;
+                 }
+             }
+-        } else if (play->sceneNum == SCENE_CARPENTERS_TENT) {
++        } else if (play->sceneNum == SCENE_KAKARIKO_VILLAGE) { // MissingShip (MS-100): ML's tent talk plays in spot01
+             if (Message_ShouldAdvance(play)) {
+                 switch (this->actor.textId) {
+                     case 0x6061:
+@@ -299,7 +293,7 @@ void EnDaiku_UpdateText(EnDaiku* this, PlayState* play) {
+                              (ENDAIKU_STATEFLAG_GERUDOFIGHTING | ENDAIKU_STATEFLAG_GERUDODEFEATED))) {
+                     this->actor.textId = 0x6007;
+                 }
+-            } else if (play->sceneNum == SCENE_CARPENTERS_TENT) {
++            } else if (play->sceneNum == SCENE_KAKARIKO_VILLAGE) { // MissingShip (MS-100): tent text in spot01
+                 switch (this->actor.params & 3) {
+                     case 0:
+                         if (CHECK_QUEST_ITEM(QUEST_MEDALLION_SPIRIT)) {
+@@ -598,6 +592,15 @@ void EnDaiku_Update(Actor* thisx, PlayState* play) {
+             Npc_TrackPoint(&this->actor, &this->interactInfo, 0, NPC_TRACKING_HEAD_AND_TORSO);
+         }
+     }
++
++    // MissingShip (MS-100): ML removes the carpenters every frame until switch flag 7 of scene 3 is set (ML builds
++    // Bmori1 in the Forest Temple slot). Otherwise params 0 becomes 4; ML then checks whether Kakariko (Adult) music
++    // is playing, but the call that would start it is nop'd out, so nothing else happens.
++    if (!(gSaveContext.sceneFlags[SCENE_FOREST_TEMPLE].swch & (1 << 7))) {
++        Actor_Kill(&this->actor);
++    } else if (this->actor.params == 0) {
++        this->actor.params = 4;
++    }
+ }
+ 
+ void EnDaiku_Draw(Actor* thisx, PlayState* play) {
 diff --git a/soh/src/overlays/actors/ovl_En_Dekubaba/z_en_dekubaba.c b/soh/src/overlays/actors/ovl_En_Dekubaba/z_en_dekubaba.c
 index b84103a4a0b0e1d4dfd9b3b4a810fb02a1e7b710..ed9889aed1bc722934988d5044bdf941ddba8750 100644
 --- a/soh/src/overlays/actors/ovl_En_Dekubaba/z_en_dekubaba.c
@@ -3013,6 +3319,19 @@ index 89044687e0a9f6f2e5f615f802a0c75a89551319..51a2ac2729c90b00e20c6004fd9dc616
          this->dnsItemEntry->setRupeesAndFlags(this);
          this->dropCollectible = 1;
          this->maintainCollider = 0;
+diff --git a/soh/src/overlays/actors/ovl_En_Dodojr/z_en_dodojr.c b/soh/src/overlays/actors/ovl_En_Dodojr/z_en_dodojr.c
+index 6235d87100c46e6a34a03c85d42d85b081585756..452128dc52374175f64b48023ad105785c93b255 100644
+--- a/soh/src/overlays/actors/ovl_En_Dodojr/z_en_dodojr.c
++++ b/soh/src/overlays/actors/ovl_En_Dodojr/z_en_dodojr.c
+@@ -116,6 +116,8 @@ void func_809F6510(EnDodojr* this, PlayState* play, s32 count) {
+ 
+         pos.x = (Math_SinS(angle) * 22.0f) + this->dustPos.x;
+         pos.z = (Math_CosS(angle) * 22.0f) + this->dustPos.z;
++        // MissingShip (MS-097): ML raises each puff to the Baby Dodongo's own height, not dustPos.y.
++        pos.y = this->actor.world.pos.y;
+ 
+         func_8002836C(play, &pos, &velocity, &accel, &prim, &env, 120, 40, 10);
+     }
 diff --git a/soh/src/overlays/actors/ovl_En_Elf/z_en_elf.c b/soh/src/overlays/actors/ovl_En_Elf/z_en_elf.c
 index 27586062bfa47cf2420105b85edd5096bb5547b8..68fe031219f924539f154ae0ab171d3a443654b2 100644
 --- a/soh/src/overlays/actors/ovl_En_Elf/z_en_elf.c
@@ -3061,6 +3380,23 @@ index cda0fb18ad89bea5da77eaf48c902f1de9d1585a..f8fe6736326195bec1cf58eb5d673df5
  
  void EnFirefly_Init(Actor* thisx, PlayState* play);
  void EnFirefly_Destroy(Actor* thisx, PlayState* play);
+diff --git a/soh/src/overlays/actors/ovl_En_Hs/z_en_hs.c b/soh/src/overlays/actors/ovl_En_Hs/z_en_hs.c
+index d9529d66551efa218cbabff33516d08cde115d0c..3283c2a16c86eee4b6a838d5d1910161bbb43a7d 100644
+--- a/soh/src/overlays/actors/ovl_En_Hs/z_en_hs.c
++++ b/soh/src/overlays/actors/ovl_En_Hs/z_en_hs.c
+@@ -259,6 +259,12 @@ void EnHs_Update(Actor* thisx, PlayState* play) {
+         Math_SmoothStepToS(&this->unk_2A2.x, 0, 6, 6200, 100);
+         Math_SmoothStepToS(&this->unk_2A2.y, 0, 6, 6200, 100);
+     }
++
++    // MissingShip (MS-098): ML removes him every frame until switch flag 7 of scene 3 is set (ML builds Bmori1 in
++    // the Forest Temple slot), the event Ml_Villager also waits for.
++    if (!(gSaveContext.sceneFlags[SCENE_FOREST_TEMPLE].swch & (1 << 7))) {
++        Actor_Kill(&this->actor);
++    }
+ }
+ 
+ s32 EnHs_OverrideLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3f* pos, Vec3s* rot, void* thisx) {
 diff --git a/soh/src/overlays/actors/ovl_En_Hy/z_en_hy.c b/soh/src/overlays/actors/ovl_En_Hy/z_en_hy.c
 index bcd1f362d0efca401ebfc3042ea2f041307255ff..30269610e7b913c76b0baf5829f99e0f57ee6601 100644
 --- a/soh/src/overlays/actors/ovl_En_Hy/z_en_hy.c
@@ -3600,6 +3936,77 @@ index ed2cfe90da6bdb5f768436f265fb5003c5492a5d..d473b2abb9db8f191bcae98be142916b
  }
  
  void EnNutsball_Update(Actor* thisx, PlayState* play) {
+diff --git a/soh/src/overlays/actors/ovl_En_Rd/z_en_rd.c b/soh/src/overlays/actors/ovl_En_Rd/z_en_rd.c
+index 062be3268d79d1962ef0be03f7deeb0ede102d29..afb51f099efd972d1d69c8d6dbb9272a8bf8e0c1 100644
+--- a/soh/src/overlays/actors/ovl_En_Rd/z_en_rd.c
++++ b/soh/src/overlays/actors/ovl_En_Rd/z_en_rd.c
+@@ -170,6 +170,12 @@ void EnRd_Init(Actor* thisx, PlayState* play) {
+     if (thisx->params == 3) {
+         thisx->flags |= ACTOR_FLAG_REACT_TO_LENS;
+     }
++
++    // MissingShip (MS-099): ML removes them once switch flag 7 of scene 3 is set (ML builds Bmori1 in the Forest
++    // Temple slot), the event the villagers wait for.
++    if (gSaveContext.sceneFlags[SCENE_FOREST_TEMPLE].swch & (1 << 7)) {
++        Actor_Kill(thisx);
++    }
+ }
+ 
+ void EnRd_Destroy(Actor* thisx, PlayState* play) {
+@@ -346,9 +352,8 @@ void func_80AE2C1C(EnRd* this, PlayState* play) {
+                 if (!(this->unk_312 & PLAYER_STATE2_GRABBED_BY_ENEMY) &&
+                     GameInteractor_Should(VB_REDEAD_GIBDO_FREEZE_LINK, true, this)) {
+                     player->actor.freezeTimer = 40;
+-                    Player_SetAutoLockOnActor(play, &this->actor);
++                    // MissingShip (MS-099): ML keeps the freeze but drops the lock-on call and the rumble.
+                     GET_PLAYER(play)->autoLockOnActor = &this->actor;
+-                    func_800AA000(this->actor.xzDistToPlayer, 0xFF, 0x14, 0x96);
+                 }
+                 this->unk_306 = 0x3C;
+                 Audio_PlayActorSound2(&this->actor, NA_SE_EN_REDEAD_AIM);
+@@ -575,11 +580,7 @@ void func_80AE3834(EnRd* this, PlayState* play) {
+     s16 temp_v0 = this->actor.yawTowardsPlayer - this->actor.shape.rot.y - this->unk_30E - this->unk_310;
+ 
+     if (ABS(temp_v0) < 0x2008) {
+-        if (!(this->unk_312 & 0x80) && GameInteractor_Should(VB_REDEAD_GIBDO_FREEZE_LINK, true, this)) {
+-            player->actor.freezeTimer = 60;
+-            func_800AA000(this->actor.xzDistToPlayer, 0xFF, 0x14, 0x96);
+-            Player_SetAutoLockOnActor(play, &this->actor);
+-        }
++        // MissingShip (MS-099): ML removes this scream's freeze, rumble and lock-on; only the sound is left.
+         Audio_PlayActorSound2(&this->actor, NA_SE_EN_REDEAD_AIM);
+         func_80AE2B90(this, play);
+     }
+@@ -679,15 +680,11 @@ void func_80AE3C98(EnRd* this, PlayState* play) {
+             if (!Flags_GetSwitch(play, this->unk_312 & 0x7F) && !enemyRandoCCActive) {
+                 Flags_SetSwitch(play, this->unk_312 & 0x7F);
+             }
+-            if (this->unk_314 != 0) {
+-                if (this->unk_314 == 0xB4) {
+-                    func_80AE2630(play, &this->actor, 0);
+-                }
+-                this->actor.scale.y -= 0.000075f;
+-                this->unk_314 -= 5;
+-            } else {
+-                Actor_Kill(&this->actor);
+-            }
++            // MissingShip (MS-099): ML's body never sinks or goes away. Each loop it resets the fade to 0xFF, releases
++            // its followers, and steps to 0xFA without writing the shrunk scale, so vanilla's Actor_Kill is unreachable.
++            this->unk_314 = 0xFF;
++            func_80AE2630(play, &this->actor, 0);
++            this->unk_314 -= 5;
+         } else {
+             this->unk_30C--;
+         }
+@@ -801,7 +798,7 @@ void func_80AE4114(EnRd* this, PlayState* play) {
+                 if (this->actor.colChkInfo.health == 0) {
+                     func_80AE2630(play, &this->actor, 1);
+                     func_80AE3C20(this);
+-                    Item_DropCollectibleRandom(play, 0, &this->actor.world.pos, 0x90);
++                    // MissingShip (MS-099): no item drop in ML.
+                 } else {
+                     func_80AE3A8C(this);
+                 }
 diff --git a/soh/src/overlays/actors/ovl_En_St/z_en_st.c b/soh/src/overlays/actors/ovl_En_St/z_en_st.c
 index 99f4617bb9aae2f179bf2b59f7245ef426f468e0..adafde99b678fb69a9751e2f2aa4c995f84f4aef 100644
 --- a/soh/src/overlays/actors/ovl_En_St/z_en_st.c
@@ -3895,6 +4302,107 @@ index 0000000000000000000000000000000000000000..9d0e8ccf604011cde8af25b6de10a23a
 +    Actor actor;
 +    Actor* heart; // the Piece of Heart it spawned
 +} MlBeamHeart;
++
++#endif
+diff --git a/soh/src/overlays/actors/ovl_Ml_BgmTrigger/z_ml_bgmtrigger.c b/soh/src/overlays/actors/ovl_Ml_BgmTrigger/z_ml_bgmtrigger.c
+new file mode 100644
+index 0000000000000000000000000000000000000000..8f0e1e06e09d485d7c281160afa0e0a16012d8cd
+--- /dev/null
++++ b/soh/src/overlays/actors/ovl_Ml_BgmTrigger/z_ml_bgmtrigger.c
+@@ -0,0 +1,77 @@
++/*
++ * File: z_ml_bgmtrigger.c
++ * Overlay: ovl_Ml_BgmTrigger
++ * Description: The Missing Link - music and sound trigger (ML's rewrite of Bg_Po_Event, slot 0x093)
++ *
++ * Source overlay: ML dma 213, text 0x170. Every frame, by params:
++ *   0  silence the main BGM (sequence 0) until switch flag 7 of scene 3 is set (ML's Bmori1 event)
++ *   1  once that flag is set, play Kakariko Village (Adult)
++ *   2  play Inside the Deku Tree
++ *   3  once, when Link is within 20 units and not above it: his child falling scream
++ * Each music mode first checks the main BGM player's current sequence, so the command is sent only once.
++ * Placed in spot01 (params 1, both rooms), hairal_niwa2 and night_shop.
++ */
++
++#include "z_ml_bgmtrigger.h"
++
++#define FLAGS ACTOR_FLAG_UPDATE_CULLING_DISABLED
++
++void MlBgmTrigger_Init(Actor* thisx, PlayState* play);
++void MlBgmTrigger_Destroy(Actor* thisx, PlayState* play);
++void MlBgmTrigger_Update(Actor* thisx, PlayState* play);
++void MlBgmTrigger_Draw(Actor* thisx, PlayState* play);
++
++const ActorInit Ml_BgmTrigger_InitVars = {
++    ACTOR_BG_PO_EVENT,
++    ACTORCAT_PROP,
++    FLAGS,
++    OBJECT_GAMEPLAY_KEEP,
++    sizeof(MlBgmTrigger),
++    (ActorFunc)MlBgmTrigger_Init,
++    (ActorFunc)MlBgmTrigger_Destroy,
++    (ActorFunc)MlBgmTrigger_Update,
++    (ActorFunc)MlBgmTrigger_Draw,
++    NULL,
++};
++
++void MlBgmTrigger_Init(Actor* thisx, PlayState* play) {
++}
++
++void MlBgmTrigger_Destroy(Actor* thisx, PlayState* play) {
++}
++
++void MlBgmTrigger_Update(Actor* thisx, PlayState* play) {
++    MlBgmTrigger* this = (MlBgmTrigger*)thisx;
++    u16 seqId = gAudioContext.seqPlayers[SEQ_PLAYER_BGM_MAIN].seqId;
++    s32 eventDone = (gSaveContext.sceneFlags[SCENE_FOREST_TEMPLE].swch & (1 << 7)) != 0;
++    Player* player;
++
++    switch (thisx->params) {
++        case 0:
++            if ((seqId != 0) && !eventDone) {
++                Audio_QueueSeqCmd(0);
++            }
++            break;
++        case 1:
++            if ((seqId != NA_BGM_KAKARIKO_ADULT) && eventDone) {
++                Audio_QueueSeqCmd(NA_BGM_KAKARIKO_ADULT);
++            }
++            break;
++        case 2:
++            if (seqId != NA_BGM_INSIDE_DEKU_TREE) {
++                Audio_QueueSeqCmd(NA_BGM_INSIDE_DEKU_TREE);
++            }
++            break;
++        case 3:
++            player = GET_PLAYER(play);
++            if (!this->played && (thisx->xzDistToPlayer <= 20.0f) &&
++                (player->actor.world.pos.y <= thisx->world.pos.y)) {
++                Sfx_PlaySfxCentered(NA_SE_VO_LI_FALL_L_KID);
++                this->played = true;
++            }
++            break;
++    }
++}
++
++void MlBgmTrigger_Draw(Actor* thisx, PlayState* play) {
++}
+diff --git a/soh/src/overlays/actors/ovl_Ml_BgmTrigger/z_ml_bgmtrigger.h b/soh/src/overlays/actors/ovl_Ml_BgmTrigger/z_ml_bgmtrigger.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..42e5da789b656c1cd71c3e82f06fcdd7617c4372
+--- /dev/null
++++ b/soh/src/overlays/actors/ovl_Ml_BgmTrigger/z_ml_bgmtrigger.h
+@@ -0,0 +1,12 @@
++#ifndef Z_ML_BGMTRIGGER_H
++#define Z_ML_BGMTRIGGER_H
++
++#include <libultraship/libultra.h>
++#include "global.h"
++
++typedef struct MlBgmTrigger {
++    /* 0x0000 */ Actor actor;
++    /* 0x014C */ u8 played;
++} MlBgmTrigger; // ML instanceSize = 0x150
 +
 +#endif
 diff --git a/soh/src/overlays/actors/ovl_Ml_EventSpawner/z_ml_eventspawner.c b/soh/src/overlays/actors/ovl_Ml_EventSpawner/z_ml_eventspawner.c
@@ -6939,6 +7447,74 @@ index 0000000000000000000000000000000000000000..f36a3903b8ae89303e5f675b50d1a70e
 +} MlSongBlock;
 +
 +#endif
+diff --git a/soh/src/overlays/actors/ovl_Ml_TalkSpot/z_ml_talkspot.c b/soh/src/overlays/actors/ovl_Ml_TalkSpot/z_ml_talkspot.c
+new file mode 100644
+index 0000000000000000000000000000000000000000..7006e3e2c27b7795bcbee084de57dc84411acf83
+--- /dev/null
++++ b/soh/src/overlays/actors/ovl_Ml_TalkSpot/z_ml_talkspot.c
+@@ -0,0 +1,45 @@
++/*
++ * File: z_ml_talkspot.c
++ * Overlay: ovl_Ml_TalkSpot
++ * Description: The Missing Link - an invisible spot Link can talk to (ML's rewrite of Bg_Toki_Hikari, slot 0x06A)
++ *
++ * Source overlay: ML dma 203, text 0x80. Init sets the focus 100 units up and text 0x6026; Update offers the
++ * conversation within 150 units. Nothing is drawn. Placed once in spot01 (params 0xFFFF, unused).
++ */
++
++#include "z_ml_talkspot.h"
++
++#define FLAGS (ACTOR_FLAG_ATTENTION_ENABLED | ACTOR_FLAG_UPDATE_CULLING_DISABLED)
++
++void MlTalkSpot_Init(Actor* thisx, PlayState* play);
++void MlTalkSpot_Destroy(Actor* thisx, PlayState* play);
++void MlTalkSpot_Update(Actor* thisx, PlayState* play);
++void MlTalkSpot_Draw(Actor* thisx, PlayState* play);
++
++const ActorInit Ml_TalkSpot_InitVars = {
++    ACTOR_BG_TOKI_HIKARI,
++    ACTORCAT_PROP,
++    FLAGS,
++    OBJECT_GAMEPLAY_KEEP,
++    sizeof(MlTalkSpot),
++    (ActorFunc)MlTalkSpot_Init,
++    (ActorFunc)MlTalkSpot_Destroy,
++    (ActorFunc)MlTalkSpot_Update,
++    (ActorFunc)MlTalkSpot_Draw,
++    NULL,
++};
++
++void MlTalkSpot_Init(Actor* thisx, PlayState* play) {
++    Actor_SetFocus(thisx, 100.0f);
++    thisx->textId = 0x6026;
++}
++
++void MlTalkSpot_Destroy(Actor* thisx, PlayState* play) {
++}
++
++void MlTalkSpot_Update(Actor* thisx, PlayState* play) {
++    func_8002F2CC(thisx, play, 150.0f); // offer to talk within 150 units
++}
++
++void MlTalkSpot_Draw(Actor* thisx, PlayState* play) {
++}
+diff --git a/soh/src/overlays/actors/ovl_Ml_TalkSpot/z_ml_talkspot.h b/soh/src/overlays/actors/ovl_Ml_TalkSpot/z_ml_talkspot.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..91fbf1ef07545ea070252750c101519ba2f42a73
+--- /dev/null
++++ b/soh/src/overlays/actors/ovl_Ml_TalkSpot/z_ml_talkspot.h
+@@ -0,0 +1,11 @@
++#ifndef Z_ML_TALKSPOT_H
++#define Z_ML_TALKSPOT_H
++
++#include <libultraship/libultra.h>
++#include "global.h"
++
++typedef struct MlTalkSpot {
++    /* 0x0000 */ Actor actor;
++} MlTalkSpot; // ML instanceSize = 0x14C
++
++#endif
 diff --git a/soh/src/overlays/actors/ovl_Ml_TreeBridge/z_ml_treebridge.c b/soh/src/overlays/actors/ovl_Ml_TreeBridge/z_ml_treebridge.c
 new file mode 100644
 index 0000000000000000000000000000000000000000..31ce8de9735e2250f7a235cbc086f39311fa2b52
@@ -7350,6 +7926,72 @@ index 602236816e00bd47b23243d5ec9de20a1f425c29..028cd295a5fb5ac8870d08d4a13fd437
  
  void ObjBombiwa_Init(Actor* thisx, PlayState* play);
  void ObjBombiwa_InitCollision(Actor* thisx, PlayState* play);
+diff --git a/soh/src/overlays/actors/ovl_Obj_Makekinsuta/z_obj_makekinsuta.c b/soh/src/overlays/actors/ovl_Obj_Makekinsuta/z_obj_makekinsuta.c
+index e7f72f7f6d23836251000e1e44500884ea6f15a2..8f8e52a137846a9277f21c1e76329162b9269ea7 100644
+--- a/soh/src/overlays/actors/ovl_Obj_Makekinsuta/z_obj_makekinsuta.c
++++ b/soh/src/overlays/actors/ovl_Obj_Makekinsuta/z_obj_makekinsuta.c
+@@ -47,12 +47,43 @@ void ObjMakekinsuta_Init(Actor* thisx, PlayState* play) {
+     this->actionFunc = func_80B98320;
+ }
+ 
++// MissingShip (MS-102): ML rewrote this soft-soil spot. Bugs dropped on it for 60 frames still trigger it, but it
++// brings up a Piece of Heart (collectible flag 0x0C) instead of a Gold Skulltula: the heart rises 40 units out of the
++// soil, 10 a frame, then settles back to the soil.
++static void ObjMakekinsuta_MlRaiseHeartPiece(ObjMakekinsuta* this, PlayState* play) {
++    Actor* heartPiece = play->actorCtx.actorLists[ACTORCAT_MISC].head;
++
++    // ML keeps moving the pointer even if Link grabbed the heart mid-rise (harmless stale memory on N64); here, stop
++    // once it is gone.
++    while ((heartPiece != NULL) && (heartPiece != this->heartPiece)) {
++        heartPiece = heartPiece->next;
++    }
++    if (heartPiece == NULL) {
++        this->actionFunc = ObjMakekinsuta_DoNothing;
++        return;
++    }
++
++    if (!this->risen) {
++        if (heartPiece->world.pos.y < this->actor.world.pos.y + 40.0f) {
++            heartPiece->world.pos.y += 10.0f;
++        } else {
++            this->risen = true;
++        }
++    } else if (this->actor.world.pos.y < heartPiece->world.pos.y) {
++        heartPiece->world.pos.y -= 10.0f;
++    } else {
++        heartPiece->world.pos.y = this->actor.world.pos.y;
++        this->actionFunc = ObjMakekinsuta_DoNothing;
++    }
++}
++
+ void func_80B98320(ObjMakekinsuta* this, PlayState* play) {
+     if (this->unk_152 != 0) {
+-        if (GameInteractor_Should(VB_SPAWN_BEAN_SKULLTULA, this->timer >= 60) && !func_8002DEEC(GET_PLAYER(play))) {
+-            Actor_Spawn(&play->actorCtx, play, ACTOR_EN_SW, this->actor.world.pos.x, this->actor.world.pos.y,
+-                        this->actor.world.pos.z, 0, this->actor.shape.rot.y, 0, (this->actor.params | 0x8000));
+-            this->actionFunc = ObjMakekinsuta_DoNothing;
++        if ((this->timer >= 60) && !func_8002DEEC(GET_PLAYER(play))) {
++            this->heartPiece = Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ITEM00, this->actor.world.pos.x,
++                                           this->actor.world.pos.y, this->actor.world.pos.z, 0,
++                                           this->actor.shape.rot.y, 0, (0x0C << 8) | ITEM00_HEART_PIECE);
++            this->actionFunc = ObjMakekinsuta_MlRaiseHeartPiece;
+         } else {
+             this->timer++;
+         }
+diff --git a/soh/src/overlays/actors/ovl_Obj_Makekinsuta/z_obj_makekinsuta.h b/soh/src/overlays/actors/ovl_Obj_Makekinsuta/z_obj_makekinsuta.h
+index 6324a12a51060b2892daf89d41a86ea552f45ab1..3548648170c4b77bb1694dbfa8ecc6d65851df55 100644
+--- a/soh/src/overlays/actors/ovl_Obj_Makekinsuta/z_obj_makekinsuta.h
++++ b/soh/src/overlays/actors/ovl_Obj_Makekinsuta/z_obj_makekinsuta.h
+@@ -13,6 +13,8 @@ typedef struct ObjMakekinsuta {
+     /* 0x014C */ ObjMakekinsutaActionFunc actionFunc;
+     /* 0x150  */ s16 timer;
+     /* 0x152  */ s16 unk_152;
+-} ObjMakekinsuta; // size = 0x0154
++    /* 0x154  */ Actor* heartPiece; // MissingShip (MS-102): ML's fields
++    /* 0x158  */ s16 risen;
++} ObjMakekinsuta; // size = 0x015C
+ 
+ #endif
 diff --git a/soh/src/overlays/actors/ovl_Obj_Oshihiki/z_obj_oshihiki.c b/soh/src/overlays/actors/ovl_Obj_Oshihiki/z_obj_oshihiki.c
 index 16f592a7d62864772aa2a830fee6dc4a724dc8c9..81563455907823e1368332d9879dd2bbc44f37ea 100644
 --- a/soh/src/overlays/actors/ovl_Obj_Oshihiki/z_obj_oshihiki.c
@@ -7371,6 +8013,21 @@ index 16f592a7d62864772aa2a830fee6dc4a724dc8c9..81563455907823e1368332d9879dd2bb
      { { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 } }, // ganons castle
      { { 232, 210, 176 }, { 232, 210, 176 }, { 232, 210, 176 }, { 232, 210, 176 } }, // Gerudo Training Ground
  };
+diff --git a/soh/src/overlays/actors/ovl_Oceff_Storm/z_oceff_storm.c b/soh/src/overlays/actors/ovl_Oceff_Storm/z_oceff_storm.c
+index 07dd6a3e6ed856d84af0b2082ab43ebde82db5fd..d11dbb3cedbf3decc70fb385a27a98489022f596 100644
+--- a/soh/src/overlays/actors/ovl_Oceff_Storm/z_oceff_storm.c
++++ b/soh/src/overlays/actors/ovl_Oceff_Storm/z_oceff_storm.c
+@@ -53,8 +53,8 @@ void OceffStorm_Init(Actor* thisx, PlayState* play) {
+         OceffStorm_SetupAction(this, OceffStorm_UnkAction);
+         this->actor.draw = OceffStorm_Draw2;
+     } else {
+-        Actor_Spawn(&play->actorCtx, play, ACTOR_EN_OKARINA_EFFECT, this->actor.world.pos.x,
+-                    this->actor.world.pos.y - 30.0f, this->actor.world.pos.z, 0, 0, 0, 1);
++        // MissingShip (MS-106): ML deletes En_Okarina_Effect (its actor-table entry is empty), so this spawn fails
++        // there and the Song of Storms brings no rain.
+     }
+ }
+ 
 diff --git a/soh/src/overlays/actors/ovl_Oceff_Wipe/z_oceff_wipe.c b/soh/src/overlays/actors/ovl_Oceff_Wipe/z_oceff_wipe.c
 index ee7efb87929e747aa8c7fc8df7cafebaefe79546..a66f524f1d3a5c6c31c7773948a85e3aa900aa54 100644
 --- a/soh/src/overlays/actors/ovl_Oceff_Wipe/z_oceff_wipe.c
