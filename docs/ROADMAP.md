@@ -28,6 +28,21 @@ Last full review: **2026-09-25**, with every ML file compared against PAL MQ Deb
   2. a generic SoH feature;
   3. an upstreamable bugfix;
   4. ML-specific C, as a last resort.
+- **Keep ML as its author intended** (owner decision, 2026-09-25). If a report turns out to match ML's own code, close it as authentic. QoL is limited to what stock SoH already has, plus options the owner asks for.
+- **Use ML's area names** in docs, issues, the checklist and tool output, with the slot name after them where it helps, e.g. "Hollow Root Keep (HAKAdan)". Code identifiers keep the slot names. The map lives in `hacks/ml/hack.json` (`areas`); tools print it through `hack.area()`.
+
+| Slot | Area | | Slot | Area |
+|---|---|---|---|---|
+| `spot04` | Kokiri Forest (title card) | | `HAKAdan` | Hollow Root Keep (title card) |
+| `spot10` | Deep Woods (title card) | | `HAKAdan_bs` | Hollow Root Keep boss room |
+| `spot09` | Deku Road (title card) | | `Bmori1` | Monktown Sanctuary (title card) |
+| `spot12` | Deku Grove (title card) | | `kakariko3` | Library (title card) |
+| `spot20` | Cluck Cluck Ranch (title card) | | `night_shop` | Bombchu Shop (title card) |
+| `malon_stable` | Cluck Cluck Ranch stable | | `kakariko` | Monktown Valley house |
+| `spot01` | Monktown Valley (title card) | | `kokiri_home`, `kokiri_home3`, `kokiri_home4` | Kokiri Forest houses |
+| `turibori` | Fishing Pond | | `spot00` | title screen |
+
+Not named yet, because they have no title card and no clear parent area: `ydan`, `spot05`, `spot11`, `tokinoma`, `hairal_niwa2`, `link_home`, `testroom`.
 
 ---
 

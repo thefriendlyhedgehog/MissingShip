@@ -17,68 +17,68 @@ Actors living in `code` (En_Item00, En_A_Obj) and slots ML deleted are left out;
 
 | Actor | ML change vs MQ Debug | Placed in (unique entries) | Spawned by | Status | Verified |
 |---|---|---|---|---|---|
-| `0x003` Ml_Fishpond | ML custom (0x1f0 bytes) | turibori ×13 | — | ported | yes (2026-09-23) |
-| `0x005` Ml_TreeBridge | ML custom (0x840 bytes) | spot04 | — | ported | no |
-| `0x006` Ml_Villager | ML custom (0x390 bytes) | spot01 ×3 | — | ported | yes (2026-09-23) |
-| `0x012` Ml_Ending (was En_Dodongo) | REWRITTEN (text 0x840 vs 0x2570) | spot10 | — | ported (Ml_Ending: ML's ending card, spot10 room 1 cutscene header; MS-138) | no |
-| `0x013` En_Firefly | 0 text / 1 data words differ | HAKAdan ×7, kakariko ×6, spot00 ×4, spot10 ×10, ydan ×2 | — | ported | no |
-| `0x019` En_Niw | 0 text / 1 data words differ | malon_stable ×4, spot20 ×4 | En_Niw_Girl | no change (padding byte) | no |
-| `0x01a` Ml_RoomClearSwitch | ML custom (0x2b0 bytes) | HAKAdan | — | ported (Ml_RoomClearSwitch, MS-108) | no |
-| `0x01c` Ml_BeamHeart (was En_Reeba) | REWRITTEN (text 0x130 vs 0x1890) | spot09 | En_Encount1 | ported (Ml_BeamHeart: Blade Beam Piece of Heart) | no |
-| `0x01d` En_Peehat | REWRITTEN (text 0x3290 vs 0x3280) | Bmori1 | — | ported (mini-boss music, MS-038) | no |
+| `0x003` Ml_Fishpond | ML custom (0x1f0 bytes) | Fishing Pond (turibori) ×13 | — | ported | yes (2026-09-23) |
+| `0x005` Ml_TreeBridge | ML custom (0x840 bytes) | Kokiri Forest (spot04) | — | ported | no |
+| `0x006` Ml_Villager | ML custom (0x390 bytes) | Monktown Valley (spot01) ×3 | — | ported | yes (2026-09-23) |
+| `0x012` Ml_Ending (was En_Dodongo) | REWRITTEN (text 0x840 vs 0x2570) | Deep Woods (spot10) | — | ported (Ml_Ending: ML's ending card, spot10 room 1 cutscene header; MS-138) | no |
+| `0x013` En_Firefly | 0 text / 1 data words differ | Hollow Root Keep (HAKAdan) ×7, Monktown Valley house (kakariko) ×6, title screen (spot00) ×4, Deep Woods (spot10) ×10, ydan ×2 | — | ported | no |
+| `0x019` En_Niw | 0 text / 1 data words differ | Cluck Cluck Ranch stable (malon_stable) ×4, Cluck Cluck Ranch (spot20) ×4 | En_Niw_Girl | no change (padding byte) | no |
+| `0x01a` Ml_RoomClearSwitch | ML custom (0x2b0 bytes) | Hollow Root Keep (HAKAdan) | — | ported (Ml_RoomClearSwitch, MS-108) | no |
+| `0x01c` Ml_BeamHeart (was En_Reeba) | REWRITTEN (text 0x130 vs 0x1890) | Deku Road (spot09) | En_Encount1 | ported (Ml_BeamHeart: Blade Beam Piece of Heart) | no |
+| `0x01d` En_Peehat | REWRITTEN (text 0x3290 vs 0x3280) | Monktown Sanctuary (Bmori1) | — | ported (mini-boss music, MS-038) | no |
 | `0x01f` Ml_Prologue | ML custom (0x4b0 bytes) | link_home | — | ported (Ml_Prologue) | no |
-| `0x027` Ml_Torch (was Boss_Dodongo) | REWRITTEN (text 0xb40 vs 0x5e50) | Bmori1 ×2 | — | ported (Ml_Torch in z_obj_syokudai.c, MS-038) | no |
-| `0x02f` En_Dodojr | REWRITTEN (text 0x1ac0 vs 0x1ad0) | spot01 ×4 | — | ported (MS-097) | no |
-| `0x037` En_St | 0 text / 1 data words differ | HAKAdan ×8, spot12 | — | ported (not hostile) | no |
-| `0x03d` En_Ossan | 5818 text / 0 data words differ | night_shop | — | ported (MS-035) | no |
-| `0x03e` Bg_Treemouth | REWRITTEN (text 0x230 vs 0x920) | spot00, spot10 ×6 | — | ported | no |
-| `0x040` Ml_ElevatorSpawner (was Bg_Hidan_Dalm) | REWRITTEN (text 0x100 vs 0x660) | HAKAdan | — | ported (Ml_ElevatorSpawner, MS-109) | no |
-| `0x055` En_Dekubaba | 1 text / 1 data words differ | HAKAdan ×12, spot09 ×5, spot10 ×4, spot12 ×9, testroom ×2, ydan ×5 | Ml_EventSpawner | ported | no |
-| `0x060` En_Dekunuts | 1 text / 0 data words differ  hooks ['0x806008e0'] | spot10 ×3, ydan ×3 | — | ported | no |
-| `0x06a` Ml_TalkSpot (was Bg_Toki_Hikari) | REWRITTEN (text 0x80 vs 0xd50) | spot01 | — | ported (Ml_TalkSpot, MS-103) | no |
-| `0x087` Ml_HakaLift (was Bg_Mori_Elevator) | REWRITTEN (text 0x280 vs 0xa10) | HAKAdan | — | ported (Ml_HakaLift, MS-111) | no |
-| `0x08e` En_Floormas | REWRITTEN (text 0x32e0 vs 0x2f40) | HAKAdan | — | ported (giant variant, MS-112) | no |
-| `0x090` En_Rd | REWRITTEN (text 0x2490 vs 0x24a0) | night_shop, spot01 ×6 | Ml_Thief | ported (MS-099) | no |
-| `0x093` Ml_BgmTrigger (was Bg_Po_Event) | REWRITTEN (text 0x170 vs 0x1aa0) | hairal_niwa2 ×2, night_shop, spot01 ×2 | — | ported (Ml_BgmTrigger, MS-104) | no |
-| `0x095` En_Sw | 0 text / 1 data words differ | HAKAdan ×8 | En_Wood02, Obj_Kibako2 | ported (not hostile) | no |
-| `0x098` Ml_Pillar (was En_Du) | REWRITTEN (text 0x2e0 vs 0x15e0) | Bmori1 ×3 | — | ported (Ml_Pillar, object_ml_du, MS-038) | no |
-| `0x09b` Door_Ana | 3 text / 8 data words differ | spot09, spot10 ×3, spot12 ×3 | — | ported | no |
-| `0x09c` Bg_Spot02_Objects | 1131 text / 4 data words differ | spot01 ×3 | — | ported (MS-101, object_ml_spot02) | no |
-| `0x0ba` Ml_BossVa (was Boss_Va) | REWRITTEN (text 0x2c00 vs 0xcc80) | HAKAdan_bs | — | ported (Ml_BossVa, MS-037) | no |
-| `0x0c3` Ml_Thief (was En_Nb) | REWRITTEN (text 0x590 vs 0x3550) | Bmori1 ×3 | — | ported (Ml_Thief, object_ml_nb, MS-038) | no |
-| `0x0cd` Bg_Spot16_Bombstone | 322 text / 0 data words differ | spot01 | — | ported (MS-096) | no |
+| `0x027` Ml_Torch (was Boss_Dodongo) | REWRITTEN (text 0xb40 vs 0x5e50) | Monktown Sanctuary (Bmori1) ×2 | — | ported (Ml_Torch in z_obj_syokudai.c, MS-038) | no |
+| `0x02f` En_Dodojr | REWRITTEN (text 0x1ac0 vs 0x1ad0) | Monktown Valley (spot01) ×4 | — | ported (MS-097) | no |
+| `0x037` En_St | 0 text / 1 data words differ | Hollow Root Keep (HAKAdan) ×8, Deku Grove (spot12) | — | ported (not hostile) | no |
+| `0x03d` En_Ossan | 5818 text / 0 data words differ | Bombchu Shop (night_shop) | — | ported (MS-035) | no |
+| `0x03e` Bg_Treemouth | REWRITTEN (text 0x230 vs 0x920) | title screen (spot00), Deep Woods (spot10) ×6 | — | ported | no |
+| `0x040` Ml_ElevatorSpawner (was Bg_Hidan_Dalm) | REWRITTEN (text 0x100 vs 0x660) | Hollow Root Keep (HAKAdan) | — | ported (Ml_ElevatorSpawner, MS-109) | no |
+| `0x055` En_Dekubaba | 1 text / 1 data words differ | Hollow Root Keep (HAKAdan) ×12, Deku Road (spot09) ×5, Deep Woods (spot10) ×4, Deku Grove (spot12) ×9, testroom ×2, ydan ×5 | Ml_EventSpawner | ported | no |
+| `0x060` En_Dekunuts | 1 text / 0 data words differ  hooks ['0x806008e0'] | Deep Woods (spot10) ×3, ydan ×3 | — | ported | no |
+| `0x06a` Ml_TalkSpot (was Bg_Toki_Hikari) | REWRITTEN (text 0x80 vs 0xd50) | Monktown Valley (spot01) | — | ported (Ml_TalkSpot, MS-103) | no |
+| `0x087` Ml_HakaLift (was Bg_Mori_Elevator) | REWRITTEN (text 0x280 vs 0xa10) | Hollow Root Keep (HAKAdan) | — | ported (Ml_HakaLift, MS-111) | no |
+| `0x08e` En_Floormas | REWRITTEN (text 0x32e0 vs 0x2f40) | Hollow Root Keep (HAKAdan) | — | ported (giant variant, MS-112) | no |
+| `0x090` En_Rd | REWRITTEN (text 0x2490 vs 0x24a0) | Bombchu Shop (night_shop), Monktown Valley (spot01) ×6 | Ml_Thief | ported (MS-099) | no |
+| `0x093` Ml_BgmTrigger (was Bg_Po_Event) | REWRITTEN (text 0x170 vs 0x1aa0) | hairal_niwa2 ×2, Bombchu Shop (night_shop), Monktown Valley (spot01) ×2 | — | ported (Ml_BgmTrigger, MS-104) | no |
+| `0x095` En_Sw | 0 text / 1 data words differ | Hollow Root Keep (HAKAdan) ×8 | En_Wood02, Obj_Kibako2 | ported (not hostile) | no |
+| `0x098` Ml_Pillar (was En_Du) | REWRITTEN (text 0x2e0 vs 0x15e0) | Monktown Sanctuary (Bmori1) ×3 | — | ported (Ml_Pillar, object_ml_du, MS-038) | no |
+| `0x09b` Door_Ana | 3 text / 8 data words differ | Deku Road (spot09), Deep Woods (spot10) ×3, Deku Grove (spot12) ×3 | — | ported | no |
+| `0x09c` Bg_Spot02_Objects | 1131 text / 4 data words differ | Monktown Valley (spot01) ×3 | — | ported (MS-101, object_ml_spot02) | no |
+| `0x0ba` Ml_BossVa (was Boss_Va) | REWRITTEN (text 0x2c00 vs 0xcc80) | Hollow Root Keep boss room (HAKAdan_bs) | — | ported (Ml_BossVa, MS-037) | no |
+| `0x0c3` Ml_Thief (was En_Nb) | REWRITTEN (text 0x590 vs 0x3550) | Monktown Sanctuary (Bmori1) ×3 | — | ported (Ml_Thief, object_ml_nb, MS-038) | no |
+| `0x0cd` Bg_Spot16_Bombstone | 322 text / 0 data words differ | Monktown Valley (spot01) | — | ported (MS-096) | no |
 | `0x0cf` Bg_Hidan_Kowarerukabe | 0 text / 7 data words differ | ydan | — | ported (object_ml_crackwall) | no |
-| `0x0dc` Ml_SlideBlock (was Boss_Tw) | REWRITTEN (text 0x490 vs 0x11ae0) | HAKAdan ×26 | — | ported (Ml_SlideBlock, MS-107) | no |
-| `0x0e3` Ml_LiftBlock (was Bg_Mori_Hashira4) | REWRITTEN (text 0x130 vs 0x540) | spot10 | — | ported | no |
-| `0x0e7` Ml_Malon (was En_Ma1) | REWRITTEN (text 0xbf0 vs 0xf90) | spot20 | Ml_EventSpawner | ported (Ml_Malon: new model object_ml_ma1, race host + finish line; spawns Ml_Cucco) | no |
-| `0x0ff` Obj_Oshihiki | 0 text / 6 data words differ | HAKAdan, ydan ×2 | — | ported (ML colours) | no |
-| `0x115` Ml_SkullKid (was En_Skj) | REWRITTEN (text 0x4c0 vs 0x3390) | spot09 ×2 | — | ported (Ml_SkullKid) | no |
+| `0x0dc` Ml_SlideBlock (was Boss_Tw) | REWRITTEN (text 0x490 vs 0x11ae0) | Hollow Root Keep (HAKAdan) ×26 | — | ported (Ml_SlideBlock, MS-107) | no |
+| `0x0e3` Ml_LiftBlock (was Bg_Mori_Hashira4) | REWRITTEN (text 0x130 vs 0x540) | Deep Woods (spot10) | — | ported | no |
+| `0x0e7` Ml_Malon (was En_Ma1) | REWRITTEN (text 0xbf0 vs 0xf90) | Cluck Cluck Ranch (spot20) | Ml_EventSpawner | ported (Ml_Malon: new model object_ml_ma1, race host + finish line; spawns Ml_Cucco) | no |
+| `0x0ff` Obj_Oshihiki | 0 text / 6 data words differ | Hollow Root Keep (HAKAdan), ydan ×2 | — | ported (ML colours) | no |
+| `0x115` Ml_SkullKid (was En_Skj) | REWRITTEN (text 0x4c0 vs 0x3390) | Deku Road (spot09) ×2 | — | ported (Ml_SkullKid) | no |
 | `0x119` Ml_DnsShop (was Demo_Shd) | REWRITTEN (text 0x1040 vs 0x430) | spot11 | — | ported (Ml_DnsShop: En_Dns copy, grotto heart-piece scrub) | no |
-| `0x11a` En_Dns | REWRITTEN (text 0x1080 vs 0x1070) | spot11 ×2, spot12 ×3 | En_Shopnuts | ported | no |
-| `0x121` Ml_EventSpawner (was En_Fz) | REWRITTEN (text 0xba0 vs 0x1db0) | spot09 ×11, spot20, testroom | Ml_Fishpond | ported (Ml_EventSpawner, all modes; mode 3 waits on MS-037's entrance 0x420) | no |
-| `0x127` Obj_Bombiwa | 0 text / 1 data words differ | spot01 ×4, spot09 | — | ported (update-culling off) | no |
-| `0x12c` Ml_Lift (was Obj_Lift) | REWRITTEN (text 0x270 vs 0x8d0) | HAKAdan ×2, spot10 ×2, spot12 | — | ported | no |
-| `0x133` En_Daiku | REWRITTEN (text 0x1500 vs 0x1510) | spot01 ×2 | — | ported (MS-100) | no |
-| `0x13c` En_Niw_Lady | REWRITTEN (text 0x16d0 vs 0x1740) | spot10 | — | ported (the certificate hand-in is ML's only edit) | no |
-| `0x13e` En_Ms | 342 text / 0 data words differ | spot12 | — | ported (Bunny Hood for Deku Nuts) | no |
-| `0x13f` En_Hs | 546 text / 0 data words differ | spot01 | — | ported (MS-098) | no |
-| `0x147` En_Wonder_Talk | REWRITTEN (text 0x5f0 vs 0x860) | kakariko3 ×7, kokiri_home4 | — | ported (text = params + 0x300, no kill, no follow-up). Vanilla's Poe spawn (slot 0x0D) is kept but unreachable from ML's Init; it would now spawn Ml_Cucco | no |
-| `0x163` En_Ko | 544 text / 0 data words differ  hooks ['0x80602200'] | spot04 ×5 | — | ported (MS-032) | no |
-| `0x165` En_Weather_Tag | REWRITTEN (text 0xdb0 vs 0xe00) | spot12 | Ml_TreeBridge | ported (no story-flag kills) | no |
-| `0x16d` En_Md | 263 text / 0 data words differ  hooks ['0x80602200'] | spot04 | — | ported | no |
-| `0x16e` En_Hy | REWRITTEN (text 0x28c0 vs 0x28f0) | malon_stable ×2, spot20 | — | ported (the certificate offer is ML's only edit) | certificate offer: yes (2026-09-23) |
-| `0x171` En_Mag | REWRITTEN (text 0x1730 vs 0x23a0) | spot00 | — | ported (ML title screen, object_ml_mag, MS-039) | no |
-| `0x174` Ml_FogWall (was Demo_Gt) | REWRITTEN (text 0xe70 vs 0x4f50) | spot10 ×9 | — | ported | no |
-| `0x17a` Ml_PushBlock (was Boss_Ganon2) | REWRITTEN (text 0x1690 vs 0x9e00) | kakariko3 | — | ported (Ml_PushBlock in z_obj_oshihiki.c, object_ml_ganon2, MS-039) | no |
-| `0x17b` Ml_Elevator (was En_Kakasi) | REWRITTEN (text 0x390 vs 0xc70) | HAKAdan ×2 | Ml_ElevatorSpawner | ported (Ml_Elevator, MS-110) | no |
-| `0x188` En_Ssh | REWRITTEN (text 0x20e0 vs 0x2150) | HAKAdan ×4 | — | ported (MS-113) | no |
+| `0x11a` En_Dns | REWRITTEN (text 0x1080 vs 0x1070) | spot11 ×2, Deku Grove (spot12) ×3 | En_Shopnuts | ported | no |
+| `0x121` Ml_EventSpawner (was En_Fz) | REWRITTEN (text 0xba0 vs 0x1db0) | Deku Road (spot09) ×11, Cluck Cluck Ranch (spot20), testroom | Ml_Fishpond | ported (Ml_EventSpawner, all modes; mode 3 waits on MS-037's entrance 0x420) | no |
+| `0x127` Obj_Bombiwa | 0 text / 1 data words differ | Monktown Valley (spot01) ×4, Deku Road (spot09) | — | ported (update-culling off) | no |
+| `0x12c` Ml_Lift (was Obj_Lift) | REWRITTEN (text 0x270 vs 0x8d0) | Hollow Root Keep (HAKAdan) ×2, Deep Woods (spot10) ×2, Deku Grove (spot12) | — | ported | no |
+| `0x133` En_Daiku | REWRITTEN (text 0x1500 vs 0x1510) | Monktown Valley (spot01) ×2 | — | ported (MS-100) | no |
+| `0x13c` En_Niw_Lady | REWRITTEN (text 0x16d0 vs 0x1740) | Deep Woods (spot10) | — | ported (the certificate hand-in is ML's only edit) | no |
+| `0x13e` En_Ms | 342 text / 0 data words differ | Deku Grove (spot12) | — | ported (Bunny Hood for Deku Nuts) | no |
+| `0x13f` En_Hs | 546 text / 0 data words differ | Monktown Valley (spot01) | — | ported (MS-098) | no |
+| `0x147` En_Wonder_Talk | REWRITTEN (text 0x5f0 vs 0x860) | Library (kakariko3) ×7, Kokiri Forest house (kokiri_home4) | — | ported (text = params + 0x300, no kill, no follow-up). Vanilla's Poe spawn (slot 0x0D) is kept but unreachable from ML's Init; it would now spawn Ml_Cucco | no |
+| `0x163` En_Ko | 544 text / 0 data words differ  hooks ['0x80602200'] | Kokiri Forest (spot04) ×5 | — | ported (MS-032) | no |
+| `0x165` En_Weather_Tag | REWRITTEN (text 0xdb0 vs 0xe00) | Deku Grove (spot12) | Ml_TreeBridge | ported (no story-flag kills) | no |
+| `0x16d` En_Md | 263 text / 0 data words differ  hooks ['0x80602200'] | Kokiri Forest (spot04) | — | ported | no |
+| `0x16e` En_Hy | REWRITTEN (text 0x28c0 vs 0x28f0) | Cluck Cluck Ranch stable (malon_stable) ×2, Cluck Cluck Ranch (spot20) | — | ported (the certificate offer is ML's only edit) | certificate offer: yes (2026-09-23) |
+| `0x171` En_Mag | REWRITTEN (text 0x1730 vs 0x23a0) | title screen (spot00) | — | ported (ML title screen, object_ml_mag, MS-039) | no |
+| `0x174` Ml_FogWall (was Demo_Gt) | REWRITTEN (text 0xe70 vs 0x4f50) | Deep Woods (spot10) ×9 | — | ported | no |
+| `0x17a` Ml_PushBlock (was Boss_Ganon2) | REWRITTEN (text 0x1690 vs 0x9e00) | Library (kakariko3) | — | ported (Ml_PushBlock in z_obj_oshihiki.c, object_ml_ganon2, MS-039) | no |
+| `0x17b` Ml_Elevator (was En_Kakasi) | REWRITTEN (text 0x390 vs 0xc70) | Hollow Root Keep (HAKAdan) ×2 | Ml_ElevatorSpawner | ported (Ml_Elevator, MS-110) | no |
+| `0x188` En_Ssh | REWRITTEN (text 0x20e0 vs 0x2150) | Hollow Root Keep (HAKAdan) ×4 | — | ported (MS-113) | no |
 | `0x18c` Ml_HoleScrub (was En_Weiyer) | REWRITTEN (text 0x1910 vs 0x17e0) | ydan | — | ported (Ml_HoleScrub: hole-hopping scrub) | no |
-| `0x18e` Bg_Jya_1flift | REWRITTEN (text 0x540 vs 0x580) | Bmori1 | — | ported (ML sliding platform, MS-038) | no |
-| `0x192` Ml_HintNuts (was En_Hintnuts) | REWRITTEN (text 0x7f0 vs 0x17e0) | spot09 ×3, spot10 ×2, spot12, ydan ×2 | — | ported | no |
-| `0x1bb` Bg_Mizu_Shutter | 252 text / 0 data words differ | HAKAdan | — | ported (MS-114) | no |
-| `0x1c6` En_Cow | 1 text / 0 data words differ | spot01, spot20 | — | ported (limb 5 drawn) | no |
-| `0x1cf` Obj_Makekinsuta | REWRITTEN (text 0x1a0 vs 0x1a0) | spot01 | — | ported (MS-102) | no |
-| `0x1d1` Ml_SongBlock (was Obj_Timeblock) | REWRITTEN (text 0x260 vs 0xb30) | spot04 | — | ported | no |
+| `0x18e` Bg_Jya_1flift | REWRITTEN (text 0x540 vs 0x580) | Monktown Sanctuary (Bmori1) | — | ported (ML sliding platform, MS-038) | no |
+| `0x192` Ml_HintNuts (was En_Hintnuts) | REWRITTEN (text 0x7f0 vs 0x17e0) | Deku Road (spot09) ×3, Deep Woods (spot10) ×2, Deku Grove (spot12), ydan ×2 | — | ported | no |
+| `0x1bb` Bg_Mizu_Shutter | 252 text / 0 data words differ | Hollow Root Keep (HAKAdan) | — | ported (MS-114) | no |
+| `0x1c6` En_Cow | 1 text / 0 data words differ | Monktown Valley (spot01), Cluck Cluck Ranch (spot20) | — | ported (limb 5 drawn) | no |
+| `0x1cf` Obj_Makekinsuta | REWRITTEN (text 0x1a0 vs 0x1a0) | Monktown Valley (spot01) | — | ported (MS-102) | no |
+| `0x1d1` Ml_SongBlock (was Obj_Timeblock) | REWRITTEN (text 0x260 vs 0xb30) | Kokiri Forest (spot04) | — | ported | no |
 
 ## Not placed, spawned at runtime (11)
 

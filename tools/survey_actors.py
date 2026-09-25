@@ -161,7 +161,7 @@ for a in range(1, N_ACTORS):
     status, verified = old.get(a, ('todo', 'no'))
     vn = vanilla_name(a)
     name = f'`{a:#05x}` {NAME.get(a, "?")}' + (f' (was {vn})' if vn and vn != NAME.get(a) else '')
-    where = ', '.join(f'{k} ×{v}' if v > 1 else k for k, v in sorted(p.items())) if p else '—'
+    where = ', '.join(f'{hack.area(k)} ×{v}' if v > 1 else hack.area(k) for k, v in sorted(p.items())) if p else '—'
     who = ', '.join(sorted(x for x in (s or []) if x != NAME.get(a))) or '—'
     row = f'| {name} | {c} | {where} | {who} | {status} | {verified} |'
     rows['placed' if p else 'spawned' if s else 'orphan'].append(row)

@@ -21,6 +21,32 @@
     "code_dma": "114",
     "player_dma": "102",
     "player_ram": "0x804D23B0",
-    "custom_code": [{"dma": "507", "vram": "0x80600000"}]
+    "custom_code": [
+      {
+        "dma": "507",
+        "vram": "0x80600000"
+      }
+    ]
+  },
+  "areas_comment": "Player-facing area names by scene (MS-130), for docs and tool output. Scenes with a title card use ML's own card text (dma = the scene table's title file); the rest are named after the titled area that leads into them. Unnamed scenes print their slot name.",
+  "areas": {
+    "Bmori1": "Monktown Sanctuary",
+    "HAKAdan": "Hollow Root Keep",
+    "kakariko3": "Library",
+    "night_shop": "Bombchu Shop",
+    "spot01": "Monktown Valley",
+    "spot04": "Kokiri Forest",
+    "spot09": "Deku Road",
+    "spot10": "Deep Woods",
+    "spot12": "Deku Grove",
+    "spot20": "Cluck Cluck Ranch",
+    "HAKAdan_bs": "Hollow Root Keep boss room",
+    "kokiri_home": "Kokiri Forest house",
+    "kokiri_home3": "Kokiri Forest house",
+    "kokiri_home4": "Kokiri Forest house",
+    "kakariko": "Monktown Valley house",
+    "malon_stable": "Cluck Cluck Ranch stable",
+    "turibori": "Fishing Pond",
+    "spot00": "title screen"
   }
 }

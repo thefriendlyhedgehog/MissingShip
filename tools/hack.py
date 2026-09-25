@@ -27,6 +27,12 @@ H, B = _side(_cfg['hack']), _side(_cfg['baseline'])
 HACK_ROM = _os.path.join(mspaths.ROOT, H.rom) if hasattr(H, 'rom') else mspaths.ML_ROM
 BASE_ROM = _os.path.join(mspaths.ROOT, B.rom) if hasattr(B, 'rom') else mspaths.DEBUG_ROM
 CUSTOM = [(int(c['dma'], 0), int(c['vram'], 0)) for c in _cfg['hack'].get('custom_code', [])]
+AREAS = _cfg.get('areas', {})
+
+def area(scene):
+    """'Hollow Root Keep (HAKAdan)' for a scene name with or without '_scene'; the bare slot name when unnamed."""
+    s = scene[:-6] if scene.endswith('_scene') else scene
+    return f'{AREAS[s]} ({s})' if s in AREAS else s
 
 CODE_VRAM, ACTOR_TABLE, ACTOR_STRIDE, N_ACTORS = B.code_vram, B.actor_table, B.actor_stride, B.actor_count
 SPAWN, SPAWN_CHILD = B.actor_spawn, B.actor_spawn_as_child
