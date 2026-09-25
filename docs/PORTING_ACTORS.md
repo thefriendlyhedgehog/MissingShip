@@ -148,3 +148,4 @@ Then:
 - Set the actor's **Status** in `docs/ML_ACTOR_INVENTORY.md` to `ported (...)`.
 - Set its **Verified** cell to `yes (date)` only once it has been seen working in the game.
 - To refresh the inventory's machine columns (changes, placements, spawners), run `python3 tools/survey_actors.py --write`; hand-edited cells survive.
+- Finally run `python3 tools/check.py --build`. The pre-push hook runs it without `--build` anyway.

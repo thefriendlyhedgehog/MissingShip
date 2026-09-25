@@ -16,6 +16,7 @@ Last full review: **2026-09-25**, with every ML file compared against PAL MQ Deb
 
 ## How we work
 
+- **Checks before pushing.** `python3 tools/check.py` must pass. The `.githooks/pre-push` hook runs it once enabled with `git config core.hooksPath .githooks`.
 - **One issue per change.** Put the issue ID in the commit subject, e.g. `MS-014: port En_Nutsball`.
 - **The ledger rule.** Any engine change updates `ENGINE_CHANGES.md` in the same commit. An actor change also updates `ML_ACTOR_INVENTORY.md`.
 - **Engine work is commits.** Commit it on `missingship` in the engine fork (same `MS-nnn` subject), push, then run `tools/genpatch.py` so `docs/*.patch` match (`PORTING_ACTORS.md` step 6).
@@ -180,6 +181,7 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 | [MS-007](https://github.com/thefriendlyhedgehog/MissingShip/issues/7) | infra | Engine changes live only as a 350 KB patch; code review and merges are painful. | Decide: a private Shipwright fork with a `missingship` branch (patch generated from it) vs. the patch-only workflow. **Done: fork.** |
 | [MS-008](https://github.com/thefriendlyhedgehog/MissingShip/issues/8) | infra | No automated checks. | A script that runs `checkexits.py`, `checkhashes.py`, the patch-applies check and a build; run it before every push (or in CI where ROMs are available). |
 | [MS-009](https://github.com/thefriendlyhedgehog/MissingShip/issues/51) | infra | The pipeline mixes two ZAPD builds (SOHCombo's for scenes/objects/UI, Shipwright's patched one for audio), and `inject_titles.py` reads SOHCombo's unpatched `scene_table.h`. The app's `Info.plist` has an absolute `SHIP_HOME` (double-click only). | One patched ZAPD + one table source; archive still identical; `MS_SOHCOMBO` removed. |
+| [MS-014](https://github.com/thefriendlyhedgehog/MissingShip/issues/52) | infra | The engine fork is cloned next to this repo and nothing pins which engine commit a MissingShip commit expects. | The engine is a submodule (e.g. `engine/`): one `git clone --recursive` builds and runs everything; `mspaths` defaults to it. |
 
 ### M1: Verify
 
@@ -202,6 +204,7 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 | [MS-025](https://github.com/thefriendlyhedgehog/MissingShip/issues/18) | port | Skyboxes `vr_fine1` and `vr_cloud2` (+ palettes; ML dma 128/129, 138/139). | Injected. |
 | [MS-026](https://github.com/thefriendlyhedgehog/MissingShip/issues/19) | port | gameplay_keep sword-turn animations (`kiruL_end`, `kiruR`, `kiruR_end`). | Injected under the vanilla names (check how they interact with Link's animations, MS-051). |
 | [MS-027](https://github.com/thefriendlyhedgehog/MissingShip/issues/20) | port | Entrance flags: 39 entrances with ML's music-continuity / transition-style flags. | A data override, or a small engine table plus a ledger row. |
+| [MS-015](https://github.com/thefriendlyhedgehog/MissingShip/issues/53) | port | 9 IA4 scene texture references (spot01 ×7, spot04, tokinoma) are skipped on purpose (`ML_SKIP_FMT=4:0`, listed in `pipeline/unresolved.json`) because they once crashed Metal; the zero-size guard now exists. | The three rooms draw their IA4 textures; `unresolved.json` empty or explained. |
 
 ### M3: Actors, by scene
 
@@ -265,6 +268,7 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 
 ### Done
 
+- MS-008: `tools/check.py` runs every automated check in about 3 s: compile, engine fork clean and pushed, patches current, ledger, exits, resource hashes (the 9 deliberate IA4 skips allowed exactly, MS-015 filed), inventory vs ROMs; `--build` builds the engine. Committed `.githooks/pre-push` hook. Verified that injected faults fail it. Also: `survey_actors.py --check`, `checkexits.py` now exits 1 on problems; filed MS-014 (engine as submodule) and MS-015.
 - MS-007: engine moved to private repos with full upstream history: MissingShip-Shipwright, MissingShip-libultraship, MissingShip-ZAPDTR (branch `missingship`; not GitHub forks, which are always public). Baseline commit 993e7fb on tag 9.2.3; submodules repointed. `tools/genpatch.py` regenerates docs/*.patch (content identical to the old patches; full blob hashes for stable output); `--check` for MS-008. A fresh recursive clone was verified.
 - MS-006: `tools/hookscan.py` re-derives every hook from every overlay's relocation table (plus `code` words that differ from MQ Debug). There are 20 live hook sites outside the player/pause menu, not the claimed 17 overlays (ten of those were vanilla). There is no code past 0x80608000. The player overlay's fixed RAM address is 0x804D23B0. Ledger section rewritten with a per-target status table.
 - MS-055: resolved by MS-006. There is no ML code past 0x80608000; the reported targets were data decoded as jumps.

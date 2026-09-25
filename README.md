@@ -109,6 +109,27 @@ cmake -S . -B build-ml && cmake --build build-ml --target soh -j8
 - **Analysis tools:** `tools/*.py` also need the OoT **PAL MQ Debug** ROM at `roms/oot-mq-debug-pal.z64`.
 - **Knobs:** set these env vars to restore old workarounds; the defaults are correct: `ML_STRIP_ACTORS`, `ML_REMAP_OBJECTS`, `ML_FIX_SETTIMG_FMT`, `ML_SCRUB`, `ML_STRIP_CS`, `ML_SKIP_FMT`, `ML_SKIP_SLOTS`, `ML_NO_START_FIX`.
 
+### Checks
+
+```bash
+python3 tools/check.py            # a few seconds; add --build to build the engine too
+```
+
+It runs every automated check and prints PASS / FAIL / SKIP. A check whose inputs are missing, such as the ROMs or the engine checkout, is skipped. The checks cover:
+- the scripts compile;
+- the engine fork has no uncommitted or unpushed work;
+- `docs/*.patch` match the fork;
+- the change log names every patched file;
+- every ML exit remaps correctly;
+- every resource reference in the mod resolves, except the pipeline's deliberate skips;
+- the actor inventory matches the ROMs.
+
+The committed git hook runs it before every push. Enable it once per clone:
+
+```bash
+git config core.hooksPath .githooks
+```
+
 ### Paths
 
 Every script finds its inputs through `pipeline/mspaths.py` (the shell scripts source `pipeline/mspaths.sh`). Defaults resolve from the repo's own location, so a fresh clone works anywhere. Check what it resolved with:

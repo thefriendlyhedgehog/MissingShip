@@ -1,0 +1,5 @@
+#!/bin/sh
+# MissingShip pre-push check (MS-008): runs tools/check.py and blocks the push if anything fails.
+# Enable once per clone:   git config core.hooksPath .githooks
+# Skip in an emergency:     git push --no-verify
+exec python3 "$(git rev-parse --show-toplevel)/tools/check.py"

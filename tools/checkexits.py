@@ -73,3 +73,4 @@ for slot, (dma, name) in sorted(by_slot.items()):
 print(f'{checked} exits checked, {problems} problems')
 for name, entries in zero_gaps:
     print(f'NOT REMAPPED {name}: (exit, got, want) {entries}')
+sys.exit(1 if problems or zero_gaps else 0)

@@ -8,7 +8,7 @@ For every actor slot it works out, straight from the ROMs:
     (dma 507) and every actor overlay, taking the last immediate loaded into the actor-id register before the call.
 
 The hand-written Status and Verified columns are carried over from the existing inventory by actor slot, so
-regenerating never loses them. Usage: survey_actors.py [--write]   (without --write it prints to stdout)
+regenerating never loses them. Usage: survey_actors.py [--write | --check]   (default: print to stdout)
 """
 import os as _os, sys as _sys
 _sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..', 'pipeline'))
@@ -200,6 +200,10 @@ These may be spawned with a computed id, from a cutscene, or not at all. Check b
 if warn:
     out += '\n## Warnings\n\nSlots ML deleted that some surviving code still spawns. These are vanilla paths ML should never reach; the static scan can also report false positives from ML\'s custom code, which mixes code and data.\n\n' + '\n'.join('- ' + w for w in warn) + '\n'
 
+if '--check' in sys.argv:   # the machine columns must match the ROMs (hand columns were carried over above)
+    same = _os.path.exists(INV) and open(INV).read() == out
+    print('inventory up to date' if same else 'inventory is stale: run tools/survey_actors.py --write')
+    sys.exit(0 if same else 1)
 if '--write' in sys.argv:
     open(INV, 'w').write(out); print(f'wrote {INV}: {len(rows["placed"])} placed, {len(rows["spawned"])} spawned, {len(rows["orphan"])} orphan, {len(warn)} warnings')
 else:
