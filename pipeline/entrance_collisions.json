@@ -2,5 +2,29 @@
   "0x058": "Harmless (MS-095): ML 0x058 and 0x157 are identical entries (Lon Lon Ranch slot, spawn 0, flags 0x4183 / 0x4102), so they land on SoH 0x157 together. Ml_EventSpawner compares 0x058 only in its spot09 (Gerudo Valley slot) chase modes, and no route into spot09 leaves the entrance at a ranch value; Ml_Malon only writes 0x058 back as the ranch respawn after the race.",
   "raw": {
     "src/overlays/actors/ovl_Ml_FogWall/z_ml_fogwall.c:94 ENTR_KOKIRI_FOREST_0": "Vanilla En_Holl code copied into ML's fog wall (credits check: Kokiri Forest entrance with scene layer 8). ML's copy compares ML 0x0EE, which maps to the same SoH 0x0EE; the extra ML entrances landing there (0x008-0x00B, ...) never use layer 8, so the check behaves the same."
+  },
+  "vanilla": {
+    "src/code/z_actor.c ENTR_KOKIRI_FOREST_0": "Vanilla's ending (Kokiri Forest, scene layer 4 or 8, or its cutscene camera). ML's credits reach Kokiri Forest through ENTR_MISSINGSHIP_KOKIRI_FOREST_EVENT, not 0x0EE; the other routes (0x008 from tokinoma, 0x574 cutscene 106) never use those layers. Here: NPC head tracking uses the camera eye during a cutscene at 0x0EE, so on a first-visit intro after 0x008/0x574 NPCs face the camera instead of Link. Cosmetic.",
+    "src/overlays/actors/ovl_Object_Kankyo/z_object_kankyo.c ENTR_KOKIRI_FOREST_0": "Vanilla's ending (Kokiri Forest, scene layer 4 or 8, or its cutscene camera). ML's credits reach Kokiri Forest through ENTR_MISSINGSHIP_KOKIRI_FOREST_EVENT, not 0x0EE; the other routes (0x008 from tokinoma, 0x574 cutscene 106) never use those layers. Here: only with sceneSetupIndex 4 (vanilla ending).",
+    "src/overlays/actors/ovl_Demo_Effect/z_demo_effect.c ENTR_KOKIRI_FOREST_0": "Vanilla's ending (Kokiri Forest, scene layer 4 or 8, or its cutscene camera). ML's credits reach Kokiri Forest through ENTR_MISSINGSHIP_KOKIRI_FOREST_EVENT, not 0x0EE; the other routes (0x008 from tokinoma, 0x574 cutscene 106) never use those layers. Here: Farore's light scale; ML places no Demo_Effect in Kokiri Forest.",
+    "src/overlays/actors/ovl_En_Holl/z_en_holl.c ENTR_KOKIRI_FOREST_0": "Vanilla's ending (Kokiri Forest, scene layer 4 or 8, or its cutscene camera). ML's credits reach Kokiri Forest through ENTR_MISSINGSHIP_KOKIRI_FOREST_EVENT, not 0x0EE; the other routes (0x008 from tokinoma, 0x574 cutscene 106) never use those layers. Here: only with scene layer 8.",
+    "src/code/z_demo.c ENTR_TEMPLE_OF_TIME_ENTRANCE": "Only route is ML's prologue (cutscene 119 -> ML 0x5F0 -> tokinoma). A cutscene's misc command 3 there sets env flag 2 (no ported ML code reads env flags), and a transition plays the white-out sound. Cosmetic at most.",
+    "src/overlays/actors/ovl_Demo_Effect/z_demo_effect.c ENTR_TEMPLE_OF_TIME_ENTRANCE": "Only route is ML's prologue into tokinoma; ML places no Demo_Effect there.",
+    "src/overlays/actors/ovl_Door_Warp1/z_door_warp1.c ENTR_TEMPLE_OF_TIME_ENTRANCE": "Only route is ML's prologue into tokinoma; no blue warp there.",
+    "src/code/z_kankyo.c ENTR_TEMPLE_OF_TIME_ENTRANCE": "Environment_WarpSongLeave: sets vanilla's 'entered' flag for a warp song's destination; no warp song lands here, only ML's prologue (cutscene 119).",
+    "src/code/z_kankyo.c ENTR_DESERT_COLOSSUS_EAST_EXIT": "Environment_WarpSongLeave: sets vanilla's 'entered' flag for a warp song's destination; no warp song lands here, only ML's Deku Grove grotto 0x11C (grotto table).",
+    "src/code/z_kankyo.c ENTR_SACRED_FOREST_MEADOW_SOUTH_EXIT": "An empty case (break only).",
+    "src/overlays/actors/ovl_En_Horse/z_en_horse.c ENTR_LON_LON_RANCH_ENTRANCE": "Vanilla ending (ranch, scene layer 9); ML never loads the ranch on that layer.",
+    "src/overlays/actors/ovl_En_Ms/z_en_ms.c ENTR_LON_LON_RANCH_ENTRANCE": "Vanilla ending (ranch, scene layer 8); ML never loads the ranch on that layer.",
+    "src/overlays/actors/ovl_En_Jsjutan/z_en_jsjutan.c ENTR_LON_LON_RANCH_ENTRANCE": "Vanilla ending (ranch, scene layer 8); ML never loads the ranch on that layer.",
+    "src/overlays/actors/ovl_En_Horse_Link_Child/z_en_horse_link_child.c ENTR_LON_LON_RANCH_1": "Young Epona neighs on arrival; ML 0x080 (malon_stable exit) also plays it. Sound only; ML's young Epona is Ml_EventSpawner.",
+    "src/overlays/misc/ovl_kaleido_scope/z_kaleido_scope_PAL.c ENTR_DEKU_TREE_ENTRANCE": "Save-in-dungeon switch: MissingShip already translates the entrance to ML's number (MlEntrance_FromSoh) before this switch, so the literals compare ML numbers as in ML.",
+    "src/overlays/misc/ovl_kaleido_scope/z_kaleido_scope_PAL.c ENTR_FOREST_TEMPLE_ENTRANCE": "Save-in-dungeon switch, translated to ML numbers first (see ENTR_DEKU_TREE_ENTRANCE).",
+    "src/overlays/misc/ovl_kaleido_scope/z_kaleido_scope_PAL.c ENTR_SHADOW_TEMPLE_ENTRANCE": "Save-in-dungeon switch, translated to ML numbers first (see ENTR_DEKU_TREE_ENTRANCE).",
+    "src/overlays/misc/ovl_kaleido_scope/z_kaleido_scope_PAL.c ENTR_SHADOW_TEMPLE_BOSS_ENTRANCE": "Save-in-dungeon switch, translated to ML numbers first (see ENTR_DEKU_TREE_ENTRANCE).",
+    "soh/Enhancements/TimeSavers/SkipCutscene/Story/SkipBlueWarp.cpp ENTR_KOKIRI_FOREST_0": "Skip Story's Deku Tree blue warp: needs cutsceneIndex 0xFFF1 at 0x0EE, which no ML route sets (ML's credits use ENTR_MISSINGSHIP_KOKIRI_FOREST_EVENT with 0xFFF0).",
+    "soh/Enhancements/TimeSavers/SkipCutscene/Story/SkipBlueWarp.cpp ENTR_KAKARIKO_VILLAGE_FRONT_GATE": "Skip Story's Fire Temple blue warp: needs cutsceneIndex 0xFFF3 at 0x0DB (Monktown Valley's gate), which no ML route sets.",
+    "soh/Enhancements/timesaver_hook_handlers.cpp ENTR_TEMPLE_OF_TIME_ENTRANCE": "Skip Songs' Song of Time: needs cutsceneIndex 0xFFF7 at 0x053, which no ML route sets (the prologue arrives with 0).",
+    "soh/Enhancements/timesplits/TimeSplits.cpp ENTR_LOST_WOODS_SOUTH_EXIT": "Only relabels a Lost Woods entrance split as misc; ML's split list (ledger 111) has no Lost Woods entrance split."
   }
 }

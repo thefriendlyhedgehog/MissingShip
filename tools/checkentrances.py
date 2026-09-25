@@ -7,7 +7,8 @@ that arrives at the same SoH entrance: scene exits (every header), cutscene dest
 code that sets an entrance. A route from outside L's group would trigger L's behaviour too.
 
 A collision that is known to be harmless goes in pipeline/entrance_collisions.json with the reason; anything else fails.
-It also fails on any raw SoH `ENTR_` constant in ported ML code (ovl_Ml_*, code/ml_*.c, lines marked MissingShip): several
+It also fails on a vanilla `ENTR_` comparison that an ML route from another group reaches (MS-120), and on any raw
+SoH `ENTR_` constant in ported ML code (ovl_Ml_*, code/ml_*.c, lines marked MissingShip): several
 ML entrances can share one SoH entrance, so the code must say which ML one it means (MS-148). Documented exceptions go
 under "raw" in entrance_collisions.json.
 Usage: checkentrances.py [-v]
@@ -91,9 +92,8 @@ for f in glob.glob(SOH + '/src/**/*.c', recursive=True):
 
 # ---- raw SoH ENTR_ constants in ML-ported code (MS-148) ------------------------------------------------------
 # ML's code means its own entrance numbers; a raw SoH constant in ported code is only right where SoH's entrance and
-# the ML entrance that maps to it are one and the same group. Vanilla code is left alone (its literals were
-# reviewed in MS-148: none reachable in ML); ported code is anything in ovl_Ml_* or code/ml_*.c, and lines marked
-# "MissingShip".
+# the ML entrance that maps to it are one and the same group. Vanilla code's literals are checked separately below
+# (MS-120); ported code is anything in ovl_Ml_* or code/ml_*.c, and lines marked "MissingShip".
 allowed = json.load(open(PIPE + '/entrance_collisions.json'))
 ENTR = {}
 for l in open(SOH + '/include/tables/entrance_table.h'):
@@ -116,6 +116,37 @@ for f in glob.glob(SOH + '/src/**/*.c', recursive=True):
                            ' with MlEntrance_ToSoh, or document it under "raw" in entrance_collisions.json')
 for r in raw_bad: print('RAW ENTRANCE', r)
 
+# ---- vanilla code's ENTR_ comparisons (MS-120) -----------------------------------------------------------------
+# Vanilla code runs in ML too, where the same literal compared ML's own entrance number. The port maps ML entrances
+# onto SoH's by (scene, spawn), so ML routes from other groups can now reach a vanilla check that ML's never did: ML's
+# Deku Grove upper grotto (0x120) landed on SoH 0x1E1 and froze Link under vanilla's Requiem trigger. A comparison is
+# flagged when an ML route from outside the literal's own group arrives at it; document harmless ones under "vanilla"
+# (keyed by file and constant) in entrance_collisions.json. Code under #if 0 and randomizer code are skipped.
+vanilla_bad = []
+for f in sorted(glob.glob(SOH + '/src/**/*.c', recursive=True) + glob.glob(SOH + '/soh/**/*.cpp', recursive=True)):
+    rel = _os.path.relpath(f, SOH)
+    if 'andomizer' in rel or '/ovl_Ml_' in f or _os.path.basename(f).startswith('ml_'):
+        continue
+    skip = 0
+    for n, l in enumerate(open(f, errors='replace'), 1):
+        s = l.strip()
+        if skip:
+            skip += s.startswith('#if') - s.startswith('#endif')
+            continue
+        if s.startswith('#if 0'):
+            skip = 1; continue
+        if s.startswith('//') or 'MlEntrance_' in l or not re.search(r'==|!=|\bcase\b', l):
+            continue
+        for mm in re.finditer(r'\bENTR_\w+', l):
+            v = ENTR.get(mm.group(0))
+            if v is None or mm.group(0).startswith('ENTR_MISSINGSHIP'): continue
+            others = sorted(e for e, _ in routes.get(v, ()) if not same_group(v, e))
+            if others and f'{rel} {mm.group(0)}' not in allowed.get('vanilla', {}):
+                vanilla_bad.append(f'{rel}:{n}: {mm.group(0)} ({v:#05x}) is also reached by ML '
+                                   + ', '.join(f'{e:#05x}' for e in others[:6]) + ' -- ML compared its own '
+                                   f'{v:#05x}; guard it or document it under "vanilla" in entrance_collisions.json')
+for r in vanilla_bad: print('VANILLA ENTRANCE', r)
+
 if '-v' in sys.argv:
     kinds = collections.Counter(why.split()[0] for s in routes.values() for _, why in s)
     print(f'routes into {len(routes)} SoH entrances: ' + ', '.join(f'{n} {k}' for k, n in kinds.most_common()))
@@ -131,6 +162,6 @@ for base, where in sorted(set(compares)):
         print(f'ML {base:#05x} (SoH {soh:#05x}) compared at {where}: {status}')
         for e, why in others: print(f'    also arrives: ML {e:#05x} via {why}')
         if status == 'documented': print(f'    documented: {allowed[f"{base:#05x}"]}')
-bad += len(raw_bad)
+bad += len(raw_bad) + len(vanilla_bad)
 print(f'{len(set(b for b, _ in compares))} compared entrances, {bad} undocumented collisions')
 sys.exit(1 if bad else 0)

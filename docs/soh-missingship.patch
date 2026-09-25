@@ -924,6 +924,32 @@ index 5e213d26d3b86035539a646ebad81c16273a2c18..93dfea96cbe8cef2386b814dca231066
  };
  
  static std::vector<TimeObject> activeTimers;
+diff --git a/soh/soh/Enhancements/TimeSavers/SkipCutscene/SkipIntro.cpp b/soh/soh/Enhancements/TimeSavers/SkipCutscene/SkipIntro.cpp
+index d9e08b3dafe51861746db65ae542f04b4d8ba83d..e9f32c61f4af5ae0f8c48e02844fe31f22586f39 100644
+--- a/soh/soh/Enhancements/TimeSavers/SkipCutscene/SkipIntro.cpp
++++ b/soh/soh/Enhancements/TimeSavers/SkipCutscene/SkipIntro.cpp
+@@ -6,6 +6,7 @@ extern "C" {
+ #include "z64save.h"
+ #include "functions.h"
+ #include "soh/Enhancements/randomizer/randomizer_entrance.h"
++#include "src/code/ml_entrance_map.h"
+ extern PlayState* gPlayState;
+ extern SaveContext gSaveContext;
+ }
+@@ -41,6 +42,13 @@ void RegisterSkipIntro() {
+             // Skip the intro cutscene for whatever the spawnEntrance is calculated to be.
+             if (gSaveContext.entranceIndex == spawnEntrance) {
+                 gSaveContext.cutsceneIndex = 0;
++                // MissingShip: in ML this entrance is the prologue's staging room, which has no geometry; skipping the
++                // prologue there left the player in a black void. Go where the prologue ends instead: its cutscene
++                // destination 119 (ML entrance 0x5F0) at noon, as that case sets.
++                if (!IS_RANDO && spawnEntrance == ENTR_LINKS_HOUSE_CHILD_SPAWN) {
++                    gSaveContext.entranceIndex = MlEntrance_ToSoh(0x5F0);
++                    gSaveContext.dayTime = gSaveContext.skyboxTime = 0x8000;
++                }
+                 *should = false;
+             }
+         }
 diff --git a/soh/soh/Enhancements/bootcommands.c b/soh/soh/Enhancements/bootcommands.c
 index b9838cf66ad00fe4a7e4cfc4c6f11eaa38edbc3d..c80b9e4e02fb316971b9bd55edefbdf8df500fe2 100644
 --- a/soh/soh/Enhancements/bootcommands.c
@@ -1126,6 +1152,29 @@ index 6b2e1c721403c768e65f8ebbeef8764d00806ee0..a58c289a987fc589833caf41dccb4322
      strcpy(itemTimestampDisplayName[TIMESTAMP_BOSSRUSH_FINISH],      "Boss Rush Finished: ");
      strcpy(itemTimestampDisplayName[TIMESTAMP_FOUND_GREG],           "Greg Found:         ");
      strcpy(itemTimestampDisplayName[TIMESTAMP_TRIFORCE_COMPLETED],   "Triforce Completed: ");
+diff --git a/soh/soh/Enhancements/timesaver_hook_handlers.cpp b/soh/soh/Enhancements/timesaver_hook_handlers.cpp
+index be043b6da3ac10220b741420859a484b27f5747c..b367a44e9c3da2d2b238b619388520fb497fb27d 100644
+--- a/soh/soh/Enhancements/timesaver_hook_handlers.cpp
++++ b/soh/soh/Enhancements/timesaver_hook_handlers.cpp
+@@ -144,6 +144,10 @@ void TimeSaverOnVanillaBehaviorHandler(GIVanillaBehavior id, bool* should, va_li
+                     *should = false;
+                 }
+ 
++                // MissingShip (MS-120): the Requiem and Nocturne skips are left out with the triggers they stand in
++                // for (Cutscene_HandleConditionalTriggers): SoH 0x1E1 is ML's Deku Grove upper scrub grotto and SoH
++                // 0x0DB Monktown Valley's gate, and ML gives Requiem in its credits tour.
++#if 0
+                 // Requiem of Spirit
+                 if ((gSaveContext.entranceIndex == ENTR_DESERT_COLOSSUS_OUTSIDE_TEMPLE) &&
+                     !Flags_GetEventChkInf(EVENTCHKINF_LEARNED_REQUIEM_OF_SPIRIT)) {
+@@ -171,6 +175,7 @@ void TimeSaverOnVanillaBehaviorHandler(GIVanillaBehavior id, bool* should, va_li
+                     }
+                     *should = false;
+                 }
++#endif
+             }
+ 
+             if (CVarGetInteger(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.Story"), IS_RANDO)) {
 diff --git a/soh/soh/Enhancements/timesplits/TimeSplits.cpp b/soh/soh/Enhancements/timesplits/TimeSplits.cpp
 index e970b965cfe8b8227a17c15a88034111a21e14e3..327d9de32d6220eb592e53c622cf9935c8dcfe66 100644
 --- a/soh/soh/Enhancements/timesplits/TimeSplits.cpp
@@ -2830,7 +2879,7 @@ index f0ad28568bbc8ef2223b7330fa4300a1b1a6b0e9..c0ecf8d8ee231df0dee3d951bcbbdb92
      }
      return (Vec3s*)SEGMENTED_TO_VIRTUAL(cameraDataList[camId].camPosData);
 diff --git a/soh/src/code/z_demo.c b/soh/src/code/z_demo.c
-index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..82e0cedfd30f2261736cf7f3f60d7b6c339a3ff1 100644
+index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..c817e20f1969b2131461384a2f85c39d61e6d33b 100644
 --- a/soh/src/code/z_demo.c
 +++ b/soh/src/code/z_demo.c
 @@ -1,5 +1,7 @@
@@ -3081,7 +3130,30 @@ index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..82e0cedfd30f2261736cf7f3f60d7b6c
              Flags_SetEventChkInf(entranceCutscene->flag);
              if (GameInteractor_Should(VB_PLAY_ENTRANCE_CS, true, entranceCutscene->flag, entranceCutscene->entrance)) {
                  Cutscene_SetSegment(play, entranceCutscene->segAddr);
-@@ -2261,6 +2285,7 @@ void Cutscene_HandleConditionalTriggers(PlayState* play) {
+@@ -2220,6 +2244,11 @@ void Cutscene_HandleConditionalTriggers(PlayState* play) {
+ 
+     if ((gSaveContext.gameMode == GAMEMODE_NORMAL) && (gSaveContext.respawnFlag <= 0) &&
+         (gSaveContext.cutsceneIndex < 0xFFF0)) {
++        // MissingShip (MS-120): vanilla's Requiem and Nocturne triggers are left out. ML never arrives by the entrances
++        // they check (its own 0x1E1 and 0x0DB go unused), but the port maps other ML entrances onto them by scene and
++        // spawn: ML 0x120, the Deku Grove upper scrub grotto, lands on SoH 0x1E1, where the Requiem trigger moved Link
++        // to spawn 0 under a cutscene layer that scene doesn't have (Link frozen); SoH 0x0DB is Monktown Valley's gate.
++#if 0
+         if ((gSaveContext.entranceIndex == ENTR_DESERT_COLOSSUS_OUTSIDE_TEMPLE) &&
+             !Flags_GetEventChkInf(EVENTCHKINF_LEARNED_REQUIEM_OF_SPIRIT)) {
+             Flags_SetEventChkInf(EVENTCHKINF_LEARNED_REQUIEM_OF_SPIRIT);
+@@ -2234,7 +2263,9 @@ void Cutscene_HandleConditionalTriggers(PlayState* play) {
+                                           !Flags_GetEventChkInf(EVENTCHKINF_BONGO_BONGO_ESCAPED_FROM_WELL)))) {
+             Flags_SetEventChkInf(EVENTCHKINF_BONGO_BONGO_ESCAPED_FROM_WELL);
+             gSaveContext.cutsceneIndex = 0xFFF0;
+-        } else if ((gSaveContext.entranceIndex == ENTR_LOST_WOODS_BRIDGE_EAST_EXIT) &&
++        } else
++#endif
++        if ((gSaveContext.entranceIndex == ENTR_LOST_WOODS_BRIDGE_EAST_EXIT) &&
+                    !Flags_GetEventChkInf(EVENTCHKINF_SPOKE_TO_SARIA_ON_BRIDGE)) {
+             Flags_SetEventChkInf(EVENTCHKINF_SPOKE_TO_SARIA_ON_BRIDGE);
+             if (GameInteractor_Should(VB_GIVE_ITEM_FAIRY_OCARINA, true)) {
+@@ -2261,6 +2292,7 @@ void Cutscene_HandleConditionalTriggers(PlayState* play) {
  }
  
  void Cutscene_SetSegment(PlayState* play, void* segment) {
