@@ -154,6 +154,8 @@ override 0x806023E0.
 | Ocarina A-note green (80,255,150) | 0x80106A18 | z_message_PAL.c |
 | Text reveals 2 chars per step (SoH Text Speed default 2) | 0x80109908 | z_message_PAL.c, SohMenuEnhancements.cpp |
 | Scene draw config 0 = Deku Tree handler (nop'd default falls through) | 0x80099550 | z_scene_table.c |
+| Young Malon rewritten: new model + race host/finish line (actor 0xE7) | dma 236, object 0xE0 | new ovl_Ml_Malon, object_ml_ma1 |
+| Actor 0x0D = ML copy of En_Niw (recoloured cucco, object 0x09), health 0x77, loud cries removed | dma 154, object 0x09 | ovl_En_Niw `Ml_Cucco_InitVars`, object_ml_cucco |
 
 Not ported / not applicable: debug camera toggle and D-Right cutscene skip (SoH gates both behind debug), credits
 trigger at Gerudo Valley setup 6 (already `#if 0` in SoH), heap/arena/audio sizes, arena memsets, controller count,
