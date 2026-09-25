@@ -951,10 +951,10 @@ index d9e08b3dafe51861746db65ae542f04b4d8ba83d..e9f32c61f4af5ae0f8c48e02844fe31f
              }
          }
 diff --git a/soh/soh/Enhancements/bootcommands.c b/soh/soh/Enhancements/bootcommands.c
-index b9838cf66ad00fe4a7e4cfc4c6f11eaa38edbc3d..e6bb75be5d566b3a3452307fbf070a2cdc8ae2c7 100644
+index b9838cf66ad00fe4a7e4cfc4c6f11eaa38edbc3d..fd42fe66e84e0c1babae4b5470e1e2d56eddf3f0 100644
 --- a/soh/soh/Enhancements/bootcommands.c
 +++ b/soh/soh/Enhancements/bootcommands.c
-@@ -15,3 +15,42 @@ void BootCommands_Init() {
+@@ -15,3 +15,52 @@ void BootCommands_Init() {
      CVarRegisterInteger(CVAR_IMGUI_CONTROLLER_NAV, 1); // always enable controller nav on switch/wii u
  #endif
  }
@@ -990,6 +990,16 @@ index b9838cf66ad00fe4a7e4cfc4c6f11eaa38edbc3d..e6bb75be5d566b3a3452307fbf070a2c
 +    CVAR_ENHANCEMENT("FixDaruniaDanceSpeed"), CVAR_ENHANCEMENT("CreditsFix"), CVAR_ENHANCEMENT("RedGanonBlood"),
 +    CVAR_ENHANCEMENT("HoverFishing"), CVAR_ENHANCEMENT("QuickBongoKill"), CVAR_ENHANCEMENT("EarlyEyeballFrog"),
 +    CVAR_ENHANCEMENT("GraveHoles"),
++    // Quality of Life and Skips & Speed-ups: options whose target ML doesn't have, or that change ML's design
++    CVAR_ENHANCEMENT("DayGravePull"), CVAR_ENHANCEMENT("DampeAllNight"), CVAR_ENHANCEMENT("MarketSneak"),
++    CVAR_ENHANCEMENT("OpenAllHours"), CVAR_ENHANCEMENT("ChestSizeDependsStoneOfAgony"), CVAR_ENHANCEMENT("NaviOnL"),
++    CVAR_ENHANCEMENT("BetterOwl"), CVAR_ENHANCEMENT("QuitFishingAtDoor"), CVAR_ENHANCEMENT("CowOfTime"),
++    CVAR_ENHANCEMENT("TimeSavers.SleepingWaterfall"), CVAR_ENHANCEMENT("TimeSavers.SkipJabuJabuFish"),
++    CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.BossIntro"), CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.QuickBossDeaths"),
++    CVAR_ENHANCEMENT("TimeSavers.SkipOwlInteractions"), CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.GlitchAiding"),
++    CVAR_ENHANCEMENT("FasterHeavyBlockLift"), CVAR_ENHANCEMENT("FasterShadowShip"), CVAR_ENHANCEMENT("MweepSpeed"),
++    CVAR_ENHANCEMENT("TimeSavers.SkipChildStealth"), CVAR_ENHANCEMENT("TimeSavers.SkipTowerEscape"),
++    CVAR_ENHANCEMENT("InstantScarecrow"), CVAR_ENHANCEMENT("ForgeTime"),
 +};
 +
 +void MissingShip_ClearRetiredOptions() {
@@ -1418,7 +1428,7 @@ index 39f04ddbbd3a3894ac268a4364b3b7b711b3edee..ed9201e52a84271f28ff10417db4cac3
      Rando::StaticData::InitHashMaps();
      OTRGlobals::Instance->gRandoContext->AddExcludedOptions();
 diff --git a/soh/soh/SohGui/SohMenuEnhancements.cpp b/soh/soh/SohGui/SohMenuEnhancements.cpp
-index 4cf7305373689a1e3d9a084f91a1a2693902dfde..97bfa462229f7b176a39eef6e5d51b19d255c355 100644
+index 4cf7305373689a1e3d9a084f91a1a2693902dfde..7ff3bb4da0117721140f011b4370550a05676e03 100644
 --- a/soh/soh/SohGui/SohMenuEnhancements.cpp
 +++ b/soh/soh/SohGui/SohMenuEnhancements.cpp
 @@ -9,6 +9,7 @@
@@ -1444,7 +1454,84 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..97bfa462229f7b176a39eef6e5d51b19
  static std::map<int32_t, const char*> bunnyHoodEffectMap = {
      { BUNNY_HOOD_VANILLA, "Vanilla" },
      { BUNNY_HOOD_FAST, "Faster Run" },
-@@ -304,11 +313,7 @@ void SohMenu::AddMenuEnhancements() {
+@@ -140,6 +149,11 @@ void SohMenu::AddMenuEnhancements() {
+     AddMenuEntry("Enhancements", CVAR_SETTING("Menu.EnhancementsSidebarSection"));
+ 
+     // Quality of Life
++    // MissingShip (MS-145): Quality of Life and Skips & Speed-ups options whose target ML doesn't have are removed
++    // (graveyard, Market guards, Navi, owl, fishing, Zora's River, Jabu-Jabu, Pierre, Biggoron, vanilla boss intros and
++    // deaths, the Shadow Temple ship, heavy blocks). So are Containers of Agony (the Stone of Agony slot is ML's Birth
++    // Certificate) and Shops and Games Always Open (it would open ML's night-only Bombchu Shop by day). Their CVars are
++    // cleared at boot (MissingShip_ClearRetiredOptions).
+     WidgetPath path = { "Enhancements", "Quality of Life", SECTION_COLUMN_1 };
+     AddSidebarEntry("Enhancements", path.sidebarName, 3);
+     path.column = SECTION_COLUMN_1;
+@@ -176,39 +190,11 @@ void SohMenu::AddMenuEnhancements() {
+         .Options(CheckboxOptions().DefaultValue(false).Tooltip(
+             "Toggle to change container textures to match their contents in randomizer games.\n"
+             "Categories: Major items, Lesser items, Junk items, Small keys, Boss keys, Skulltula Tokens."));
+-    AddWidget(path, "Containers of Agony", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("ChestSizeDependsStoneOfAgony"))
+-        .PreFunc([](WidgetInfo& info) {
+-            info.isHidden = !CVarGetInteger(CVAR_ENHANCEMENT("ChestSizeAndTextureMatchContents"), 0);
+-        })
+-        .Options(CheckboxOptions().Tooltip("Only change the texture of containers if you have the Stone of Agony."));
+ 
+     AddWidget(path, "Time of Day", WIDGET_SEPARATOR_TEXT);
+     AddWidget(path, "Nighttime GS Always Spawn", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("NightGSAlwaysSpawn"))
+         .Options(CheckboxOptions().Tooltip("Nighttime Skulltulas will spawn during both day and night."));
+-    AddWidget(path, "Pull Grave During the Day", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("DayGravePull"))
+-        .Options(CheckboxOptions().Tooltip("Allows graves to be pulled when child during the day."));
+-    AddWidget(path, "Dampe Appears All Night", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("DampeAllNight"))
+-        .Options(CheckboxOptions().Tooltip(
+-            "Makes Dampe appear anytime during the night, not just his usual working hours."));
+-    AddWidget(path, "Exit Market at Night", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("MarketSneak"))
+-        .Options(CheckboxOptions().Tooltip(
+-            "Allows exiting Hyrule Castle Market Town to Hyrule Field at night by speaking to the guard "
+-            "next to the gate."));
+-    AddWidget(path, "Shops and Games Always Open", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("OpenAllHours"))
+-        .PreFunc([](WidgetInfo& info) {
+-            info.options->disabled =
+-                IS_RANDO && OTRGlobals::Instance->gRandoContext->GetOption(RSK_LOCK_OVERWORLD_DOORS).Is(RO_GENERIC_ON);
+-        })
+-        .Options(
+-            CheckboxOptions()
+-                .Tooltip("Shops and Minigames are open both day and night. Requires a scene reload to take effect.")
+-                .DisabledTooltip("This is not compatible with the Locked Overworld Doors Randomizer option."));
+ 
+     AddWidget(path, "Pause Menu", WIDGET_SEPARATOR_TEXT);
+     AddWidget(path, "Allow the Cursor to be on Any Slot", WIDGET_CVAR_COMBOBOX)
+@@ -226,10 +212,6 @@ void SohMenu::AddMenuEnhancements() {
+ 
+     path.column = SECTION_COLUMN_2;
+     AddWidget(path, "Controls", WIDGET_SEPARATOR_TEXT);
+-    AddWidget(path, "Answer Navi Prompt with L Button", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("NaviOnL"))
+-        .RaceDisable(false)
+-        .Options(CheckboxOptions().Tooltip("Speak to Navi with L but enter First-Person Camera with C-Up."));
+     AddWidget(path, "Don't Require Input for Credits Sequence", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("NoInputForCredits"))
+         .RaceDisable(false)
+@@ -290,56 +272,12 @@ void SohMenu::AddMenuEnhancements() {
+         .CVar(CVAR_ENHANCEMENT("DisableCritWiggle"))
+         .RaceDisable(false)
+         .Options(CheckboxOptions().Tooltip("Disable Random Camera Wiggle at Low Health."));
+-    AddWidget(path, "Better Owl", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("BetterOwl"))
+-        .Options(CheckboxOptions().Tooltip(
+-            "The default response to Kaepora Gaebora is always that you understood what he said."));
+ 
+     AddWidget(path, "Convenience", WIDGET_SEPARATOR_TEXT);
+-    AddWidget(path, "Quit Fishing at Door", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("QuitFishingAtDoor"))
+-        .Options(CheckboxOptions().Tooltip(
+-            "Fisherman asks if you want to quit at the door if you try to leave the Fishing Pond "
+-            "while still holding the Fishing Rod."));
      AddWidget(path, "Instant Putaway", WIDGET_CVAR_CHECKBOX)
          .CVar(CVAR_ENHANCEMENT("InstantPutaway"))
          .Options(CheckboxOptions().Tooltip("Allow Link to put items away without having to wait around."));
@@ -1453,11 +1540,96 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..97bfa462229f7b176a39eef6e5d51b19
 -        .Options(
 -            CheckboxOptions().Tooltip("Resets the Navi timer on scene change. If you have already talked to her, "
 -                                      "she will try and talk to you again, instead of needing a save warp or death."));
+-    AddWidget(path, "Link's Cow in Both Time Periods", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("CowOfTime"))
+-        .Options(CheckboxOptions().Tooltip(
+-            "Allows the Lon Lon Ranch Obstacle Course reward to be shared across time periods."));
+-    AddWidget(path, "Play Zelda's Lullaby to Open Sleeping Waterfall", WIDGET_CVAR_COMBOBOX)
+-        .CVar(CVAR_ENHANCEMENT("TimeSavers.SleepingWaterfall"))
+-        .PreFunc([](WidgetInfo& info) {
+-            info.options->disabled =
+-                IS_RANDO &&
+-                OTRGlobals::Instance->gRandoContext->GetOption(RSK_SLEEPING_WATERFALL).Is(RO_WATERFALL_OPEN);
+-            info.options->disabledTooltip = "This setting is forcefully enabled because a randomizer savefile with "
+-                                            "\"Sleeping Waterfall: Open\" is loaded.";
+-        })
+-        .Options(
+-            ComboboxOptions()
+-                .ComboMap(sleepingWaterfallOptions)
+-                .DefaultIndex(WATERFALL_ALWAYS)
+-                .Tooltip(
+-                    "Always: Link must always play Zelda's Lullaby to open the waterfall entrance to Zora's Domain.\n"
+-                    "Once: Link only needs to play Zelda's Lullaby once to open the waterfall; after that, it stays "
+-                    "open permanently.\n"
+-                    "Never: Link never needs to play Zelda's Lullaby to open the waterfall. He only needs to have "
+-                    "learned it and have an Ocarina."));
+-    AddWidget(path, "Skip Feeding Jabu-Jabu", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("TimeSavers.SkipJabuJabuFish"))
+-        .PreFunc([](WidgetInfo& info) {
+-            info.options->disabled = IS_RANDO;
+-            info.options->disabledTooltip =
+-                "This setting is disabled because a randomizer savefile with \"Jabu-Jabu: Open\" is loaded.";
+-        })
+-        .Options(CheckboxOptions().Tooltip("Allow Link to enter Jabu-Jabu without feeding him a fish."));
 +    // MissingShip (MS-145): "Navi Timer Resets on Scene Change" removed -- ML has no Navi.
-     AddWidget(path, "Link's Cow in Both Time Periods", WIDGET_CVAR_CHECKBOX)
-         .CVar(CVAR_ENHANCEMENT("CowOfTime"))
-         .Options(CheckboxOptions().Tooltip(
-@@ -436,7 +441,7 @@ void SohMenu::AddMenuEnhancements() {
+ 
+     // Skips & Speed-ups
+     path.sidebarName = "Skips & Speed-ups";
+@@ -354,10 +292,7 @@ void SohMenu::AddMenuEnhancements() {
+             CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.Entrances"), true);
+             CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.Story"), true);
+             CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.LearnSong"), true);
+-            CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.BossIntro"), true);
+-            CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.QuickBossDeaths"), true);
+             CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.OnePoint"), true);
+-            CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipOwlInteractions"), true);
+             CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipMiscInteractions"), true);
+             CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.DisableTitleCard"), true);
+ 
+@@ -371,10 +306,7 @@ void SohMenu::AddMenuEnhancements() {
+             CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.Entrances"), false);
+             CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.Story"), false);
+             CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.LearnSong"), false);
+-            CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.BossIntro"), false);
+-            CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.QuickBossDeaths"), false);
+             CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.OnePoint"), false);
+-            CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipOwlInteractions"), false);
+             CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipMiscInteractions"), false);
+             CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.DisableTitleCard"), false);
+ 
+@@ -392,31 +324,15 @@ void SohMenu::AddMenuEnhancements() {
+     AddWidget(path, "Skip Song Cutscenes", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.LearnSong"))
+         .Options(CheckboxOptions().DefaultValue(IS_RANDO));
+-    AddWidget(path, "Skip Boss Introductions", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.BossIntro"))
+-        .Options(CheckboxOptions().DefaultValue(IS_RANDO));
+-    AddWidget(path, "Quick Boss Deaths", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.QuickBossDeaths"))
+-        .Options(CheckboxOptions().DefaultValue(IS_RANDO));
+     AddWidget(path, "Skip One Point Cutscenes (Chests, Door Unlocks, etc.)", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.OnePoint"))
+         .Options(CheckboxOptions().DefaultValue(IS_RANDO));
+-    AddWidget(path, "Skip Owl Interactions", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("TimeSavers.SkipOwlInteractions"))
+-        .Options(CheckboxOptions().DefaultValue(IS_RANDO));
+     AddWidget(path, "Skip Misc Interactions", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("TimeSavers.SkipMiscInteractions"))
+         .Options(CheckboxOptions().DefaultValue(IS_RANDO));
+     AddWidget(path, "Disable Title Card", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("TimeSavers.DisableTitleCard"))
+         .Options(CheckboxOptions().DefaultValue(IS_RANDO));
+-    AddWidget(path, "Exclude Glitch-Aiding Cutscenes", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.GlitchAiding"))
+-        .Options(
+-            CheckboxOptions().Tooltip("Don't skip cutscenes that are associated with useful glitches. Currently, it is "
+-                                      "only the Fire Temple Darunia CS, Forest Temple Poe Sisters CS, Dodongo Boss "
+-                                      "Door Switch CS, Water Temple Dragon Switch CS, the Box Skip One Point in Jabu, "
+-                                      "Early Hammer Switch CS in MQ Spirit, and Cow Switch Chest CS in MQ Jabu."));
+ 
+     AddWidget(path, "Text", WIDGET_SEPARATOR_TEXT);
+     AddWidget(path, "Skip Bottle Pickup Messages", WIDGET_CVAR_CHECKBOX)
+@@ -436,7 +352,7 @@ void SohMenu::AddMenuEnhancements() {
          .Options(CheckboxOptions().Tooltip("Holding down B skips text."));
      AddWidget(path, "Text Speed: %dx", WIDGET_CVAR_SLIDER_INT)
          .CVar(CVAR_ENHANCEMENT("TextSpeed"))
@@ -1466,7 +1638,67 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..97bfa462229f7b176a39eef6e5d51b19
      AddWidget(path, "Slow Text Speed: %dx", WIDGET_CVAR_SLIDER_INT)
          .CVar(CVAR_ENHANCEMENT("SlowTextSpeed"))
          .Options(IntSliderOptions().Min(1).Max(5).DefaultValue(1).Format("%dx").Tooltip(
-@@ -824,14 +829,7 @@ void SohMenu::AddMenuEnhancements() {
+@@ -444,12 +360,6 @@ void SohMenu::AddMenuEnhancements() {
+ 
+     path.column = SECTION_COLUMN_2;
+     AddWidget(path, "Animations", WIDGET_SEPARATOR_TEXT);
+-    AddWidget(path, "Faster Heavy Block Lift", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("FasterHeavyBlockLift"))
+-        .Options(CheckboxOptions().Tooltip("Speeds up lifting Silver Rocks and Obelisks."));
+-    AddWidget(path, "Faster Shadow Ship", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("FasterShadowShip"))
+-        .Options(CheckboxOptions().Tooltip("Speeds up ship in Shadow Temple."));
+     AddWidget(path, "Fast Chests", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("FastChests"))
+         .Options(CheckboxOptions().Tooltip("Makes Link always kick the chest to open it, instead of doing the longer "
+@@ -475,34 +385,12 @@ void SohMenu::AddMenuEnhancements() {
+         .PreFunc([](WidgetInfo& info) { info.isHidden = CVarGetInteger(CVAR_ENHANCEMENT("CrawlSpeed"), 0) == 1; })
+         .Options(CheckboxOptions().Tooltip("Don't increase crawl speed when exiting glitch-useful crawlspaces."
+                                            "Currently it is only the BOTW crawlspace to locked door"));
+-    AddWidget(path, "King Zora Speed: %.2fx", WIDGET_CVAR_SLIDER_FLOAT)
+-        .CVar(CVAR_ENHANCEMENT("MweepSpeed"))
+-        .Options(FloatSliderOptions().Min(0.1f).Max(5.0f).DefaultValue(1.0f).Format("%.2fx"));
+     AddWidget(path, "Faster Pause Menu", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("FasterPauseMenu"))
+         .Options(CheckboxOptions().Tooltip("Speeds up animation of the pause menu, similar to Majora's Mask"));
+ 
+     path.column = SECTION_COLUMN_3;
+     AddWidget(path, "Misc", WIDGET_SEPARATOR_TEXT);
+-    AddWidget(path, "Skip Child Stealth", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("TimeSavers.SkipChildStealth"))
+-        .Options(CheckboxOptions().Tooltip(
+-            "The crawlspace into Hyrule Castle goes straight to Zelda, skipping the guards."));
+-    AddWidget(path, "Skip Tower Escape", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("TimeSavers.SkipTowerEscape"))
+-        .Options(CheckboxOptions().Tooltip("Skip the tower escape sequence between Ganondorf and Ganon."));
+-    AddWidget(path, "Skip Playing Scarecrow's Song", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("InstantScarecrow"))
+-        .PreFunc([](WidgetInfo& info) {
+-            info.options->disabled =
+-                IS_RANDO && OTRGlobals::Instance->gRandoContext->GetOption(RSK_SKIP_SCARECROWS_SONG);
+-            info.options->disabledTooltip = "This setting is forcefully enabled because a randomized save "
+-                                            "file with the option \"Skip Scarecrow's Song\" is currently loaded.";
+-        })
+-        .Options(CheckboxOptions().Tooltip(
+-            "Pierre appears when an Ocarina is pulled out. Requires learning the Scarecrow's Song first.\n"
+-            "Without the randomizer option \"Skip Scarecrow's Song\" enabled for a seed, this still requires you "
+-            "to teach the scarecrow the song as both ages before summoning."));
+     AddWidget(path, "Faster Rupee Accumulator", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("FasterRupeeAccumulator"))
+         .Options(CheckboxOptions().Tooltip("Causes your Wallet to fill and empty faster when you gain or lose money."));
+@@ -527,11 +415,6 @@ void SohMenu::AddMenuEnhancements() {
+         .CVar(CVAR_ENHANCEMENT("FasterBeanSkull"))
+         .Options(CheckboxOptions().Tooltip(
+             "Makes Gold Skulltulas come out of bean patches faster after bugs dig into center."));
+-    AddWidget(path, "Biggoron Forge Time: %d days", WIDGET_CVAR_SLIDER_INT)
+-        .CVar(CVAR_ENHANCEMENT("ForgeTime"))
+-        .Options(IntSliderOptions().Min(0).Max(3).DefaultValue(3).Format("%d days").Tooltip(
+-            "Allows you to change the number of days it takes for "
+-            "Biggoron to forge the Biggoron's Sword."));
+ 
+     // Graphics
+     path.sidebarName = "Graphics";
+@@ -824,14 +707,7 @@ void SohMenu::AddMenuEnhancements() {
                                " - Not within range of Ocarina Playing spots"));
  
      AddWidget(path, "Masks", WIDGET_SEPARATOR_TEXT);
@@ -1482,7 +1714,7 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..97bfa462229f7b176a39eef6e5d51b19
      AddWidget(path, "Masks Equippable as Adult", WIDGET_CVAR_CHECKBOX)
          .CVar(CVAR_ENHANCEMENT("AdultMasks"))
          .Options(CheckboxOptions().Tooltip("Allows masks to be equipped normally from the pause menu as adult."));
-@@ -980,36 +978,14 @@ void SohMenu::AddMenuEnhancements() {
+@@ -980,36 +856,14 @@ void SohMenu::AddMenuEnhancements() {
          .Options(CheckboxOptions().Tooltip("Blue Fire dropped from bottle can be bottled."));
  
      // Fixes
@@ -1523,7 +1755,7 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..97bfa462229f7b176a39eef6e5d51b19
      AddWidget(path, "Fix Falling from Vine Edges", WIDGET_CVAR_CHECKBOX)
          .CVar(CVAR_ENHANCEMENT("FixVineFall"))
          .Options(
-@@ -1023,60 +999,6 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1023,60 +877,6 @@ void SohMenu::AddMenuEnhancements() {
          .Options(CheckboxOptions().Tooltip(
              "Causes respawning enemies, like Stalchildren, to appear on land near bodies of water. "
              "Fixes an incorrect calculation that acted like water underneath ground was above it."));
@@ -1584,7 +1816,7 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..97bfa462229f7b176a39eef6e5d51b19
  
      AddWidget(path, "Camera Fixes", WIDGET_SEPARATOR_TEXT);
      AddWidget(path, "Fix Camera Drift", WIDGET_CVAR_CHECKBOX)
-@@ -1105,22 +1027,6 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1105,22 +905,6 @@ void SohMenu::AddMenuEnhancements() {
          .Options(CheckboxOptions().Tooltip(
              "Removes the Dungeon Entrance icon on the top-left corner of the screen when no dungeon is present on the "
              "current map."));
@@ -1607,7 +1839,7 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..97bfa462229f7b176a39eef6e5d51b19
      AddWidget(path, "Fix Out of Bounds Textures", WIDGET_CVAR_CHECKBOX)
          .CVar(CVAR_ENHANCEMENT("FixTexturesOOB"))
          .Callback([](WidgetInfo& info) { ApplyAuthenticGfxPatches(); })
-@@ -1131,11 +1037,6 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1131,11 +915,6 @@ void SohMenu::AddMenuEnhancements() {
          .RaceDisable(false)
          .Options(CheckboxOptions().Tooltip(
              "Fixes Link's eyes being open in the opening cutscene when he is supposed to be sleeping."));
@@ -1619,7 +1851,7 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..97bfa462229f7b176a39eef6e5d51b19
      AddWidget(path, "Fix Vanishing Paths", WIDGET_CVAR_COMBOBOX)
          .CVar(CVAR_ENHANCEMENT("SceneSpecificDirtPathFix"))
          .RaceDisable(false)
-@@ -1148,33 +1049,8 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1148,33 +927,8 @@ void SohMenu::AddMenuEnhancements() {
                           "No Vanish: Paths do not vanish, Link seems to sink in to some paths.\n"
                           "This might affect other decal effects."));
  
@@ -1653,7 +1885,7 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..97bfa462229f7b176a39eef6e5d51b19
      AddWidget(path, "Restore Old Gold Skulltula Cutscene", WIDGET_CVAR_CHECKBOX)
          .CVar(CVAR_ENHANCEMENT("GSCutscene"))
          .Options(CheckboxOptions().Tooltip(
-@@ -1186,10 +1062,6 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1186,10 +940,6 @@ void SohMenu::AddMenuEnhancements() {
              "Restores an unfinished feature to pulsate the boss room icon when you are in the boss room."));
  
      AddWidget(path, "Glitch Restorations", WIDGET_SEPARATOR_TEXT);
@@ -1664,7 +1896,7 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..97bfa462229f7b176a39eef6e5d51b19
      AddWidget(path, "N64 Weird Frames", WIDGET_CVAR_CHECKBOX)
          .CVar(CVAR_ENHANCEMENT("N64WeirdFrames"))
          .Options(CheckboxOptions().Tooltip(
-@@ -1203,15 +1075,6 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1203,15 +953,6 @@ void SohMenu::AddMenuEnhancements() {
          .Options(CheckboxOptions().Tooltip(
              "Restore a bug from NTSC 1.0 that allows putting away an item without an animation and performing "
              "Putaway Ocarina Items."));
@@ -1680,7 +1912,7 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..97bfa462229f7b176a39eef6e5d51b19
  
      AddWidget(path, "Misc Restorations", WIDGET_SEPARATOR_TEXT);
      AddWidget(path, "Fix L&Z Page Switch in Pause Menu", WIDGET_CVAR_CHECKBOX)
-@@ -1222,10 +1085,6 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1222,10 +963,6 @@ void SohMenu::AddMenuEnhancements() {
          .CVar(CVAR_ENHANCEMENT("WideShutterDoorRange"))
          .Options(CheckboxOptions().Tooltip("Restores the wider range of certain shutter doors from NTSC 1.0.\n"
                                             "Notably affects Jabu-Jabu and boss doors."));
@@ -1691,7 +1923,7 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..97bfa462229f7b176a39eef6e5d51b19
  
      // Difficulty Options
      path.sidebarName = "Difficulty";
-@@ -1364,210 +1223,8 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1364,210 +1101,8 @@ void SohMenu::AddMenuEnhancements() {
                       .Format("%d seconds")
                       .Tooltip("The time between groups of Leevers spawning."));
  
@@ -1904,7 +2136,7 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..97bfa462229f7b176a39eef6e5d51b19
  
      // Extra Modes
      path.sidebarName = "Extra Modes";
-@@ -1926,6 +1583,56 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1926,6 +1461,56 @@ void SohMenu::AddMenuEnhancements() {
              .CVar(timer.timeEnable)
              .Callback([](WidgetInfo& info) { TimeDisplayUpdateDisplayOptions(); });
      }
