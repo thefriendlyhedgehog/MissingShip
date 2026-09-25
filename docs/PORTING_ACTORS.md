@@ -128,20 +128,23 @@ cmake -S . -B build-ml && cmake --build build-ml --target soh -j8
 
 Then copy `build-ml/soh/soh-macos` over `MissingShip.app/Contents/MacOS/MissingShip`.
 
-### 6. Regenerate the engine patch
+### 6. Commit, regenerate the patches, update the docs
 
-Then add the change to `docs/ENGINE_CHANGES.md` and run `python3 tools/checkledger.py`, which fails if any
-patched file is missing from the ledger. Set the actor's **Status** in `docs/ML_ACTOR_INVENTORY.md` to `ported (...)`,
-and its **Verified** cell to `yes (date)` only once it has been seen working in the game. To refresh the
-inventory's machine columns (changes, placements, spawners), run `python3 tools/survey_actors.py --write`; hand-edited
-cells survive.
-
-New actor files are untracked, so a plain `git diff` silently omits them. Mark them
-intent-to-add first, and exclude the submodules, which carry their own patches:
+The engine is the private fork `MissingShip-Shipwright`, branch `missingship` (see the README). Commit the actor there,
+with the issue ID in the subject, and push:
 
 ```bash
 cd Shipwright
-git add -N soh/src/overlays/actors/ovl_<Name>/ soh/assets/ml_assets.h
-git diff -- . ':!ZAPDTR' ':!libultraship' > ../MissingShip/docs/soh-missingship.patch
-git reset -q
+git add soh/src/overlays/actors/ovl_<Name>/ soh/include/tables/actor_table.h soh/assets/ml_assets.h   # what you touched
+git commit -m "MS-0nn: port <Name>" && git push
+cd ../MissingShip && python3 tools/genpatch.py
 ```
+
+Only committed work reaches the patches. A change inside `libultraship` or `ZAPDTR` is committed and pushed in that
+submodule first (branch `missingship`), then the new submodule pointer is committed in the engine.
+
+Then:
+- Add the change to `docs/ENGINE_CHANGES.md` and run `python3 tools/checkledger.py`, which fails if any patched file is missing from the ledger.
+- Set the actor's **Status** in `docs/ML_ACTOR_INVENTORY.md` to `ported (...)`.
+- Set its **Verified** cell to `yes (date)` only once it has been seen working in the game.
+- To refresh the inventory's machine columns (changes, placements, spawners), run `python3 tools/survey_actors.py --write`; hand-edited cells survive.

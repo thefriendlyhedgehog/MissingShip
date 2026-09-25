@@ -10,6 +10,9 @@ feature that data can drive.
 Order of preference for any new fix: **data-side** → **generic data-driven SoH feature (upstream)** →
 **upstreamable bugfix** → ML-specific C (last resort, isolated, commented `MissingShip:`, logged here).
 
+The code for every row lives in the private engine fork `MissingShip-Shipwright` (branch `missingship`, on SoH tag
+9.2.3); `docs/soh-missingship.patch` is generated from it by `tools/genpatch.py`.
+
 ## Already drop-in compatible (data, shipped in `MissingLink_Scenes.o2r`)
 
 Scenes and rooms (textures, geometry, exit remaps, cutscene destinations) · audio (574, incl. the

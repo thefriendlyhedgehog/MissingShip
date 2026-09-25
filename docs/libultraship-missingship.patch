@@ -1,5 +1,5 @@
 diff --git a/src/fast/backends/gfx_metal.cpp b/src/fast/backends/gfx_metal.cpp
-index 9f9ea33..fd23962 100644
+index 9f9ea33905e73fdc95f76f7bf4de1b67c693ded4..fd23962f9fd611b08603881b95857d6b16051fd4 100644
 --- a/src/fast/backends/gfx_metal.cpp
 +++ b/src/fast/backends/gfx_metal.cpp
 @@ -320,6 +320,15 @@ void GfxRenderingAPIMetal::SelectTexture(int tile, uint32_t texture_id) {

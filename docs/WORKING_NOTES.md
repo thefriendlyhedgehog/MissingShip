@@ -16,6 +16,8 @@ Project memory notes from the local sessions are copied in `docs/notes/`. The pl
 - ML object table in code at +0x10A6C8 (8-byte {vromStart, vromEnd} entries).
 - Many "rewritten" actors are vanilla source recompiled with edits: diff with `tools/aligndiff.py <ml_id> [vanilla_id]`
   (second id when ML moved an actor to another slot), then copy SoH's source and apply the diff.
+- Engine: private fork `MissingShip-Shipwright` (branch `missingship` on tag 9.2.3; submodules MissingShip-libultraship /
+  MissingShip-ZAPDTR, branch `missingship`). Commit engine work there, then `tools/genpatch.py` refreshes docs/*.patch.
 - Paths: everything resolves through `pipeline/mspaths.py` / `mspaths.sh` (env overrides `MS_*`, see README).
 - New actor dirs need `cmake -S . -B build-ml` before building. Deploy: copy `build-ml/soh/soh-macos` over
   `MissingShip.app/Contents/MacOS/MissingShip`, then `pipeline/ms_cycle.sh` (rebuilds the .o2r and relaunches).

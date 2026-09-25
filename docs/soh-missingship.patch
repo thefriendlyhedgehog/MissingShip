@@ -1,6 +1,6 @@
 diff --git a/soh/assets/ml_assets.h b/soh/assets/ml_assets.h
 new file mode 100644
-index 0000000..02792f3
+index 0000000000000000000000000000000000000000..02792f36eb8084bada7d2dd0ee774d652e930cf9
 --- /dev/null
 +++ b/soh/assets/ml_assets.h
 @@ -0,0 +1,147 @@
@@ -152,7 +152,7 @@ index 0000000..02792f3
 +
 +#endif
 diff --git a/soh/include/tables/actor_table.h b/soh/include/tables/actor_table.h
-index d05085f..4fa7716 100644
+index d05085f4d07788d84b76c9ab9a6d32b623c2cd42..4fa7716bb682dd24623c8ed0267fe00262fca227 100644
 --- a/soh/include/tables/actor_table.h
 +++ b/soh/include/tables/actor_table.h
 @@ -13,17 +13,17 @@
@@ -280,7 +280,7 @@ index d05085f..4fa7716 100644
  /* 0x01D3 */ DEFINE_ACTOR(En_Zl4, ACTOR_EN_ZL4, ALLOCTYPE_NORMAL)
  /* 0x01D4 */ DEFINE_ACTOR(En_Mm2, ACTOR_EN_MM2, ALLOCTYPE_NORMAL)
 diff --git a/soh/include/tables/entrance_table.h b/soh/include/tables/entrance_table.h
-index fe62e63..17f7ba0 100644
+index fe62e632b60506329faa58be591cf1adf70e643a..17f7ba0582bd3c86bbb9134048ff0e954b698d1e 100644
 --- a/soh/include/tables/entrance_table.h
 +++ b/soh/include/tables/entrance_table.h
 @@ -1931,4 +1931,57 @@
@@ -344,7 +344,7 @@ index fe62e63..17f7ba0 100644
 +/* 0x635 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_6B_3, SCENE_HAIRAL_NIWA2, 3, false, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
 +
 diff --git a/soh/include/tables/scene_table.h b/soh/include/tables/scene_table.h
-index da290bd..45a4f13 100644
+index da290bd00d8cd90dccf06eb83f0540363564cc65..45a4f13b9f05bd5c5f2f38287e02a131521d4a77 100644
 --- a/soh/include/tables/scene_table.h
 +++ b/soh/include/tables/scene_table.h
 @@ -9,14 +9,14 @@
@@ -436,7 +436,7 @@ index da290bd..45a4f13 100644
 \ No newline at end of file
 +/* 0x6D */ DEFINE_SCENE(testroom_scene, none, SCENE_TESTROOM, SDC_GROTTOS, 0, 0) // MissingShip: ML draw config (was SDC_DEFAULT)
 diff --git a/soh/soh/ActorDB.cpp b/soh/soh/ActorDB.cpp
-index 70ea296..1eb47c0 100644
+index 70ea29675e664b080ecb268571ea6d0f1249d208..1eb47c0f76ca9e1b8360458b47c796ac80edb48c 100644
 --- a/soh/soh/ActorDB.cpp
 +++ b/soh/soh/ActorDB.cpp
 @@ -34,6 +34,10 @@ static constexpr AddPair initialActorTable[] = {
@@ -514,7 +514,7 @@ index 70ea296..1eb47c0 100644
      { ACTOR_EN_ZL4, "Zelda (Child)" },
      { ACTOR_EN_MM2, "Running Man (Adult Era)" },
 diff --git a/soh/soh/Enhancements/RemoveSpinAttackDarkness.cpp b/soh/soh/Enhancements/RemoveSpinAttackDarkness.cpp
-index 9658170..5922381 100644
+index 96581703010c097c8dc647f7035abbe334eda9ce..5922381972ce8419855aede989ea4a894cf83c8c 100644
 --- a/soh/soh/Enhancements/RemoveSpinAttackDarkness.cpp
 +++ b/soh/soh/Enhancements/RemoveSpinAttackDarkness.cpp
 @@ -27,6 +27,9 @@ void Custom_EnMThunder_Update(Actor* thisx, PlayState* play) {
@@ -528,7 +528,7 @@ index 9658170..5922381 100644
      enMThunder->actor.update = Custom_EnMThunder_Update;
  }
 diff --git a/soh/soh/Enhancements/debugger/actorViewer.cpp b/soh/soh/Enhancements/debugger/actorViewer.cpp
-index a47a404..e79cc4d 100644
+index a47a404ad1d016684eeb3b62538266483182bf1e..e79cc4da63f07cd4e9e7c0bec53e94103c2eaaf3 100644
 --- a/soh/soh/Enhancements/debugger/actorViewer.cpp
 +++ b/soh/soh/Enhancements/debugger/actorViewer.cpp
 @@ -190,12 +190,8 @@ static std::vector<u16> noParamsActors = {
@@ -545,7 +545,7 @@ index a47a404..e79cc4d 100644
      ACTOR_UNSET_31,
      ACTOR_UNSET_36,
 diff --git a/soh/soh/SohGui/SohMenuEnhancements.cpp b/soh/soh/SohGui/SohMenuEnhancements.cpp
-index 4cf7305..e814617 100644
+index 4cf7305373689a1e3d9a084f91a1a2693902dfde..e81461779f47c50d1a83a749d9283b53f07a2485 100644
 --- a/soh/soh/SohGui/SohMenuEnhancements.cpp
 +++ b/soh/soh/SohGui/SohMenuEnhancements.cpp
 @@ -436,7 +436,7 @@ void SohMenu::AddMenuEnhancements() {
@@ -558,7 +558,7 @@ index 4cf7305..e814617 100644
          .CVar(CVAR_ENHANCEMENT("SlowTextSpeed"))
          .Options(IntSliderOptions().Min(1).Max(5).DefaultValue(1).Format("%dx").Tooltip(
 diff --git a/soh/src/code/code_800F7260.c b/soh/src/code/code_800F7260.c
-index 94f13de..3d3d810 100644
+index 94f13de7f2b1030991d72a3fe4c44a160c7e2569..3d3d8106194405a9919ca5109dc6c87f0f6fb9e3 100644
 --- a/soh/src/code/code_800F7260.c
 +++ b/soh/src/code/code_800F7260.c
 @@ -124,10 +124,29 @@ void Audio_ClearBGMMute(u8 channelIdx) {
@@ -593,7 +593,7 @@ index 94f13de..3d3d810 100644
          if (!gAudioSfxSwapOff) {
 diff --git a/soh/src/code/ml_entrance_map.c b/soh/src/code/ml_entrance_map.c
 new file mode 100644
-index 0000000..2454c77
+index 0000000000000000000000000000000000000000..2454c77f79369965202fb1a90b9c93fe1cbf9405
 --- /dev/null
 +++ b/soh/src/code/ml_entrance_map.c
 @@ -0,0 +1,280 @@
@@ -879,7 +879,7 @@ index 0000000..2454c77
 +}
 diff --git a/soh/src/code/ml_entrance_map.h b/soh/src/code/ml_entrance_map.h
 new file mode 100644
-index 0000000..a469a7a
+index 0000000000000000000000000000000000000000..a469a7ae194ada29968394de469a8f5b00c1ef61
 --- /dev/null
 +++ b/soh/src/code/ml_entrance_map.h
 @@ -0,0 +1,11 @@
@@ -896,7 +896,7 @@ index 0000000..a469a7a
 +#endif
 diff --git a/soh/src/code/ml_state.c b/soh/src/code/ml_state.c
 new file mode 100644
-index 0000000..b6bfce6
+index 0000000000000000000000000000000000000000..b6bfce6476c31a489d01a0c72cea768c74b4c895
 --- /dev/null
 +++ b/soh/src/code/ml_state.c
 @@ -0,0 +1,36 @@
@@ -938,7 +938,7 @@ index 0000000..b6bfce6
 +}
 diff --git a/soh/src/code/ml_state.h b/soh/src/code/ml_state.h
 new file mode 100644
-index 0000000..6e11519
+index 0000000000000000000000000000000000000000..6e1151951b893dfd773edc4f5470296ca398e5a8
 --- /dev/null
 +++ b/soh/src/code/ml_state.h
 @@ -0,0 +1,13 @@
@@ -956,7 +956,7 @@ index 0000000..6e11519
 +
 +#endif
 diff --git a/soh/src/code/z_actor.c b/soh/src/code/z_actor.c
-index 54c33e2..474c990 100644
+index 54c33e2cfa96fdcc53dc1cea4544383cfe034f0c..474c99065d8fd1bd22eb889dfd7b1b0cb47c124a 100644
 --- a/soh/src/code/z_actor.c
 +++ b/soh/src/code/z_actor.c
 @@ -1,4 +1,5 @@
@@ -1049,7 +1049,7 @@ index 54c33e2..474c990 100644
              actor->bgCheckFlags |= 8;
              actor->wallBgId = bgId;
 diff --git a/soh/src/code/z_bgcheck.c b/soh/src/code/z_bgcheck.c
-index f0ad285..c0ecf8d 100644
+index f0ad28568bbc8ef2223b7330fa4300a1b1a6b0e9..c0ecf8d8ee231df0dee3d951bcbbdb922ef1f378 100644
 --- a/soh/src/code/z_bgcheck.c
 +++ b/soh/src/code/z_bgcheck.c
 @@ -3884,6 +3884,11 @@ u16 func_80041A4C(CollisionContext* colCtx, u32 camId, s32 bgId) {
@@ -1083,7 +1083,7 @@ index f0ad285..c0ecf8d 100644
      }
      return (Vec3s*)SEGMENTED_TO_VIRTUAL(cameraDataList[camId].camPosData);
 diff --git a/soh/src/code/z_demo.c b/soh/src/code/z_demo.c
-index fda3cd0..35c6a6c 100644
+index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..35c6a6cb2476ef5d443be7a58176aba38e153843 100644
 --- a/soh/src/code/z_demo.c
 +++ b/soh/src/code/z_demo.c
 @@ -1,5 +1,6 @@
@@ -1216,7 +1216,7 @@ index fda3cd0..35c6a6c 100644
          play->csCtx.segment = SEGMENTED_TO_VIRTUAL(segment);
      } else {
 diff --git a/soh/src/code/z_draw.c b/soh/src/code/z_draw.c
-index 98695c9..03847f0 100644
+index 98695c992ed69fb28768ba14ba3a2b427f7e4594..03847f07ae31c7a6aba96355c94e01353ff0126e 100644
 --- a/soh/src/code/z_draw.c
 +++ b/soh/src/code/z_draw.c
 @@ -1,4 +1,5 @@
@@ -1256,7 +1256,7 @@ index 98695c9..03847f0 100644
      { GetItem_DrawSmallRupee,
        { gGiRupeeInnerDL, gGiGreenRupeeInnerColorDL, gGiRupeeOuterDL, gGiGreenRupeeOuterColorDL } },
 diff --git a/soh/src/code/z_effect_soft_sprite_old_init.c b/soh/src/code/z_effect_soft_sprite_old_init.c
-index abe9e67..1f87573 100644
+index abe9e6788e6165156c36871f0a04afe1c8949825..1f8757301db3bcbe409723f299f9d2f38e03ea37 100644
 --- a/soh/src/code/z_effect_soft_sprite_old_init.c
 +++ b/soh/src/code/z_effect_soft_sprite_old_init.c
 @@ -234,6 +234,9 @@ void EffectSsKiraKira_SpawnSmall(PlayState* play, Vec3f* pos, Vec3f* velocity, V
@@ -1270,7 +1270,7 @@ index abe9e67..1f87573 100644
  
      Math_Vec3f_Copy(&initParams.pos, pos);
 diff --git a/soh/src/code/z_inventory.c b/soh/src/code/z_inventory.c
-index f89f20a..c24d18d 100644
+index f89f20afb78164a6ec436d5aa8767cec0724fb7e..c24d18dd2e5a90404d139b3eb1354dd646cb8c47 100644
 --- a/soh/src/code/z_inventory.c
 +++ b/soh/src/code/z_inventory.c
 @@ -15,8 +15,10 @@ u32 gBitFlags[] = {
@@ -1326,7 +1326,7 @@ index f89f20a..c24d18d 100644
  
  void Inventory_ChangeEquipment(s16 equipment, u16 value) {
 diff --git a/soh/src/code/z_map_exp.c b/soh/src/code/z_map_exp.c
-index 44b5b43..56920e2 100644
+index 44b5b43b5d6d26a2bdb559e8fe80be90cf9f9757..56920e24289838ad81e0dbcf8601918303e64f35 100644
 --- a/soh/src/code/z_map_exp.c
 +++ b/soh/src/code/z_map_exp.c
 @@ -804,7 +804,7 @@ void Minimap_Draw(PlayState* play) {
@@ -1360,7 +1360,7 @@ index 44b5b43..56920e2 100644
                      if (!R_MINIMAP_DISABLED) { Audio_PlaySoundGeneral(NA_SE_SY_CAMERA_ZOOM_UP, &gSfxDefaultPos, 4,
                                                                        &gSfxDefaultFreqAndVolScale, &gSfxDefaultFreqAndVolScale, &gSfxDefaultReverb); }
 diff --git a/soh/src/code/z_message_PAL.c b/soh/src/code/z_message_PAL.c
-index ce09fe2..f0da190 100644
+index ce09fe27168d77ea579150b2f6249f7eed9b523b..f0da1903df2a9638a4590735709173114a5782e6 100644
 --- a/soh/src/code/z_message_PAL.c
 +++ b/soh/src/code/z_message_PAL.c
 @@ -105,7 +105,7 @@ void Message_ResetOcarinaNoteState(void) {
@@ -1409,7 +1409,7 @@ index ce09fe2..f0da190 100644
      } else if (msgCtx->textDelayTimer <= gSlowTextSpeed) {
          msgCtx->textDelayTimer = 0;
 diff --git a/soh/src/code/z_parameter.c b/soh/src/code/z_parameter.c
-index 4b782d9..361b996 100644
+index 4b782d9540cfa2f235048c04c7811502db9225bd..361b996abc52ea52a78d86c004b52508a25dc43e 100644
 --- a/soh/src/code/z_parameter.c
 +++ b/soh/src/code/z_parameter.c
 @@ -49,13 +49,15 @@ typedef struct {
@@ -1579,7 +1579,7 @@ index 4b782d9..361b996 100644
              gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 120, 255, 0, alpha);
          }
 diff --git a/soh/src/code/z_play.c b/soh/src/code/z_play.c
-index f73d076..3e401fc 100644
+index f73d076de42c85067bb5f8d6fc0b4be7cf1e4ca8..3e401fc55cbdd94f8ddecc0960cc97c3e93b2491 100644
 --- a/soh/src/code/z_play.c
 +++ b/soh/src/code/z_play.c
 @@ -736,6 +736,7 @@ void Play_Update(PlayState* play) {
@@ -1591,7 +1591,7 @@ index f73d076..3e401fc 100644
          }
  
 diff --git a/soh/src/code/z_player_lib.c b/soh/src/code/z_player_lib.c
-index 34750ed..c2c4c70 100644
+index 34750ed2cc7fc7cfc66f9999de6581ea2fc091b4..c2c4c70b38869df2a8f3b70a37312661181f77ba 100644
 --- a/soh/src/code/z_player_lib.c
 +++ b/soh/src/code/z_player_lib.c
 @@ -526,7 +526,8 @@ s32 Player_CheckHostileLockOn(Player* this) {
@@ -1616,7 +1616,7 @@ index 34750ed..c2c4c70 100644
      if (CVarGetInteger(CVAR_ENHANCEMENT("ToggleStrength"), 0) &&
          CVarGetInteger(CVAR_ENHANCEMENT("StrengthDisabled"), 0)) {
 diff --git a/soh/src/code/z_scene.c b/soh/src/code/z_scene.c
-index c138bd4..8072508 100644
+index c138bd4cf539e6ff34e7d28e35ebccadc6dcdb55..8072508a27061c17a551af59aff47143ee7ba20c 100644
 --- a/soh/src/code/z_scene.c
 +++ b/soh/src/code/z_scene.c
 @@ -461,6 +461,19 @@ void Scene_CommandCutsceneData(PlayState* play, SceneCmd* cmd) {
@@ -1640,7 +1640,7 @@ index c138bd4..8072508 100644
      if ((play->sceneNum == SCENE_BAZAAR) || (play->sceneNum == SCENE_SHOOTING_GALLERY)) {
          if (LINK_AGE_IN_YEARS == YEARS_ADULT) {
 diff --git a/soh/src/code/z_scene_table.c b/soh/src/code/z_scene_table.c
-index 090d52f..ece4ce9 100644
+index 090d52fa669b430d62a246cd9a9dc4382e46f686..ece4ce9de8f58d45fccbc3a48751b3431c9e9fcf 100644
 --- a/soh/src/code/z_scene_table.c
 +++ b/soh/src/code/z_scene_table.c
 @@ -107,14 +107,14 @@ void Scene_SetTransitionForNextEntrance(PlayState* play) {
@@ -1665,7 +1665,7 @@ index 090d52f..ece4ce9 100644
  
  void* D_8012A2F8[] = {
 diff --git a/soh/src/code/z_sram.c b/soh/src/code/z_sram.c
-index 7abc221..987dcb9 100644
+index 7abc221a4aa050d0048d36703194649ae6ffceff..987dcb9aa32d33cadb6cd70ed06be111b89219bd 100644
 --- a/soh/src/code/z_sram.c
 +++ b/soh/src/code/z_sram.c
 @@ -1,4 +1,5 @@
@@ -1833,7 +1833,7 @@ index 7abc221..987dcb9 100644
          gSaveContext.ship.maskMemory = PLAYER_MASK_NONE;
      }
 diff --git a/soh/src/overlays/actors/ovl_Bg_Hidan_Kowarerukabe/z_bg_hidan_kowarerukabe.c b/soh/src/overlays/actors/ovl_Bg_Hidan_Kowarerukabe/z_bg_hidan_kowarerukabe.c
-index 0625c6a..fecae2a 100644
+index 0625c6ab87d330ebf312f7a9e25f5038c5b8e543..fecae2ace76a2b41539dc73b0619d2d98b87cfa6 100644
 --- a/soh/src/overlays/actors/ovl_Bg_Hidan_Kowarerukabe/z_bg_hidan_kowarerukabe.c
 +++ b/soh/src/overlays/actors/ovl_Bg_Hidan_Kowarerukabe/z_bg_hidan_kowarerukabe.c
 @@ -8,6 +8,7 @@
@@ -1883,7 +1883,7 @@ index 0625c6a..fecae2a 100644
      s32 pad;
      CollisionHeader* colHeader = NULL;
 diff --git a/soh/src/overlays/actors/ovl_Bg_Treemouth/z_bg_treemouth.c b/soh/src/overlays/actors/ovl_Bg_Treemouth/z_bg_treemouth.c
-index 9c7bbb4..af47561 100644
+index 9c7bbb4e0c240418d1c08ac306c94170c55ad493..af47561820a051e28624ea677f4b0ad7b3986b1f 100644
 --- a/soh/src/overlays/actors/ovl_Bg_Treemouth/z_bg_treemouth.c
 +++ b/soh/src/overlays/actors/ovl_Bg_Treemouth/z_bg_treemouth.c
 @@ -61,6 +61,15 @@ void BgTreemouth_SetupAction(BgTreemouth* this, BgTreemouthActionFunc actionFunc
@@ -1903,7 +1903,7 @@ index 9c7bbb4..af47561 100644
      BgTreemouth* this = (BgTreemouth*)thisx;
      CollisionHeader* colHeader = NULL;
 diff --git a/soh/src/overlays/actors/ovl_Door_Ana/z_door_ana.c b/soh/src/overlays/actors/ovl_Door_Ana/z_door_ana.c
-index 7dde93e..f29f1d2 100644
+index 7dde93e1cd96061fc8c6d0d5d75a081962082230..f29f1d27d344b619c1e0ef68272d61a2327138c2 100644
 --- a/soh/src/overlays/actors/ovl_Door_Ana/z_door_ana.c
 +++ b/soh/src/overlays/actors/ovl_Door_Ana/z_door_ana.c
 @@ -5,6 +5,7 @@
@@ -1962,7 +1962,7 @@ index 7dde93e..f29f1d2 100644
      CLOSE_DISPS(play->state.gfxCtx);
  }
 diff --git a/soh/src/overlays/actors/ovl_En_Cow/z_en_cow.c b/soh/src/overlays/actors/ovl_En_Cow/z_en_cow.c
-index 0009c25..94ae7f8 100644
+index 0009c25dd094f41645f493e86c140b126c28d306..94ae7f8ed07c8aab6b6453b532878e7eec4b241c 100644
 --- a/soh/src/overlays/actors/ovl_En_Cow/z_en_cow.c
 +++ b/soh/src/overlays/actors/ovl_En_Cow/z_en_cow.c
 @@ -369,9 +369,7 @@ s32 EnCow_OverrideLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3f* p
@@ -1977,7 +1977,7 @@ index 0009c25..94ae7f8 100644
  }
  
 diff --git a/soh/src/overlays/actors/ovl_En_Dekubaba/z_en_dekubaba.c b/soh/src/overlays/actors/ovl_En_Dekubaba/z_en_dekubaba.c
-index b84103a..ed9889a 100644
+index b84103a4a0b0e1d4dfd9b3b4a810fb02a1e7b710..ed9889aed1bc722934988d5044bdf941ddba8750 100644
 --- a/soh/src/overlays/actors/ovl_En_Dekubaba/z_en_dekubaba.c
 +++ b/soh/src/overlays/actors/ovl_En_Dekubaba/z_en_dekubaba.c
 @@ -5,7 +5,8 @@
@@ -2001,7 +2001,7 @@ index b84103a..ed9889a 100644
  
              if (this->actor.params == DEKUBABA_BIG) {
 diff --git a/soh/src/overlays/actors/ovl_En_Dekunuts/z_en_dekunuts.c b/soh/src/overlays/actors/ovl_En_Dekunuts/z_en_dekunuts.c
-index 0c7584c..2fd2e20 100644
+index 0c7584c00618a85ad304bd2250e2b36c1c8e606d..2fd2e20cc9ba0f6b57346a0f4cb9e4cbd7c59a0a 100644
 --- a/soh/src/overlays/actors/ovl_En_Dekunuts/z_en_dekunuts.c
 +++ b/soh/src/overlays/actors/ovl_En_Dekunuts/z_en_dekunuts.c
 @@ -496,6 +496,20 @@ void EnDekunuts_Update(Actor* thisx, PlayState* play) {
@@ -2026,7 +2026,7 @@ index 0c7584c..2fd2e20 100644
  
  s32 EnDekunuts_OverrideLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3f* pos, Vec3s* rot, void* thisx) {
 diff --git a/soh/src/overlays/actors/ovl_En_Dns/z_en_dns.c b/soh/src/overlays/actors/ovl_En_Dns/z_en_dns.c
-index 8904468..51a2ac2 100644
+index 89044687e0a9f6f2e5f615f802a0c75a89551319..51a2ac2729c90b00e20c6004fd9dc6161d7f0d8b 100644
 --- a/soh/src/overlays/actors/ovl_En_Dns/z_en_dns.c
 +++ b/soh/src/overlays/actors/ovl_En_Dns/z_en_dns.c
 @@ -59,6 +59,25 @@ const ActorInit En_Dns_InitVars = {
@@ -2187,7 +2187,7 @@ index 8904468..51a2ac2 100644
          this->dropCollectible = 1;
          this->maintainCollider = 0;
 diff --git a/soh/src/overlays/actors/ovl_En_Firefly/z_en_firefly.c b/soh/src/overlays/actors/ovl_En_Firefly/z_en_firefly.c
-index cda0fb1..f8fe673 100644
+index cda0fb18ad89bea5da77eaf48c902f1de9d1585a..f8fe6736326195bec1cf58eb5d673df52007628b 100644
 --- a/soh/src/overlays/actors/ovl_En_Firefly/z_en_firefly.c
 +++ b/soh/src/overlays/actors/ovl_En_Firefly/z_en_firefly.c
 @@ -10,8 +10,8 @@
@@ -2202,7 +2202,7 @@ index cda0fb1..f8fe673 100644
  void EnFirefly_Init(Actor* thisx, PlayState* play);
  void EnFirefly_Destroy(Actor* thisx, PlayState* play);
 diff --git a/soh/src/overlays/actors/ovl_En_Hy/z_en_hy.c b/soh/src/overlays/actors/ovl_En_Hy/z_en_hy.c
-index bcd1f36..3026961 100644
+index bcd1f362d0efca401ebfc3042ea2f041307255ff..30269610e7b913c76b0baf5829f99e0f57ee6601 100644
 --- a/soh/src/overlays/actors/ovl_En_Hy/z_en_hy.c
 +++ b/soh/src/overlays/actors/ovl_En_Hy/z_en_hy.c
 @@ -584,13 +584,16 @@ s16 func_80A70058(PlayState* play, Actor* thisx) {
@@ -2229,7 +2229,7 @@ index bcd1f36..3026961 100644
                      break;
                  case 0x70F0:
 diff --git a/soh/src/overlays/actors/ovl_En_Md/z_en_md.c b/soh/src/overlays/actors/ovl_En_Md/z_en_md.c
-index 13b51a1..7825227 100644
+index 13b51a16ec8a8cda56ea7f7ac1bcabf40fa5326d..7825227e8947e6ec1d869be3f17fb89c80dd0fbc 100644
 --- a/soh/src/overlays/actors/ovl_En_Md/z_en_md.c
 +++ b/soh/src/overlays/actors/ovl_En_Md/z_en_md.c
 @@ -434,7 +434,9 @@ u16 EnMd_GetText(PlayState* play, Actor* thisx) {
@@ -2269,7 +2269,7 @@ index 13b51a1..7825227 100644
  
  s32 EnMd_OverrideLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3f* pos, Vec3s* rot, void* thisx, Gfx** gfx) {
 diff --git a/soh/src/overlays/actors/ovl_En_Ms/z_en_ms.c b/soh/src/overlays/actors/ovl_En_Ms/z_en_ms.c
-index 3c8442b..e0b241c 100644
+index 3c8442ba97708d273cb149b11349f702dec32af8..e0b241c04d84ea3e3f43146b522be67355b6beb3 100644
 --- a/soh/src/overlays/actors/ovl_En_Ms/z_en_ms.c
 +++ b/soh/src/overlays/actors/ovl_En_Ms/z_en_ms.c
 @@ -47,27 +47,20 @@ static ColliderCylinderInitType1 sCylinderInit = {
@@ -2367,7 +2367,7 @@ index 3c8442b..e0b241c 100644
  
  void EnMs_Draw(Actor* thisx, PlayState* play) {
 diff --git a/soh/src/overlays/actors/ovl_En_Niw/z_en_niw.c b/soh/src/overlays/actors/ovl_En_Niw/z_en_niw.c
-index c258182..0bbbd44 100644
+index c258182d5c8e9676cbb459606549fc140052b701..0bbbd44ea3a41abfc57c4c73615f569b2f387bb7 100644
 --- a/soh/src/overlays/actors/ovl_En_Niw/z_en_niw.c
 +++ b/soh/src/overlays/actors/ovl_En_Niw/z_en_niw.c
 @@ -2,6 +2,9 @@
@@ -2520,7 +2520,7 @@ index c258182..0bbbd44 100644
          }
      }
 diff --git a/soh/src/overlays/actors/ovl_En_Niw_Lady/z_en_niw_lady.c b/soh/src/overlays/actors/ovl_En_Niw_Lady/z_en_niw_lady.c
-index 4e204fa..f28d213 100644
+index 4e204fac5de9e45547ff1fca7d7204cf93757523..f28d2131317bcc14f9a388695cfa33ea005ea54f 100644
 --- a/soh/src/overlays/actors/ovl_En_Niw_Lady/z_en_niw_lady.c
 +++ b/soh/src/overlays/actors/ovl_En_Niw_Lady/z_en_niw_lady.c
 @@ -202,31 +202,18 @@ void func_80ABA21C(EnNiwLady* this, PlayState* play) {
@@ -2592,7 +2592,7 @@ index 4e204fa..f28d213 100644
                  // Circumvent the item offer action
                  this->actionFunc = func_80ABAC84;
 diff --git a/soh/src/overlays/actors/ovl_En_St/z_en_st.c b/soh/src/overlays/actors/ovl_En_St/z_en_st.c
-index 99f4617..adafde9 100644
+index 99f4617bb9aae2f179bf2b59f7245ef426f468e0..adafde99b678fb69a9751e2f2aa4c995f84f4aef 100644
 --- a/soh/src/overlays/actors/ovl_En_St/z_en_st.c
 +++ b/soh/src/overlays/actors/ovl_En_St/z_en_st.c
 @@ -9,9 +9,8 @@
@@ -2608,7 +2608,7 @@ index 99f4617..adafde9 100644
  void EnSt_Init(Actor* thisx, PlayState* play);
  void EnSt_Destroy(Actor* thisx, PlayState* play);
 diff --git a/soh/src/overlays/actors/ovl_En_Sw/z_en_sw.c b/soh/src/overlays/actors/ovl_En_Sw/z_en_sw.c
-index c5c8e61..4f846a8 100644
+index c5c8e6167fafc9ebe01b649e8178bb6c828cb4f1..4f846a8dcedab77b2733b430ada07d85ce771e30 100644
 --- a/soh/src/overlays/actors/ovl_En_Sw/z_en_sw.c
 +++ b/soh/src/overlays/actors/ovl_En_Sw/z_en_sw.c
 @@ -3,7 +3,8 @@
@@ -2622,7 +2622,7 @@ index c5c8e61..4f846a8 100644
  void EnSw_Init(Actor* thisx, PlayState* play);
  void EnSw_Destroy(Actor* thisx, PlayState* play);
 diff --git a/soh/src/overlays/actors/ovl_En_Weather_Tag/z_en_weather_tag.c b/soh/src/overlays/actors/ovl_En_Weather_Tag/z_en_weather_tag.c
-index 084334a..e727bc9 100644
+index 084334a6b06aeb809e931b58b2b0be984e42c9a3..e727bc93ef87efe8a2727d8c7695464a1c589aa5 100644
 --- a/soh/src/overlays/actors/ovl_En_Weather_Tag/z_en_weather_tag.c
 +++ b/soh/src/overlays/actors/ovl_En_Weather_Tag/z_en_weather_tag.c
 @@ -68,7 +68,8 @@ void EnWeatherTag_Init(Actor* thisx, PlayState* play) {
@@ -2676,7 +2676,7 @@ index 084334a..e727bc9 100644
              EnWeatherTag_SetupAction(this, EnWeatherTag_DisabledCloudyRainThunderKakariko);
              break;
 diff --git a/soh/src/overlays/actors/ovl_En_Wonder_Talk/z_en_wonder_talk.c b/soh/src/overlays/actors/ovl_En_Wonder_Talk/z_en_wonder_talk.c
-index d427b8a..a246f59 100644
+index d427b8aaaef0b5135c40125ff6aa5b3980e82507..a246f59f20fb2b77a28067e31c6c9bca3b04d478 100644
 --- a/soh/src/overlays/actors/ovl_En_Wonder_Talk/z_en_wonder_talk.c
 +++ b/soh/src/overlays/actors/ovl_En_Wonder_Talk/z_en_wonder_talk.c
 @@ -40,93 +40,20 @@ void EnWonderTalk_Init(Actor* thisx, PlayState* play) {
@@ -2805,7 +2805,7 @@ index d427b8a..a246f59 100644
      if (BREG(0) != 0) {
 diff --git a/soh/src/overlays/actors/ovl_Ml_BeamHeart/z_ml_beamheart.c b/soh/src/overlays/actors/ovl_Ml_BeamHeart/z_ml_beamheart.c
 new file mode 100644
-index 0000000..6288794
+index 0000000000000000000000000000000000000000..62887941c44d1afa7aa06ade2dccdac30a1c0aec
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_BeamHeart/z_ml_beamheart.c
 @@ -0,0 +1,61 @@
@@ -2872,7 +2872,7 @@ index 0000000..6288794
 +}
 diff --git a/soh/src/overlays/actors/ovl_Ml_BeamHeart/z_ml_beamheart.h b/soh/src/overlays/actors/ovl_Ml_BeamHeart/z_ml_beamheart.h
 new file mode 100644
-index 0000000..9d0e8cc
+index 0000000000000000000000000000000000000000..9d0e8ccf604011cde8af25b6de10a23aac49787b
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_BeamHeart/z_ml_beamheart.h
 @@ -0,0 +1,12 @@
@@ -2890,7 +2890,7 @@ index 0000000..9d0e8cc
 +#endif
 diff --git a/soh/src/overlays/actors/ovl_Ml_EventSpawner/z_ml_eventspawner.c b/soh/src/overlays/actors/ovl_Ml_EventSpawner/z_ml_eventspawner.c
 new file mode 100644
-index 0000000..a7befaa
+index 0000000000000000000000000000000000000000..a7befaa1fdc66294b74ef052aade4e64d8696c30
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_EventSpawner/z_ml_eventspawner.c
 @@ -0,0 +1,74 @@
@@ -2970,7 +2970,7 @@ index 0000000..a7befaa
 +}
 diff --git a/soh/src/overlays/actors/ovl_Ml_EventSpawner/z_ml_eventspawner.h b/soh/src/overlays/actors/ovl_Ml_EventSpawner/z_ml_eventspawner.h
 new file mode 100644
-index 0000000..51c0d67
+index 0000000000000000000000000000000000000000..51c0d67b4151d5d67dc750eb0503726ea337c250
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_EventSpawner/z_ml_eventspawner.h
 @@ -0,0 +1,11 @@
@@ -2987,7 +2987,7 @@ index 0000000..51c0d67
 +#endif
 diff --git a/soh/src/overlays/actors/ovl_Ml_Fishpond/z_ml_fishpond.c b/soh/src/overlays/actors/ovl_Ml_Fishpond/z_ml_fishpond.c
 new file mode 100644
-index 0000000..7d302d7
+index 0000000000000000000000000000000000000000..7d302d7d2bb540ecfce4b04c6abd641b0cac64d1
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_Fishpond/z_ml_fishpond.c
 @@ -0,0 +1,86 @@
@@ -3079,7 +3079,7 @@ index 0000000..7d302d7
 +}
 diff --git a/soh/src/overlays/actors/ovl_Ml_Fishpond/z_ml_fishpond.h b/soh/src/overlays/actors/ovl_Ml_Fishpond/z_ml_fishpond.h
 new file mode 100644
-index 0000000..06fa57c
+index 0000000000000000000000000000000000000000..06fa57c60e7fa6c011d6b5e2b47c8af4b8fe4252
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_Fishpond/z_ml_fishpond.h
 @@ -0,0 +1,12 @@
@@ -3097,7 +3097,7 @@ index 0000000..06fa57c
 +#endif
 diff --git a/soh/src/overlays/actors/ovl_Ml_FogWall/z_ml_fogwall.c b/soh/src/overlays/actors/ovl_Ml_FogWall/z_ml_fogwall.c
 new file mode 100644
-index 0000000..9ce7b33
+index 0000000000000000000000000000000000000000..9ce7b332eb20418a556d0158a748514baacc1ce1
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_FogWall/z_ml_fogwall.c
 @@ -0,0 +1,415 @@
@@ -3518,7 +3518,7 @@ index 0000000..9ce7b33
 +}
 diff --git a/soh/src/overlays/actors/ovl_Ml_FogWall/z_ml_fogwall.h b/soh/src/overlays/actors/ovl_Ml_FogWall/z_ml_fogwall.h
 new file mode 100644
-index 0000000..d9728e0
+index 0000000000000000000000000000000000000000..d9728e0c1c0e835ec2f6239a963b6223115a0448
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_FogWall/z_ml_fogwall.h
 @@ -0,0 +1,19 @@
@@ -3543,7 +3543,7 @@ index 0000000..d9728e0
 +#endif
 diff --git a/soh/src/overlays/actors/ovl_Ml_HintNuts/z_ml_hintnuts.c b/soh/src/overlays/actors/ovl_Ml_HintNuts/z_ml_hintnuts.c
 new file mode 100644
-index 0000000..711748e
+index 0000000000000000000000000000000000000000..711748ea3c653d8026cede0ee7fcd9ebd8d7ceec
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_HintNuts/z_ml_hintnuts.c
 @@ -0,0 +1,251 @@
@@ -3800,7 +3800,7 @@ index 0000000..711748e
 +}
 diff --git a/soh/src/overlays/actors/ovl_Ml_HintNuts/z_ml_hintnuts.h b/soh/src/overlays/actors/ovl_Ml_HintNuts/z_ml_hintnuts.h
 new file mode 100644
-index 0000000..f41c2e6
+index 0000000000000000000000000000000000000000..f41c2e6a029d85b7bcb0c1a615f06569da28d521
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_HintNuts/z_ml_hintnuts.h
 @@ -0,0 +1,18 @@
@@ -3824,7 +3824,7 @@ index 0000000..f41c2e6
 +#endif
 diff --git a/soh/src/overlays/actors/ovl_Ml_HoleScrub/z_ml_holescrub.c b/soh/src/overlays/actors/ovl_Ml_HoleScrub/z_ml_holescrub.c
 new file mode 100644
-index 0000000..b6b87c3
+index 0000000000000000000000000000000000000000..b6b87c33212fed327aebadd4bb21d32b6f65bc8a
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_HoleScrub/z_ml_holescrub.c
 @@ -0,0 +1,397 @@
@@ -4227,7 +4227,7 @@ index 0000000..b6b87c3
 +}
 diff --git a/soh/src/overlays/actors/ovl_Ml_HoleScrub/z_ml_holescrub.h b/soh/src/overlays/actors/ovl_Ml_HoleScrub/z_ml_holescrub.h
 new file mode 100644
-index 0000000..44f8746
+index 0000000000000000000000000000000000000000..44f874671b1f27359e8a66732713e9cdae2e956c
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_HoleScrub/z_ml_holescrub.h
 @@ -0,0 +1,23 @@
@@ -4256,7 +4256,7 @@ index 0000000..44f8746
 +#endif
 diff --git a/soh/src/overlays/actors/ovl_Ml_Lift/z_ml_lift.c b/soh/src/overlays/actors/ovl_Ml_Lift/z_ml_lift.c
 new file mode 100644
-index 0000000..69f5a13
+index 0000000000000000000000000000000000000000..69f5a136eac29ab8606aa3601cd282d9678f2f95
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_Lift/z_ml_lift.c
 @@ -0,0 +1,107 @@
@@ -4369,7 +4369,7 @@ index 0000000..69f5a13
 +}
 diff --git a/soh/src/overlays/actors/ovl_Ml_Lift/z_ml_lift.h b/soh/src/overlays/actors/ovl_Ml_Lift/z_ml_lift.h
 new file mode 100644
-index 0000000..e5c9ca3
+index 0000000000000000000000000000000000000000..e5c9ca34e573be38e3ff4542f66ed913bddc1816
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_Lift/z_ml_lift.h
 @@ -0,0 +1,14 @@
@@ -4389,7 +4389,7 @@ index 0000000..e5c9ca3
 +#endif
 diff --git a/soh/src/overlays/actors/ovl_Ml_LiftBlock/z_ml_liftblock.c b/soh/src/overlays/actors/ovl_Ml_LiftBlock/z_ml_liftblock.c
 new file mode 100644
-index 0000000..d415255
+index 0000000000000000000000000000000000000000..d41525571c4f0b6e3547ef4ab53e1b7bd92ff920
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_LiftBlock/z_ml_liftblock.c
 @@ -0,0 +1,64 @@
@@ -4459,7 +4459,7 @@ index 0000000..d415255
 +}
 diff --git a/soh/src/overlays/actors/ovl_Ml_LiftBlock/z_ml_liftblock.h b/soh/src/overlays/actors/ovl_Ml_LiftBlock/z_ml_liftblock.h
 new file mode 100644
-index 0000000..6b618fc
+index 0000000000000000000000000000000000000000..6b618fcef761cadd302b6be4d31eccae86e588bf
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_LiftBlock/z_ml_liftblock.h
 @@ -0,0 +1,11 @@
@@ -4476,7 +4476,7 @@ index 0000000..6b618fc
 +#endif
 diff --git a/soh/src/overlays/actors/ovl_Ml_MThunder/z_ml_mthunder.c b/soh/src/overlays/actors/ovl_Ml_MThunder/z_ml_mthunder.c
 new file mode 100644
-index 0000000..edc8543
+index 0000000000000000000000000000000000000000..edc85432b1a447cf4036397e2793e0947f111725
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_MThunder/z_ml_mthunder.c
 @@ -0,0 +1,292 @@
@@ -4774,7 +4774,7 @@ index 0000000..edc8543
 +}
 diff --git a/soh/src/overlays/actors/ovl_Ml_MThunder/z_ml_mthunder.h b/soh/src/overlays/actors/ovl_Ml_MThunder/z_ml_mthunder.h
 new file mode 100644
-index 0000000..99733be
+index 0000000000000000000000000000000000000000..99733bebb5bd44666339bb3c3133beecbe1e769c
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_MThunder/z_ml_mthunder.h
 @@ -0,0 +1,30 @@
@@ -4810,7 +4810,7 @@ index 0000000..99733be
 +#endif
 diff --git a/soh/src/overlays/actors/ovl_Ml_Malon/z_ml_malon.c b/soh/src/overlays/actors/ovl_Ml_Malon/z_ml_malon.c
 new file mode 100644
-index 0000000..e82eb08
+index 0000000000000000000000000000000000000000..e82eb0894235eba93e3c1009a72d7fb25da0bd21
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_Malon/z_ml_malon.c
 @@ -0,0 +1,263 @@
@@ -5079,7 +5079,7 @@ index 0000000..e82eb08
 +}
 diff --git a/soh/src/overlays/actors/ovl_Ml_Malon/z_ml_malon.h b/soh/src/overlays/actors/ovl_Ml_Malon/z_ml_malon.h
 new file mode 100644
-index 0000000..0255704
+index 0000000000000000000000000000000000000000..0255704f68b7f4d617d7a63b31e921a5c6516c71
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_Malon/z_ml_malon.h
 @@ -0,0 +1,26 @@
@@ -5111,7 +5111,7 @@ index 0000000..0255704
 +#endif
 diff --git a/soh/src/overlays/actors/ovl_Ml_Prologue/z_ml_prologue.c b/soh/src/overlays/actors/ovl_Ml_Prologue/z_ml_prologue.c
 new file mode 100644
-index 0000000..0ed96d4
+index 0000000000000000000000000000000000000000..0ed96d4a438c47c215076867ea34be4719e4f327
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_Prologue/z_ml_prologue.c
 @@ -0,0 +1,235 @@
@@ -5352,7 +5352,7 @@ index 0000000..0ed96d4
 +}
 diff --git a/soh/src/overlays/actors/ovl_Ml_Prologue/z_ml_prologue.h b/soh/src/overlays/actors/ovl_Ml_Prologue/z_ml_prologue.h
 new file mode 100644
-index 0000000..11a0c60
+index 0000000000000000000000000000000000000000..11a0c606dfcbe330dfe792d005763250110b9976
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_Prologue/z_ml_prologue.h
 @@ -0,0 +1,13 @@
@@ -5371,7 +5371,7 @@ index 0000000..11a0c60
 +#endif
 diff --git a/soh/src/overlays/actors/ovl_Ml_SkullKid/z_ml_skullkid.c b/soh/src/overlays/actors/ovl_Ml_SkullKid/z_ml_skullkid.c
 new file mode 100644
-index 0000000..a8cb236
+index 0000000000000000000000000000000000000000..a8cb2367e1ab6f388646df84b09f8fa7e7f3c68e
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_SkullKid/z_ml_skullkid.c
 @@ -0,0 +1,168 @@
@@ -5545,7 +5545,7 @@ index 0000000..a8cb236
 +}
 diff --git a/soh/src/overlays/actors/ovl_Ml_SkullKid/z_ml_skullkid.h b/soh/src/overlays/actors/ovl_Ml_SkullKid/z_ml_skullkid.h
 new file mode 100644
-index 0000000..3b489e5
+index 0000000000000000000000000000000000000000..3b489e5c50c803fc82247cb7101dcff0bc2dd65b
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_SkullKid/z_ml_skullkid.h
 @@ -0,0 +1,17 @@
@@ -5568,7 +5568,7 @@ index 0000000..3b489e5
 +#endif
 diff --git a/soh/src/overlays/actors/ovl_Ml_SongBlock/z_ml_songblock.c b/soh/src/overlays/actors/ovl_Ml_SongBlock/z_ml_songblock.c
 new file mode 100644
-index 0000000..92ffb7c
+index 0000000000000000000000000000000000000000..92ffb7c1085a8ad22b6d07db6b98121b5b983ae7
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_SongBlock/z_ml_songblock.c
 @@ -0,0 +1,96 @@
@@ -5670,7 +5670,7 @@ index 0000000..92ffb7c
 +}
 diff --git a/soh/src/overlays/actors/ovl_Ml_SongBlock/z_ml_songblock.h b/soh/src/overlays/actors/ovl_Ml_SongBlock/z_ml_songblock.h
 new file mode 100644
-index 0000000..f36a390
+index 0000000000000000000000000000000000000000..f36a3903b8ae89303e5f675b50d1a70e90eb72a0
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_SongBlock/z_ml_songblock.h
 @@ -0,0 +1,15 @@
@@ -5691,7 +5691,7 @@ index 0000000..f36a390
 +#endif
 diff --git a/soh/src/overlays/actors/ovl_Ml_TreeBridge/z_ml_treebridge.c b/soh/src/overlays/actors/ovl_Ml_TreeBridge/z_ml_treebridge.c
 new file mode 100644
-index 0000000..31ce8de
+index 0000000000000000000000000000000000000000..31ce8de9735e2250f7a235cbc086f39311fa2b52
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_TreeBridge/z_ml_treebridge.c
 @@ -0,0 +1,142 @@
@@ -5839,7 +5839,7 @@ index 0000000..31ce8de
 +}
 diff --git a/soh/src/overlays/actors/ovl_Ml_TreeBridge/z_ml_treebridge.h b/soh/src/overlays/actors/ovl_Ml_TreeBridge/z_ml_treebridge.h
 new file mode 100644
-index 0000000..38dd552
+index 0000000000000000000000000000000000000000..38dd5523c1920373e1701e18871a3170e567d0bd
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_TreeBridge/z_ml_treebridge.h
 @@ -0,0 +1,17 @@
@@ -5862,7 +5862,7 @@ index 0000000..38dd552
 +#endif
 diff --git a/soh/src/overlays/actors/ovl_Ml_TreeBridge/z_ml_treebridge_col.inc b/soh/src/overlays/actors/ovl_Ml_TreeBridge/z_ml_treebridge_col.inc
 new file mode 100644
-index 0000000..777678f
+index 0000000000000000000000000000000000000000..777678fc06e24cc758e8a031894a4b1ec3509d76
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_TreeBridge/z_ml_treebridge_col.inc
 @@ -0,0 +1,58 @@
@@ -5926,7 +5926,7 @@ index 0000000..777678f
 +};
 diff --git a/soh/src/overlays/actors/ovl_Ml_Villager/z_ml_villager.c b/soh/src/overlays/actors/ovl_Ml_Villager/z_ml_villager.c
 new file mode 100644
-index 0000000..7b86c62
+index 0000000000000000000000000000000000000000..7b86c62951da3469ed6d819aa8f4e004cd560655
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_Villager/z_ml_villager.c
 @@ -0,0 +1,137 @@
@@ -6069,7 +6069,7 @@ index 0000000..7b86c62
 +}
 diff --git a/soh/src/overlays/actors/ovl_Ml_Villager/z_ml_villager.h b/soh/src/overlays/actors/ovl_Ml_Villager/z_ml_villager.h
 new file mode 100644
-index 0000000..a471068
+index 0000000000000000000000000000000000000000..a471068d928d19daef231036801f6ff5f2d729d1
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_Villager/z_ml_villager.h
 @@ -0,0 +1,13 @@
@@ -6087,7 +6087,7 @@ index 0000000..a471068
 +
 +#endif
 diff --git a/soh/src/overlays/actors/ovl_Obj_Bombiwa/z_obj_bombiwa.c b/soh/src/overlays/actors/ovl_Obj_Bombiwa/z_obj_bombiwa.c
-index 6022368..028cd29 100644
+index 602236816e00bd47b23243d5ec9de20a1f425c29..028cd295a5fb5ac8870d08d4a13fd437c773541a 100644
 --- a/soh/src/overlays/actors/ovl_Obj_Bombiwa/z_obj_bombiwa.c
 +++ b/soh/src/overlays/actors/ovl_Obj_Bombiwa/z_obj_bombiwa.c
 @@ -8,7 +8,8 @@
@@ -6101,7 +6101,7 @@ index 6022368..028cd29 100644
  void ObjBombiwa_Init(Actor* thisx, PlayState* play);
  void ObjBombiwa_InitCollision(Actor* thisx, PlayState* play);
 diff --git a/soh/src/overlays/actors/ovl_Obj_Oshihiki/z_obj_oshihiki.c b/soh/src/overlays/actors/ovl_Obj_Oshihiki/z_obj_oshihiki.c
-index 16f592a..8156345 100644
+index 16f592a7d62864772aa2a830fee6dc4a724dc8c9..81563455907823e1368332d9879dd2bbc44f37ea 100644
 --- a/soh/src/overlays/actors/ovl_Obj_Oshihiki/z_obj_oshihiki.c
 +++ b/soh/src/overlays/actors/ovl_Obj_Oshihiki/z_obj_oshihiki.c
 @@ -43,13 +43,14 @@ static f32 sScales[] = {
@@ -6122,7 +6122,7 @@ index 16f592a..8156345 100644
      { { 232, 210, 176 }, { 232, 210, 176 }, { 232, 210, 176 }, { 232, 210, 176 } }, // Gerudo Training Ground
  };
 diff --git a/soh/src/overlays/actors/ovl_Oceff_Wipe/z_oceff_wipe.c b/soh/src/overlays/actors/ovl_Oceff_Wipe/z_oceff_wipe.c
-index ee7efb8..a66f524 100644
+index ee7efb87929e747aa8c7fc8df7cafebaefe79546..a66f524f1d3a5c6c31c7773948a85e3aa900aa54 100644
 --- a/soh/src/overlays/actors/ovl_Oceff_Wipe/z_oceff_wipe.c
 +++ b/soh/src/overlays/actors/ovl_Oceff_Wipe/z_oceff_wipe.c
 @@ -5,6 +5,7 @@
@@ -6144,7 +6144,7 @@ index ee7efb8..a66f524 100644
  
      gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 diff --git a/soh/src/overlays/actors/ovl_Oceff_Wipe2/z_oceff_wipe2.c b/soh/src/overlays/actors/ovl_Oceff_Wipe2/z_oceff_wipe2.c
-index 3dcf1fe..887930d 100644
+index 3dcf1fe108a5c4ae55a2f4f03fc23c62d528ee13..887930ddb2c0fcce19c09a5568cb5c3bd6c3deeb 100644
 --- a/soh/src/overlays/actors/ovl_Oceff_Wipe2/z_oceff_wipe2.c
 +++ b/soh/src/overlays/actors/ovl_Oceff_Wipe2/z_oceff_wipe2.c
 @@ -5,6 +5,7 @@
@@ -6166,7 +6166,7 @@ index 3dcf1fe..887930d 100644
  
      gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 diff --git a/soh/src/overlays/actors/ovl_Oceff_Wipe3/z_oceff_wipe3.c b/soh/src/overlays/actors/ovl_Oceff_Wipe3/z_oceff_wipe3.c
-index aed9f32..5606fd7 100644
+index aed9f32a9191d139c674e1a72f006b44f5b98b1f..5606fd779584147cb4c832ca48a1596c994baf57 100644
 --- a/soh/src/overlays/actors/ovl_Oceff_Wipe3/z_oceff_wipe3.c
 +++ b/soh/src/overlays/actors/ovl_Oceff_Wipe3/z_oceff_wipe3.c
 @@ -5,6 +5,7 @@
@@ -6188,7 +6188,7 @@ index aed9f32..5606fd7 100644
  
      gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 diff --git a/soh/src/overlays/actors/ovl_Oceff_Wipe4/z_oceff_wipe4.c b/soh/src/overlays/actors/ovl_Oceff_Wipe4/z_oceff_wipe4.c
-index f0cf6da..749055c 100644
+index f0cf6dad0bee6c91a54576f87a18a1cbc02c741f..749055c3a78e1b2b72acfd278839a00a631d6c56 100644
 --- a/soh/src/overlays/actors/ovl_Oceff_Wipe4/z_oceff_wipe4.c
 +++ b/soh/src/overlays/actors/ovl_Oceff_Wipe4/z_oceff_wipe4.c
 @@ -5,6 +5,7 @@
@@ -6210,7 +6210,7 @@ index f0cf6da..749055c 100644
  
      gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 diff --git a/soh/src/overlays/actors/ovl_player_actor/z_player.c b/soh/src/overlays/actors/ovl_player_actor/z_player.c
-index 5aa9d94..e5887e2 100644
+index 5aa9d947048cdc4670e6c76ac55913860b7c4535..e5887e29cc1659e73f868e747a5bad25653dd5f0 100644
 --- a/soh/src/overlays/actors/ovl_player_actor/z_player.c
 +++ b/soh/src/overlays/actors/ovl_player_actor/z_player.c
 @@ -6,6 +6,7 @@
@@ -6243,7 +6243,7 @@ index 5aa9d94..e5887e2 100644
      MREG(53) = this->actor.world.pos.y;
      MREG(54) = this->actor.world.pos.z;
 diff --git a/soh/src/overlays/misc/ovl_kaleido_scope/z_kaleido_collect.c b/soh/src/overlays/misc/ovl_kaleido_scope/z_kaleido_collect.c
-index ade62ac..c90fe10 100644
+index ade62acc3e7057bd68fecb65746558fc1a2ba0c1..c90fe1047d5fd01af87083dad1136c3676c6611a 100644
 --- a/soh/src/overlays/misc/ovl_kaleido_scope/z_kaleido_collect.c
 +++ b/soh/src/overlays/misc/ovl_kaleido_scope/z_kaleido_collect.c
 @@ -251,7 +251,8 @@ void KaleidoScope_DrawQuestStatus(PlayState* play, GraphicsContext* gfxCtx) {
@@ -6286,7 +6286,7 @@ index ade62ac..c90fe10 100644
  
      return 1;
 diff --git a/soh/src/overlays/misc/ovl_kaleido_scope/z_kaleido_equipment.c b/soh/src/overlays/misc/ovl_kaleido_scope/z_kaleido_equipment.c
-index f5adb0b..2530ff5 100644
+index f5adb0b44d6668e1e61853e6ff96f524837ab0ea..2530ff558414b6ff4a7577eb1a89380af5baa922 100644
 --- a/soh/src/overlays/misc/ovl_kaleido_scope/z_kaleido_equipment.c
 +++ b/soh/src/overlays/misc/ovl_kaleido_scope/z_kaleido_equipment.c
 @@ -166,6 +166,25 @@ void KaleidoScope_DrawPlayerWork(PlayState* play) {
@@ -6368,7 +6368,7 @@ index f5adb0b..2530ff5 100644
                          }
                      } else {
 diff --git a/soh/src/overlays/misc/ovl_kaleido_scope/z_kaleido_item.c b/soh/src/overlays/misc/ovl_kaleido_scope/z_kaleido_item.c
-index 16cfd87..29efbe5 100644
+index 16cfd8742d3b837cc314b52cd1ae11bc9c8fdfc7..29efbe575e82bd2febc671717438b3cd7b66a83c 100644
 --- a/soh/src/overlays/misc/ovl_kaleido_scope/z_kaleido_item.c
 +++ b/soh/src/overlays/misc/ovl_kaleido_scope/z_kaleido_item.c
 @@ -59,7 +59,7 @@ void KaleidoScope_DrawAmmoCount(PauseContext* pauseCtx, GraphicsContext* gfxCtx,
@@ -6415,7 +6415,7 @@ index 16cfd87..29efbe5 100644
      }
  
 diff --git a/soh/src/overlays/misc/ovl_kaleido_scope/z_kaleido_scope_PAL.c b/soh/src/overlays/misc/ovl_kaleido_scope/z_kaleido_scope_PAL.c
-index b47f06f..f828672 100644
+index b47f06fb20348e32f2b7c194fff6fb4d4056f7b3..f828672c8c0d9811248f33c290e1c75db1a90c4f 100644
 --- a/soh/src/overlays/misc/ovl_kaleido_scope/z_kaleido_scope_PAL.c
 +++ b/soh/src/overlays/misc/ovl_kaleido_scope/z_kaleido_scope_PAL.c
 @@ -1,4 +1,5 @@

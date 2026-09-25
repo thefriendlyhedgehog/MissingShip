@@ -18,7 +18,7 @@ Last full review: **2026-09-25**, with every ML file compared against PAL MQ Deb
 
 - **One issue per change.** Put the issue ID in the commit subject, e.g. `MS-014: port En_Nutsball`.
 - **The ledger rule.** Any engine change updates `ENGINE_CHANGES.md` in the same commit. An actor change also updates `ML_ACTOR_INVENTORY.md`.
-- **Regenerate the patch.** After engine work, regenerate `docs/soh-missingship.patch` (`PORTING_ACTORS.md` step 6) and check that it still applies to SoH `cb71e22`.
+- **Engine work is commits.** Commit it on `missingship` in the engine fork (same `MS-nnn` subject), push, then run `tools/genpatch.py` so `docs/*.patch` match (`PORTING_ACTORS.md` step 6).
 - **Tested vs. built.** "Ported" means built and deployed. "Verified" means played in-game. Record which one applies in the inventory.
 - **Port ML's actual code.** A port must follow ML's code, recovered by diff or disassembly. Guessed behaviour must be marked as a guess.
 - **Order of preference for a fix:**
@@ -177,7 +177,7 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 | [MS-004](https://github.com/thefriendlyhedgehog/MissingShip/issues/4) | infra | `README.md` is stale. It says audio is vanilla (it's ported), that "36 custom actor overlays and 18 custom objects" are unported (wrong numbers), and that cutscenes don't work (entrance intros are ported; overall status unverified). Its "engine change" section describes only the Metal fix. | The README matches this review and points here. |
 | [MS-005](https://github.com/thefriendlyhedgehog/MissingShip/issues/5) | infra | `ML_ACTOR_INVENTORY.md` only surveys *placed* actors. | Regenerated from the full scan: B and C added, and a *Verified* column added. |
 | [MS-006](https://github.com/thefriendlyhedgehog/MissingShip/issues/6) | infra | `modcheck.py` only reports hooks below 0x80608000, and several of the "17 hooked overlays" in the ledger (0x09E, 0x0F4, 0x11B, 0x12E, 0x141, 0x173, 0x18A, 0x18B, 0x198, 0x199) are not actor slots with hooks in the current scan. | The hook list is re-derived across all overlay tables (actor, effect, gamestate) and all target ranges, and the ledger is corrected. |
-| [MS-007](https://github.com/thefriendlyhedgehog/MissingShip/issues/7) | infra | Engine changes live only as a 350 KB patch; code review and merges are painful. | Decide: a private Shipwright fork with a `missingship` branch (patch generated from it) vs. the patch-only workflow. |
+| [MS-007](https://github.com/thefriendlyhedgehog/MissingShip/issues/7) | infra | Engine changes live only as a 350 KB patch; code review and merges are painful. | Decide: a private Shipwright fork with a `missingship` branch (patch generated from it) vs. the patch-only workflow. **Done: fork.** |
 | [MS-008](https://github.com/thefriendlyhedgehog/MissingShip/issues/8) | infra | No automated checks. | A script that runs `checkexits.py`, `checkhashes.py`, the patch-applies check and a build; run it before every push (or in CI where ROMs are available). |
 | [MS-009](https://github.com/thefriendlyhedgehog/MissingShip/issues/51) | infra | The pipeline mixes two ZAPD builds (SOHCombo's for scenes/objects/UI, Shipwright's patched one for audio), and `inject_titles.py` reads SOHCombo's unpatched `scene_table.h`. The app's `Info.plist` has an absolute `SHIP_HOME` (double-click only). | One patched ZAPD + one table source; archive still identical; `MS_SOHCOMBO` removed. |
 
@@ -265,6 +265,7 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 
 ### Done
 
+- MS-007: engine moved to private repos with full upstream history: MissingShip-Shipwright, MissingShip-libultraship, MissingShip-ZAPDTR (branch `missingship`; not GitHub forks, which are always public). Baseline commit 993e7fb on tag 9.2.3; submodules repointed. `tools/genpatch.py` regenerates docs/*.patch (content identical to the old patches; full blob hashes for stable output); `--check` for MS-008. A fresh recursive clone was verified.
 - MS-006: `tools/hookscan.py` re-derives every hook from every overlay's relocation table (plus `code` words that differ from MQ Debug). There are 20 live hook sites outside the player/pause menu, not the claimed 17 overlays (ten of those were vanilla). There is no code past 0x80608000. The player overlay's fixed RAM address is 0x804D23B0. Ledger section rewritten with a per-target status table.
 - MS-055: resolved by MS-006. There is no ML code past 0x80608000; the reported targets were data decoded as jumps.
 - MS-005: `tools/survey_actors.py --write` regenerates the inventory from the ROMs (placements from every scene/room header, spawners from a text-section spawn scan, changes from modcheck); Status and Verified columns are carried over by slot, and regeneration is lossless. 62 placed + 11 spawned + 7 unreached actors; every todo links its issue. New find: En_Dodongo placed in `spot10`.

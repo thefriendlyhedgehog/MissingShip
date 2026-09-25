@@ -77,20 +77,27 @@ The batches from 2026-09-24/25 are built but not playtested (ROADMAP issue MS-01
 
 ### Engine
 
-SoH 9.2.3 plus our patches:
+The engine lives in a **private fork**, clone it next to this repo:
+
+| Repo | Branch | Contents |
+|---|---|---|
+| [MissingShip-Shipwright](https://github.com/thefriendlyhedgehog/MissingShip-Shipwright) | `missingship` | SoH 9.2.3 (tag `9.2.3`) + every engine change |
+| [MissingShip-libultraship](https://github.com/thefriendlyhedgehog/MissingShip-libultraship) | `missingship` | submodule: Metal zero-size texture guard |
+| [MissingShip-ZAPDTR](https://github.com/thefriendlyhedgehog/MissingShip-ZAPDTR) | `missingship` | submodule: ZAudio zero-size soundfont guard |
+
+These are private repos with SoH's full history rather than GitHub forks, because GitHub forks of public repos are always public and the engine carries ML-derived data.
 
 ```bash
-git clone --recursive https://github.com/HarbourMasters/Shipwright.git && cd Shipwright
-git checkout cb71e22 && git submodule update --init --recursive
-git apply ../MissingShip/docs/soh-missingship.patch
-(cd ZAPDTR && git apply ../../MissingShip/docs/zapd-missingship.patch)
-(cd libultraship && git apply ../../MissingShip/docs/libultraship-missingship.patch)
+git clone --recursive https://github.com/thefriendlyhedgehog/MissingShip-Shipwright.git Shipwright
+cd Shipwright
+git remote add upstream https://github.com/HarbourMasters/Shipwright.git   # for SoH updates
 cmake -S . -B build-ml && cmake --build build-ml --target soh -j8
 ```
 
 - Copy `build-ml/soh/soh-macos` over `MissingShip.app/Contents/MacOS/MissingShip`.
 - A new actor directory needs the `cmake -S . -B build-ml` reconfigure.
-- After changing the engine, regenerate the patch (`docs/PORTING_ACTORS.md` step 6).
+- **Engine changes are commits on `missingship`.** Then run `python3 tools/genpatch.py` to refresh the patches in `docs/` (see `docs/PORTING_ACTORS.md` step 6). The patches are generated review copies, not the source of truth; `tools/genpatch.py --check` fails if they're stale.
+- Taking a newer SoH release means merging its tag into `missingship` (`git fetch upstream --tags && git merge <tag>`), then rebuilding and replaying the tests.
 
 ### Mod archive
 
@@ -139,7 +146,7 @@ ZAPD's config (`pipeline/Config_ML.xml`) is a template; each run writes the fill
 | `docs/ML_ACTOR_INVENTORY.md` | per-actor port status |
 | `docs/PORTING_ACTORS.md` | how to port an actor (diff → C → object → build) |
 | `docs/WORKING_NOTES.md`, `docs/notes/` | handoff notes and key facts (addresses, gotchas) |
-| `docs/*.patch` | engine changes against SoH `cb71e22` (soh, ZAPDTR, libultraship) |
+| `docs/*.patch` | generated from the engine fork by `tools/genpatch.py`: changes against SoH 9.2.3 (soh, ZAPDTR, libultraship) |
 
 ## Goals
 
