@@ -34,3 +34,9 @@ logic" -- ML replaces too much vanilla item/flag logic). SoH QoL enhancements (f
 and should keep working. Engine-level QoL (text speed) is ML-agnostic; the risk is enhancements keyed to
 VANILLA flags/entrances/actors (cutscene skips, time savers) colliding with ML's rewritten logic -- audit
 those as their own pass. Note: with DebugEnabled on, START during a cutscene triggers SoH's debug skip.
+
+**Expanded vision (user, 2026-09-25):** work as a TEAM, not solo -- plan and track through GitHub Issues
+(milestones M0-M6, Platforms, Porting kit; see [[missingship-github]]). Long-term: **Windows + Linux support like
+SoH** (macOS is the only test platform for now). Beyond ML: build up a knowledge base and the tools into a
+**reusable porting kit** -- the user will hand over more romhacks to port to the SoH engine "until we have a ready
+made porting option, or they are all done". So prefer generic, configurable tools over ML-hardcoded ones.
