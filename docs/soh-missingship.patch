@@ -1,9 +1,9 @@
 diff --git a/soh/assets/ml_assets.h b/soh/assets/ml_assets.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..7a18ba1147b3b453e81a79f387e6cfcc32f36d3d
+index 0000000000000000000000000000000000000000..c9cece4f9cfc6bdc92e871c27b96f7578735ae09
 --- /dev/null
 +++ b/soh/assets/ml_assets.h
-@@ -0,0 +1,259 @@
+@@ -0,0 +1,297 @@
 +#ifndef ML_ASSETS_H
 +#define ML_ASSETS_H
 +
@@ -262,9 +262,47 @@ index 0000000000000000000000000000000000000000..7a18ba1147b3b453e81a79f387e6cfcc
 +#define dgMlBmori1ThievesLeaveCs "__OTR__scenes/nonmq/Bmori1_scene/gMlBmori1ThievesLeaveCs"
 +static const ALIGN_ASSET(2) char gMlBmori1ThievesLeaveCs[] = dgMlBmori1ThievesLeaveCs;
 +
++// object_ml_mag
++#define dgMlTitleLogoTex "__OTR__objects/object_ml_mag/gMlTitleLogoTex"
++static const ALIGN_ASSET(2) char gMlTitleLogoTex[] = dgMlTitleLogoTex;
++#define dgMlTitleEffectMask00Tex "__OTR__objects/object_ml_mag/gMlTitleEffectMask00Tex"
++static const ALIGN_ASSET(2) char gMlTitleEffectMask00Tex[] = dgMlTitleEffectMask00Tex;
++#define dgMlTitleEffectMask01Tex "__OTR__objects/object_ml_mag/gMlTitleEffectMask01Tex"
++static const ALIGN_ASSET(2) char gMlTitleEffectMask01Tex[] = dgMlTitleEffectMask01Tex;
++#define dgMlTitleEffectMask02Tex "__OTR__objects/object_ml_mag/gMlTitleEffectMask02Tex"
++static const ALIGN_ASSET(2) char gMlTitleEffectMask02Tex[] = dgMlTitleEffectMask02Tex;
++#define dgMlTitleEffectMask10Tex "__OTR__objects/object_ml_mag/gMlTitleEffectMask10Tex"
++static const ALIGN_ASSET(2) char gMlTitleEffectMask10Tex[] = dgMlTitleEffectMask10Tex;
++#define dgMlTitleEffectMask11Tex "__OTR__objects/object_ml_mag/gMlTitleEffectMask11Tex"
++static const ALIGN_ASSET(2) char gMlTitleEffectMask11Tex[] = dgMlTitleEffectMask11Tex;
++#define dgMlTitleEffectMask12Tex "__OTR__objects/object_ml_mag/gMlTitleEffectMask12Tex"
++static const ALIGN_ASSET(2) char gMlTitleEffectMask12Tex[] = dgMlTitleEffectMask12Tex;
++#define dgMlTitleEffectMask20Tex "__OTR__objects/object_ml_mag/gMlTitleEffectMask20Tex"
++static const ALIGN_ASSET(2) char gMlTitleEffectMask20Tex[] = dgMlTitleEffectMask20Tex;
++#define dgMlTitleEffectMask21Tex "__OTR__objects/object_ml_mag/gMlTitleEffectMask21Tex"
++static const ALIGN_ASSET(2) char gMlTitleEffectMask21Tex[] = dgMlTitleEffectMask21Tex;
++#define dgMlTitleEffectMask22Tex "__OTR__objects/object_ml_mag/gMlTitleEffectMask22Tex"
++static const ALIGN_ASSET(2) char gMlTitleEffectMask22Tex[] = dgMlTitleEffectMask22Tex;
++#define dgMlTitleFlameEffectTex "__OTR__objects/object_ml_mag/gMlTitleFlameEffectTex"
++static const ALIGN_ASSET(2) char gMlTitleFlameEffectTex[] = dgMlTitleFlameEffectTex;
++#define dgMlTitleBarTex "__OTR__objects/object_ml_mag/gMlTitleBarTex"
++static const ALIGN_ASSET(2) char gMlTitleBarTex[] = dgMlTitleBarTex;
++#define dgMlTitleText1Tex "__OTR__objects/object_ml_mag/gMlTitleText1Tex"
++static const ALIGN_ASSET(2) char gMlTitleText1Tex[] = dgMlTitleText1Tex;
++#define dgMlTitleText2Tex "__OTR__objects/object_ml_mag/gMlTitleText2Tex"
++static const ALIGN_ASSET(2) char gMlTitleText2Tex[] = dgMlTitleText2Tex;
++#define dgMlTitlePressStartTex "__OTR__objects/object_ml_mag/gMlTitlePressStartTex"
++static const ALIGN_ASSET(2) char gMlTitlePressStartTex[] = dgMlTitlePressStartTex;
++
++// object_ml_ganon2
++#define dgMlPushBlockCol "__OTR__objects/object_ml_ganon2/gMlPushBlockCol"
++static const ALIGN_ASSET(2) char gMlPushBlockCol[] = dgMlPushBlockCol;
++#define dgMlPushBlockDL "__OTR__objects/object_ml_ganon2/gMlPushBlockDL"
++static const ALIGN_ASSET(2) char gMlPushBlockDL[] = dgMlPushBlockDL;
++
 +#endif
 diff --git a/soh/include/tables/actor_table.h b/soh/include/tables/actor_table.h
-index d05085f4d07788d84b76c9ab9a6d32b623c2cd42..25bb3f44513f6b66bb399564b956da2e085d83f9 100644
+index d05085f4d07788d84b76c9ab9a6d32b623c2cd42..f7a70c53e1de249d12b01fece9eab392949d316c 100644
 --- a/soh/include/tables/actor_table.h
 +++ b/soh/include/tables/actor_table.h
 @@ -11,19 +11,19 @@
@@ -456,8 +494,9 @@ index d05085f4d07788d84b76c9ab9a6d32b623c2cd42..25bb3f44513f6b66bb399564b956da2e
  /* 0x0177 */ DEFINE_ACTOR(Bg_Zg, ACTOR_BG_ZG, ALLOCTYPE_NORMAL)
  /* 0x0178 */ DEFINE_ACTOR(En_Heishi4, ACTOR_EN_HEISHI4, ALLOCTYPE_NORMAL)
  /* 0x0179 */ DEFINE_ACTOR(En_Zl3, ACTOR_EN_ZL3, ALLOCTYPE_NORMAL)
- /* 0x017A */ DEFINE_ACTOR(Boss_Ganon2, ACTOR_BOSS_GANON2, ALLOCTYPE_NORMAL)
+-/* 0x017A */ DEFINE_ACTOR(Boss_Ganon2, ACTOR_BOSS_GANON2, ALLOCTYPE_NORMAL)
 -/* 0x017B */ DEFINE_ACTOR(En_Kakasi, ACTOR_EN_KAKASI, ALLOCTYPE_NORMAL)
++/* 0x017A */ DEFINE_ACTOR(Ml_PushBlock, ACTOR_BOSS_GANON2, ALLOCTYPE_NORMAL) // MissingShip: ML rewrite (in z_obj_oshihiki.c)
 +/* 0x017B */ DEFINE_ACTOR(Ml_Elevator, ACTOR_EN_KAKASI, ALLOCTYPE_NORMAL) // MissingShip: ML rewrite
  /* 0x017C */ DEFINE_ACTOR(En_Takara_Man, ACTOR_EN_TAKARA_MAN, ALLOCTYPE_NORMAL)
  /* 0x017D */ DEFINE_ACTOR(Obj_Makeoshihiki, ACTOR_OBJ_MAKEOSHIHIKI, ALLOCTYPE_NORMAL)
@@ -4144,6 +4183,177 @@ index 2f062223628c8ea2df7b0ea81e686855c5ac992b..5dce431da43c5241525944af3e390f73
          // special case for the credits
          yOffset = (this->actor.params < 0) ? 1 : 40;
          Lights_PointNoGlowSetInfo(&this->lightInfo, this->actor.world.pos.x, yOffset + (s16)this->actor.world.pos.y,
+diff --git a/soh/src/overlays/actors/ovl_En_Mag/z_en_mag.c b/soh/src/overlays/actors/ovl_En_Mag/z_en_mag.c
+index 6290d65bee7b04e7ffb45f8316724809e716633b..bfaab23775e9d63b973b5b8e366c7972e912aea3 100644
+--- a/soh/src/overlays/actors/ovl_En_Mag/z_en_mag.c
++++ b/soh/src/overlays/actors/ovl_En_Mag/z_en_mag.c
+@@ -2,6 +2,12 @@
+  * File: z_en_mag.c
+  * Overlay: ovl_En_Mag
+  * Description: Title Screen Manager & Logo
++ *
++ * MissingShip: ML rewrote the drawing (ML dma 286) around its own object_mag layout (object 0x14A, dma 378, shipped
++ * as object_ml_mag): the same flame effect and logo placement (MQ's, centred), then instead of the subtitle text,
++ * copyright and font-drawn messages, a dark bar with two credit lines under the logo and a second bar behind a
++ * red-pulsing PRESS START image (EnMag_DrawInnerMl). Its update also letterboxes the title cutscene and hides the
++ * HUD while it runs, and the copyright fade-in step is 10 instead of 6.
+  */
+ 
+ #include "z_en_mag.h"
+@@ -9,6 +15,7 @@
+ #include <soh/GameVersions.h>
+ #include "soh/ResourceManagerHelpers.h"
+ #include <string.h>
++#include "assets/ml_assets.h"
+ 
+ #define FLAGS (ACTOR_FLAG_UPDATE_CULLING_DISABLED | ACTOR_FLAG_DRAW_CULLING_DISABLED)
+ 
+@@ -77,7 +84,7 @@ void EnMag_Init(Actor* thisx, PlayState* play) {
+     VREG(5) = 6;
+     VREG(6) = 2;
+ 
+-    this->copyrightAlphaStep = 6;
++    this->copyrightAlphaStep = 10; // MissingShip: ML's step (vanilla 6)
+     this->fadeOutAlphaStep = 10;
+ 
+     VREG(19) = 99;
+@@ -153,6 +160,13 @@ void EnMag_Update(Actor* thisx, PlayState* play) {
+     EnMag* this = (EnMag*)thisx;
+     bool isMQ = ResourceMgr_IsGameMasterQuest();
+ 
++    // MissingShip: ML letterboxes the title cutscene and hides the HUD while it runs.
++    if (play->csCtx.state != CS_STATE_IDLE) {
++        Interface_ChangeAlpha(1);
++        ShrinkWindow_SetVal(32);
++        ShrinkWindow_SetCurrentVal(32);
++    }
++
+     if (gSaveContext.fileNum != 0xFEDC) {
+         if (this->globalState < MAG_STATE_DISPLAY) {
+             if (CHECK_BTN_ALL(play->state.input[0].press.button, BTN_START) ||
+@@ -754,6 +768,113 @@ void EnMag_DrawInner(Actor* thisx, PlayState* play, Gfx** gfxP) {
+     *gfxP = gfx;
+ }
+ 
++// MissingShip: ML's DrawInner (ML dma 286, +0xE74), on object_ml_mag.
++static void EnMag_DrawInnerMl(Actor* thisx, PlayState* play, Gfx** gfxP) {
++    static void* effectMaskTextures[] = {
++        gMlTitleEffectMask00Tex, gMlTitleEffectMask01Tex, gMlTitleEffectMask02Tex,
++        gMlTitleEffectMask10Tex, gMlTitleEffectMask11Tex, gMlTitleEffectMask12Tex,
++        gMlTitleEffectMask20Tex, gMlTitleEffectMask21Tex, gMlTitleEffectMask22Tex,
++    };
++    static f32 sPulse = 0.5f;
++    static u8 sPulseFalling = false;
++    EnMag* this = (EnMag*)thisx;
++    Gfx* gfx = *gfxP;
++    u16 i, j, k;
++    u16 rectLeft;
++    u16 rectTop;
++    s16 subAlpha;
++    s16 copyrightAlpha;
++    u8 r, g;
++
++    gSPSegment(gfx++, 0x06, play->objectCtx.status[this->actor.objBankIndex].segment);
++
++    Gfx_SetupDL_39Ptr(&gfx);
++
++    this->effectScroll -= 2;
++
++    gDPSetCycleType(gfx++, G_CYC_2CYCLE);
++    gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
++    gDPSetRenderMode(gfx++, G_RM_PASS, G_RM_CLD_SURF2);
++    gDPSetCombineLERP(gfx++, TEXEL1, PRIMITIVE, PRIM_LOD_FRAC, TEXEL0, TEXEL1, 1, PRIM_LOD_FRAC, TEXEL0, PRIMITIVE,
++                      ENVIRONMENT, COMBINED, ENVIRONMENT, COMBINED, 0, PRIMITIVE, 0);
++
++    gDPSetPrimColor(gfx++, 0, (s16)this->effectPrimLodFrac, (s16)this->effectPrimColor[0],
++                    (s16)this->effectPrimColor[1], (s16)this->effectPrimColor[2], (s16)this->effectAlpha);
++    gDPSetEnvColor(gfx++, (s16)this->effectEnvColor[0], (s16)this->effectEnvColor[1], (s16)this->effectEnvColor[2],
++                   255);
++
++    if ((s16)this->effectPrimLodFrac != 0) {
++        for (k = 0, i = 0, rectTop = 0; i < 3; i++, rectTop += 64) {
++            for (j = 0, rectLeft = 64; j < 3; j++, k++, rectLeft += 64) {
++                EnMag_DrawEffectTextures(&gfx, effectMaskTextures[k], gMlTitleFlameEffectTex, 64, 64, 32, 32, rectLeft,
++                                         rectTop, 64, 64, 1024, 1024, 1, 1, k, this);
++            }
++        }
++    }
++
++    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, (s16)this->mainAlpha);
++
++    if ((s16)this->mainAlpha != 0) {
++        EnMag_DrawImageRGBA32(&gfx, 160, 100, gMlTitleLogoTex, 160, 160);
++    }
++
++    subAlpha = (s16)this->subAlpha;
++    if (subAlpha != 0) {
++        copyrightAlpha = (s16)this->copyrightAlpha;
++
++        // Dark bars: one under the credits, one behind PRESS START. The bar texture is a single row, stretched.
++        gDPSetAlphaCompare(gfx++, G_AC_NONE);
++        gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
++        gDPPipeSync(gfx++);
++        gDPSetEnvColor(gfx++, 0, 0, 0, 255);
++        gDPLoadTextureBlock(gfx++, gMlTitleBarTex, G_IM_FMT_IA, G_IM_SIZ_16b, 232, 1, 0, G_TX_NOMIRROR | G_TX_CLAMP,
++                            G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
++        gDPSetPrimColor(gfx++, 0, 0, 30, 20, 0, subAlpha);
++        gSPTextureRectangle(gfx++, 88 << 2, 179 << 2, 320 << 2, 205 << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 0x27);
++        if (copyrightAlpha != 0) {
++            gDPSetPrimColor(gfx++, 0, 0, 30, 20, 0, copyrightAlpha);
++            gSPTextureRectangle(gfx++, 181 << 2, 160 << 2, 320 << 2, 174 << 2, G_TX_RENDERTILE, 0, 0, 0x6AD, 0x49);
++        }
++
++        // The two credit lines.
++        gDPPipeSync(gfx++);
++        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, subAlpha);
++        gDPLoadTextureBlock(gfx++, gMlTitleText1Tex, G_IM_FMT_IA, G_IM_SIZ_8b, 112, 13, 0, G_TX_NOMIRROR | G_TX_CLAMP,
++                            G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
++        gSPTextureRectangle(gfx++, 195 << 2, 179 << 2, 307 << 2, 192 << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
++        gDPLoadTextureBlock(gfx++, gMlTitleText2Tex, G_IM_FMT_IA, G_IM_SIZ_8b, 112, 12, 0, G_TX_NOMIRROR | G_TX_CLAMP,
++                            G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
++        gSPTextureRectangle(gfx++, 195 << 2, 192 << 2, 307 << 2, 204 << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
++
++        if (copyrightAlpha != 0) {
++            // PRESS START pulses between dark red (127, 15, 15) and red (255, 30, 30), 0.02 a frame.
++            if (!sPulseFalling) {
++                sPulse += 0.02f;
++                if (sPulse >= 1.0f) {
++                    sPulse = 1.0f;
++                    sPulseFalling = true;
++                }
++            } else {
++                sPulse -= 0.02f;
++                if (sPulse <= 0.5f) {
++                    sPulse = 0.5f;
++                    sPulseFalling = false;
++                }
++            }
++            r = (s32)(sPulse * 255.0f);
++            g = (s32)(sPulse * 30.0f);
++            gDPPipeSync(gfx++);
++            gDPSetPrimColor(gfx++, 0, 0, r, g, g, copyrightAlpha);
++            gDPLoadTextureBlock(gfx++, gMlTitlePressStartTex, G_IM_FMT_IA, G_IM_SIZ_8b, 72, 11, 0,
++                                G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK,
++                                G_TX_NOLOD, G_TX_NOLOD);
++            gSPTextureRectangle(gfx++, 231 << 2, 162 << 2, 303 << 2, 173 << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
++        }
++    }
++
++    *gfxP = gfx;
++}
++
+ void EnMag_Draw(Actor* thisx, PlayState* play) {
+     s32 pad;
+     Gfx* gfx;
+@@ -765,7 +886,7 @@ void EnMag_Draw(Actor* thisx, PlayState* play) {
+     gfx = Graph_GfxPlusOne(gfxRef);
+     gSPDisplayList(OVERLAY_DISP++, gfx);
+ 
+-    EnMag_DrawInner(thisx, play, &gfx);
++    EnMag_DrawInnerMl(thisx, play, &gfx); // MissingShip: ML's title screen
+ 
+     gSPEndDisplayList(gfx++);
+     Graph_BranchDlist(gfxRef, gfx);
 diff --git a/soh/src/overlays/actors/ovl_En_Md/z_en_md.c b/soh/src/overlays/actors/ovl_En_Md/z_en_md.c
 index 13b51a16ec8a8cda56ea7f7ac1bcabf40fa5326d..7825227e8947e6ec1d869be3f17fb89c80dd0fbc 100644
 --- a/soh/src/overlays/actors/ovl_En_Md/z_en_md.c
@@ -10932,10 +11142,54 @@ index 6324a12a51060b2892daf89d41a86ea552f45ab1..3548648170c4b77bb1694dbfa8ecc6d6
  
  #endif
 diff --git a/soh/src/overlays/actors/ovl_Obj_Oshihiki/z_obj_oshihiki.c b/soh/src/overlays/actors/ovl_Obj_Oshihiki/z_obj_oshihiki.c
-index 16f592a7d62864772aa2a830fee6dc4a724dc8c9..81563455907823e1368332d9879dd2bbc44f37ea 100644
+index 16f592a7d62864772aa2a830fee6dc4a724dc8c9..452e7707ac40f4c10ae1cc8e1ff099553c4412a3 100644
 --- a/soh/src/overlays/actors/ovl_Obj_Oshihiki/z_obj_oshihiki.c
 +++ b/soh/src/overlays/actors/ovl_Obj_Oshihiki/z_obj_oshihiki.c
-@@ -43,13 +43,14 @@ static f32 sScales[] = {
+@@ -2,12 +2,20 @@
+  * File: z_obj_oshihiki.c
+  * Overlay: ovl_Obj_Oshihiki
+  * Description: Push Block
++ *
++ * MissingShip: also ML's copy in actor slot 0x17A (Ml_PushBlock_InitVars, ML dma 289, vanilla Boss_Ganon2's slot) on
++ * its own object 0x153 (dma 379, shipped as object_ml_ganon2), placed once in kakariko3 with the readable note
++ * (En_Wonder_Talk params 7) on top. ML's edits, marked below: its own collision and a single display list; the block's
++ * switch no longer decides whether it spawns but records that it was pushed to the far wall (set when it stops
++ * against a wall; with it set the block starts 80 units along -z, where that is); resting on a blue switch it moves
++ * only off a matching inverse switch; and every frame it keeps note 7 at its own z.
+  */
+ 
+ #include "z_obj_oshihiki.h"
+ #include "overlays/actors/ovl_Obj_Switch/z_obj_switch.h"
+ #include "objects/gameplay_dangeon_keep/gameplay_dangeon_keep.h"
+ #include "soh/ResourceManagerHelpers.h"
++#include "assets/ml_assets.h"
+ 
+ #define FLAGS ACTOR_FLAG_UPDATE_CULLING_DISABLED
+ 
+@@ -25,6 +33,22 @@ void ObjOshihiki_Push(ObjOshihiki* this, PlayState* play);
+ void ObjOshihiki_SetupFall(ObjOshihiki* this, PlayState* play);
+ void ObjOshihiki_Fall(ObjOshihiki* this, PlayState* play);
+ 
++// MissingShip: ML's push block (actor slot 0x17A, vanilla Boss_Ganon2's).
++const ActorInit Ml_PushBlock_InitVars = {
++    ACTOR_BOSS_GANON2,
++    ACTORCAT_PROP,
++    FLAGS,
++    OBJECT_GANON2,
++    sizeof(ObjOshihiki),
++    (ActorFunc)ObjOshihiki_Init,
++    (ActorFunc)ObjOshihiki_Destroy,
++    (ActorFunc)ObjOshihiki_Update,
++    (ActorFunc)ObjOshihiki_Draw,
++    NULL,
++};
++
++#define OSHIHIKI_IS_ML(this) ((this)->dyna.actor.id == ACTOR_BOSS_GANON2)
++
+ const ActorInit Obj_Oshihiki_InitVars = {
+     ACTOR_OBJ_OSHIHIKI,
+     ACTORCAT_PROP,
+@@ -43,13 +67,14 @@ static f32 sScales[] = {
  };
  
  static Color_RGB8 sColors[][4] = {
@@ -10952,6 +11206,99 @@ index 16f592a7d62864772aa2a830fee6dc4a724dc8c9..81563455907823e1368332d9879dd2bb
      { { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 } }, // ganons castle
      { { 232, 210, 176 }, { 232, 210, 176 }, { 232, 210, 176 }, { 232, 210, 176 } }, // Gerudo Training Ground
  };
+@@ -92,6 +117,9 @@ void ObjOshihiki_InitDynapoly(ObjOshihiki* this, PlayState* play, CollisionHeade
+     s32 pad2;
+ 
+     DynaPolyActor_Init(&this->dyna, moveFlag);
++    if (OSHIHIKI_IS_ML(this)) {
++        collision = (CollisionHeader*)gMlPushBlockCol; // MissingShip: ML's own collision
++    }
+     CollisionHeader_GetVirtual(collision, &colHeader);
+     this->dyna.bgId = DynaPoly_SetBgActor(play, &play->colCtx.dyna, &this->dyna.actor, colHeader);
+ 
+@@ -181,6 +209,16 @@ s32 ObjOshihiki_NoSwitchPress(ObjOshihiki* this, DynaPolyActor* dyna, PlayState*
+ 
+     if (dyna == NULL) {
+         return 1;
++    } else if ((dyna->actor.id == ACTOR_OBJ_SWITCH) && OSHIHIKI_IS_ML(this)) {
++        // MissingShip: ML's patch (0x3AC, 0x3D0) drops the switch checks and returns 0 on a flag mismatch, so the
++        // block is stuck on any blue switch and moves off an inverse one only when the flags match.
++        dynaSwitchFlag = (dyna->actor.params >> 8) & 0x3F;
++        if ((dyna->actor.params & 0x33) == 0x30) {
++            return dynaSwitchFlag == ((this->dyna.actor.params >> 8) & 0x3F);
++        }
++        if ((dyna->actor.params & 0x33) == 0x20) {
++            return 0;
++        }
+     } else if (dyna->actor.id == ACTOR_OBJ_SWITCH) {
+         dynaSwitchFlag = (dyna->actor.params >> 8) & 0x3F;
+         switch (dyna->actor.params & 0x33) {
+@@ -277,7 +315,8 @@ void ObjOshihiki_Init(Actor* thisx, PlayState* play2) {
+     ObjOshihiki_CheckType(this, play);
+ 
+     if ((((this->dyna.actor.params >> 8) & 0xFF) >= 0) && (((this->dyna.actor.params >> 8) & 0xFF) <= 0x3F)) {
+-        if (Flags_GetSwitch(play, (this->dyna.actor.params >> 8) & 0x3F)) {
++        // MissingShip: ML's block ignores its switch here (START_ON always spawns, START_OFF never).
++        if (!OSHIHIKI_IS_ML(this) && Flags_GetSwitch(play, (this->dyna.actor.params >> 8) & 0x3F)) {
+             switch (this->dyna.actor.params & 0xF) {
+                 case PUSHBLOCK_SMALL_START_ON:
+                 case PUSHBLOCK_MEDIUM_START_ON:
+@@ -307,6 +346,14 @@ void ObjOshihiki_Init(Actor* thisx, PlayState* play2) {
+     ObjOshihiki_SetupOnActor(this, play);
+     // "(dungeon keep push-pull block)"
+     osSyncPrintf("(dungeon keep 押し引きブロック)(arg_data 0x%04x)\n", this->dyna.actor.params);
++
++    // MissingShip: ML's hand-written patch: with its switch set (it was pushed to the far wall), the block starts
++    // 80 units along -z. ML also writes -80 into prevPos.z, a feet position and yawSin; the first two are unused
++    // here and Update recomputes yawSin, so those are left out.
++    if (OSHIHIKI_IS_ML(this) && Flags_GetSwitch(play, (this->dyna.actor.params >> 8) & 0xFF)) {
++        this->dyna.actor.world.pos.z += -80.0f;
++        this->dyna.actor.home.pos.z = this->dyna.actor.world.pos.z;
++    }
+ }
+ 
+ void ObjOshihiki_Destroy(Actor* thisx, PlayState* play) {
+@@ -580,6 +627,9 @@ void ObjOshihiki_Push(ObjOshihiki* this, PlayState* play) {
+         player = GET_PLAYER(play);
+         if (ObjOshihiki_CheckWall(play, this->dyna.unk_158, this->dyna.unk_150, this)) {
+             Audio_PlayActorSound2(thisx, NA_SE_EV_BLOCK_BOUND);
++            if (OSHIHIKI_IS_ML(this)) {
++                Flags_SetSwitch(play, (thisx->params >> 8) & 0xFF); // MissingShip: ML records the push
++            }
+         }
+ 
+         thisx->home.pos.x = thisx->world.pos.x;
+@@ -649,12 +699,30 @@ void ObjOshihiki_Update(Actor* thisx, PlayState* play) {
+     if (this->actionFunc != NULL) {
+         this->actionFunc(this, play);
+     }
++
++    // MissingShip: ML keeps the note on top of its block (En_Wonder_Talk params 7) at the block's z. ML walks the
++    // prop list without a NULL check; SoH stops at the end of it.
++    if (OSHIHIKI_IS_ML(this)) {
++        Actor* note;
++
++        for (note = play->actorCtx.actorLists[ACTORCAT_PROP].head; note != NULL; note = note->next) {
++            if ((note->id == ACTOR_EN_WONDER_TALK) && ((u16)note->params == 7)) {
++                note->world.pos.z = this->dyna.actor.world.pos.z;
++                break;
++            }
++        }
++    }
+ }
+ 
+ void ObjOshihiki_Draw(Actor* thisx, PlayState* play) {
+     s32 pad;
+     ObjOshihiki* this = (ObjOshihiki*)thisx;
+ 
++    if (OSHIHIKI_IS_ML(this)) {
++        Gfx_DrawDListOpa(play, (Gfx*)gMlPushBlockDL); // MissingShip: ML's draw is its one display list
++        return;
++    }
++
+     OPEN_DISPS(play->state.gfxCtx);
+     if (ObjOshihiki_MoveWithBlockUnder(this, play)) {
+         Matrix_Translate(this->underDistX * 10.0f, 0.0f, this->underDistZ * 10.0f, MTXMODE_APPLY);
 diff --git a/soh/src/overlays/actors/ovl_Obj_Syokudai/z_obj_syokudai.c b/soh/src/overlays/actors/ovl_Obj_Syokudai/z_obj_syokudai.c
 index 10ae5895a66a895c9e93a76ffb62921fc1930150..65cca2714e17a922c80fd9b9afbda7bc5719e909 100644
 --- a/soh/src/overlays/actors/ovl_Obj_Syokudai/z_obj_syokudai.c

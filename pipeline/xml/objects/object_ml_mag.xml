@@ -1,0 +1,20 @@
+<Root>
+    <!-- ML object 0x14A (dma 378; its own layout, not vanilla object_mag's): ML's title screen for En_Mag. -->
+    <File Name="object_ml_mag" Segment="6">
+        <Texture Name="gMlTitleLogoTex" OutName="title_logo" Format="rgba32" Width="160" Height="160" Offset="0x0"/>
+        <Texture Name="gMlTitleEffectMask00Tex" OutName="title_effect_mask_0_0" Format="i4" Width="64" Height="64" Offset="0x19000"/>
+        <Texture Name="gMlTitleEffectMask01Tex" OutName="title_effect_mask_0_1" Format="i4" Width="64" Height="64" Offset="0x19800"/>
+        <Texture Name="gMlTitleEffectMask02Tex" OutName="title_effect_mask_0_2" Format="i4" Width="64" Height="64" Offset="0x1A000"/>
+        <Texture Name="gMlTitleEffectMask10Tex" OutName="title_effect_mask_1_0" Format="i4" Width="64" Height="64" Offset="0x1A800"/>
+        <Texture Name="gMlTitleEffectMask11Tex" OutName="title_effect_mask_1_1" Format="i4" Width="64" Height="64" Offset="0x1B000"/>
+        <Texture Name="gMlTitleEffectMask12Tex" OutName="title_effect_mask_1_2" Format="i4" Width="64" Height="64" Offset="0x1B800"/>
+        <Texture Name="gMlTitleEffectMask20Tex" OutName="title_effect_mask_2_0" Format="i4" Width="64" Height="64" Offset="0x1C000"/>
+        <Texture Name="gMlTitleEffectMask21Tex" OutName="title_effect_mask_2_1" Format="i4" Width="64" Height="64" Offset="0x1C800"/>
+        <Texture Name="gMlTitleEffectMask22Tex" OutName="title_effect_mask_2_2" Format="i4" Width="64" Height="64" Offset="0x1D000"/>
+        <Texture Name="gMlTitleFlameEffectTex" OutName="title_flame_effect" Format="i8" Width="32" Height="32" Offset="0x1D800"/>
+        <Texture Name="gMlTitleBarTex" OutName="title_bar" Format="ia16" Width="232" Height="1" Offset="0x1DC00"/>
+        <Texture Name="gMlTitleText1Tex" OutName="title_text_1" Format="ia8" Width="112" Height="13" Offset="0x1DDD0"/>
+        <Texture Name="gMlTitleText2Tex" OutName="title_text_2" Format="ia8" Width="112" Height="12" Offset="0x1E380"/>
+        <Texture Name="gMlTitlePressStartTex" OutName="title_press_start" Format="ia8" Width="72" Height="11" Offset="0x1E8C0"/>
+    </File>
+</Root>

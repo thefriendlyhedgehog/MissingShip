@@ -67,9 +67,9 @@ Actors living in `code` (En_Item00, En_A_Obj) and slots ML deleted are left out;
 | `0x165` En_Weather_Tag | REWRITTEN (text 0xdb0 vs 0xe00) | spot12 | Ml_TreeBridge | ported (no story-flag kills) | no |
 | `0x16d` En_Md | 263 text / 0 data words differ  hooks ['0x80602200'] | spot04 | — | ported | no |
 | `0x16e` En_Hy | REWRITTEN (text 0x28c0 vs 0x28f0) | malon_stable ×2, spot20 | — | ported (the certificate offer is ML's only edit) | certificate offer: yes (2026-09-23) |
-| `0x171` En_Mag | REWRITTEN (text 0x1730 vs 0x23a0) | spot00 | — | todo: MS-039 | no |
+| `0x171` En_Mag | REWRITTEN (text 0x1730 vs 0x23a0) | spot00 | — | ported (ML title screen, object_ml_mag, MS-039) | no |
 | `0x174` Ml_FogWall (was Demo_Gt) | REWRITTEN (text 0xe70 vs 0x4f50) | spot10 ×9 | — | ported | no |
-| `0x17a` Boss_Ganon2 | REWRITTEN (text 0x1690 vs 0x9e00) | kakariko3 | — | todo: MS-039 | no |
+| `0x17a` Ml_PushBlock (was Boss_Ganon2) | REWRITTEN (text 0x1690 vs 0x9e00) | kakariko3 | — | ported (Ml_PushBlock in z_obj_oshihiki.c, object_ml_ganon2, MS-039) | no |
 | `0x17b` Ml_Elevator (was En_Kakasi) | REWRITTEN (text 0x390 vs 0xc70) | HAKAdan ×2 | Ml_ElevatorSpawner | ported (Ml_Elevator, MS-110) | no |
 | `0x188` En_Ssh | REWRITTEN (text 0x20e0 vs 0x2150) | HAKAdan ×4 | — | ported (MS-113) | no |
 | `0x18c` Ml_HoleScrub (was En_Weiyer) | REWRITTEN (text 0x1910 vs 0x17e0) | ydan | — | ported (Ml_HoleScrub: hole-hopping scrub) | no |

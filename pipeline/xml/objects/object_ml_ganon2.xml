@@ -1,0 +1,8 @@
+<Root>
+    <!-- ML object 0x153 (dma 379; vanilla's object_ganon2 is Ganon's final form): the kakariko3 push block for
+         Ml_PushBlock (actor slot 0x17A, Boss_Ganon2 in vanilla), an Obj_Oshihiki copy. -->
+    <File Name="object_ml_ganon2" Segment="6">
+        <Collision Name="gMlPushBlockCol" Offset="0x3000"/>
+        <DList Name="gMlPushBlockDL" Offset="0x4260"/>
+    </File>
+</Root>

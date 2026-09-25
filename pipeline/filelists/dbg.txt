@@ -376,8 +376,8 @@ mlfile_374
 mlfile_375
 object_ml_gi_certificate
 mlfile_377
-mlfile_378
-mlfile_379
+object_ml_mag
+object_ml_ganon2
 object_ml_elevator
 mlfile_381
 mlfile_382
