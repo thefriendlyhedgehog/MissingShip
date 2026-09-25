@@ -71,7 +71,7 @@ described by hand:
 The `File Name` must match the name given to that object's **dma index** in `filelists/dbg.txt`.
 ML reorganised dmadata, so these indices carry object data under unrelated vanilla names (object
 slot 0x40 lives at dma 12, whose vanilla name is `icon_item_nes_static`). The cycle script rewrites
-that filelist every run, so add the index to `ML_OBJECTS` in `ms_cycle.sh` — otherwise the name is
+that filelist every run, so add the index to `ML_OBJECTS` in `pipeline/ms_cycle.py` — otherwise the name is
 silently lost on the next rebuild and ZAPD fails. Find the dma index through ML's `gObjectTable` at
 code offset **0x10A6C8** (8-byte `RomFile` entries).
 

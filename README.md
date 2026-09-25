@@ -105,10 +105,12 @@ cmake --build build-ml --target soh ZAPD -j8         # the engine, and the ZAPD 
 ### Mod archive
 
 ```bash
-./pipeline/ms_cycle.sh      # rebuild ROM → ZAPD → inject text/audio/objects/UI → install → relaunch
+python3 pipeline/ms_cycle.py              # rebuild ROM → ZAPD → inject text/audio/objects/UI → install → relaunch
+python3 pipeline/ms_cycle.py --no-launch  # build and install only
 ```
 
-- **Inputs:** `pipeline/tml_2_0.z64` (the ML v2.0 ROM), `home/oot.o2r`, and the engine checkout. Every step uses the engine's own ZAPD (`build-ml/ZAPD/ZAPD.out`, from our patched ZAPDTR, built with the engine) and its tables; nothing else is needed.
+- **Inputs:** `pipeline/tml_2_0.z64` (the ML v2.0 ROM), `home/oot.o2r`, and the engine checkout. Every step uses the engine's own ZAPD (`build-ml/ZAPD/ZAPD.out`, or `ZAPD.exe` on Windows, from our patched ZAPDTR, built with the engine) and its tables; nothing else is needed.
+- **Any OS (MS-082):** the build is plain Python 3 plus ZAPD, so it runs on macOS, Windows and Linux. Only the relaunch is macOS-only until the Windows / Linux packages (MS-080 / MS-081); `ms_cycle.sh` just calls `ms_cycle.py`.
 - **Analysis tools:** `tools/*.py` also need the OoT **PAL MQ Debug** ROM at `roms/oot-mq-debug-pal.z64`.
 - **Knobs:** set these env vars to restore old workarounds; the defaults are correct: `ML_STRIP_ACTORS`, `ML_REMAP_OBJECTS`, `ML_FIX_SETTIMG_FMT`, `ML_SCRUB`, `ML_STRIP_CS`, `ML_SKIP_FMT`, `ML_SKIP_SLOTS`, `ML_NO_START_FIX`.
 
@@ -135,7 +137,7 @@ git config core.hooksPath .githooks
 
 ### Paths
 
-Every script finds its inputs through `pipeline/mspaths.py` (the shell scripts source `pipeline/mspaths.sh`). Defaults resolve from the repo's own location, so a fresh clone works anywhere. Check what it resolved with:
+Every script finds its inputs through `pipeline/mspaths.py`. Defaults resolve from the repo's own location, so a fresh clone works anywhere. Check what it resolved with:
 
 ```bash
 python3 pipeline/mspaths.py

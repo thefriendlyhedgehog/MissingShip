@@ -7,7 +7,7 @@ actor actually draws; ZAPD follows them and pulls in the vertices and textures t
 we never have to describe a whole 54KB object by hand.
 
 Requires the object's dma index to be named in filelists/dbg.txt to match the XML's File Name --
-ms_cycle.sh rewrites that filelist every run, so the name is forced there (see ML_OBJECTS).
+ms_cycle.py rewrites that filelist every run, so the name is forced there (see ML_OBJECTS).
 """
 from mspaths import PIPE, SOH, ZAPD, ZAPD_CWD, zapd_config
 import subprocess, zipfile, shutil, os, sys

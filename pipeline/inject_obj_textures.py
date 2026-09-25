@@ -1,7 +1,7 @@
 """Port the textures (and collision tweaks) ML made inside otherwise-vanilla objects (MS-020).
 
 These ML objects are byte-for-byte the size of their MQ debug counterparts, with the same layout, so SoH's own MQ
-XMLs describe them. Texture-only copies of those XMLs are written to xml/objtex/ as ml_<object> (ms_cycle.sh names
+XMLs describe them. Texture-only copies of those XMLs are written to xml/objtex/ as ml_<object> (ms_cycle.py names
 the matching ML dma files the same way). ZAPD extracts them from ML's ROM, and only textures whose pixels differ
 from stock SoH's ship, under the vanilla paths objects/<object>/<texture>. The game keeps drawing its own
 display lists and picks up ML's art. Pure data: drop-in compatible.
@@ -15,7 +15,7 @@ from mspaths import DEBUG_ROM, ML_ROM, OOT_O2R, PIPE, SOH, ZAPD, ZAPD_CWD, zapd_
 import os, re, struct, subprocess, sys, zipfile
 from yaz0 import get_file
 
-# ML dma index of each object (ms_cycle.sh names them ml_<object>); the debug ROM's is found by name
+# ML dma index of each object (ms_cycle.py names them ml_<object>); the debug ROM's is found by name
 ML_DMA = {'gameplay_dangeon_keep': 351, 'object_box': 358, 'object_bombf': 367, 'object_bdoor': 36,
           'object_haka_door': 395, 'object_jya_obj': 58}
 BPP = {'rgba16': 2, 'rgba32': 4, 'i4': 0.5, 'i8': 1, 'ia4': 0.5, 'ia8': 1, 'ia16': 2, 'ci4': 0.5, 'ci8': 1}

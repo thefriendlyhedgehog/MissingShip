@@ -19,11 +19,11 @@ Project memory notes from the local sessions are copied in `docs/notes/`. The pl
 - Engine: private fork `MissingShip-Shipwright`, the `engine/` submodule (branch `missingship` on tag 9.2.3; submodules MissingShip-libultraship /
   MissingShip-ZAPDTR, branch `missingship`). Commit + push engine work there, then commit the `engine` pointer here; `tools/genpatch.py` refreshes docs/*.patch.
 - Before pushing: `python3 tools/check.py` (enable the hook once: `git config core.hooksPath .githooks`).
-- Paths: everything resolves through `pipeline/mspaths.py` / `mspaths.sh` (env overrides `MS_*`, see README).
+- Paths: everything resolves through `pipeline/mspaths.py` (env overrides `MS_*`, see README).
 - New actor dirs need `cmake -S . -B build-ml` (in `engine/`) before building. Deploy: copy `engine/build-ml/soh/soh-macos` over
-  `MissingShip.app/Contents/MacOS/MissingShip`, then `pipeline/ms_cycle.sh` (rebuilds the .o2r and relaunches).
+  `MissingShip.app/Contents/MacOS/MissingShip`, then `python3 pipeline/ms_cycle.py` (rebuilds the .o2r and relaunches; `--no-launch` only builds).
 - New ML object: add `pipeline/xml/objects/object_ml_<name>.xml`, name its dma index in ML_OBJECTS in
-  `ms_cycle.sh`, declare paths in `soh/assets/ml_assets.h`.
+  `pipeline/ms_cycle.py`, declare paths in `soh/assets/ml_assets.h`.
 
 ## Last batch (2026-09-25, built + deployed, NOT yet tested in game)
 - **Ml_Malon** (slot 0xE7, ML dma 236; object 0xE0 = dma 55 -> object_ml_ma1). Race state = switch 0x11 of scene 0x5A,

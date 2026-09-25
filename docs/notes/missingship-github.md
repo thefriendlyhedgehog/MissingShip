@@ -25,9 +25,9 @@ carry the MS id and `Fixes #N`; move closed rows to ROADMAP's Done section. New 
 
 Related: [[missingship-goal]], [[missing-link-soh-port]].
 
-**Paths (MS-001, 2026-09-25):** all tools/pipeline scripts resolve inputs via `pipeline/mspaths.py` / `mspaths.sh`
+**Paths (MS-001, 2026-09-25):** all tools/pipeline scripts resolve inputs via `pipeline/mspaths.py`
 (env `MS_*` overrides; `python3 pipeline/mspaths.py` prints them). Debug ROM = `roms/oot-mq-debug-pal.z64` (committed by the user; no env var
-needed). `cycle.sh` is gone; `ms_cycle.sh` is the only build script. Verify pipeline refactors by comparing a
+needed). `cycle.sh` is gone; the build is `python3 pipeline/ms_cycle.py [--no-launch]` (MS-082; `ms_cycle.sh` is a wrapper). Verify pipeline refactors by comparing a
 per-entry md5 manifest of pipeline/ml.otr before/after, and `git restore` the rebuilt .o2r/.otr (identical content)
 instead of committing them.
 
