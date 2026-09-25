@@ -2280,6 +2280,26 @@ index f89f20afb78164a6ec436d5aa8767cec0724fb7e..c24d18dd2e5a90404d139b3eb1354dd6
  };
  
  void Inventory_ChangeEquipment(s16 equipment, u16 value) {
+diff --git a/soh/src/code/z_kankyo.c b/soh/src/code/z_kankyo.c
+index 91aac96238c80b101d7efeb714665c8f551503fc..81c7d0e6302637abf6ad4f5702284e5e07ae4223 100644
+--- a/soh/src/code/z_kankyo.c
++++ b/soh/src/code/z_kankyo.c
+@@ -2235,6 +2235,15 @@ void Environment_FadeOutGameOverLights(PlayState* play) {
+ 
+ void func_800766C4(PlayState* play) {
+     u8 max = MAX(play->envCtx.unk_EE[0], play->envCtx.unk_F2[0]);
++    // MissingShip (MS-106): log every change of the rain targets, so the source of stray rain shows in the log.
++    static u8 sMlRainLogged[2] = { 0, 0 };
++
++    if ((sMlRainLogged[0] != play->envCtx.unk_EE[0]) || (sMlRainLogged[1] != play->envCtx.unk_F2[0])) {
++        LUSLOG_INFO("MissingShip-TRACE rain target EE0=%d F2=%d drops=%d scene=%#x weatherMode=%d cs=%d", play->envCtx.unk_EE[0],
++                    play->envCtx.unk_F2[0], play->envCtx.unk_EE[1], play->sceneNum, gWeatherMode, play->csCtx.state);
++        sMlRainLogged[0] = play->envCtx.unk_EE[0];
++        sMlRainLogged[1] = play->envCtx.unk_F2[0];
++    }
+ 
+     if (play->envCtx.unk_EE[1] != max && ((play->state.frames % 8) == 0)) {
+         if (play->envCtx.unk_EE[1] < max) {
 diff --git a/soh/src/code/z_map_data.c b/soh/src/code/z_map_data.c
 index 48507ce0efe8247493720303ecf59a5318a956f1..df24849cda9eb8190a99628ac8739d62c805672f 100644
 --- a/soh/src/code/z_map_data.c
