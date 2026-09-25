@@ -6299,7 +6299,7 @@ index f0cf6dad0bee6c91a54576f87a18a1cbc02c741f..749055c3a78e1b2b72acfd278839a00a
  
      gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 diff --git a/soh/src/overlays/actors/ovl_player_actor/z_player.c b/soh/src/overlays/actors/ovl_player_actor/z_player.c
-index 5aa9d947048cdc4670e6c76ac55913860b7c4535..e5887e29cc1659e73f868e747a5bad25653dd5f0 100644
+index 5aa9d947048cdc4670e6c76ac55913860b7c4535..d1656dd5e52bc009c45540bee6aa0f5dd6edbee1 100644
 --- a/soh/src/overlays/actors/ovl_player_actor/z_player.c
 +++ b/soh/src/overlays/actors/ovl_player_actor/z_player.c
 @@ -6,6 +6,7 @@
@@ -6318,7 +6318,30 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..e5887e29cc1659e73f868e747a5bad25
  #include <stdlib.h>
  #include <assert.h>
  
-@@ -12322,6 +12324,12 @@ void Player_Update(Actor* thisx, PlayState* play) {
+@@ -254,6 +256,12 @@ s32 Player_InflictDamage(PlayState* play, s32 damage);
+ s32 Player_InflictDamageModified(PlayState* play, s32 damage, u8 modified);
+ void Player_StartTalking(PlayState* play, Actor* actor);
+ 
++// MissingShip: ML never starts a conversation with text 0xE0, vanilla's "talk to Saria?" that Navi offers after
++// Saria's Song. Its player hook at +0x20F38 (custom code 0x80600D90) returns from Player_StartTalking before it does
++// anything, to the caller's return address + 8: every caller then skips the branch after the call and falls through
++// into the code laid out next. Each call site below reproduces its own fall-through (MS-017).
++#define ML_SKIP_TALK(actor) ((actor)->textId == 0xE0)
++
+ void Player_Action_80840450(Player* this, PlayState* play);
+ void Player_Action_808407CC(Player* this, PlayState* play);
+ void Player_Action_Idle(Player* this, PlayState* play);
+@@ -6229,6 +6237,9 @@ s32 Player_ActionHandler_Talk(Player* this, PlayState* play) {
+                     // text will be used. This is especially important to prevent unwanted behavior with regards to mask
+                     // trading.
+                     this->currentMask = sSavedCurrentMask;
++                    if (ML_SKIP_TALK(talkOfferActor)) {
++                        return false; // MissingShip: ML falls through to this function's `return false`
++                    }
+                     Player_StartTalking(play, talkOfferActor);
+                     return true;
+                 }
+@@ -12322,6 +12333,12 @@ void Player_Update(Actor* thisx, PlayState* play) {
          Player_UpdateCommon(this, play, &sp44);
      }
  
@@ -6331,6 +6354,63 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..e5887e29cc1659e73f868e747a5bad25
      MREG(52) = this->actor.world.pos.x;
      MREG(53) = this->actor.world.pos.y;
      MREG(54) = this->actor.world.pos.z;
+@@ -14316,12 +14333,16 @@ void Player_Action_8084E3C4(Player* this, PlayState* play) {
+     if (play->msgCtx.ocarinaMode == OCARINA_MODE_04) {
+         func_8005B1A4(Play_GetCamera(play, 0));
+ 
+-        if ((this->talkActor != NULL) && (this->talkActor == this->unk_6A8)) {
++        // MissingShip: with text 0xE0 ML falls through to the next test instead of talking (see ML_SKIP_TALK).
++        if ((this->talkActor != NULL) && (this->talkActor == this->unk_6A8) && !ML_SKIP_TALK(this->talkActor)) {
+             Player_StartTalking(play, this->talkActor);
+         } else if (this->naviTextId < 0) {
+             this->talkActor = this->naviActor;
+             this->naviActor->textId = -this->naviTextId;
+-            Player_StartTalking(play, this->talkActor);
++            // MissingShip: ML replaces this call (player +0x1C2B0) with a no-op, so Navi's forced talk never starts
++            // straight after a song. Any other negative naviTextId still reaches Navi a frame later through the C-Up
++            // path; 0xE0 is refused there too. (ML's replacement instruction also clobbers the caller's $s2; not
++            // reproduced.)
+         } else if (!Player_ActionHandler_13(this, play)) {
+             func_8083A098(this, &gPlayerAnim_link_normal_okarina_end, play);
+         }
+@@ -14392,7 +14413,11 @@ void Player_Action_8084E6D4(Player* this, PlayState* play) {
+                         this->exchangeItemId = EXCH_ITEM_NONE;
+ 
+                         if (func_8084B4D4(play, this) == 0) {
+-                            Player_StartTalking(play, this->talkActor);
++                            if (ML_SKIP_TALK(this->talkActor)) {
++                                func_8084DFAC(play, this); // MissingShip: ML falls through into the else branch
++                            } else {
++                                Player_StartTalking(play, this->talkActor);
++                            }
+                         }
+                     } else {
+                         func_8084DFAC(play, this);
+@@ -14715,7 +14740,12 @@ void Player_Action_ExchangeItem(Player* this, PlayState* play) {
+                 this->actor.flags |= ACTOR_FLAG_TALK;
+             }
+ 
+-            Player_StartTalking(play, talkActor);
++            // MissingShip: for text 0xE0 ML falls through into the exchange branch below with EXCH_ITEM_NONE, which
++            // reads D_80854528[-1]. Deliberate deviation: just don't talk. (Unreached in practice: this path follows
++            // presenting an item, and nothing ML places offers text 0xE0.)
++            if (!ML_SKIP_TALK(talkActor)) {
++                Player_StartTalking(play, talkActor);
++            }
+         } else {
+             GetItemEntry giEntry = ItemTable_Retrieve(D_80854528[this->exchangeItemId - 1]);
+ 
+@@ -16642,6 +16672,10 @@ void Player_StartTalking(PlayState* play, Actor* actor) {
+     Player* this = GET_PLAYER(play);
+     s32 pad;
+ 
++    if (ML_SKIP_TALK(actor)) {
++        return; // MissingShip: ML's hook (0x80600D90); covers the play->talkWithPlayer callers too
++    }
++
+     if ((this->talkActor != NULL) || (actor == this->naviActor) ||
+         CHECK_FLAG_ALL(actor->flags, ACTOR_FLAG_ATTENTION_ENABLED | ACTOR_FLAG_TALK_WITH_C_UP)) {
+         actor->flags |= ACTOR_FLAG_TALK;
 diff --git a/soh/src/overlays/misc/ovl_kaleido_scope/z_kaleido_collect.c b/soh/src/overlays/misc/ovl_kaleido_scope/z_kaleido_collect.c
 index ade62acc3e7057bd68fecb65746558fc1a2ba0c1..c90fe1047d5fd01af87083dad1136c3676c6611a 100644
 --- a/soh/src/overlays/misc/ovl_kaleido_scope/z_kaleido_collect.c

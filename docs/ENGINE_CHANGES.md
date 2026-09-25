@@ -73,6 +73,7 @@ over ML's Saria's house) · raw gameplay_keep texture pointers in ML display lis
 | 43 | `soh/assets/ml_assets.h` | resource paths of every ML object the ported actors draw (all shipped in `MissingLink_Scenes.o2r`) | Goes away with the actors that use it |
 | 44 | libultraship `interpreter.cpp` `GfxDpLoadBlock`: `word_size_shift` made `int32_t` (MS-016) | as `uint32_t`, the -1 for 4-bit loads became 0xFFFFFFFF and the size came out 0 bytes (a zero-height texture). ML doesn't hit it; any mod that block-loads with SETTIMG siz=4b would | **Upstream as a bugfix**: Kenix3/libultraship `main` still has it |
 | 45 | `SohMenuEnhancements.cpp`: **Enhancements > MissingShip** page; `code/ml_settings.h` (option values) (MS-019) | every MissingShip-specific option is a normal SoH menu option; also shows Equip Items on Dpad and Dpad Ocarina Playback (stock CVars) | Goes with the options it hosts; the page itself is fork-only UI |
+| 46 | `z_player.c`: no conversation with text 0xE0 ("talk to Saria?"): `ML_SKIP_TALK` early-out in `Player_StartTalking` with each caller's ML fall-through, and no `Player_StartTalking` in the post-song Navi branch (MS-017) | ML hook player +0x20F38 → 0x80600D90 (returns to ra + 8) and player +0x1C2B0 (`jal` replaced). Without it, Saria's Song at the song-block door asked "talk to Saria?" before the door opened | **Needs mod code** (player logic) |
 | — | Scene draw configs set to ML's (`pipeline/gen_scene_config.py` → `scene_table.h`, 17 slots) | ML changed the draw config of most slots it uses (grotto scenes → SDC_GROTTOS, Deep Woods/Deku Road → SDC_DEKU_TREE, ...). Vanilla's left segment 8 unset in the grotto scenes, so their DLs ran a rupee texture as commands (crash entering the Colossus-slot grotto) | engine table: the scene table is code, so a drop-in .o2r cannot change it; needs a SoH hook that lets a scene resource override its draw config |
 | — | Pipeline: `remap_exits` no longer stops at entrance 0 | ML entrance 0 is real (Deep Woods spawn 0); 6 scenes had later exits left unmapped (Deku Road's last three, the grotto arena's, ...). Each list is now bounded by the next header data block: without the 0 terminator the scan ran into tokinoma's player entries and rewrote Player's actor id 0, so Player never spawned after the prologue (crash in `func_800304DC`). `tools/checkexits.py` verifies all 104 real exit slots end to end | data (fixed) |
 | — | ZAPD `ZAudio.cpp`: zero-size soundfont guard | pipeline only, never shipped | Upstream as a bugfix (optional) |
@@ -82,7 +83,7 @@ over ML's Saria's house) · raw gameplay_keep texture pointers in ML display lis
 ## The hard wall: actor logic
 
 ML rewrote a large set of vanilla actors (see `placed_actor_status.json`) and added its own in vanilla's
-unused actor slots. Every row marked **Needs mod code** above is one of these (26 of 45 so far). None can be pure data in
+unused actor slots. Every row marked **Needs mod code** above is one of these (27 of 46 so far). None can be pure data in
 stock SoH. Realistic long-run options, to decide with the user:
 
 - **Upstream a mod-code mechanism** into SoH (plugin API or scripting) — the only route to a true
@@ -162,7 +163,7 @@ Descriptions of unported targets are a first reading of the code; confirm them w
 | 0x806023E0 | code ×5, player ×29 | Link animation override (skips / substitutes animations) | not ported (MS-051) |
 | 0x80600690, 0x80606C90, 0x80607F20 | pause menu | quest-status layout and cursor, vertical move on the equipment page, world-map points | **ported** (row 24; world-map points in the item-restriction table) |
 | 0x80600E00 (+ 0x80601000, 0x80601680) | player +0x17E5C | Magic Hourglass: position ring buffer and rewind, then calls the displaced player function (+0x16D8C) and returns to +0x17E68 | not ported (MS-053) |
-| 0x80600D90 | player +0x20F38 | skips the hooked function when the talk target's text id is 0xE0, else re-runs its prologue and continues | not ported (MS-052) |
+| 0x80600D90 | player +0x20F38 | `Player_StartTalking` returns to ra + 8 (skipping each caller's branch) when the actor's text is 0xE0, the "talk to Saria?" prompt; else re-runs the prologue and continues | **ported** (row 46, MS-017), with player +0x1C2B0 |
 | 0x80600480 | player +0x1D728 | clears the room-frame counter at 0x80609FF0 (already ported as `gMlRoomFrames` in `ml_state.c`), then walks an actor list looking for actor 0x19 (En_Niw, the cucco) | not ported (MS-052) |
 | 0x80606BA0 | player +0xBD9C | writes a halfword into the struct at `*0x8015FA90`, then adjusts `a1` | not ported (MS-052) |
 | 0x80606BC8 | player +0x17938 | returns 1.0, or 1.25 when a player state byte (0x8022470F) is 4: a speed/scale factor | not ported (MS-052) |

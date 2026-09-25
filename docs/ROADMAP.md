@@ -273,6 +273,7 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 
 ### Done
 
+- MS-017: ML never offers "talk to Saria?" (text 0xE0): ported its player hook 0x80600D90 (`Player_StartTalking` early-out with each call site's exact fall-through, read from ML's player code) and its removal of the post-song Navi `StartTalking` (+0x1C2B0). Engine 91a364e, ledger row 46. In-game check at the door pending (MS-010).
 - MS-019: Enhancements > MissingShip settings page (future MissingShip options go here); Starting Ocarina Button (D-Down default, C-Left fallback without Dpad equips); Dpad Ocarina Playback on in the seed and local profiles (engine a4d8237; ledger rows 15, 45). In-game check pending (MS-010).
 - MS-016: `GfxDpLoadBlock`'s `word_size_shift` is now signed (MissingShip-libultraship b0ea7db, engine 160ad6e, ledger row 44). A test of the exact expression gave 0 bytes for a 1024-texel 4b load before and 512 after (clang -O0 and -O2). Engine rebuilt and boots. Upstream PR deferred: none until the whole project is done (owner decision); tracked on MS-070.
 - MS-014: the engine fork is the `engine/` submodule (branch `missingship`); one `git clone --recursive` gets everything at matching versions. `mspaths` defaults to `engine/`; `tools/check.py` fails if `engine/` is not at the pinned commit. Locally the checkout was moved in (history kept) and `../Shipwright` is a compatibility symlink; the engine was reconfigured and rebuilt at the new path.
