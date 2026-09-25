@@ -30,7 +30,7 @@ Actors living in `code` (En_Item00, En_A_Obj) and slots ML deleted are left out;
 | `0x027` Boss_Dodongo | REWRITTEN (text 0xb40 vs 0x5e50) | Bmori1 ×2 | — | todo: MS-038 | no |
 | `0x02f` En_Dodojr | REWRITTEN (text 0x1ac0 vs 0x1ad0) | spot01 ×4 | — | ported (MS-097) | no |
 | `0x037` En_St | 0 text / 1 data words differ | HAKAdan ×8, spot12 | — | ported (not hostile) | no |
-| `0x03d` En_Ossan | 5818 text / 0 data words differ | night_shop | — | todo: MS-035 | no |
+| `0x03d` En_Ossan | 5818 text / 0 data words differ | night_shop | — | ported (MS-035) | no |
 | `0x03e` Bg_Treemouth | REWRITTEN (text 0x230 vs 0x920) | spot00, spot10 ×6 | — | ported | no |
 | `0x040` Bg_Hidan_Dalm | REWRITTEN (text 0x100 vs 0x660) | HAKAdan | — | todo: MS-036 | no |
 | `0x055` En_Dekubaba | 1 text / 1 data words differ | HAKAdan ×12, spot09 ×5, spot10 ×4, spot12 ×9, testroom ×2, ydan ×5 | Ml_EventSpawner | ported | no |
@@ -102,7 +102,7 @@ These may be spawned with a computed id, from a cutscene, or not at all. Check b
 
 | Actor | ML change vs MQ Debug | Placed in (unique entries) | Spawned by | Status | Verified |
 |---|---|---|---|---|---|
-| `0x004` En_GirlA | 0 text / 8 data words differ | — | — | todo: MS-035 | no |
+| `0x004` En_GirlA | 0 text / 8 data words differ | — | — | ported (MS-035) | no |
 | `0x00b` Bg_Dy_Yoseizo | REWRITTEN (text 0xa0 vs 0x2c10) | — | — | todo: MS-040 | no |
 | `0x0bd` Bg_Haka_Huta | REWRITTEN (text 0x940 vs 0x960) | — | — | todo: MS-040 | no |
 | `0x0c7` En_Karebaba | 0 text / 1 data words differ | — | — | todo: MS-040 | no |

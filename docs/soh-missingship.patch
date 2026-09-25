@@ -3380,6 +3380,47 @@ index cda0fb18ad89bea5da77eaf48c902f1de9d1585a..f8fe6736326195bec1cf58eb5d673df5
  
  void EnFirefly_Init(Actor* thisx, PlayState* play);
  void EnFirefly_Destroy(Actor* thisx, PlayState* play);
+diff --git a/soh/src/overlays/actors/ovl_En_GirlA/z_en_girla.c b/soh/src/overlays/actors/ovl_En_GirlA/z_en_girla.c
+index 9576c7a82fab771762bb74ef03df928f7e37160a..521c5c7ccad2383b5ac157600d7eaf4f8ccb2f06 100644
+--- a/soh/src/overlays/actors/ovl_En_GirlA/z_en_girla.c
++++ b/soh/src/overlays/actors/ovl_En_GirlA/z_en_girla.c
+@@ -228,28 +228,28 @@ static ShopItemEntry shopItemEntries[] = {
+     { OBJECT_GI_EGG, GID_EGG, func_8002EBCC, 10000, 1, 0x00B5, 0x0085, GI_NONE, EnGirlA_CanBuy_Unk20,
+       EnGirlA_ItemGive_Unk20, EnGirlA_BuyEvent_ShieldDiscount },
+     /* SI_BOMBCHU_10_1 */
+-    { OBJECT_GI_BOMB_2, GID_BOMBCHU, func_8002EBCC, 100, 10, 0x00BC, 0x008C, GI_BOMBCHUS_10, EnGirlA_CanBuy_Bombchus,
++    { OBJECT_GI_BOMB_2, GID_BOMBCHU, func_8002EBCC, 40, 10, /* MissingShip: ML price (100) */ 0x00BC, 0x008C, GI_BOMBCHUS_10, EnGirlA_CanBuy_Bombchus,
+       NULL, EnGirlA_BuyEvent_ObtainBombchuPack },
+     /* SI_BOMBCHU_20_1 */
+-    { OBJECT_GI_BOMB_2, GID_BOMBCHU, func_8002EBCC, 180, 20, 0x0061, 0x002A, GI_BOMBCHUS_20, EnGirlA_CanBuy_Bombchus,
++    { OBJECT_GI_BOMB_2, GID_BOMBCHU, func_8002EBCC, 80, 20, /* MissingShip: ML price (180) */ 0x0061, 0x002A, GI_BOMBCHUS_20, EnGirlA_CanBuy_Bombchus,
+       NULL, EnGirlA_BuyEvent_ObtainBombchuPack },
+     /* SI_BOMBCHU_20_2 */
+-    { OBJECT_GI_BOMB_2, GID_BOMBCHU, func_8002EBCC, 180, 20, 0x0061, 0x002A, GI_BOMBCHUS_20, EnGirlA_CanBuy_Bombchus,
++    { OBJECT_GI_BOMB_2, GID_BOMBCHU, func_8002EBCC, 80, 20, /* MissingShip: ML price (180) */ 0x0061, 0x002A, GI_BOMBCHUS_20, EnGirlA_CanBuy_Bombchus,
+       NULL, EnGirlA_BuyEvent_ObtainBombchuPack },
+     /* SI_BOMBCHU_10_2 */
+-    { OBJECT_GI_BOMB_2, GID_BOMBCHU, func_8002EBCC, 100, 10, 0x00BC, 0x008C, GI_BOMBCHUS_10, EnGirlA_CanBuy_Bombchus,
++    { OBJECT_GI_BOMB_2, GID_BOMBCHU, func_8002EBCC, 40, 10, /* MissingShip: ML price (100) */ 0x00BC, 0x008C, GI_BOMBCHUS_10, EnGirlA_CanBuy_Bombchus,
+       NULL, EnGirlA_BuyEvent_ObtainBombchuPack },
+     /* SI_BOMBCHU_10_3 */
+-    { OBJECT_GI_BOMB_2, GID_BOMBCHU, func_8002EBCC, 100, 10, 0x00BC, 0x008C, GI_BOMBCHUS_10, EnGirlA_CanBuy_Bombchus,
++    { OBJECT_GI_BOMB_2, GID_BOMBCHU, func_8002EBCC, 40, 10, /* MissingShip: ML price (100) */ 0x00BC, 0x008C, GI_BOMBCHUS_10, EnGirlA_CanBuy_Bombchus,
+       NULL, EnGirlA_BuyEvent_ObtainBombchuPack },
+     /* SI_BOMBCHU_20_3 */
+-    { OBJECT_GI_BOMB_2, GID_BOMBCHU, func_8002EBCC, 180, 20, 0x0061, 0x002A, GI_BOMBCHUS_20, EnGirlA_CanBuy_Bombchus,
++    { OBJECT_GI_BOMB_2, GID_BOMBCHU, func_8002EBCC, 80, 20, /* MissingShip: ML price (180) */ 0x0061, 0x002A, GI_BOMBCHUS_20, EnGirlA_CanBuy_Bombchus,
+       NULL, EnGirlA_BuyEvent_ObtainBombchuPack },
+     /* SI_BOMBCHU_20_4 */
+-    { OBJECT_GI_BOMB_2, GID_BOMBCHU, func_8002EBCC, 180, 20, 0x0061, 0x002A, GI_BOMBCHUS_20, EnGirlA_CanBuy_Bombchus,
++    { OBJECT_GI_BOMB_2, GID_BOMBCHU, func_8002EBCC, 80, 20, /* MissingShip: ML price (180) */ 0x0061, 0x002A, GI_BOMBCHUS_20, EnGirlA_CanBuy_Bombchus,
+       NULL, EnGirlA_BuyEvent_ObtainBombchuPack },
+     /* SI_BOMBCHU_10_4 */
+-    { OBJECT_GI_BOMB_2, GID_BOMBCHU, func_8002EBCC, 100, 10, 0x00BC, 0x008C, GI_BOMBCHUS_10, EnGirlA_CanBuy_Bombchus,
++    { OBJECT_GI_BOMB_2, GID_BOMBCHU, func_8002EBCC, 40, 10, /* MissingShip: ML price (100) */ 0x00BC, 0x008C, GI_BOMBCHUS_10, EnGirlA_CanBuy_Bombchus,
+       NULL, EnGirlA_BuyEvent_ObtainBombchuPack },
+     /* SI_DEKU_SEEDS_30 */
+     { OBJECT_GI_SEED, GID_SEEDS, func_8002EBCC, 30, 30, 0x00DF, 0x00DE, GI_SEEDS_30, EnGirlA_CanBuy_DekuSeeds,
 diff --git a/soh/src/overlays/actors/ovl_En_Hs/z_en_hs.c b/soh/src/overlays/actors/ovl_En_Hs/z_en_hs.c
 index d9529d66551efa218cbabff33516d08cde115d0c..3283c2a16c86eee4b6a838d5d1910161bbb43a7d 100644
 --- a/soh/src/overlays/actors/ovl_En_Hs/z_en_hs.c
@@ -3936,6 +3977,61 @@ index ed2cfe90da6bdb5f768436f265fb5003c5492a5d..d473b2abb9db8f191bcae98be142916b
  }
  
  void EnNutsball_Update(Actor* thisx, PlayState* play) {
+diff --git a/soh/src/overlays/actors/ovl_En_Ossan/z_en_ossan.c b/soh/src/overlays/actors/ovl_En_Ossan/z_en_ossan.c
+index f6077d2d0ee909ede2be8a60806022059db036ce..051910c9b48197fef960886d7100892018be3065 100644
+--- a/soh/src/overlays/actors/ovl_En_Ossan/z_en_ossan.c
++++ b/soh/src/overlays/actors/ovl_En_Ossan/z_en_ossan.c
+@@ -586,7 +586,20 @@ s32 EnOssan_TryGetObjBankIndexes(EnOssan* this, PlayState* play, s16* objectIds)
+     return true;
+ }
+ 
++static void EnOssan_InitVanilla(Actor* thisx, PlayState* play);
++
++// MissingShip: ML wraps the whole Init. Once ML's Bmori1 event has happened the shop music starts; before it the
++// shopkeeper is removed. ML runs this after every exit of the vanilla Init, including the early kills.
+ void EnOssan_Init(Actor* thisx, PlayState* play) {
++    EnOssan_InitVanilla(thisx, play);
++    if (gSaveContext.sceneFlags[SCENE_FOREST_TEMPLE].swch & (1 << 7)) {
++        Audio_QueueSeqCmd(NA_BGM_SHOP);
++    } else {
++        Actor_Kill(thisx);
++    }
++}
++
++static void EnOssan_InitVanilla(Actor* thisx, PlayState* play) {
+     EnOssan* this = (EnOssan*)thisx;
+     s32 pad;
+     s16* objectIds;
+@@ -621,7 +634,8 @@ void EnOssan_Init(Actor* thisx, PlayState* play) {
+ 
+     // Don't kill bombchu shop actor in rando, making it so the shop is immediately open
+     // Flags_GetEventChkInf(EVENTCHKINF_USED_DODONGOS_CAVERN_BLUE_WARP) - Completed Dodongo's Cavern
+-    if (this->actor.params == OSSAN_TYPE_BOMBCHUS &&
++    // MissingShip: ML's bombchu shop is always open (ML removes this kill)
++    if (false && this->actor.params == OSSAN_TYPE_BOMBCHUS &&
+         !Flags_GetEventChkInf(EVENTCHKINF_USED_DODONGOS_CAVERN_BLUE_WARP) && !IS_RANDO) {
+         Actor_Kill(&this->actor);
+         return;
+@@ -764,7 +778,7 @@ void EnOssan_State_Idle(EnOssan* this, PlayState* play, Player* player) {
+     if (Actor_ProcessTalkRequest(&this->actor, play)) {
+         // "Start conversation!!"
+         osSyncPrintf(VT_FGCOL(YELLOW) "★★★ 会話開始！！ ★★★" VT_RST "\n");
+-        player->stateFlags2 |= PLAYER_STATE2_DISABLE_DRAW;
++        // MissingShip: ML keeps Link drawn when the conversation starts (drops stateFlags2 |= DISABLE_DRAW)
+         Play_SetShopBrowsingViewpoint(play);
+         EnOssan_SetStateStartShopping(play, this, false);
+     } else if (this->actor.xzDistToPlayer < 100.0f) {
+@@ -1965,8 +1979,8 @@ void EnOssan_UpdateCursorAnim(EnOssan* this) {
+         }
+     }
+     this->cursorColorR = ColChanMix(aButtonColor.r, 0.0f, t);
+-    this->cursorColorG = ColChanMix(aButtonColor.g, 80.0f, t);
+-    this->cursorColorB = ColChanMix(aButtonColor.b, 0.0f, t);
++    // MissingShip: ML leaves green at its initial value and fixes blue at 255, so the cursor doesn't pulse
++    this->cursorColorB = 255;
+     this->cursorColorA = ColChanMix(255, 0.0f, t);
+     this->cursorAnimTween = t;
+ }
 diff --git a/soh/src/overlays/actors/ovl_En_Rd/z_en_rd.c b/soh/src/overlays/actors/ovl_En_Rd/z_en_rd.c
 index 062be3268d79d1962ef0be03f7deeb0ede102d29..afb51f099efd972d1d69c8d6dbb9272a8bf8e0c1 100644
 --- a/soh/src/overlays/actors/ovl_En_Rd/z_en_rd.c
