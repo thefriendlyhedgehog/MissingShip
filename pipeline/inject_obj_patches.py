@@ -7,6 +7,9 @@ loudly if an assumption stops holding. Pure data: drop-in compatible.
 
   object_vm   gBeamosBodyDL, gBeamosTopEyelidDL   first command G_RDPPIPESYNC -> G_ENDDL: ML draws neither
   object_sa   gSariaRightHandLimb                 display list gSariaRightHandDL -> gSariaRightHandAndOcarinaDL
+  gameplay_keep  gPlayerAnim_link_fighter_turn_kiruL_end / _kiruR_end   frame count 16 -> 13 / 14 (MS-026): ML cut the
+              recovery after a sword turn short, and re-animated exactly the frames it kept: link_animetion's
+              gPlayerAnimData_114420 / _114FB0 take ML's frames (the rest of link_animetion is MS-051)
 """
 from mspaths import DEBUG_ROM, ML_ROM, OOT_O2R, PIPE, SOH
 import os, re, struct, sys, zipfile
@@ -14,7 +17,7 @@ from yaz0 import get_file
 
 MOD = os.path.join(PIPE, 'ml.otr')
 XML = os.path.join(SOH, 'assets', 'xml', 'GC_MQ_PAL_F', 'objects')
-ML_DMA = {'object_vm': 25, 'object_sa': 43}
+ML_DMA = {'object_vm': 25, 'object_sa': 43, 'gameplay_keep': 349, 'link_animetion': 146}
 DBG_NAMES = open(os.path.join(SOH, 'assets', 'extractor', 'filelists', 'dbg.txt')).read().split('\n')
 
 def rom_file(path, index):
@@ -60,6 +63,31 @@ old_ref, new_ref = struct.pack('<I', len(old)) + old, struct.pack('<I', len(new)
 if res.count(old_ref) != 1:
     fail(f'{path}: expected one length-prefixed reference to gSariaRightHandDL')
 out[path] = res.replace(old_ref, new_ref)
+
+# Link's sword-turn recoveries: ML shortened two gameplay_keep player-animation headers (MS-026). A header is
+# { s16 frameCount; pad; u32 segment pointer into link_animetion }; stock stores type 1 (Link), then frameCount at 0x44.
+for name, frames in (('gPlayerAnim_link_fighter_turn_kiruL_end', 13), ('gPlayerAnim_link_fighter_turn_kiruR_end', 14)):
+    off = int(re.search(rf'Name="{name}" Offset="(0x[0-9A-Fa-f]+)"',
+                        open(os.path.join(XML, 'gameplay_keep.xml')).read()).group(1), 16)
+    d, m = dbg['gameplay_keep'][off:off + 8], ml['gameplay_keep'][off:off + 8]
+    if struct.unpack('>h', d[:2])[0] != 16 or struct.unpack('>h', m[:2])[0] != frames or d[4:] != m[4:]:
+        fail(f'{name}: expected frame count 16 -> {frames} with the same animation data')
+    path = f'objects/gameplay_keep/{name}'
+    res = oot.read(path)
+    if res[4:8] != b'MNAO' or struct.unpack('<Ih', res[0x40:0x46]) != (1, 16):
+        fail(f'{path}: unexpected layout (want a Link animation with 16 frames)')
+    out[path] = res[:0x44] + struct.pack('<h', frames) + res[0x46:]
+    # the frames it points at: 0x86 bytes (67 s16) per frame, big-endian in the ROM, little-endian in stock
+    seg = struct.unpack('>I', m[4:])[0] & 0xFFFFFF
+    dpath = f'misc/link_animetion/gPlayerAnimData_{seg:06X}'
+    data = oot.read(dpath)
+    n = struct.unpack('<I', data[0x40:0x44])[0]
+    dd, md = dbg['link_animetion'][seg:seg + 2 * n], ml['link_animetion'][seg:seg + 2 * n]
+    if data[4:8] != b'MAPO' or struct.unpack(f'<{n}h', data[0x44:]) != struct.unpack(f'>{n}h', dd):
+        fail(f'{dpath}: stock is not the debug ROM\'s data')
+    if md[frames * 0x86:] != dd[frames * 0x86:]:
+        fail(f'{dpath}: ML changed frames past its new count of {frames}')
+    out[dpath] = data[:0x44] + struct.pack(f'<{n}h', *struct.unpack(f'>{n}h', md))
 
 with zipfile.ZipFile(MOD) as src, zipfile.ZipFile(MOD + '.tmp', 'w', zipfile.ZIP_DEFLATED) as z:
     for info in src.infolist():

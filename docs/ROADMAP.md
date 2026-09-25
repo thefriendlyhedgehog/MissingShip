@@ -96,7 +96,7 @@ The 3, 5, 6 and 0x1F slots are ported. Still to do:
 | object_link_child (0x15) | 35,836 words; Link's model | big: the "Link object port" |
 | object_bv (0x8C) | boss model | with Boss_Va |
 | object_tw, object_nb, object_du, object_mag, object_ganon2, object_ka, object_spot02_objects, object_mori_objects | redrawn for their rewritten actors | with each actor |
-| gameplay_keep | sword-turn animations `link_fighter_turn_kiruL_end` / `kiruR` / `kiruR_end` + unused shape DLs; drop-bomb texture and grotto hole are done | data (animations) |
+| gameplay_keep | sword-turn recoveries `link_fighter_turn_kiruL_end` / `kiruR_end` (frames 16 → 13 / 14, ML's frames) done (MS-026; `kiruR` is unchanged); unused shape DLs; drop-bomb texture and grotto hole are done | data (animations) |
 | gameplay_dangeon_keep | push-block textures | **data only**: texture aliases |
 | object_box | chest textures + the curve skeleton | mostly data |
 | object_bombf | bomb-flower leaf textures | data only |
@@ -118,7 +118,7 @@ The 3, 5, 6 and 0x1F slots are ported. Still to do:
 | map_i_static (dma 113), map_48x85_static (dma 112) | redrawn dungeon minimaps and pause dungeon maps. **Ported** (MS-022: 32 textures, the room + 190 index and ML's map tables). |
 | staff_message_data_static (dma 110) | ML's credits text. **Ported** (MS-024: 11 of 48 credits rewritten by ML, via inject_messages.py). |
 | Skyboxes | `vr_fine1_static` and `vr_cloud2_static` (+ palettes) redrawn. **Ported** (MS-025: all 12 resources, via inject_minimaps.py). |
-| link_animetion (dma 146, 2.5 MB) | Link's animation data changed. Not ported (goes with the Link port). |
+| link_animetion (dma 146, 2.5 MB) | Link's animation data changed. Not ported (goes with the Link port, MS-050), except the two sword-turn recoveries MS-026 needed (`gPlayerAnimData_114420` / `_114FB0`). |
 | Entrance flags | 39 SoH entrances used by ML have different title-card / music / transition flags. Title cards are fixed; music and transitions are not. |
 
 ### F. ML custom code (dma 507) still unported
@@ -206,7 +206,7 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 | [MS-023](https://github.com/thefriendlyhedgehog/MissingShip/issues/16) | port | map_mark_data (dma 103, 58 data words): dungeon-map chest / boss markers. | Markers match ML. **Done:** ML's markers in SoH's MQ tables, MQ tables always used (ledger 49). In-game check pending. |
 | [MS-024](https://github.com/thefriendlyhedgehog/MissingShip/issues/17) | port | Credits text (staff_message_data_static, dma 110). | Injected as a resource. **Done:** the 11 credits ML rewrote ship in the mod's staff message resource. In-game check pending. |
 | [MS-025](https://github.com/thefriendlyhedgehog/MissingShip/issues/18) | port | Skyboxes `vr_fine1` and `vr_cloud2` (+ palettes; ML dma 128/129, 138/139). | Injected. **Done:** day and overcast-sunset skies plus palettes ship under vanilla paths. In-game check pending. |
-| [MS-026](https://github.com/thefriendlyhedgehog/MissingShip/issues/19) | port | gameplay_keep sword-turn animations (`kiruL_end`, `kiruR`, `kiruR_end`). | Injected under the vanilla names (check how they interact with Link's animations, MS-051). |
+| [MS-026](https://github.com/thefriendlyhedgehog/MissingShip/issues/19) | port | gameplay_keep sword-turn animations (`kiruL_end`, `kiruR`, `kiruR_end`). | Injected under the vanilla names (check how they interact with Link's animations, MS-051). **Done:** the two changed headers (`kiruL_end` 16 → 13 frames, `kiruR_end` 16 → 14) and the frames ML re-animated, patched into stock (inject_obj_patches.py). In-game check pending. |
 | [MS-027](https://github.com/thefriendlyhedgehog/MissingShip/issues/20) | port | Entrance flags: 39 entrances with ML's music-continuity / transition-style flags. | A data override, or a small engine table plus a ledger row. |
 | [MS-015](https://github.com/thefriendlyhedgehog/MissingShip/issues/53) | port | 9 **I4** scene texture references (spot01 ×7, spot04, tokinoma) were skipped (`ML_SKIP_FMT=4:0`). **Built:** skip removed; they are 4 real textures in the standard 16b block-load form that SoH sizes correctly; 0 unresolved. Awaiting an in-game look (MS-010 checklist). | The three rooms draw their I4 textures; `unresolved.json` empty. |
 
