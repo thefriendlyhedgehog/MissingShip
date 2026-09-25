@@ -63,7 +63,7 @@ Actors living in `code` (En_Item00, En_A_Obj) and slots ML deleted are left out;
 | `0x13e` En_Ms | 342 text / 0 data words differ | spot12 | — | ported (Bunny Hood for Deku Nuts) | no |
 | `0x13f` En_Hs | 546 text / 0 data words differ | spot01 | — | todo: MS-034 | no |
 | `0x147` En_Wonder_Talk | REWRITTEN (text 0x5f0 vs 0x860) | kakariko3 ×7, kokiri_home4 | — | ported (text = params + 0x300, no kill, no follow-up). Vanilla's Poe spawn (slot 0x0D) is kept but unreachable from ML's Init; it would now spawn Ml_Cucco | no |
-| `0x163` En_Ko | 544 text / 0 data words differ  hooks ['0x80602200'] | spot04 ×5 | — | todo: MS-032 (shares Mido's hook) | no |
+| `0x163` En_Ko | 544 text / 0 data words differ  hooks ['0x80602200'] | spot04 ×5 | — | ported (MS-032) | no |
 | `0x165` En_Weather_Tag | REWRITTEN (text 0xdb0 vs 0xe00) | spot12 | Ml_TreeBridge | ported (no story-flag kills) | no |
 | `0x16d` En_Md | 263 text / 0 data words differ  hooks ['0x80602200'] | spot04 | — | ported | no |
 | `0x16e` En_Hy | REWRITTEN (text 0x28c0 vs 0x28f0) | malon_stable ×2, spot20 | — | partial: certificate offer only — MS-033 | certificate offer: yes (2026-09-23) |

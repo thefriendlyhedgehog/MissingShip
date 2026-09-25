@@ -10,6 +10,9 @@ loudly if an assumption stops holding. Pure data: drop-in compatible.
   gameplay_keep  gPlayerAnim_link_fighter_turn_kiruL_end / _kiruR_end   frame count 16 -> 13 / 14 (MS-026): ML cut the
               recovery after a sword turn short, and re-animated exactly the frames it kept: link_animetion's
               gPlayerAnimData_114420 / _114FB0 take ML's frames (the rest of link_animetion is MS-051)
+  object_kw1  gMlKw1MouthFrownTex (new)           ML's custom code (hook 0x80602200, run by En_Ko's Update) copies
+              0xE0 bytes over rows 12-18 of gKw1MouthTex once Link has the sword, turning the smile into a frown (MS-032).
+              Object memory is ML's to patch but not ours, so the frown ships as its own texture and En_Ko swaps it in
 """
 from mspaths import DEBUG_ROM, ML_ROM, OOT_O2R, PIPE, SOH
 import os, re, struct, sys, zipfile
@@ -17,7 +20,7 @@ from yaz0 import get_file
 
 MOD = os.path.join(PIPE, 'ml.otr')
 XML = os.path.join(SOH, 'assets', 'xml', 'GC_MQ_PAL_F', 'objects')
-ML_DMA = {'object_vm': 25, 'object_sa': 43, 'gameplay_keep': 349, 'link_animetion': 146}
+ML_DMA = {'object_vm': 25, 'object_sa': 43, 'gameplay_keep': 349, 'link_animetion': 146, 'object_kw1': 62}
 DBG_NAMES = open(os.path.join(SOH, 'assets', 'extractor', 'filelists', 'dbg.txt')).read().split('\n')
 
 def rom_file(path, index):
@@ -25,7 +28,7 @@ def rom_file(path, index):
     return get_file(rom, *struct.unpack('>IIII', rom[0x12F70 + 16 * index:0x12F70 + 16 * index + 16]))
 
 def offset_of(obj, name):
-    return int(re.search(rf'Name="{name}"[^>]*Offset="(0x[0-9A-Fa-f]+)"', open(os.path.join(XML, obj + '.xml')).read())
+    return int(re.search(rf'Name="{name}"[^>]*\sOffset="(0x[0-9A-Fa-f]+)"', open(os.path.join(XML, obj + '.xml')).read())
                .group(1), 16)
 
 def fail(msg):
@@ -88,6 +91,24 @@ for name, frames in (('gPlayerAnim_link_fighter_turn_kiruL_end', 13), ('gPlayerA
     if md[frames * 0x86:] != dd[frames * 0x86:]:
         fail(f'{dpath}: ML changed frames past its new count of {frames}')
     out[dpath] = data[:0x44] + struct.pack(f'<{n}h', *struct.unpack(f'>{n}h', md))
+
+# Kokiri frown (MS-032): the hook tests the word at row 12 of the mouth (0x102, vanilla's), then copies 0xE0 bytes
+# from custom code 0x80602B00 over it. Check the hook still does exactly that, then ship the patched texture.
+custom = rom_file(ML_ROM, 507)
+mouth = offset_of('object_kw1', 'gKw1MouthTex')
+hook = struct.unpack('>9I', custom[0x2270:0x2294])
+if mouth != 0x160C or hook[1] != 0x2508160C or hook[3] != 0x34010102 or hook[7] != 0x252A00E0 or \
+   custom[0x2290:0x2298] != bytes.fromhex('3c0b8060356b2b00'):
+    fail('hook 0x80602200: expected it to copy 0xE0 bytes from 0x80602B00 to gKw1MouthTex + 0x180, guarded by 0x102')
+if ml['object_kw1'] != dbg['object_kw1'] or ml['object_kw1'][mouth + 0x180:mouth + 0x184] != bytes.fromhex('00000102'):
+    fail('object_kw1: expected ML\'s copy to be the debug ROM\'s, with the guard word in place')
+path = 'objects/object_kw1/gKw1MouthTex'
+res = oot.read(path)
+if res[4:8] != b'XETO' or len(res) != 0x50 + 0x400 or res[0x50:] != dbg['object_kw1'][mouth:mouth + 0x400]:
+    fail(f'{path}: expected the debug ROM\'s 32x32 ci8 mouth, raw, behind a 0x50-byte header')
+tex = bytearray(res)
+tex[0x50 + 0x180:0x50 + 0x260] = custom[0x2B00:0x2BE0]
+out['objects/object_kw1/gMlKw1MouthFrownTex'] = bytes(tex)
 
 with zipfile.ZipFile(MOD) as src, zipfile.ZipFile(MOD + '.tmp', 'w', zipfile.ZIP_DEFLATED) as z:
     for info in src.infolist():

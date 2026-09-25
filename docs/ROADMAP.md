@@ -217,7 +217,7 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 |---|---|---|---|
 | [MS-030](https://github.com/thefriendlyhedgehog/MissingShip/issues/21) | port | **En_Elf (Navi)**: 4018 words + custom hook 0x80602000. She's in every scene, so this comes first. | Behaviour diffed and ported. **Done:** two real edits found and ported (ledger 51). In-game check pending. |
 | [MS-031](https://github.com/thefriendlyhedgehog/MissingShip/issues/22) | port | En_Nutsball: **built** (Hylian-Shield-only reflect; nuts break during swim_15step_up); needs playtest. | Ported, and the scrubs verified with it. |
-| [MS-032](https://github.com/thefriendlyhedgehog/MissingShip/issues/23) | port | En_Ko: Kokiri text swaps + texture patch (hook 0x80602200, shared with Mido). | Ported. |
+| [MS-032](https://github.com/thefriendlyhedgehog/MissingShip/issues/23) | port | En_Ko: **built** (11 after-the-sword text swaps, the Kokiri frown, two branch edits); needs playtest. | Ported. |
 | [MS-033](https://github.com/thefriendlyhedgehog/MissingShip/issues/24) | port | Finish the partial actors: En_Fz / Ml_EventSpawner (remaining modes), En_Niw_Lady, En_Hy. | Full behaviour. |
 | [MS-034](https://github.com/thefriendlyhedgehog/MissingShip/issues/25) | port | `spot01`: En_Dodojr, Bg_Toki_Hikari, En_Rd, Bg_Po_Event, Bg_Spot02_Objects (+ object_spot02_objects), Bg_Spot16_Bombstone, En_Daiku, En_Hs, Obj_Makekinsuta. | One issue per actor when started. |
 | [MS-035](https://github.com/thefriendlyhedgehog/MissingShip/issues/26) | port | `night_shop`: En_Ossan + En_GirlA shop items (8 data words: prices?). | The shop works as in ML. |

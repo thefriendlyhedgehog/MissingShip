@@ -3088,6 +3088,108 @@ index bcd1f362d0efca401ebfc3042ea2f041307255ff..30269610e7b913c76b0baf5829f99e0f
                      }
                      break;
                  case 0x70F0:
+diff --git a/soh/src/overlays/actors/ovl_En_Ko/z_en_ko.c b/soh/src/overlays/actors/ovl_En_Ko/z_en_ko.c
+index 4b2280d7edae762faee252338785a24cab9bacee..d70f805ad724085337ad934fa56be26efc6da002 100644
+--- a/soh/src/overlays/actors/ovl_En_Ko/z_en_ko.c
++++ b/soh/src/overlays/actors/ovl_En_Ko/z_en_ko.c
+@@ -10,9 +10,12 @@
+ #include "objects/object_km1/object_km1.h"
+ #include "objects/object_kw1/object_kw1.h"
+ #include "vt.h"
++#include "soh/OTRGlobals.h"
+ #include "soh/ResourceManagerHelpers.h"
+ #include "soh/Enhancements/game-interactor/GameInteractor_Hooks.h"
+ 
++#include <string.h> // memset
++
+ #define FLAGS (ACTOR_FLAG_ATTENTION_ENABLED | ACTOR_FLAG_FRIENDLY | ACTOR_FLAG_UPDATE_CULLING_DISABLED)
+ 
+ #define ENKO_TYPE (this->actor.params & 0xFF)
+@@ -988,7 +991,14 @@ void func_80A9877C(EnKo* this, PlayState* play) {
+ 
+ // Checks if the Kokiri should spawn based on quest progress
+ s32 EnKo_CanSpawn(EnKo* this, PlayState* play) {
+-    switch (play->sceneNum) {
++    s16 sceneNum = play->sceneNum;
++
++    // MissingShip (MS-032): ML sends every scene from 0x2E to Kokiri Forest's case (+0x1BB4, `beql` -> `b`).
++    // ML places Kokiri only in Kokiri Forest, so this shows only if a Kokiri turns up somewhere else.
++    if (sceneNum >= 0x2E && sceneNum <= SCENE_KOKIRI_FOREST) {
++        sceneNum = SCENE_KOKIRI_FOREST;
++    }
++    switch (sceneNum) {
+         case SCENE_KOKIRI_FOREST:
+             if (ENKO_TYPE >= ENKO_TYPE_CHILD_7 && ENKO_TYPE != ENKO_TYPE_CHILD_FADO) {
+                 return false;
+@@ -1097,10 +1107,8 @@ s32 EnKo_GetForestQuestState2(EnKo* this) {
+ void func_80A98DB4(EnKo* this, PlayState* play) {
+     f32 dist;
+ 
+-    if (play->sceneNum != SCENE_LOST_WOODS && play->sceneNum != SCENE_KOKIRI_FOREST) {
+-        this->modelAlpha = 255.0f;
+-        return;
+-    }
++    // MissingShip (MS-032): ML fades Kokiri in and out by distance in every scene, not just Kokiri Forest and the
++    // Lost Woods (+0x2028, `beq` -> `b`), so the full-alpha early return is gone.
+     if ((play->csCtx.state != CS_STATE_IDLE) || gDbgCamEnabled) {
+         dist = Math_Vec3f_DistXYZ(&this->actor.world.pos, &play->view.eye) * 0.25f;
+     } else {
+@@ -1273,6 +1281,47 @@ void func_80A995CC(EnKo* this, PlayState* play) {
+     }
+ }
+ 
++// MissingShip (MS-032): ML's custom code hook 0x80602200, jumped to at the end of Update. Once Link has the
++// Soul-Charged Kokiri Sword (slingshot ammo != 0), these lines give way to their after-the-sword versions. ML's loop
++// runs on over 13 more "pairs" that are its own code; the only one that could match, 0x1040 -> 0x0003, lands after
++// that line is already on screen and no case reads it, so they are left out.
++static const u16 sMlSwordTextSwaps[][2] = {
++    { 0x1005, 0x1000 }, { 0x1006, 0x1000 }, { 0x100A, 0x101F }, { 0x100B, 0x101F }, { 0x100C, 0x1011 },
++    { 0x100D, 0x1011 }, { 0x100E, 0x1012 }, { 0x1019, 0x1012 }, { 0x10D7, 0x1045 }, { 0x10D8, 0x1045 },
++    { 0x1046, 0x1044 },
++};
++
++// The same hook then patches rows 12-18 of object_kw1's mouth texture in object memory, turning the Kokiri smile into
++// a frown, when this Kokiri's legs come from object_kw1. The pipeline ships the frown as its own texture
++// (inject_obj_patches.py), swapped in here with a blended texture: it stays until a save without the sword is played.
++static u8 sMlFrownMask[32 * 32];
++static s32 sMlFrown = false;
++
++void EnKo_MlAfterSword(EnKo* this) {
++    s32 i;
++
++    if (gSaveContext.inventory.ammo[SLOT_SLINGSHOT] == 0) {
++        if (sMlFrown) {
++            Gfx_UnregisterBlendedTexture(gKw1MouthTex);
++            sMlFrown = false;
++        }
++        return;
++    }
++    for (i = 0; i < ARRAY_COUNT(sMlSwordTextSwaps); i++) {
++        if (this->actor.textId == sMlSwordTextSwaps[i][0]) {
++            this->actor.textId = sMlSwordTextSwaps[i][1];
++            break;
++        }
++    }
++    if (!sMlFrown && sSkeleton[sModelInfo[ENKO_TYPE].legsId].objectId == OBJECT_KW1 &&
++        ResourceMgr_FileExists("objects/object_kw1/gMlKw1MouthFrownTex")) {
++        memset(sMlFrownMask, 1, sizeof(sMlFrownMask));
++        Gfx_RegisterBlendedTexture(gKw1MouthTex, sMlFrownMask, (u8*)"__OTR__objects/object_kw1/gMlKw1MouthFrownTex");
++        Gfx_TextureCacheDelete(sMlFrownMask);
++        sMlFrown = true;
++    }
++}
++
+ void EnKo_Update(Actor* thisx, PlayState* play) {
+     ColliderCylinder* collider;
+     EnKo* this = (EnKo*)thisx;
+@@ -1304,6 +1353,7 @@ void EnKo_Update(Actor* thisx, PlayState* play) {
+     collider = &this->collider;
+     Collider_UpdateCylinder(&this->actor, collider);
+     CollisionCheck_SetOC(play, &play->colChkCtx, &collider->base);
++    EnKo_MlAfterSword(this);
+ }
+ 
+ s32 EnKo_OverrideLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3f* pos, Vec3s* rot, void* thisx, Gfx** gfx) {
 diff --git a/soh/src/overlays/actors/ovl_En_Md/z_en_md.c b/soh/src/overlays/actors/ovl_En_Md/z_en_md.c
 index 13b51a16ec8a8cda56ea7f7ac1bcabf40fa5326d..7825227e8947e6ec1d869be3f17fb89c80dd0fbc 100644
 --- a/soh/src/overlays/actors/ovl_En_Md/z_en_md.c
