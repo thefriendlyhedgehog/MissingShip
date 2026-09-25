@@ -545,10 +545,33 @@ index a47a404ad1d016684eeb3b62538266483182bf1e..e79cc4da63f07cd4e9e7c0bec53e9410
      ACTOR_UNSET_31,
      ACTOR_UNSET_36,
 diff --git a/soh/soh/SohGui/SohMenuEnhancements.cpp b/soh/soh/SohGui/SohMenuEnhancements.cpp
-index 4cf7305373689a1e3d9a084f91a1a2693902dfde..e81461779f47c50d1a83a749d9283b53f07a2485 100644
+index 4cf7305373689a1e3d9a084f91a1a2693902dfde..897e1c0a8bd40ee0f55d836eaa4bd50cb90882aa 100644
 --- a/soh/soh/SohGui/SohMenuEnhancements.cpp
 +++ b/soh/soh/SohGui/SohMenuEnhancements.cpp
-@@ -436,7 +436,7 @@ void SohMenu::AddMenuEnhancements() {
+@@ -9,6 +9,7 @@
+ extern "C" {
+ #include "functions.h"
+ #include "variables.h"
++#include "code/ml_settings.h"
+ extern PlayState* gPlayState;
+ }
+ 
+@@ -33,6 +34,14 @@ namespace SohGui {
+ extern std::shared_ptr<SohMenu> mSohMenu;
+ using namespace UIWidgets;
+ 
++// MissingShip: options of the Enhancements > MissingShip page (values in code/ml_settings.h).
++static std::map<int32_t, const char*> msStartOcarinaButtonMap = {
++    { MS_START_OCARINA_DDOWN, "D-Down" },
++    { MS_START_OCARINA_CLEFT, "C-Left (The Missing Link)" },
++    { MS_START_OCARINA_BOTH, "D-Down and C-Left" },
++    { MS_START_OCARINA_NONE, "None" },
++};
++
+ static std::map<int32_t, const char*> bunnyHoodEffectMap = {
+     { BUNNY_HOOD_VANILLA, "Vanilla" },
+     { BUNNY_HOOD_FAST, "Faster Run" },
+@@ -436,7 +445,7 @@ void SohMenu::AddMenuEnhancements() {
          .Options(CheckboxOptions().Tooltip("Holding down B skips text."));
      AddWidget(path, "Text Speed: %dx", WIDGET_CVAR_SLIDER_INT)
          .CVar(CVAR_ENHANCEMENT("TextSpeed"))
@@ -557,6 +580,41 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..e81461779f47c50d1a83a749d9283b53
      AddWidget(path, "Slow Text Speed: %dx", WIDGET_CVAR_SLIDER_INT)
          .CVar(CVAR_ENHANCEMENT("SlowTextSpeed"))
          .Options(IntSliderOptions().Min(1).Max(5).DefaultValue(1).Format("%dx").Tooltip(
+@@ -1926,6 +1935,34 @@ void SohMenu::AddMenuEnhancements() {
+             .CVar(timer.timeEnable)
+             .Callback([](WidgetInfo& info) { TimeDisplayUpdateDisplayOptions(); });
+     }
++
++    // MissingShip: every MissingShip-specific option lives on this page, so players can tailor the port the way
++    // they tailor SoH. Stock SoH options that matter most for ML are repeated here (same CVars, same values).
++    path.sidebarName = "MissingShip";
++    AddSidebarEntry("Enhancements", path.sidebarName, 2);
++    path.column = SECTION_COLUMN_1;
++    AddWidget(path, "New Game", WIDGET_SEPARATOR_TEXT);
++    AddWidget(path, "Starting Ocarina Button", WIDGET_CVAR_COMBOBOX)
++        .CVar(CVAR_ENHANCEMENT("MissingShip.StartOcarinaButton"))
++        .Options(ComboboxOptions()
++                     .ComboMap(msStartOcarinaButtonMap)
++                     .DefaultIndex(MS_START_OCARINA_DDOWN)
++                     .Tooltip("Where a new game's Ocarina of Time is equipped. Existing saves are not changed.\n\n"
++                              "D-Down: keeps the C buttons free. Needs \"Equip Items on Dpad\"; without it the "
++                              "Ocarina goes on C-Left instead.\n\n"
++                              "C-Left: The Missing Link's own new-game setup."));
++
++    path.column = SECTION_COLUMN_2;
++    AddWidget(path, "Controls", WIDGET_SEPARATOR_TEXT);
++    AddWidget(path, "Equip Items on Dpad", WIDGET_CVAR_CHECKBOX)
++        .CVar(CVAR_ENHANCEMENT("DpadEquips"))
++        .Options(CheckboxOptions().Tooltip("Equip items and equipment on the D-pad. Same setting as Enhancements > "
++                                           "Items; needed for the D-Down Ocarina."));
++    AddWidget(path, "Dpad Ocarina Playback", WIDGET_CVAR_CHECKBOX)
++        .CVar(CVAR_SETTING("CustomOcarina.Dpad"))
++        .Options(CheckboxOptions().Tooltip("While playing the Ocarina, the D-pad plays the four C-button notes "
++                                           "(the D-pad still uses items otherwise). Same setting as Settings > "
++                                           "Controls > Ocarina Controls."));
+ }
+ 
+ } // namespace SohGui
 diff --git a/soh/src/code/code_800F7260.c b/soh/src/code/code_800F7260.c
 index 94f13de7f2b1030991d72a3fe4c44a160c7e2569..3d3d8106194405a9919ca5109dc6c87f0f6fb9e3 100644
 --- a/soh/src/code/code_800F7260.c
@@ -892,6 +950,27 @@ index 0000000000000000000000000000000000000000..a469a7ae194ada29968394de469a8f5b
 +// number with ML's meaning converts it here (tables generated from the pipeline's mapping).
 +u16 MlEntrance_ToSoh(u16 mlIndex);
 +u16 MlEntrance_FromSoh(u16 sohIndex);
++
++#endif
+diff --git a/soh/src/code/ml_settings.h b/soh/src/code/ml_settings.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..b3e5a87f7eed1795dea7fb1abc931997bedf470b
+--- /dev/null
++++ b/soh/src/code/ml_settings.h
+@@ -0,0 +1,15 @@
++#ifndef ML_SETTINGS_H
++#define ML_SETTINGS_H
++
++// MissingShip: values of the options on the Enhancements > MissingShip menu page (SohMenuEnhancements.cpp).
++// Plain C, no includes, so both the game code and the C++ menu can use it.
++
++// CVAR_ENHANCEMENT("MissingShip.StartOcarinaButton"): where a new game's Ocarina of Time is equipped.
++typedef enum {
++    MS_START_OCARINA_DDOWN, // default; needs "Equip Items on Dpad", else falls back to C-Left
++    MS_START_OCARINA_CLEFT, // The Missing Link's own new-game template
++    MS_START_OCARINA_BOTH,
++    MS_START_OCARINA_NONE,
++} MsStartOcarinaButton;
 +
 +#endif
 diff --git a/soh/src/code/ml_state.c b/soh/src/code/ml_state.c
@@ -1665,16 +1744,17 @@ index 090d52fa669b430d62a246cd9a9dc4382e46f686..ece4ce9de8f58d45fccbc3a48751b343
  
  void* D_8012A2F8[] = {
 diff --git a/soh/src/code/z_sram.c b/soh/src/code/z_sram.c
-index 7abc221a4aa050d0048d36703194649ae6ffceff..987dcb9aa32d33cadb6cd70ed06be111b89219bd 100644
+index 7abc221a4aa050d0048d36703194649ae6ffceff..28df7a5d7c0b868df6e0f4822e7d5facccd6407f 100644
 --- a/soh/src/code/z_sram.c
 +++ b/soh/src/code/z_sram.c
-@@ -1,4 +1,5 @@
+@@ -1,4 +1,6 @@
  #include "global.h"
 +#include "code/ml_entrance_map.h"
++#include "code/ml_settings.h"
  #include "vt.h"
  
  #include <string.h>
-@@ -22,6 +23,28 @@ void BossRush_InitSave(void);
+@@ -22,6 +24,37 @@ void BossRush_InitSave(void);
   */
  void Sram_InitNewSave(void) {
      Save_InitFile(false);
@@ -1690,11 +1770,20 @@ index 7abc221a4aa050d0048d36703194649ae6ffceff..987dcb9aa32d33cadb6cd70ed06be111
 +    gSaveContext.inventory.upgrades = 0x1040;   // Goron's Bracelet, Adult's Wallet
 +    gSaveContext.inventory.questItems = 0x6000; // Epona's Song, Saria's Song
 +    gSaveContext.equips.buttonItems[0] = ITEM_SWORD_KOKIRI;
-+    gSaveContext.equips.buttonItems[1] = ITEM_OCARINA_TIME;
-+    gSaveContext.equips.cButtonSlots[0] = SLOT_OCARINA;
-+    // MissingShip QoL: with "Equip Items on Dpad" on, also put the Ocarina on D-Down (buttonItems[5] /
-+    // cButtonSlots[4]), as 2Ship does. DPAD_ITEM() ignores these slots when the setting is off.
-+    if (CVarGetInteger(CVAR_ENHANCEMENT("DpadEquips"), 0)) {
++    // MissingShip QoL: where the starting Ocarina goes (Enhancements > MissingShip > "Starting Ocarina Button").
++    // ML's template puts it on C-Left; by default it goes on D-Down instead (as in 2Ship), leaving the C buttons free.
++    // D-Down needs "Equip Items on Dpad" (DPAD_ITEM() ignores buttonItems[5] otherwise), so without that setting
++    // D-Down falls back to C-Left rather than leaving the Ocarina unequipped.
++    s32 ocarinaButton = CVarGetInteger(CVAR_ENHANCEMENT("MissingShip.StartOcarinaButton"), MS_START_OCARINA_DDOWN);
++    bool dpad = CVarGetInteger(CVAR_ENHANCEMENT("DpadEquips"), 0) != 0;
++    if (ocarinaButton == MS_START_OCARINA_DDOWN && !dpad) {
++        ocarinaButton = MS_START_OCARINA_CLEFT;
++    }
++    if (ocarinaButton == MS_START_OCARINA_CLEFT || ocarinaButton == MS_START_OCARINA_BOTH) {
++        gSaveContext.equips.buttonItems[1] = ITEM_OCARINA_TIME;
++        gSaveContext.equips.cButtonSlots[0] = SLOT_OCARINA;
++    }
++    if (ocarinaButton == MS_START_OCARINA_DDOWN || ocarinaButton == MS_START_OCARINA_BOTH) {
 +        gSaveContext.equips.buttonItems[5] = ITEM_OCARINA_TIME;
 +        gSaveContext.equips.cButtonSlots[4] = SLOT_OCARINA;
 +    }
@@ -1703,7 +1792,7 @@ index 7abc221a4aa050d0048d36703194649ae6ffceff..987dcb9aa32d33cadb6cd70ed06be111
  }
  
  /**
-@@ -71,12 +94,53 @@ static s16 sDungeonEntrances[] = {
+@@ -71,12 +104,53 @@ static s16 sDungeonEntrances[] = {
   *  - Give and equip master sword if player is adult and doesnt have kokiri sword (bug?)
   *  - Revert any trade items that spoil
   */
@@ -1757,7 +1846,7 @@ index 7abc221a4aa050d0048d36703194649ae6ffceff..987dcb9aa32d33cadb6cd70ed06be111
  
      switch (gSaveContext.savedSceneNum) {
          case SCENE_DEKU_TREE:
-@@ -93,41 +157,47 @@ void Sram_OpenSave() {
+@@ -93,41 +167,47 @@ void Sram_OpenSave() {
          case SCENE_GERUDO_TRAINING_GROUND:
          case SCENE_THIEVES_HIDEOUT:
          case SCENE_INSIDE_GANONS_CASTLE:
@@ -1815,7 +1904,7 @@ index 7abc221a4aa050d0048d36703194649ae6ffceff..987dcb9aa32d33cadb6cd70ed06be111
              // Use the saved entrance value with remember save location, except when in grottos/fairy fountains
              if (CVarGetInteger(CVAR_ENHANCEMENT("RememberSaveLocation"), 0) &&
                  gSaveContext.savedSceneNum != SCENE_FAIRYS_FOUNTAIN && gSaveContext.savedSceneNum != SCENE_GROTTOS) {
-@@ -143,6 +213,16 @@ void Sram_OpenSave() {
+@@ -143,6 +223,16 @@ void Sram_OpenSave() {
              break;
      }
  

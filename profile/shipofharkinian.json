@@ -313,7 +313,10 @@
                 "DevToolsSidebarSection": "Value Viewer"
             },
             "OverlayFont": "Press Start 2P",
-            "TextureFilter": 0
+            "TextureFilter": 0,
+            "CustomOcarina": {
+                "Dpad": 1
+            }
         },
         "gCosmetics": {
             "HUD": {

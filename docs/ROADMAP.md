@@ -194,6 +194,7 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 | [MS-013](https://github.com/thefriendlyhedgehog/MissingShip/issues/12) | port | Where is Malon's race? The finish-line Malon (params 0xFFFF) and ML entrances 0x138 / 0x13C aren't placed on the scene map yet. | The race is located and played start to finish. |
 | [MS-017](https://github.com/thefriendlyhedgehog/MissingShip/issues/55) | bug | Saria's Song at the song-block door shows vanilla's "talk to Saria?" prompt (Navi text 0xE0) before the door cutscene; ML skips it in its player hook 0x80600D90 (player +0x20F38). | No prompt at the door; the hook is ported and logged. |
 | [MS-018](https://github.com/thefriendlyhedgehog/MissingShip/issues/56) | enhancement | B should answer No / close yes-no prompts (at least the Saria prompt), not need another A. | B cancels safely on choice prompts; logged. |
+| [MS-019](https://github.com/thefriendlyhedgehog/MissingShip/issues/57) | enhancement | New games put the Ocarina on D-Down *and* C-Left; D-pad ocarina playback was off; MissingShip options weren't in the SoH menu. | **Done:** Enhancements > MissingShip page, Starting Ocarina Button (D-Down default), Dpad Ocarina Playback on. In-game check pending. |
 
 ### M2: Data-only quick wins (pipeline, no engine code)
 
@@ -272,6 +273,7 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 
 ### Done
 
+- MS-019: Enhancements > MissingShip settings page (future MissingShip options go here); Starting Ocarina Button (D-Down default, C-Left fallback without Dpad equips); Dpad Ocarina Playback on in the seed and local profiles (engine a4d8237; ledger rows 15, 45). In-game check pending (MS-010).
 - MS-016: `GfxDpLoadBlock`'s `word_size_shift` is now signed (MissingShip-libultraship b0ea7db, engine 160ad6e, ledger row 44). A test of the exact expression gave 0 bytes for a 1024-texel 4b load before and 512 after (clang -O0 and -O2). Engine rebuilt and boots. Upstream PR deferred: none until the whole project is done (owner decision); tracked on MS-070.
 - MS-014: the engine fork is the `engine/` submodule (branch `missingship`); one `git clone --recursive` gets everything at matching versions. `mspaths` defaults to `engine/`; `tools/check.py` fails if `engine/` is not at the pinned commit. Locally the checkout was moved in (history kept) and `../Shipwright` is a compatibility symlink; the engine was reconfigured and rebuilt at the new path.
 - MS-009: every pipeline step uses the engine fork's ZAPD (`build-ml/ZAPD/ZAPD.out`, patched ZAPDTR) and its scene table; SOHCombo and `MS_SOHCOMBO`/`MS_ZAPD_AUDIO` removed. Archive verified byte-identical (4636 resources) both with the switch and on the new defaults; the two scene tables' title-card mapping is identical for all 110 slots. `MissingShip.sh` keeps `Info.plist`'s `SHIP_HOME` pointing at the checkout's `home/` so double-click works anywhere (plist not in the signature; committed in plutil's canonical format).
