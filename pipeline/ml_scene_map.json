@@ -1,0 +1,177 @@
+{
+ "400": {
+  "slot": 0,
+  "scene": "ydan_scene",
+  "enum": "SCENE_DEKU_TREE",
+  "config": 31,
+  "title_dma": null
+ },
+ "407": {
+  "slot": 3,
+  "scene": "Bmori1_scene",
+  "enum": "SCENE_FOREST_TEMPLE",
+  "config": 31,
+  "title_dma": 408
+ },
+ "412": {
+  "slot": 7,
+  "scene": "HAKAdan_scene",
+  "enum": "SCENE_SHADOW_TEMPLE",
+  "config": 31,
+  "title_dma": 413
+ },
+ "439": {
+  "slot": 24,
+  "scene": "HAKAdan_bs_scene",
+  "enum": "SCENE_SHADOW_TEMPLE_BOSS",
+  "config": 31,
+  "title_dma": null
+ },
+ "441": {
+  "slot": 38,
+  "scene": "kokiri_home_scene",
+  "enum": "SCENE_KNOW_IT_ALL_BROS_HOUSE",
+  "config": 0,
+  "title_dma": null
+ },
+ "443": {
+  "slot": 39,
+  "scene": "kokiri_home3_scene",
+  "enum": "SCENE_TWINS_HOUSE",
+  "config": 0,
+  "title_dma": null
+ },
+ "445": {
+  "slot": 40,
+  "scene": "kokiri_home4_scene",
+  "enum": "SCENE_MIDOS_HOUSE",
+  "config": 0,
+  "title_dma": null
+ },
+ "447": {
+  "slot": 42,
+  "scene": "kakariko_scene",
+  "enum": "SCENE_KAKARIKO_CENTER_GUEST_HOUSE",
+  "config": 0,
+  "title_dma": null
+ },
+ "449": {
+  "slot": 43,
+  "scene": "kakariko3_scene",
+  "enum": "SCENE_BACK_ALLEY_HOUSE",
+  "config": 0,
+  "title_dma": 450
+ },
+ "452": {
+  "slot": 50,
+  "scene": "night_shop_scene",
+  "enum": "SCENE_BOMBCHU_SHOP",
+  "config": 0,
+  "title_dma": 453
+ },
+ "455": {
+  "slot": 52,
+  "scene": "link_home_scene",
+  "enum": "SCENE_LINKS_HOUSE",
+  "config": 0,
+  "title_dma": null
+ },
+ "457": {
+  "slot": 54,
+  "scene": "malon_stable_scene",
+  "enum": "SCENE_STABLE",
+  "config": 0,
+  "title_dma": null
+ },
+ "462": {
+  "slot": 67,
+  "scene": "tokinoma_scene",
+  "enum": "SCENE_TEMPLE_OF_TIME",
+  "config": 0,
+  "title_dma": null
+ },
+ "464": {
+  "slot": 73,
+  "scene": "turibori_scene",
+  "enum": "SCENE_FISHING_POND",
+  "config": 0,
+  "title_dma": null
+ },
+ "466": {
+  "slot": 81,
+  "scene": "spot00_scene",
+  "enum": "SCENE_HYRULE_FIELD",
+  "config": 0,
+  "title_dma": null
+ },
+ "468": {
+  "slot": 82,
+  "scene": "spot01_scene",
+  "enum": "SCENE_KAKARIKO_VILLAGE",
+  "config": 46,
+  "title_dma": 469
+ },
+ "472": {
+  "slot": 85,
+  "scene": "spot04_scene",
+  "enum": "SCENE_KOKIRI_FOREST",
+  "config": 0,
+  "title_dma": 473
+ },
+ "475": {
+  "slot": 86,
+  "scene": "spot05_scene",
+  "enum": "SCENE_SACRED_FOREST_MEADOW",
+  "config": 0,
+  "title_dma": null
+ },
+ "477": {
+  "slot": 90,
+  "scene": "spot09_scene",
+  "enum": "SCENE_GERUDO_VALLEY",
+  "config": 19,
+  "title_dma": 478
+ },
+ "481": {
+  "slot": 91,
+  "scene": "spot10_scene",
+  "enum": "SCENE_LOST_WOODS",
+  "config": 19,
+  "title_dma": 482
+ },
+ "489": {
+  "slot": 92,
+  "scene": "spot11_scene",
+  "enum": "SCENE_DESERT_COLOSSUS",
+  "config": 31,
+  "title_dma": null
+ },
+ "493": {
+  "slot": 93,
+  "scene": "spot12_scene",
+  "enum": "SCENE_GERUDOS_FORTRESS",
+  "config": 0,
+  "title_dma": 494
+ },
+ "499": {
+  "slot": 99,
+  "scene": "spot20_scene",
+  "enum": "SCENE_LON_LON_RANCH",
+  "config": 0,
+  "title_dma": 500
+ },
+ "502": {
+  "slot": 107,
+  "scene": "hairal_niwa2_scene",
+  "enum": "SCENE_HAIRAL_NIWA2",
+  "config": 0,
+  "title_dma": null
+ },
+ "505": {
+  "slot": 109,
+  "scene": "testroom_scene",
+  "enum": "SCENE_TESTROOM",
+  "config": 31,
+  "title_dma": null
+ }
+}

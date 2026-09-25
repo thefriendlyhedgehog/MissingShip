@@ -1,0 +1,44 @@
+<Root>
+    <File Name="kokiri_home3_scene" Segment="2">
+        <Texture Name="kokiri_home3_sceneTex_000BF0" OutName="kokiri_home3_sceneTex_000BF0" Format="ci8" Width="32" Height="32" Offset="0xBF0" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_sceneTex_0011F0" OutName="kokiri_home3_sceneTex_0011F0" Format="ci8" Width="32" Height="32" Offset="0x11F0" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_sceneTex_0017F0" OutName="kokiri_home3_sceneTex_0017F0" Format="ci8" Width="32" Height="32" Offset="0x17F0" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_sceneTex_001DF0" OutName="kokiri_home3_sceneTex_001DF0" Format="rgba16" Width="16" Height="64" Offset="0x1DF0" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_sceneTex_0025F0" OutName="kokiri_home3_sceneTex_0025F0" Format="ci8" Width="32" Height="32" Offset="0x25F0" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_sceneTex_002BF0" OutName="kokiri_home3_sceneTex_002BF0" Format="ia16" Width="32" Height="64" Offset="0x2BF0" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_sceneTex_003BF0" OutName="kokiri_home3_sceneTex_003BF0" Format="ci8" Width="32" Height="16" Offset="0x3BF0" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_sceneTex_003FF0" OutName="kokiri_home3_sceneTex_003FF0" Format="rgba16" Width="64" Height="32" Offset="0x3FF0" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_sceneTex_004FF0" OutName="kokiri_home3_sceneTex_004FF0" Format="ci8" Width="32" Height="32" Offset="0x4FF0" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_sceneTex_0055F0" OutName="kokiri_home3_sceneTex_0055F0" Format="ci4" Width="64" Height="64" Offset="0x55F0" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_sceneTex_005E10" OutName="kokiri_home3_sceneTex_005E10" Format="ci8" Width="32" Height="32" Offset="0x5E10" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_sceneTex_006410" OutName="kokiri_home3_sceneTex_006410" Format="ci8" Width="32" Height="32" Offset="0x6410" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_sceneTex_006A10" OutName="kokiri_home3_sceneTex_006A10" Format="ci4" Width="64" Height="64" Offset="0x6A10" AddedByScript="true"/>
+        <Scene Name="kokiri_home3_scene" Offset="0x0"/>
+    </File>
+    <File Name="kokiri_home3_room_0" Segment="3">
+        <Texture Name="kokiri_home3_room_0_tlut_004150" OutName="kokiri_home3_room_0_tlut_004150" Format="rgba16" Width="256" Height="1" Offset="0x4150" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_room_0_tex_004350" OutName="kokiri_home3_room_0_tex_004350" Format="ci8" Width="32" Height="32" Offset="0x4350" TlutOffset="0x4150" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_room_0_tex_004750" OutName="kokiri_home3_room_0_tex_004750" Format="ia16" Width="32" Height="64" Offset="0x4750" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_room_0_tex_005750" OutName="kokiri_home3_room_0_tex_005750" Format="rgba16" Width="16" Height="64" Offset="0x5750" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_room_0_tlut_005F50" OutName="kokiri_home3_room_0_tlut_005F50" Format="rgba16" Width="256" Height="1" Offset="0x5F50" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_room_0_tex_006150" OutName="kokiri_home3_room_0_tex_006150" Format="ci8" Width="32" Height="32" Offset="0x6150" TlutOffset="0x5F50" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_room_0_tlut_006550" OutName="kokiri_home3_room_0_tlut_006550" Format="rgba16" Width="16" Height="1" Offset="0x6550" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_room_0_tex_006570" OutName="kokiri_home3_room_0_tex_006570" Format="ci4" Width="64" Height="64" Offset="0x6570" TlutOffset="0x6550" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_room_0_tlut_006D70" OutName="kokiri_home3_room_0_tlut_006D70" Format="rgba16" Width="16" Height="1" Offset="0x6D70" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_room_0_tex_006D90" OutName="kokiri_home3_room_0_tex_006D90" Format="ci4" Width="64" Height="64" Offset="0x6D90" TlutOffset="0x6D70" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_room_0_tlut_007590" OutName="kokiri_home3_room_0_tlut_007590" Format="rgba16" Width="256" Height="1" Offset="0x7590" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_room_0_tex_007790" OutName="kokiri_home3_room_0_tex_007790" Format="ci8" Width="32" Height="32" Offset="0x7790" TlutOffset="0x7590" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_room_0_tlut_007B90" OutName="kokiri_home3_room_0_tlut_007B90" Format="rgba16" Width="256" Height="1" Offset="0x7B90" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_room_0_tex_007D90" OutName="kokiri_home3_room_0_tex_007D90" Format="ci8" Width="32" Height="16" Offset="0x7D90" TlutOffset="0x7B90" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_room_0_tlut_007F90" OutName="kokiri_home3_room_0_tlut_007F90" Format="rgba16" Width="256" Height="1" Offset="0x7F90" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_room_0_tex_008190" OutName="kokiri_home3_room_0_tex_008190" Format="ci8" Width="32" Height="32" Offset="0x8190" TlutOffset="0x7F90" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_room_0_tlut_008590" OutName="kokiri_home3_room_0_tlut_008590" Format="rgba16" Width="256" Height="1" Offset="0x8590" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_room_0_tex_008790" OutName="kokiri_home3_room_0_tex_008790" Format="ci8" Width="32" Height="32" Offset="0x8790" TlutOffset="0x8590" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_room_0_tlut_008B90" OutName="kokiri_home3_room_0_tlut_008B90" Format="rgba16" Width="256" Height="1" Offset="0x8B90" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_room_0_tex_008D90" OutName="kokiri_home3_room_0_tex_008D90" Format="ci8" Width="32" Height="32" Offset="0x8D90" TlutOffset="0x8B90" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_room_0_tlut_009190" OutName="kokiri_home3_room_0_tlut_009190" Format="rgba16" Width="256" Height="1" Offset="0x9190" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_room_0_tex_009390" OutName="kokiri_home3_room_0_tex_009390" Format="ci8" Width="32" Height="32" Offset="0x9390" TlutOffset="0x9190" AddedByScript="true"/>
+        <Texture Name="kokiri_home3_room_0_tex_009790" OutName="kokiri_home3_room_0_tex_009790" Format="rgba16" Width="64" Height="32" Offset="0x9790" AddedByScript="true"/>
+        <Room Name="kokiri_home3_room_0" Offset="0x0"/>
+    </File>
+</Root>

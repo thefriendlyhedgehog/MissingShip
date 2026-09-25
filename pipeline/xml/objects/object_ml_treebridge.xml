@@ -1,0 +1,6 @@
+<Root>
+    <File Name="object_ml_treebridge" Segment="6">
+        <DList Name="gMlTreeBridgeDL" Offset="0x80D0"/>
+        <DList Name="gMlTreeBridgeXluDL" Offset="0x81A8"/>
+    </File>
+</Root>

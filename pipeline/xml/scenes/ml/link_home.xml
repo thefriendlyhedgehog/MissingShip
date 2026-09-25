@@ -1,0 +1,10 @@
+<Root>
+    <File Name="link_home_scene" Segment="2">
+        <Cutscene Name="gMlLinkHomeIntroCs" Offset="0xD8"/>
+        <Scene Name="link_home_scene" Offset="0x0"/>
+    </File>
+    <File Name="link_home_room_0" Segment="3">
+
+        <Room Name="link_home_room_0" Offset="0x0"/>
+    </File>
+</Root>

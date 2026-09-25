@@ -1,0 +1,20 @@
+diff --git a/src/fast/backends/gfx_metal.cpp b/src/fast/backends/gfx_metal.cpp
+index 9f9ea33..fd23962 100644
+--- a/src/fast/backends/gfx_metal.cpp
++++ b/src/fast/backends/gfx_metal.cpp
+@@ -320,6 +320,15 @@ void GfxRenderingAPIMetal::SelectTexture(int tile, uint32_t texture_id) {
+ }
+ 
+ void GfxRenderingAPIMetal::UploadTexture(const uint8_t* rgba32_buf, uint32_t width, uint32_t height) {
++    // Degenerate tile setups can yield a zero dimension: the importers compute
++    // height = sizeBytes / widthBytes, which is 0 whenever a texture's loaded byte count is
++    // smaller than one line (interpreter.cpp, e.g. ImportTextureI4/ImportTextureCi4). Metal's
++    // MTLTextureDescriptor validation treats that as fatal and calls abort(), so a single
++    // malformed texture kills the process instead of just failing to draw. Skip the upload.
++    if (width == 0 || height == 0) {
++        return;
++    }
++
+     TextureDataMetal* texture_data = &mTextures[mCurrentTextureIds[mCurrentTile]];
+ 
+     NS::AutoreleasePool* autorelease_pool = NS::AutoreleasePool::alloc()->init();

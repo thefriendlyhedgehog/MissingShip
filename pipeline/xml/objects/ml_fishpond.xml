@@ -1,0 +1,8 @@
+<Root>
+    <File Name="object_ml_fishpond" Segment="6">
+        <DList Name="gMlFishpond0DL" Offset="0x978"/>
+        <DList Name="gMlFishpond1DL" Offset="0x2878"/>
+        <DList Name="gMlFishpond2DL" Offset="0x3068"/>
+        <DList Name="gMlFishpond3DL" Offset="0x3728"/>
+    </File>
+</Root>

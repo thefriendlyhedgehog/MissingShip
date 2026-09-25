@@ -1,0 +1,22 @@
+diff --git a/ZAPD/ZAudio.cpp b/ZAPD/ZAudio.cpp
+index 03c1efa..9dee9df 100644
+--- a/ZAPD/ZAudio.cpp
++++ b/ZAPD/ZAudio.cpp
+@@ -381,6 +381,17 @@ void ZAudio::ParseRawData()
+ 	// SAMPLE/FONT PARSING
+ 	for (auto& sft : soundFontTable)
+ 	{
++		// A soundfont table entry with no data is an unused slot. The sequence loop below already
++		// skips these (size == 0), but the soundfont loop did not: it would still walk the entry's
++		// instrument/drum/sfx counts and dereference offsets relative to ptr == 0, reading far past
++		// the end of the audiobank. Real ROM hacks hit this -- The Missing Link zeroes out the
++		// soundfonts it does not use while leaving their counts intact, and 22 of its 38 entries
++		// crash the extractor without this guard.
++		if (sft.size == 0)
++		{
++			continue;
++		}
++
+ 		ParseSoundFont(audioBankData, audioTableData, sampleBankTable, sft);
+ 	}
+ 

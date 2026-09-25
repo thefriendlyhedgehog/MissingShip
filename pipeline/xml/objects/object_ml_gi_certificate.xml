@@ -1,0 +1,5 @@
+<Root>
+    <File Name="object_ml_gi_certificate" Segment="6">
+        <DList Name="gMlGiCertificateDL" Offset="0x16C0"/>
+    </File>
+</Root>

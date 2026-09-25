@@ -1,0 +1,5 @@
+<Root>
+    <File Name="object_ml_gi_hourglass" Segment="6">
+        <DList Name="gMlGiHourglassDL" Offset="0x1530"/>
+    </File>
+</Root>

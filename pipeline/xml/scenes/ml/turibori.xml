@@ -1,0 +1,15 @@
+<Root>
+    <File Name="turibori_scene" Segment="2">
+        <Texture Name="turibori_sceneTex_00B9D0" OutName="turibori_sceneTex_00B9D0" Format="ia16" Width="64" Height="64" Offset="0xB9D0" AddedByScript="true"/>
+        <Texture Name="turibori_sceneTex_00D9D0" OutName="turibori_sceneTex_00D9D0" Format="i8" Width="64" Height="64" Offset="0xD9D0" AddedByScript="true"/>
+        <Cutscene Name="gMlTuriboriIntroCs" Offset="0xFB90"/>
+        <Scene Name="turibori_scene" Offset="0x0"/>
+    </File>
+    <File Name="turibori_room_0" Segment="3">
+        <Texture Name="turibori_room_0_local_0014B8" OutName="turibori_room_0_local_0014B8" Format="ia4" Width="64" Height="64" Offset="0x14B8" AddedByScript="true"/>
+        <Texture Name="turibori_room_0_local_001CB8" OutName="turibori_room_0_local_001CB8" Format="ia16" Width="8" Height="16" Offset="0x1CB8" AddedByScript="true"/>
+        <Texture Name="turibori_room_0_tex_001DC0" OutName="turibori_room_0_tex_001DC0" Format="i8" Width="64" Height="64" Offset="0x1DC0" AddedByScript="true"/>
+        <Texture Name="turibori_room_0_tex_002DC0" OutName="turibori_room_0_tex_002DC0" Format="ia16" Width="64" Height="64" Offset="0x2DC0" AddedByScript="true"/>
+        <Room Name="turibori_room_0" Offset="0x0"/>
+    </File>
+</Root>

@@ -1,0 +1,28 @@
+<Root>
+    <File Name="night_shop_scene" Segment="2">
+        <Texture Name="night_shop_sceneTex_0006A0" OutName="night_shop_sceneTex_0006A0" Format="ci8" Width="32" Height="32" Offset="0x6A0" AddedByScript="true"/>
+        <Texture Name="night_shop_sceneTex_000CA0" OutName="night_shop_sceneTex_000CA0" Format="ci4" Width="64" Height="64" Offset="0xCA0" AddedByScript="true"/>
+        <Texture Name="night_shop_sceneTex_0014C0" OutName="night_shop_sceneTex_0014C0" Format="rgba16" Width="16" Height="32" Offset="0x14C0" AddedByScript="true"/>
+        <Texture Name="night_shop_sceneTex_0018C0" OutName="night_shop_sceneTex_0018C0" Format="ci8" Width="32" Height="32" Offset="0x18C0" AddedByScript="true"/>
+        <Texture Name="night_shop_sceneTex_001EC0" OutName="night_shop_sceneTex_001EC0" Format="ci8" Width="16" Height="16" Offset="0x1EC0" AddedByScript="true"/>
+        <Texture Name="night_shop_sceneTex_0021C0" OutName="night_shop_sceneTex_0021C0" Format="ci8" Width="8" Height="16" Offset="0x21C0" AddedByScript="true"/>
+        <Texture Name="night_shop_sceneTex_002440" OutName="night_shop_sceneTex_002440" Format="ci8" Width="32" Height="32" Offset="0x2440" AddedByScript="true"/>
+        <Scene Name="night_shop_scene" Offset="0x0"/>
+    </File>
+    <File Name="night_shop_room_0" Segment="3">
+        <Texture Name="night_shop_room_0_tlut_001930" OutName="night_shop_room_0_tlut_001930" Format="rgba16" Width="256" Height="1" Offset="0x1930" AddedByScript="true"/>
+        <Texture Name="night_shop_room_0_tex_001B30" OutName="night_shop_room_0_tex_001B30" Format="ci8" Width="32" Height="32" Offset="0x1B30" TlutOffset="0x1930" AddedByScript="true"/>
+        <Texture Name="night_shop_room_0_tlut_001F30" OutName="night_shop_room_0_tlut_001F30" Format="rgba16" Width="16" Height="1" Offset="0x1F30" AddedByScript="true"/>
+        <Texture Name="night_shop_room_0_tex_001F50" OutName="night_shop_room_0_tex_001F50" Format="ci4" Width="64" Height="64" Offset="0x1F50" TlutOffset="0x1F30" AddedByScript="true"/>
+        <Texture Name="night_shop_room_0_tlut_002750" OutName="night_shop_room_0_tlut_002750" Format="rgba16" Width="256" Height="1" Offset="0x2750" AddedByScript="true"/>
+        <Texture Name="night_shop_room_0_tex_002950" OutName="night_shop_room_0_tex_002950" Format="ci8" Width="32" Height="32" Offset="0x2950" TlutOffset="0x2750" AddedByScript="true"/>
+        <Texture Name="night_shop_room_0_tlut_002D50" OutName="night_shop_room_0_tlut_002D50" Format="rgba16" Width="256" Height="1" Offset="0x2D50" AddedByScript="true"/>
+        <Texture Name="night_shop_room_0_tex_002F50" OutName="night_shop_room_0_tex_002F50" Format="ci8" Width="16" Height="16" Offset="0x2F50" TlutOffset="0x2D50" AddedByScript="true"/>
+        <Texture Name="night_shop_room_0_tlut_003050" OutName="night_shop_room_0_tlut_003050" Format="rgba16" Width="256" Height="1" Offset="0x3050" AddedByScript="true"/>
+        <Texture Name="night_shop_room_0_tex_003250" OutName="night_shop_room_0_tex_003250" Format="ci8" Width="8" Height="16" Offset="0x3250" TlutOffset="0x3050" AddedByScript="true"/>
+        <Texture Name="night_shop_room_0_tlut_0032D0" OutName="night_shop_room_0_tlut_0032D0" Format="rgba16" Width="256" Height="1" Offset="0x32D0" AddedByScript="true"/>
+        <Texture Name="night_shop_room_0_tex_0034D0" OutName="night_shop_room_0_tex_0034D0" Format="ci8" Width="32" Height="32" Offset="0x34D0" TlutOffset="0x32D0" AddedByScript="true"/>
+        <Texture Name="night_shop_room_0_tex_0038D0" OutName="night_shop_room_0_tex_0038D0" Format="rgba16" Width="16" Height="32" Offset="0x38D0" AddedByScript="true"/>
+        <Room Name="night_shop_room_0" Offset="0x0"/>
+    </File>
+</Root>

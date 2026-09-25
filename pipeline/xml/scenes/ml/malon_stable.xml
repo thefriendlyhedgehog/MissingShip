@@ -1,0 +1,117 @@
+<Root>
+    <File Name="malon_stable_scene" Segment="2">
+        <Texture Name="malon_stable_sceneTex_0030F0" OutName="malon_stable_sceneTex_0030F0" Format="ci8" Width="8" Height="32" Offset="0x30F0" AddedByScript="true"/>
+        <Texture Name="malon_stable_sceneTex_0033F0" OutName="malon_stable_sceneTex_0033F0" Format="ci4" Width="64" Height="64" Offset="0x33F0" AddedByScript="true"/>
+        <Texture Name="malon_stable_sceneTex_003C10" OutName="malon_stable_sceneTex_003C10" Format="ci8" Width="32" Height="64" Offset="0x3C10" AddedByScript="true"/>
+        <Texture Name="malon_stable_sceneTex_004610" OutName="malon_stable_sceneTex_004610" Format="rgba16" Width="16" Height="32" Offset="0x4610" AddedByScript="true"/>
+        <Texture Name="malon_stable_sceneTex_004A10" OutName="malon_stable_sceneTex_004A10" Format="ci8" Width="32" Height="32" Offset="0x4A10" AddedByScript="true"/>
+        <Texture Name="malon_stable_sceneTex_005010" OutName="malon_stable_sceneTex_005010" Format="ci8" Width="32" Height="16" Offset="0x5010" AddedByScript="true"/>
+        <Texture Name="malon_stable_sceneTex_005410" OutName="malon_stable_sceneTex_005410" Format="rgba16" Width="32" Height="64" Offset="0x5410" AddedByScript="true"/>
+        <Texture Name="malon_stable_sceneTex_006410" OutName="malon_stable_sceneTex_006410" Format="ci8" Width="32" Height="64" Offset="0x6410" AddedByScript="true"/>
+        <Texture Name="malon_stable_sceneTex_006E10" OutName="malon_stable_sceneTex_006E10" Format="rgba16" Width="16" Height="64" Offset="0x6E10" AddedByScript="true"/>
+        <Texture Name="malon_stable_sceneTex_007610" OutName="malon_stable_sceneTex_007610" Format="ci8" Width="8" Height="128" Offset="0x7610" AddedByScript="true"/>
+        <Texture Name="malon_stable_sceneTex_007C10" OutName="malon_stable_sceneTex_007C10" Format="ia8" Width="8" Height="8" Offset="0x7C10" AddedByScript="true"/>
+        <Texture Name="malon_stable_sceneTex_007C50" OutName="malon_stable_sceneTex_007C50" Format="rgba16" Width="32" Height="64" Offset="0x7C50" AddedByScript="true"/>
+        <Texture Name="malon_stable_sceneTex_008C50" OutName="malon_stable_sceneTex_008C50" Format="ci8" Width="32" Height="32" Offset="0x8C50" AddedByScript="true"/>
+        <Texture Name="malon_stable_sceneTex_009250" OutName="malon_stable_sceneTex_009250" Format="ci8" Width="16" Height="32" Offset="0x9250" AddedByScript="true"/>
+        <Texture Name="malon_stable_sceneTex_009650" OutName="malon_stable_sceneTex_009650" Format="i8" Width="32" Height="32" Offset="0x9650" AddedByScript="true"/>
+        <Texture Name="malon_stable_sceneTex_009E70" OutName="malon_stable_sceneTex_009E70" Format="ci4" Width="64" Height="64" Offset="0x9E70" AddedByScript="true"/>
+        <Texture Name="malon_stable_sceneTex_00AE90" OutName="malon_stable_sceneTex_00AE90" Format="ci4" Width="64" Height="64" Offset="0xAE90" AddedByScript="true"/>
+        <Texture Name="malon_stable_sceneTex_00BAD0" OutName="malon_stable_sceneTex_00BAD0" Format="ci8" Width="32" Height="32" Offset="0xBAD0" AddedByScript="true"/>
+        <Texture Name="malon_stable_sceneTex_00C0D0" OutName="malon_stable_sceneTex_00C0D0" Format="rgba16" Width="32" Height="64" Offset="0xC0D0" AddedByScript="true"/>
+        <Texture Name="malon_stable_sceneTex_00D2D0" OutName="malon_stable_sceneTex_00D2D0" Format="ci8" Width="32" Height="32" Offset="0xD2D0" AddedByScript="true"/>
+        <Texture Name="malon_stable_sceneTex_00D8D0" OutName="malon_stable_sceneTex_00D8D0" Format="rgba16" Width="32" Height="32" Offset="0xD8D0" AddedByScript="true"/>
+        <Texture Name="malon_stable_sceneTex_00E2D0" OutName="malon_stable_sceneTex_00E2D0" Format="ci8" Width="32" Height="32" Offset="0xE2D0" AddedByScript="true"/>
+        <Scene Name="malon_stable_scene" Offset="0x0"/>
+    </File>
+    <File Name="malon_stable_room_0" Segment="3">
+        <Texture Name="malon_stable_room_0_tlut_006C50" OutName="malon_stable_room_0_tlut_006C50" Format="rgba16" Width="256" Height="1" Offset="0x6C50" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_0_tex_006E50" OutName="malon_stable_room_0_tex_006E50" Format="ci8" Width="8" Height="32" Offset="0x6E50" TlutOffset="0x6C50" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_0_tlut_006F50" OutName="malon_stable_room_0_tlut_006F50" Format="rgba16" Width="16" Height="1" Offset="0x6F50" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_0_tex_006F70" OutName="malon_stable_room_0_tex_006F70" Format="ci4" Width="64" Height="64" Offset="0x6F70" TlutOffset="0x6F50" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_0_tlut_007770" OutName="malon_stable_room_0_tlut_007770" Format="rgba16" Width="256" Height="1" Offset="0x7770" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_0_tex_007970" OutName="malon_stable_room_0_tex_007970" Format="ci8" Width="32" Height="32" Offset="0x7970" TlutOffset="0x7770" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_0_tlut_007D70" OutName="malon_stable_room_0_tlut_007D70" Format="rgba16" Width="256" Height="1" Offset="0x7D70" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_0_tex_007F70" OutName="malon_stable_room_0_tex_007F70" Format="ci8" Width="32" Height="16" Offset="0x7F70" TlutOffset="0x7D70" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_0_tlut_008170" OutName="malon_stable_room_0_tlut_008170" Format="rgba16" Width="256" Height="1" Offset="0x8170" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_0_tex_008370" OutName="malon_stable_room_0_tex_008370" Format="ci8" Width="32" Height="64" Offset="0x8370" TlutOffset="0x8170" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_0_tex_008B70" OutName="malon_stable_room_0_tex_008B70" Format="rgba16" Width="16" Height="64" Offset="0x8B70" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_0_tlut_009370" OutName="malon_stable_room_0_tlut_009370" Format="rgba16" Width="256" Height="1" Offset="0x9370" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_0_tex_009570" OutName="malon_stable_room_0_tex_009570" Format="ci8" Width="8" Height="128" Offset="0x9570" TlutOffset="0x9370" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_0_tlut_009970" OutName="malon_stable_room_0_tlut_009970" Format="rgba16" Width="256" Height="1" Offset="0x9970" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_0_tex_009B70" OutName="malon_stable_room_0_tex_009B70" Format="ci8" Width="32" Height="32" Offset="0x9B70" TlutOffset="0x9970" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_0_tlut_009F70" OutName="malon_stable_room_0_tlut_009F70" Format="rgba16" Width="256" Height="1" Offset="0x9F70" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_0_tex_00A170" OutName="malon_stable_room_0_tex_00A170" Format="ci8" Width="16" Height="32" Offset="0xA170" TlutOffset="0x9F70" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_0_tex_00A370" OutName="malon_stable_room_0_tex_00A370" Format="ia8" Width="8" Height="8" Offset="0xA370" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_0_tex_00A3B0" OutName="malon_stable_room_0_tex_00A3B0" Format="rgba16" Width="32" Height="64" Offset="0xA3B0" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_0_tlut_00B3B0" OutName="malon_stable_room_0_tlut_00B3B0" Format="rgba16" Width="256" Height="1" Offset="0xB3B0" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_0_tex_00B5B0" OutName="malon_stable_room_0_tex_00B5B0" Format="ci8" Width="32" Height="64" Offset="0xB5B0" TlutOffset="0xB3B0" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_0_tex_00BDB0" OutName="malon_stable_room_0_tex_00BDB0" Format="rgba16" Width="16" Height="32" Offset="0xBDB0" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_0_tex_00C1B0" OutName="malon_stable_room_0_tex_00C1B0" Format="rgba16" Width="32" Height="64" Offset="0xC1B0" AddedByScript="true"/>
+        <Room Name="malon_stable_room_0" Offset="0x0"/>
+    </File>
+    <File Name="malon_stable_room_1" Segment="3">
+        <Texture Name="malon_stable_room_1_tex_005E60" OutName="malon_stable_room_1_tex_005E60" Format="i8" Width="32" Height="32" Offset="0x5E60" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_1_tex_006260" OutName="malon_stable_room_1_tex_006260" Format="ia8" Width="8" Height="8" Offset="0x6260" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_1_tlut_0062A0" OutName="malon_stable_room_1_tlut_0062A0" Format="rgba16" Width="256" Height="1" Offset="0x62A0" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_1_tex_0064A0" OutName="malon_stable_room_1_tex_0064A0" Format="ci8" Width="8" Height="32" Offset="0x64A0" TlutOffset="0x62A0" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_1_tlut_0065A0" OutName="malon_stable_room_1_tlut_0065A0" Format="rgba16" Width="16" Height="1" Offset="0x65A0" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_1_tex_0065C0" OutName="malon_stable_room_1_tex_0065C0" Format="ci4" Width="64" Height="64" Offset="0x65C0" TlutOffset="0x65A0" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_1_tlut_006DC0" OutName="malon_stable_room_1_tlut_006DC0" Format="rgba16" Width="256" Height="1" Offset="0x6DC0" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_1_tex_006FC0" OutName="malon_stable_room_1_tex_006FC0" Format="ci8" Width="32" Height="32" Offset="0x6FC0" TlutOffset="0x6DC0" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_1_tlut_0073C0" OutName="malon_stable_room_1_tlut_0073C0" Format="rgba16" Width="16" Height="1" Offset="0x73C0" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_1_tex_0073E0" OutName="malon_stable_room_1_tex_0073E0" Format="ci4" Width="64" Height="64" Offset="0x73E0" TlutOffset="0x73C0" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_1_tlut_007BE0" OutName="malon_stable_room_1_tlut_007BE0" Format="rgba16" Width="256" Height="1" Offset="0x7BE0" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_1_tex_007DE0" OutName="malon_stable_room_1_tex_007DE0" Format="ci8" Width="32" Height="16" Offset="0x7DE0" TlutOffset="0x7BE0" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_1_tlut_007FE0" OutName="malon_stable_room_1_tlut_007FE0" Format="rgba16" Width="256" Height="1" Offset="0x7FE0" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_1_tex_0081E0" OutName="malon_stable_room_1_tex_0081E0" Format="ci8" Width="32" Height="64" Offset="0x81E0" TlutOffset="0x7FE0" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_1_tex_0089E0" OutName="malon_stable_room_1_tex_0089E0" Format="rgba16" Width="16" Height="64" Offset="0x89E0" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_1_tlut_0091E0" OutName="malon_stable_room_1_tlut_0091E0" Format="rgba16" Width="256" Height="1" Offset="0x91E0" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_1_tex_0093E0" OutName="malon_stable_room_1_tex_0093E0" Format="ci8" Width="32" Height="32" Offset="0x93E0" TlutOffset="0x91E0" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_1_tlut_0097E0" OutName="malon_stable_room_1_tlut_0097E0" Format="rgba16" Width="256" Height="1" Offset="0x97E0" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_1_tex_0099E0" OutName="malon_stable_room_1_tex_0099E0" Format="ci8" Width="16" Height="32" Offset="0x99E0" TlutOffset="0x97E0" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_1_tlut_009BE0" OutName="malon_stable_room_1_tlut_009BE0" Format="rgba16" Width="16" Height="1" Offset="0x9BE0" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_1_tex_009C00" OutName="malon_stable_room_1_tex_009C00" Format="ci4" Width="64" Height="64" Offset="0x9C00" TlutOffset="0x9BE0" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_1_tex_00A400" OutName="malon_stable_room_1_tex_00A400" Format="rgba16" Width="32" Height="64" Offset="0xA400" AddedByScript="true"/>
+        <Room Name="malon_stable_room_1" Offset="0x0"/>
+    </File>
+    <File Name="malon_stable_room_2" Segment="3">
+        <Texture Name="malon_stable_room_2_tlut_005B10" OutName="malon_stable_room_2_tlut_005B10" Format="rgba16" Width="16" Height="1" Offset="0x5B10" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_2_tex_005B30" OutName="malon_stable_room_2_tex_005B30" Format="ci4" Width="64" Height="64" Offset="0x5B30" TlutOffset="0x5B10" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_2_tlut_006330" OutName="malon_stable_room_2_tlut_006330" Format="rgba16" Width="256" Height="1" Offset="0x6330" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_2_tex_006530" OutName="malon_stable_room_2_tex_006530" Format="ci8" Width="32" Height="32" Offset="0x6530" TlutOffset="0x6330" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_2_tlut_006930" OutName="malon_stable_room_2_tlut_006930" Format="rgba16" Width="256" Height="1" Offset="0x6930" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_2_tex_006B30" OutName="malon_stable_room_2_tex_006B30" Format="ci8" Width="32" Height="32" Offset="0x6B30" TlutOffset="0x6930" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_2_tlut_006F30" OutName="malon_stable_room_2_tlut_006F30" Format="rgba16" Width="256" Height="1" Offset="0x6F30" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_2_tex_007130" OutName="malon_stable_room_2_tex_007130" Format="ci8" Width="32" Height="64" Offset="0x7130" TlutOffset="0x6F30" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_2_tlut_007930" OutName="malon_stable_room_2_tlut_007930" Format="rgba16" Width="256" Height="1" Offset="0x7930" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_2_tex_007B30" OutName="malon_stable_room_2_tex_007B30" Format="ci8" Width="32" Height="32" Offset="0x7B30" TlutOffset="0x7930" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_2_tlut_007F30" OutName="malon_stable_room_2_tlut_007F30" Format="rgba16" Width="256" Height="1" Offset="0x7F30" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_2_tex_008130" OutName="malon_stable_room_2_tex_008130" Format="ci8" Width="16" Height="32" Offset="0x8130" TlutOffset="0x7F30" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_2_tex_008330" OutName="malon_stable_room_2_tex_008330" Format="rgba16" Width="32" Height="32" Offset="0x8330" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_2_tlut_008B30" OutName="malon_stable_room_2_tlut_008B30" Format="rgba16" Width="256" Height="1" Offset="0x8B30" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_2_tex_008D30" OutName="malon_stable_room_2_tex_008D30" Format="ci8" Width="32" Height="64" Offset="0x8D30" TlutOffset="0x8B30" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_2_tex_009530" OutName="malon_stable_room_2_tex_009530" Format="rgba16" Width="16" Height="32" Offset="0x9530" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_2_tex_009930" OutName="malon_stable_room_2_tex_009930" Format="rgba16" Width="32" Height="64" Offset="0x9930" AddedByScript="true"/>
+        <Room Name="malon_stable_room_2" Offset="0x0"/>
+    </File>
+    <File Name="malon_stable_room_3" Segment="3">
+        <Texture Name="malon_stable_room_3_tlut_004130" OutName="malon_stable_room_3_tlut_004130" Format="rgba16" Width="256" Height="1" Offset="0x4130" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_3_tex_004330" OutName="malon_stable_room_3_tex_004330" Format="ci8" Width="32" Height="32" Offset="0x4330" TlutOffset="0x4130" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_3_tlut_004730" OutName="malon_stable_room_3_tlut_004730" Format="rgba16" Width="16" Height="1" Offset="0x4730" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_3_tex_004750" OutName="malon_stable_room_3_tex_004750" Format="ci4" Width="64" Height="64" Offset="0x4750" TlutOffset="0x4730" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_3_tlut_004F50" OutName="malon_stable_room_3_tlut_004F50" Format="rgba16" Width="256" Height="1" Offset="0x4F50" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_3_tex_005150" OutName="malon_stable_room_3_tex_005150" Format="ci8" Width="32" Height="32" Offset="0x5150" TlutOffset="0x4F50" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_3_tlut_005550" OutName="malon_stable_room_3_tlut_005550" Format="rgba16" Width="256" Height="1" Offset="0x5550" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_3_tex_005750" OutName="malon_stable_room_3_tex_005750" Format="ci8" Width="32" Height="32" Offset="0x5750" TlutOffset="0x5550" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_3_tlut_005B50" OutName="malon_stable_room_3_tlut_005B50" Format="rgba16" Width="256" Height="1" Offset="0x5B50" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_3_tex_005D50" OutName="malon_stable_room_3_tex_005D50" Format="ci8" Width="16" Height="32" Offset="0x5D50" TlutOffset="0x5B50" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_3_tlut_005F50" OutName="malon_stable_room_3_tlut_005F50" Format="rgba16" Width="256" Height="1" Offset="0x5F50" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_3_tex_006150" OutName="malon_stable_room_3_tex_006150" Format="ci8" Width="32" Height="64" Offset="0x6150" TlutOffset="0x5F50" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_3_tlut_006950" OutName="malon_stable_room_3_tlut_006950" Format="rgba16" Width="256" Height="1" Offset="0x6950" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_3_tex_006B50" OutName="malon_stable_room_3_tex_006B50" Format="ci8" Width="32" Height="64" Offset="0x6B50" TlutOffset="0x6950" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_3_tex_007350" OutName="malon_stable_room_3_tex_007350" Format="rgba16" Width="16" Height="32" Offset="0x7350" AddedByScript="true"/>
+        <Texture Name="malon_stable_room_3_tex_007750" OutName="malon_stable_room_3_tex_007750" Format="rgba16" Width="32" Height="64" Offset="0x7750" AddedByScript="true"/>
+        <Room Name="malon_stable_room_3" Offset="0x0"/>
+    </File>
+</Root>

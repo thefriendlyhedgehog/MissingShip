@@ -1,0 +1,70 @@
+{
+ "turibori_room_0": [
+  {
+   "seg": 3,
+   "addr": 7352,
+   "fmt": 3,
+   "siz": 2,
+   "tiles": [
+    0
+   ],
+   "settile": [
+    7,
+    0
+   ],
+   "tlut": null,
+   "w": 8,
+   "h": 16
+  },
+  {
+   "seg": 3,
+   "addr": 5304,
+   "fmt": 3,
+   "siz": 0,
+   "tiles": [
+    1,
+    0
+   ],
+   "settile": [
+    7,
+    1
+   ],
+   "tlut": null,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "seg": 3,
+   "addr": 7352,
+   "fmt": 3,
+   "siz": 2,
+   "tiles": [
+    0
+   ],
+   "settile": [
+    7,
+    0
+   ],
+   "tlut": null,
+   "w": 8,
+   "h": 16
+  },
+  {
+   "seg": 3,
+   "addr": 5304,
+   "fmt": 3,
+   "siz": 0,
+   "tiles": [
+    1,
+    0
+   ],
+   "settile": [
+    7,
+    1
+   ],
+   "tlut": null,
+   "w": 64,
+   "h": 64
+  }
+ ]
+}

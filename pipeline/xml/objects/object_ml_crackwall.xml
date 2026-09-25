@@ -1,0 +1,6 @@
+<Root>
+    <File Name="object_ml_crackwall" Segment="6">
+        <DList Name="gMlCrackWallDL" Offset="0x1240"/>
+        <Collision Name="gMlCrackWallCol" Offset="0xA00"/>
+    </File>
+</Root>

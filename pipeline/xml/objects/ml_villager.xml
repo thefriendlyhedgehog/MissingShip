@@ -1,0 +1,20 @@
+<Root>
+    <File Name="object_ml_villager" Segment="6">
+        <!-- Declared by hand: limb DL 0x2BA8 renders this CI8 texture on tile 0 without its own
+             G_SETTILESIZE, inheriting 32x64 from the previous texture, so ZAPD cannot infer its size
+             (texDecl == nullptr). Size confirmed by its LOADBLOCK (2048 bytes) and by the next
+             texture starting exactly at 0x1400. Palette is the 256-entry TLUT loaded from 0x1BA0. -->
+        <Texture Name="gMlVillagerTLUT_001BA0" OutName="gMlVillagerTLUT_001BA0" Format="rgba16" Width="256" Height="1" Offset="0x1BA0"/>
+        <Texture Name="gMlVillagerTex_000C00" OutName="gMlVillagerTex_000C00" Format="ci8" Width="32" Height="64" Offset="0xC00" TlutOffset="0x1BA0"/>
+        <!-- Declared by hand at its TRUE size. Limb DL 0x48D8 loads this palette with a 256-entry
+             G_LOADTLUT (harmless over-read on N64), so ZAPD auto-declares 512 bytes -- which swallows
+             the root limb's vertex array at 0x21B8 and makes ZAPD bind 30 of its vertices to the palette,
+             drawing the villager as giant spikes. Only 28 entries fit before the vertices, and the one
+             texture using it (0x1B20) tops out at index 27. SoH's LoadTlut stores only a pointer, so a
+             short palette is safe. -->
+        <Texture Name="gMlVillagerTLUT_002180" OutName="gMlVillagerTLUT_002180" Format="rgba16" Width="28" Height="1" Offset="0x2180"/>
+        <Texture Name="gMlVillagerTex_001B20" OutName="gMlVillagerTex_001B20" Format="ci8" Width="8" Height="16" Offset="0x1B20" TlutOffset="0x2180"/>
+        <Skeleton Name="gMlVillagerSkel" Type="Flex" LimbType="Standard" Offset="0x5760"/>
+        <Animation Name="gMlVillagerIdleAnim" Offset="0x56A4"/>
+    </File>
+</Root>

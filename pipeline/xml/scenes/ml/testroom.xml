@@ -1,0 +1,23 @@
+<Root>
+    <File Name="testroom_scene" Segment="2">
+        <Texture Name="testroom_sceneTex_000960" OutName="testroom_sceneTex_000960" Format="rgba16" Width="32" Height="32" Offset="0x960" AddedByScript="true"/>
+        <Texture Name="testroom_sceneTex_001160" OutName="testroom_sceneTex_001160" Format="rgba16" Width="32" Height="32" Offset="0x1160" AddedByScript="true"/>
+        <Texture Name="testroom_sceneTex_001960" OutName="testroom_sceneTex_001960" Format="ci8" Width="64" Height="16" Offset="0x1960" AddedByScript="true"/>
+        <Texture Name="testroom_sceneTex_001F60" OutName="testroom_sceneTex_001F60" Format="ia16" Width="128" Height="16" Offset="0x1F60" AddedByScript="true"/>
+        <Texture Name="testroom_sceneTex_002F60" OutName="testroom_sceneTex_002F60" Format="i8" Width="32" Height="32" Offset="0x2F60" AddedByScript="true"/>
+        <Texture Name="testroom_sceneTex_003360" OutName="testroom_sceneTex_003360" Format="rgba16" Width="32" Height="64" Offset="0x3360" AddedByScript="true"/>
+        <Scene Name="testroom_scene" Offset="0x0"/>
+    </File>
+    <File Name="testroom_room_0" Segment="3">
+        <Texture Name="testroom_room_0_tex_001630" OutName="testroom_room_0_tex_001630" Format="rgba16" Width="32" Height="32" Offset="0x1630" AddedByScript="true"/>
+        <Texture Name="testroom_room_0_tex_001E30" OutName="testroom_room_0_tex_001E30" Format="rgba16" Width="16" Height="16" Offset="0x1E30" AddedByScript="true"/>
+        <Texture Name="testroom_room_0_tex_002030" OutName="testroom_room_0_tex_002030" Format="ia16" Width="128" Height="16" Offset="0x2030" AddedByScript="true"/>
+        <Texture Name="testroom_room_0_tlut_003030" OutName="testroom_room_0_tlut_003030" Format="rgba16" Width="256" Height="1" Offset="0x3030" AddedByScript="true"/>
+        <Texture Name="testroom_room_0_tex_003230" OutName="testroom_room_0_tex_003230" Format="ci8" Width="64" Height="16" Offset="0x3230" TlutOffset="0x3030" AddedByScript="true"/>
+        <Texture Name="testroom_room_0_tex_003630" OutName="testroom_room_0_tex_003630" Format="rgba16" Width="32" Height="64" Offset="0x3630" AddedByScript="true"/>
+        <Texture Name="testroom_room_0_tex_004630" OutName="testroom_room_0_tex_004630" Format="rgba16" Width="32" Height="32" Offset="0x4630" AddedByScript="true"/>
+        <Texture Name="testroom_room_0_tex_004E30" OutName="testroom_room_0_tex_004E30" Format="rgba16" Width="32" Height="32" Offset="0x4E30" AddedByScript="true"/>
+        <Texture Name="testroom_room_0_tex_005630" OutName="testroom_room_0_tex_005630" Format="i8" Width="32" Height="32" Offset="0x5630" AddedByScript="true"/>
+        <Room Name="testroom_room_0" Offset="0x0"/>
+    </File>
+</Root>

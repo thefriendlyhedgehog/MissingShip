@@ -1,0 +1,8 @@
+<Root>
+    <!-- ML object 0x09 (object_poh slot): a recoloured copy of object_niw for ML's cucco in actor slot 0x0D. -->
+    <File Name="object_ml_cucco" Segment="6">
+        <Skeleton Name="gMlCuccoSkel" Type="Flex" LimbType="Standard" Offset="0x2530"/>
+        <DList Name="gMlCuccoFeatherMaterialDL" Offset="0x23B0"/>
+        <DList Name="gMlCuccoFeatherModelDL" Offset="0x2428"/>
+    </File>
+</Root>

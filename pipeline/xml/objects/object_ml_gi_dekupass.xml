@@ -1,0 +1,5 @@
+<Root>
+    <File Name="object_ml_gi_dekupass" Segment="6">
+        <DList Name="gMlGiDekuPassDL" Offset="0xF60"/>
+    </File>
+</Root>

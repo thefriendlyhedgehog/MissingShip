@@ -1,0 +1,14 @@
+<Root>
+    <!-- ML object 0xE0 (object_ma1, wholly redrawn): young Malon for ML's En_Ma1 rewrite (ovl_Ml_Malon). -->
+    <File Name="object_ml_ma1" Segment="6">
+        <Animation Name="gMlMalonTalkAnim" Offset="0x9E58"/>
+        <Texture Name="gMlMalonEyeOpenTex" OutName="eye_open" Format="rgba16" Width="32" Height="32" Offset="0xFFC8"/>
+        <Texture Name="gMlMalonEyeHalfTex" OutName="eye_half" Format="rgba16" Width="32" Height="32" Offset="0x107C8"/>
+        <Texture Name="gMlMalonEyeClosedTex" OutName="eye_closed" Format="rgba16" Width="32" Height="32" Offset="0x10FC8"/>
+        <Texture Name="gMlMalonMouthNeutralTex" OutName="mouth_neutral" Format="rgba16" Width="32" Height="16" Offset="0x127C8"/>
+        <Texture Name="gMlMalonMouthSadTex" OutName="mouth_sad" Format="rgba16" Width="32" Height="16" Offset="0x12FC8"/>
+        <Texture Name="gMlMalonMouthHappyTex" OutName="mouth_happy" Format="rgba16" Width="32" Height="16" Offset="0x133C8"/>
+        <Skeleton Name="gMlMalonSkel" Type="Flex" LimbType="Standard" Offset="0x13928"/>
+        <Animation Name="gMlMalonIdleAnim" Offset="0x1B76C"/>
+    </File>
+</Root>

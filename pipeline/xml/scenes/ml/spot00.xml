@@ -1,0 +1,23 @@
+<Root>
+    <File Name="spot00_scene" Segment="2">
+        <Texture Name="spot00_sceneTex_0005D0" OutName="spot00_sceneTex_0005D0" Format="i8" Width="32" Height="64" Offset="0x5D0" AddedByScript="true"/>
+        <Texture Name="spot00_sceneTex_000DD0" OutName="spot00_sceneTex_000DD0" Format="i8" Width="64" Height="64" Offset="0xDD0" AddedByScript="true"/>
+        <Texture Name="spot00_sceneTex_001DD0" OutName="spot00_sceneTex_001DD0" Format="rgba16" Width="32" Height="32" Offset="0x1DD0" AddedByScript="true"/>
+        <Texture Name="spot00_sceneTex_0025D0" OutName="spot00_sceneTex_0025D0" Format="ia8" Width="64" Height="64" Offset="0x25D0" AddedByScript="true"/>
+        <Texture Name="spot00_sceneTex_0035D0" OutName="spot00_sceneTex_0035D0" Format="ia16" Width="64" Height="32" Offset="0x35D0" AddedByScript="true"/>
+        <Texture Name="spot00_sceneTex_0045D0" OutName="spot00_sceneTex_0045D0" Format="i8" Width="32" Height="32" Offset="0x45D0" AddedByScript="true"/>
+        <Texture Name="spot00_sceneTex_0049D0" OutName="spot00_sceneTex_0049D0" Format="i8" Width="64" Height="64" Offset="0x49D0" AddedByScript="true"/>
+        <Scene Name="spot00_scene" Offset="0x0"/>
+    </File>
+    <File Name="spot00_room_0" Segment="3">
+        <Texture Name="spot00_room_0_tex_005030" OutName="spot00_room_0_tex_005030" Format="i8" Width="32" Height="64" Offset="0x5030" AddedByScript="true"/>
+        <Texture Name="spot00_room_0_tex_005830" OutName="spot00_room_0_tex_005830" Format="ia8" Width="64" Height="64" Offset="0x5830" AddedByScript="true"/>
+        <Texture Name="spot00_room_0_tex_006830" OutName="spot00_room_0_tex_006830" Format="ia16" Width="64" Height="32" Offset="0x6830" AddedByScript="true"/>
+        <Texture Name="spot00_room_0_tex_007830" OutName="spot00_room_0_tex_007830" Format="i8" Width="64" Height="64" Offset="0x7830" AddedByScript="true"/>
+        <Texture Name="spot00_room_0_tex_008830" OutName="spot00_room_0_tex_008830" Format="rgba16" Width="32" Height="32" Offset="0x8830" AddedByScript="true"/>
+        <Texture Name="spot00_room_0_tex_009030" OutName="spot00_room_0_tex_009030" Format="rgba16" Width="32" Height="32" Offset="0x9030" AddedByScript="true"/>
+        <Texture Name="spot00_room_0_tex_009830" OutName="spot00_room_0_tex_009830" Format="i8" Width="32" Height="32" Offset="0x9830" AddedByScript="true"/>
+        <Texture Name="spot00_room_0_tex_009C30" OutName="spot00_room_0_tex_009C30" Format="i8" Width="64" Height="64" Offset="0x9C30" AddedByScript="true"/>
+        <Room Name="spot00_room_0" Offset="0x0"/>
+    </File>
+</Root>

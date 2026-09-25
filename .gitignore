@@ -1,0 +1,14 @@
+# ROMs, ROM dumps and anything built from them -- never commit (copyrighted; rebuild locally)
+*.z64
+*.n64
+*.v64
+*.o2r
+*.otr
+pipeline/ml_code.bin
+pipeline/out/
+# local runtime / build products
+MissingShip.app/
+home/
+*.log
+__pycache__/
+.DS_Store

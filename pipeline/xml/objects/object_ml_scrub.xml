@@ -1,0 +1,26 @@
+<Root>
+    <!-- ML-only object 0x005: the Deep Woods hint scrubs (ML's En_Hintnuts, params 0x1017/0x1018). -->
+    <File Name="object_ml_scrub" Segment="6">
+        <Texture Name="gMlScrubTex_000B80" OutName="tex_000B80" Format="rgba16" Width="32" Height="32" Offset="0xB80"/>
+        <Texture Name="gMlScrubTex_001380" OutName="tex_001380" Format="rgba16" Width="16" Height="16" Offset="0x1380"/>
+        <Texture Name="gMlScrubTex_001580" OutName="tex_001580" Format="rgba16" Width="8" Height="8" Offset="0x1580"/>
+        <Texture Name="gMlScrubTex_001600" OutName="tex_001600" Format="rgba16" Width="8" Height="8" Offset="0x1600"/>
+        <DList Name="gMlScrubLimbBody_001DD0DL" Offset="0x1DD0"/>
+        <DList Name="gMlScrubLimbBody_001E68DL" Offset="0x1E68"/>
+        <DList Name="gMlScrubLimbBody_001F00DL" Offset="0x1F00"/>
+        <DList Name="gMlScrubLimbBody_001FA0DL" Offset="0x1FA0"/>
+        <DList Name="gMlScrubLimbBody_002040DL" Offset="0x2040"/>
+        <DList Name="gMlScrubLimbBody_002100DL" Offset="0x2100"/>
+        <DList Name="gMlScrubLimbBody_002198DL" Offset="0x2198"/>
+        <DList Name="gMlScrubLimbBody_002250DL" Offset="0x2250"/>
+        <DList Name="gMlScrubLimbBody_002308DL" Offset="0x2308"/>
+        <DList Name="gMlScrubLimbBody_002410DL" Offset="0x2410"/>
+        <Texture Name="gMlScrubEyeOpenTex" OutName="eye_open" Format="rgba16" Width="8" Height="8" Offset="0x1680"/>
+        <Texture Name="gMlScrubEyeHalfTex" OutName="eye_half" Format="rgba16" Width="8" Height="8" Offset="0x1700"/>
+        <Texture Name="gMlScrubEyeClosedTex" OutName="eye_closed" Format="rgba16" Width="8" Height="8" Offset="0x1780"/>
+        <Animation Name="gMlScrubTalkAnim" Offset="0x31C"/>
+        <DList Name="gMlScrubPedestalDL" Offset="0x2700"/>
+        <Skeleton Name="gMlScrubSkel" Type="Normal" LimbType="Standard" Offset="0x2848"/>
+        <Animation Name="gMlScrubIdleAnim" Offset="0x2A08"/>
+    </File>
+</Root>

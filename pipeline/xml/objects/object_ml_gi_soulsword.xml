@@ -1,0 +1,6 @@
+<Root>
+    <File Name="object_ml_gi_soulsword" Segment="6">
+        <DList Name="gMlGiSoulSwordDL" Offset="0x998"/>
+        <DList Name="gMlGiSoulSwordXluDL" Offset="0x850"/>
+    </File>
+</Root>

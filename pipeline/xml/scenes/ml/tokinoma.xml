@@ -1,0 +1,33 @@
+<Root>
+    <File Name="tokinoma_scene" Segment="2">
+        <Cutscene Name="gMlTokinomaIntroCs" Offset="0x1A0"/>
+        <Texture Name="tokinoma_sceneTex_000D50" OutName="tokinoma_sceneTex_000D50" Format="ci8" Width="32" Height="64" Offset="0xD50" AddedByScript="true"/>
+        <Texture Name="tokinoma_sceneTex_001750" OutName="tokinoma_sceneTex_001750" Format="rgba16" Width="32" Height="32" Offset="0x1750" AddedByScript="true"/>
+        <Texture Name="tokinoma_sceneTex_001F50" OutName="tokinoma_sceneTex_001F50" Format="rgba16" Width="64" Height="32" Offset="0x1F50" AddedByScript="true"/>
+        <Texture Name="tokinoma_sceneTex_002F50" OutName="tokinoma_sceneTex_002F50" Format="rgba16" Width="32" Height="64" Offset="0x2F50" AddedByScript="true"/>
+        <Texture Name="tokinoma_sceneTex_003F50" OutName="tokinoma_sceneTex_003F50" Format="rgba16" Width="32" Height="32" Offset="0x3F50" AddedByScript="true"/>
+        <Texture Name="tokinoma_sceneTex_004750" OutName="tokinoma_sceneTex_004750" Format="ci8" Width="32" Height="32" Offset="0x4750" AddedByScript="true"/>
+        <Texture Name="tokinoma_sceneTex_004D50" OutName="tokinoma_sceneTex_004D50" Format="i4" Width="64" Height="64" Offset="0x4D50" AddedByScript="true"/>
+        <Texture Name="tokinoma_sceneTex_005550" OutName="tokinoma_sceneTex_005550" Format="ci8" Width="32" Height="32" Offset="0x5550" AddedByScript="true"/>
+        <Texture Name="tokinoma_sceneTex_005B50" OutName="tokinoma_sceneTex_005B50" Format="rgba16" Width="32" Height="32" Offset="0x5B50" AddedByScript="true"/>
+        <Texture Name="tokinoma_sceneTex_006350" OutName="tokinoma_sceneTex_006350" Format="ci8" Width="16" Height="16" Offset="0x6350" AddedByScript="true"/>
+        <Scene Name="tokinoma_scene" Offset="0x0"/>
+    </File>
+    <File Name="tokinoma_room_0" Segment="3">
+        <Texture Name="tokinoma_room_0_tlut_002700" OutName="tokinoma_room_0_tlut_002700" Format="rgba16" Width="256" Height="1" Offset="0x2700" AddedByScript="true"/>
+        <Texture Name="tokinoma_room_0_tex_002900" OutName="tokinoma_room_0_tex_002900" Format="ci8" Width="32" Height="64" Offset="0x2900" TlutOffset="0x2700" AddedByScript="true"/>
+        <Texture Name="tokinoma_room_0_tex_003100" OutName="tokinoma_room_0_tex_003100" Format="rgba16" Width="32" Height="32" Offset="0x3100" AddedByScript="true"/>
+        <Texture Name="tokinoma_room_0_tex_003900" OutName="tokinoma_room_0_tex_003900" Format="rgba16" Width="32" Height="32" Offset="0x3900" AddedByScript="true"/>
+        <Texture Name="tokinoma_room_0_tex_004100" OutName="tokinoma_room_0_tex_004100" Format="rgba16" Width="32" Height="32" Offset="0x4100" AddedByScript="true"/>
+        <Texture Name="tokinoma_room_0_tex_004900" OutName="tokinoma_room_0_tex_004900" Format="rgba16" Width="32" Height="32" Offset="0x4900" AddedByScript="true"/>
+        <Texture Name="tokinoma_room_0_tlut_005100" OutName="tokinoma_room_0_tlut_005100" Format="rgba16" Width="256" Height="1" Offset="0x5100" AddedByScript="true"/>
+        <Texture Name="tokinoma_room_0_tex_005300" OutName="tokinoma_room_0_tex_005300" Format="ci8" Width="32" Height="32" Offset="0x5300" TlutOffset="0x5100" AddedByScript="true"/>
+        <Texture Name="tokinoma_room_0_tlut_005700" OutName="tokinoma_room_0_tlut_005700" Format="rgba16" Width="256" Height="1" Offset="0x5700" AddedByScript="true"/>
+        <Texture Name="tokinoma_room_0_tex_005900" OutName="tokinoma_room_0_tex_005900" Format="ci8" Width="16" Height="16" Offset="0x5900" TlutOffset="0x5700" AddedByScript="true"/>
+        <Texture Name="tokinoma_room_0_tlut_005A00" OutName="tokinoma_room_0_tlut_005A00" Format="rgba16" Width="256" Height="1" Offset="0x5A00" AddedByScript="true"/>
+        <Texture Name="tokinoma_room_0_tex_005C00" OutName="tokinoma_room_0_tex_005C00" Format="ci8" Width="32" Height="32" Offset="0x5C00" TlutOffset="0x5A00" AddedByScript="true"/>
+        <Texture Name="tokinoma_room_0_tex_006000" OutName="tokinoma_room_0_tex_006000" Format="rgba16" Width="32" Height="64" Offset="0x6000" AddedByScript="true"/>
+        <Texture Name="tokinoma_room_0_tex_007000" OutName="tokinoma_room_0_tex_007000" Format="rgba16" Width="64" Height="32" Offset="0x7000" AddedByScript="true"/>
+        <Room Name="tokinoma_room_0" Offset="0x0"/>
+    </File>
+</Root>

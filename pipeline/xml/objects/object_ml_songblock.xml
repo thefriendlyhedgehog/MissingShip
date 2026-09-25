@@ -1,0 +1,6 @@
+<Root>
+    <File Name="object_ml_songblock" Segment="6">
+        <DList Name="gMlSongBlockDL" Offset="0xCB0"/>
+        <Collision Name="gMlSongBlockCol" Offset="0x600"/>
+    </File>
+</Root>

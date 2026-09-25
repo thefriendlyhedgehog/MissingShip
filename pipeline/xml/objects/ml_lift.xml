@@ -1,0 +1,8 @@
+<Root>
+    <!-- ML's replacement for object slot 0x11D (OBJECT_D_LIFT in vanilla): the switch-operated lift
+         block shared by ML's Obj_Lift and Bg_Mori_Hashira4 rewrites. -->
+    <File Name="object_ml_lift" Segment="6">
+        <Collision Name="gMlLiftCol" Offset="0x600"/>
+        <DList Name="gMlLiftDL" Offset="0x740"/>
+    </File>
+</Root>

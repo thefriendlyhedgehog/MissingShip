@@ -1,0 +1,7 @@
+<Root>
+    <!-- ML's gameplay_keep: only the parts ML changed. Segment 4 like the real keep. -->
+    <File Name="object_ml_gkeep" Segment="4">
+        <Texture Name="gMlDropBombTex" OutName="drop_bomb" Format="rgba16" Width="32" Height="32" Offset="0x3E070"/>
+        <DList Name="gMlGrottoDL" Offset="0x4F2B0"/>
+    </File>
+</Root>

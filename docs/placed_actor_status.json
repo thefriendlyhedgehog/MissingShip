@@ -1,0 +1,970 @@
+[
+ {
+  "aid": 151,
+  "name": "Object_Kankyo",
+  "placed": 38,
+  "code": "SAME-SIZE",
+  "obj": "CHANGED 354224B vs 354224B",
+  "scenes": [
+   "HAKAdan",
+   "HAKAdan_bs",
+   "spot04",
+   "spot11",
+   "spot12",
+   "tokinoma",
+   "ydan"
+  ]
+ },
+ {
+  "aid": 94,
+  "name": "Obj_Syokudai",
+  "placed": 56,
+  "code": "SAME-SIZE",
+  "obj": "same",
+  "scenes": [
+   "Bmori1",
+   "HAKAdan",
+   "hairal_niwa2",
+   "spot04",
+   "spot09",
+   "ydan"
+  ]
+ },
+ {
+  "aid": 85,
+  "name": "En_Dekubaba",
+  "placed": 36,
+  "code": "SAME-SIZE",
+  "obj": "same",
+  "scenes": [
+   "HAKAdan",
+   "spot09",
+   "spot10",
+   "spot12",
+   "testroom",
+   "ydan"
+  ]
+ },
+ {
+  "aid": 255,
+  "name": "Obj_Oshihiki",
+  "placed": 3,
+  "code": "SAME-SIZE",
+  "obj": "CHANGED 97008B vs 97008B",
+  "scenes": [
+   "HAKAdan",
+   "ydan"
+  ]
+ },
+ {
+  "aid": 396,
+  "name": "En_Weiyer",
+  "placed": 1,
+  "code": "+304B",
+  "obj": "same",
+  "scenes": [
+   "ydan"
+  ]
+ },
+ {
+  "aid": 96,
+  "name": "En_Dekunuts",
+  "placed": 6,
+  "code": "SAME-SIZE",
+  "obj": "same",
+  "scenes": [
+   "spot10",
+   "ydan"
+  ]
+ },
+ {
+  "aid": 273,
+  "name": "Obj_Tsubo",
+  "placed": 86,
+  "code": "SAME-SIZE",
+  "obj": "CHANGED 354224B vs 354224B",
+  "scenes": [
+   "Bmori1",
+   "HAKAdan",
+   "HAKAdan_bs",
+   "hairal_niwa2",
+   "kakariko3",
+   "kokiri_home3",
+   "spot10",
+   "ydan"
+  ]
+ },
+ {
+  "aid": 59,
+  "name": "En_River_Sound",
+  "placed": 9,
+  "code": "SAME-SIZE",
+  "obj": "CHANGED 354224B vs 354224B",
+  "scenes": [
+   "HAKAdan",
+   "spot04",
+   "spot10",
+   "ydan"
+  ]
+ },
+ {
+  "aid": 207,
+  "name": "Bg_Hidan_Kowarerukabe",
+  "placed": 1,
+  "code": "SAME-SIZE",
+  "obj": "CHANGED 5184B vs 80512B",
+  "scenes": [
+   "ydan"
+  ]
+ },
+ {
+  "aid": 402,
+  "name": "En_Hintnuts",
+  "placed": 8,
+  "code": "-4080B",
+  "obj": "same",
+  "scenes": [
+   "spot09",
+   "spot10",
+   "spot12",
+   "ydan"
+  ]
+ },
+ {
+  "aid": 10,
+  "name": "En_Box",
+  "placed": 19,
+  "code": "SAME-SIZE",
+  "obj": "CHANGED 24576B vs 24576B",
+  "scenes": [
+   "Bmori1",
+   "HAKAdan",
+   "kakariko",
+   "spot01",
+   "spot05",
+   "spot09",
+   "spot10",
+   "spot20",
+   "testroom",
+   "ydan"
+  ]
+ },
+ {
+  "aid": 19,
+  "name": "En_Firefly",
+  "placed": 30,
+  "code": "SAME-SIZE",
+  "obj": "same",
+  "scenes": [
+   "HAKAdan",
+   "kakariko",
+   "spot00",
+   "spot10",
+   "ydan"
+  ]
+ },
+ {
+  "aid": 298,
+  "name": "Obj_Switch",
+  "placed": 11,
+  "code": "SAME-SIZE",
+  "obj": "CHANGED 97008B vs 97008B",
+  "scenes": [
+   "Bmori1",
+   "HAKAdan",
+   "spot10"
+  ]
+ },
+ {
+  "aid": 152,
+  "name": "En_Du",
+  "placed": 3,
+  "code": "-4864B",
+  "obj": "CHANGED 2336B vs 73776B",
+  "scenes": [
+   "Bmori1"
+  ]
+ },
+ {
+  "aid": 39,
+  "name": "Boss_Dodongo",
+  "placed": 2,
+  "code": "-21264B",
+  "obj": "same",
+  "scenes": [
+   "Bmori1"
+  ]
+ },
+ {
+  "aid": 195,
+  "name": "En_Nb",
+  "placed": 3,
+  "code": "-12224B",
+  "obj": "CHANGED 45312B vs 98784B",
+  "scenes": [
+   "Bmori1"
+  ]
+ },
+ {
+  "aid": 398,
+  "name": "Bg_Jya_1flift",
+  "placed": 1,
+  "code": "-64B",
+  "obj": "CHANGED 115008B vs 115008B",
+  "scenes": [
+   "Bmori1"
+  ]
+ },
+ {
+  "aid": 416,
+  "name": "Obj_Kibako2",
+  "placed": 12,
+  "code": "SAME-SIZE",
+  "obj": "same",
+  "scenes": [
+   "Bmori1",
+   "hairal_niwa2",
+   "kakariko",
+   "malon_stable",
+   "spot01",
+   "spot09",
+   "spot20"
+  ]
+ },
+ {
+  "aid": 239,
+  "name": "Bg_Ice_Shelter",
+  "placed": 2,
+  "code": "SAME-SIZE",
+  "obj": "same",
+  "scenes": [
+   "Bmori1"
+  ]
+ },
+ {
+  "aid": 240,
+  "name": "En_Ice_Hono",
+  "placed": 2,
+  "code": "SAME-SIZE",
+  "obj": "CHANGED 354224B vs 354224B",
+  "scenes": [
+   "Bmori1"
+  ]
+ },
+ {
+  "aid": 272,
+  "name": "Obj_Kibako",
+  "placed": 12,
+  "code": "SAME-SIZE",
+  "obj": "CHANGED 97008B vs 97008B",
+  "scenes": [
+   "Bmori1",
+   "malon_stable"
+  ]
+ },
+ {
+  "aid": 8,
+  "name": "En_Light",
+  "placed": 14,
+  "code": "SAME-SIZE",
+  "obj": "CHANGED 354224B vs 354224B",
+  "scenes": [
+   "Bmori1",
+   "HAKAdan"
+  ]
+ },
+ {
+  "aid": 29,
+  "name": "En_Peehat",
+  "placed": 1,
+  "code": "+16B",
+  "obj": "same",
+  "scenes": [
+   "Bmori1"
+  ]
+ },
+ {
+  "aid": 15,
+  "name": "Bg_Ydan_Sp",
+  "placed": 2,
+  "code": "SAME-SIZE",
+  "obj": "same",
+  "scenes": [
+   "Bmori1",
+   "HAKAdan"
+  ]
+ },
+ {
+  "aid": 135,
+  "name": "Bg_Mori_Elevator",
+  "placed": 1,
+  "code": "-1936B",
+  "obj": "CHANGED 10384B vs 35344B",
+  "scenes": [
+   "HAKAdan"
+  ]
+ },
+ {
+  "aid": 55,
+  "name": "En_St",
+  "placed": 9,
+  "code": "SAME-SIZE",
+  "obj": "same",
+  "scenes": [
+   "HAKAdan",
+   "spot12"
+  ]
+ },
+ {
+  "aid": 220,
+  "name": "Boss_Tw",
+  "placed": 26,
+  "code": "-71248B",
+  "obj": "CHANGED 10720B vs 241584B",
+  "scenes": [
+   "HAKAdan"
+  ]
+ },
+ {
+  "aid": 149,
+  "name": "En_Sw",
+  "placed": 8,
+  "code": "SAME-SIZE",
+  "obj": "same",
+  "scenes": [
+   "HAKAdan"
+  ]
+ },
+ {
+  "aid": 443,
+  "name": "Bg_Mizu_Shutter",
+  "placed": 1,
+  "code": "SAME-SIZE",
+  "obj": "same",
+  "scenes": [
+   "HAKAdan"
+  ]
+ },
+ {
+  "aid": 392,
+  "name": "En_Ssh",
+  "placed": 4,
+  "code": "-112B",
+  "obj": "same",
+  "scenes": [
+   "HAKAdan"
+  ]
+ },
+ {
+  "aid": 2,
+  "name": "En_Test",
+  "placed": 1,
+  "code": "SAME-SIZE",
+  "obj": "same",
+  "scenes": [
+   "HAKAdan"
+  ]
+ },
+ {
+  "aid": 73,
+  "name": "Bg_Hidan_Curtain",
+  "placed": 2,
+  "code": "SAME-SIZE",
+  "obj": "CHANGED 354224B vs 354224B",
+  "scenes": [
+   "HAKAdan"
+  ]
+ },
+ {
+  "aid": 379,
+  "name": "En_Kakasi",
+  "placed": 2,
+  "code": "-2272B",
+  "obj": "CHANGED 7216B vs 26560B",
+  "scenes": [
+   "HAKAdan"
+  ]
+ },
+ {
+  "aid": 300,
+  "name": "Obj_Lift",
+  "placed": 5,
+  "code": "-1632B",
+  "obj": "CHANGED 2080B vs 6144B",
+  "scenes": [
+   "HAKAdan",
+   "spot10",
+   "spot12"
+  ]
+ },
+ {
+  "aid": 64,
+  "name": "Bg_Hidan_Dalm",
+  "placed": 1,
+  "code": "-1376B",
+  "obj": "CHANGED 354224B vs 354224B",
+  "scenes": [
+   "HAKAdan"
+  ]
+ },
+ {
+  "aid": 142,
+  "name": "En_Floormas",
+  "placed": 1,
+  "code": "+928B",
+  "obj": "same",
+  "scenes": [
+   "HAKAdan"
+  ]
+ },
+ {
+  "aid": 67,
+  "name": "Bg_Hidan_Rock",
+  "placed": 2,
+  "code": "SAME-SIZE",
+  "obj": "same",
+  "scenes": [
+   "HAKAdan"
+  ]
+ },
+ {
+  "aid": 186,
+  "name": "Boss_Va",
+  "placed": 1,
+  "code": "-41088B",
+  "obj": "CHANGED 213760B vs 127408B",
+  "scenes": [
+   "HAKAdan_bs"
+  ]
+ },
+ {
+  "aid": 389,
+  "name": "En_Wonder_Talk2",
+  "placed": 1,
+  "code": "SAME-SIZE",
+  "obj": "CHANGED 354224B vs 354224B",
+  "scenes": [
+   "kokiri_home4"
+  ]
+ },
+ {
+  "aid": 327,
+  "name": "En_Wonder_Talk",
+  "placed": 8,
+  "code": "-624B",
+  "obj": "CHANGED 354224B vs 354224B",
+  "scenes": [
+   "kakariko3",
+   "kokiri_home4"
+  ]
+ },
+ {
+  "aid": 378,
+  "name": "Boss_Ganon2",
+  "placed": 1,
+  "code": "-34672B",
+  "obj": "CHANGED 18320B vs 220144B",
+  "scenes": [
+   "kakariko3"
+  ]
+ },
+ {
+  "aid": 61,
+  "name": "En_Ossan",
+  "placed": 1,
+  "code": "SAME-SIZE",
+  "obj": "CHANGED 354224B vs 354224B",
+  "scenes": [
+   "night_shop"
+  ]
+ },
+ {
+  "aid": 194,
+  "name": "En_Tana",
+  "placed": 1,
+  "code": "SAME-SIZE",
+  "obj": "same",
+  "scenes": [
+   "night_shop"
+  ]
+ },
+ {
+  "aid": 144,
+  "name": "En_Rd",
+  "placed": 7,
+  "code": "-16B",
+  "obj": "same",
+  "scenes": [
+   "night_shop",
+   "spot01"
+  ]
+ },
+ {
+  "aid": 147,
+  "name": "Bg_Po_Event",
+  "placed": 5,
+  "code": "-6448B",
+  "obj": "CHANGED 354224B vs 354224B",
+  "scenes": [
+   "hairal_niwa2",
+   "night_shop",
+   "spot01"
+  ]
+ },
+ {
+  "aid": 366,
+  "name": "En_Hy",
+  "placed": 3,
+  "code": "-48B",
+  "obj": "CHANGED 354224B vs 354224B",
+  "scenes": [
+   "malon_stable",
+   "spot20"
+  ]
+ },
+ {
+  "aid": 420,
+  "name": "En_Guest",
+  "placed": 1,
+  "code": "SAME-SIZE",
+  "obj": "same",
+  "scenes": [
+   "malon_stable"
+  ]
+ },
+ {
+  "aid": 25,
+  "name": "En_Niw",
+  "placed": 8,
+  "code": "SAME-SIZE",
+  "obj": "same",
+  "scenes": [
+   "malon_stable",
+   "spot20"
+  ]
+ },
+ {
+  "aid": 263,
+  "name": "Bg_Spot15_Rrbox",
+  "placed": 4,
+  "code": "SAME-SIZE",
+  "obj": "same",
+  "scenes": [
+   "malon_stable"
+  ]
+ },
+ {
+  "aid": 119,
+  "name": "En_Wood02",
+  "placed": 30,
+  "code": "SAME-SIZE",
+  "obj": "CHANGED 34768B vs 34768B",
+  "scenes": [
+   "spot01",
+   "spot04",
+   "spot09",
+   "spot12",
+   "spot20",
+   "tokinoma"
+  ]
+ },
+ {
+  "aid": 62,
+  "name": "Bg_Treemouth",
+  "placed": 9,
+  "code": "-1776B",
+  "obj": "same",
+  "scenes": [
+   "spot00",
+   "spot10"
+  ]
+ },
+ {
+  "aid": 369,
+  "name": "En_Mag",
+  "placed": 1,
+  "code": "-3056B",
+  "obj": "CHANGED 125920B vs 131136B",
+  "scenes": [
+   "spot00"
+  ]
+ },
+ {
+  "aid": 337,
+  "name": "Obj_Mure2",
+  "placed": 23,
+  "code": "SAME-SIZE",
+  "obj": "CHANGED 354224B vs 354224B",
+  "scenes": [
+   "spot01",
+   "spot04",
+   "spot09",
+   "spot11",
+   "spot12",
+   "spot20"
+  ]
+ },
+ {
+  "aid": 454,
+  "name": "En_Cow",
+  "placed": 2,
+  "code": "SAME-SIZE",
+  "obj": "same",
+  "scenes": [
+   "spot01",
+   "spot20"
+  ]
+ },
+ {
+  "aid": 319,
+  "name": "En_Hs",
+  "placed": 1,
+  "code": "SAME-SIZE",
+  "obj": "same",
+  "scenes": [
+   "spot01"
+  ]
+ },
+ {
+  "aid": 38,
+  "name": "En_Hata",
+  "placed": 5,
+  "code": "SAME-SIZE",
+  "obj": "same",
+  "scenes": [
+   "spot01",
+   "spot09"
+  ]
+ },
+ {
+  "aid": 307,
+  "name": "En_Daiku",
+  "placed": 2,
+  "code": "-16B",
+  "obj": "same",
+  "scenes": [
+   "spot01"
+  ]
+ },
+ {
+  "aid": 76,
+  "name": "En_Bombf",
+  "placed": 23,
+  "code": "SAME-SIZE",
+  "obj": "CHANGED 6656B vs 6656B",
+  "scenes": [
+   "spot01"
+  ]
+ },
+ {
+  "aid": 205,
+  "name": "Bg_Spot16_Bombstone",
+  "placed": 1,
+  "code": "SAME-SIZE",
+  "obj": "same",
+  "scenes": [
+   "spot01"
+  ]
+ },
+ {
+  "aid": 294,
+  "name": "Obj_Bean",
+  "placed": 1,
+  "code": "SAME-SIZE",
+  "obj": "same",
+  "scenes": [
+   "spot01"
+  ]
+ },
+ {
+  "aid": 156,
+  "name": "Bg_Spot02_Objects",
+  "placed": 3,
+  "code": "SAME-SIZE",
+  "obj": "CHANGED 7840B vs 91680B",
+  "scenes": [
+   "spot01"
+  ]
+ },
+ {
+  "aid": 295,
+  "name": "Obj_Bombiwa",
+  "placed": 5,
+  "code": "SAME-SIZE",
+  "obj": "same",
+  "scenes": [
+   "spot01",
+   "spot09"
+  ]
+ },
+ {
+  "aid": 106,
+  "name": "Bg_Toki_Hikari",
+  "placed": 1,
+  "code": "-3280B",
+  "obj": "CHANGED 354224B vs 354224B",
+  "scenes": [
+   "spot01"
+  ]
+ },
+ {
+  "aid": 463,
+  "name": "Obj_Makekinsuta",
+  "placed": 1,
+  "code": "SAME-SIZE",
+  "obj": "CHANGED 354224B vs 354224B",
+  "scenes": [
+   "spot01"
+  ]
+ },
+ {
+  "aid": 47,
+  "name": "En_Dodojr",
+  "placed": 4,
+  "code": "-16B",
+  "obj": "same",
+  "scenes": [
+   "spot01"
+  ]
+ },
+ {
+  "aid": 365,
+  "name": "En_Md",
+  "placed": 1,
+  "code": "SAME-SIZE",
+  "obj": "same",
+  "scenes": [
+   "spot04"
+  ]
+ },
+ {
+  "aid": 148,
+  "name": "Obj_Mure",
+  "placed": 14,
+  "code": "SAME-SIZE",
+  "obj": "CHANGED 354224B vs 354224B",
+  "scenes": [
+   "spot04",
+   "spot09",
+   "spot11",
+   "spot12",
+   "testroom"
+  ]
+ },
+ {
+  "aid": 274,
+  "name": "En_Wonder_Item",
+  "placed": 3,
+  "code": "SAME-SIZE",
+  "obj": "CHANGED 354224B vs 354224B",
+  "scenes": [
+   "spot04"
+  ]
+ },
+ {
+  "aid": 355,
+  "name": "En_Ko",
+  "placed": 5,
+  "code": "SAME-SIZE",
+  "obj": "CHANGED 354224B vs 354224B",
+  "scenes": [
+   "spot04"
+  ]
+ },
+ {
+  "aid": 465,
+  "name": "Obj_Timeblock",
+  "placed": 1,
+  "code": "-2256B",
+  "obj": "CHANGED 3728B vs 2416B",
+  "scenes": [
+   "spot04"
+  ]
+ },
+ {
+  "aid": 155,
+  "name": "Door_Ana",
+  "placed": 7,
+  "code": "SAME-SIZE",
+  "obj": "CHANGED 354224B vs 354224B",
+  "scenes": [
+   "spot09",
+   "spot10",
+   "spot12"
+  ]
+ },
+ {
+  "aid": 89,
+  "name": "Bg_Breakwall",
+  "placed": 1,
+  "code": "SAME-SIZE",
+  "obj": "CHANGED 354224B vs 354224B",
+  "scenes": [
+   "spot09"
+  ]
+ },
+ {
+  "aid": 28,
+  "name": "En_Reeba",
+  "placed": 1,
+  "code": "-5984B",
+  "obj": "CHANGED 354224B vs 354224B",
+  "scenes": [
+   "spot09"
+  ]
+ },
+ {
+  "aid": 289,
+  "name": "En_Fz",
+  "placed": 13,
+  "code": "-4624B",
+  "obj": "same",
+  "scenes": [
+   "spot09",
+   "spot20",
+   "testroom"
+  ]
+ },
+ {
+  "aid": 277,
+  "name": "En_Skj",
+  "placed": 2,
+  "code": "-11984B",
+  "obj": "same",
+  "scenes": [
+   "spot09"
+  ]
+ },
+ {
+  "aid": 33,
+  "name": "En_Fish",
+  "placed": 2,
+  "code": "SAME-SIZE",
+  "obj": "CHANGED 354224B vs 354224B",
+  "scenes": [
+   "spot09"
+  ]
+ },
+ {
+  "aid": 321,
+  "name": "En_Kanban",
+  "placed": 2,
+  "code": "SAME-SIZE",
+  "obj": "same",
+  "scenes": [
+   "spot10"
+  ]
+ },
+ {
+  "aid": 391,
+  "name": "Obj_Roomtimer",
+  "placed": 1,
+  "code": "SAME-SIZE",
+  "obj": "CHANGED 354224B vs 354224B",
+  "scenes": [
+   "spot10"
+  ]
+ },
+ {
+  "aid": 316,
+  "name": "En_Niw_Lady",
+  "placed": 1,
+  "code": "-112B",
+  "obj": "same",
+  "scenes": [
+   "spot10"
+  ]
+ },
+ {
+  "aid": 227,
+  "name": "Bg_Mori_Hashira4",
+  "placed": 1,
+  "code": "-1040B",
+  "obj": "CHANGED 2080B vs 6144B",
+  "scenes": [
+   "spot10"
+  ]
+ },
+ {
+  "aid": 372,
+  "name": "Demo_Gt",
+  "placed": 9,
+  "code": "-16608B",
+  "obj": "CHANGED 354224B vs 354224B",
+  "scenes": [
+   "spot10"
+  ]
+ },
+ {
+  "aid": 293,
+  "name": "En_Kusa",
+  "placed": 8,
+  "code": "SAME-SIZE",
+  "obj": "CHANGED 354224B vs 354224B",
+  "scenes": [
+   "spot11",
+   "testroom"
+  ]
+ },
+ {
+  "aid": 282,
+  "name": "En_Dns",
+  "placed": 5,
+  "code": "+16B",
+  "obj": "same",
+  "scenes": [
+   "spot11",
+   "spot12"
+  ]
+ },
+ {
+  "aid": 281,
+  "name": "Demo_Shd",
+  "placed": 1,
+  "code": "+3088B",
+  "obj": "same",
+  "scenes": [
+   "spot11"
+  ]
+ },
+ {
+  "aid": 318,
+  "name": "En_Ms",
+  "placed": 1,
+  "code": "SAME-SIZE",
+  "obj": "same",
+  "scenes": [
+   "spot12"
+  ]
+ },
+ {
+  "aid": 357,
+  "name": "En_Weather_Tag",
+  "placed": 1,
+  "code": "-80B",
+  "obj": "CHANGED 354224B vs 354224B",
+  "scenes": [
+   "spot12"
+  ]
+ },
+ {
+  "aid": 231,
+  "name": "En_Ma1",
+  "placed": 1,
+  "code": "-928B",
+  "obj": "CHANGED 112512B vs 36224B",
+  "scenes": [
+   "spot20"
+  ]
+ },
+ {
+  "aid": 410,
+  "name": "En_Niw_Girl",
+  "placed": 1,
+  "code": "SAME-SIZE",
+  "obj": "same",
+  "scenes": [
+   "spot20"
+  ]
+ }
+]

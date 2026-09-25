@@ -1,0 +1,41 @@
+<Root>
+    <File Name="kakariko3_scene" Segment="2">
+        <Texture Name="kakariko3_sceneTex_001850" OutName="kakariko3_sceneTex_001850" Format="ia8" Width="8" Height="8" Offset="0x1850" AddedByScript="true"/>
+        <Texture Name="kakariko3_sceneTex_001890" OutName="kakariko3_sceneTex_001890" Format="ci8" Width="64" Height="16" Offset="0x1890" AddedByScript="true"/>
+        <Texture Name="kakariko3_sceneTex_001E90" OutName="kakariko3_sceneTex_001E90" Format="rgba16" Width="64" Height="32" Offset="0x1E90" AddedByScript="true"/>
+        <Texture Name="kakariko3_sceneTex_002E90" OutName="kakariko3_sceneTex_002E90" Format="rgba16" Width="64" Height="16" Offset="0x2E90" AddedByScript="true"/>
+        <Texture Name="kakariko3_sceneTex_003690" OutName="kakariko3_sceneTex_003690" Format="rgba16" Width="64" Height="32" Offset="0x3690" AddedByScript="true"/>
+        <Texture Name="kakariko3_sceneTex_004690" OutName="kakariko3_sceneTex_004690" Format="ci4" Width="64" Height="64" Offset="0x4690" AddedByScript="true"/>
+        <Texture Name="kakariko3_sceneTex_004EB0" OutName="kakariko3_sceneTex_004EB0" Format="ci4" Width="64" Height="64" Offset="0x4EB0" AddedByScript="true"/>
+        <Texture Name="kakariko3_sceneTex_0056D0" OutName="kakariko3_sceneTex_0056D0" Format="rgba16" Width="32" Height="32" Offset="0x56D0" AddedByScript="true"/>
+        <Texture Name="kakariko3_sceneTex_005ED0" OutName="kakariko3_sceneTex_005ED0" Format="rgba16" Width="32" Height="32" Offset="0x5ED0" AddedByScript="true"/>
+        <Texture Name="kakariko3_sceneTex_0066D0" OutName="kakariko3_sceneTex_0066D0" Format="rgba16" Width="32" Height="32" Offset="0x66D0" AddedByScript="true"/>
+        <Texture Name="kakariko3_sceneTex_006ED0" OutName="kakariko3_sceneTex_006ED0" Format="rgba16" Width="32" Height="32" Offset="0x6ED0" AddedByScript="true"/>
+        <Texture Name="kakariko3_sceneTex_0076D0" OutName="kakariko3_sceneTex_0076D0" Format="rgba16" Width="64" Height="32" Offset="0x76D0" AddedByScript="true"/>
+        <Texture Name="kakariko3_sceneTex_0086D0" OutName="kakariko3_sceneTex_0086D0" Format="ci4" Width="64" Height="64" Offset="0x86D0" AddedByScript="true"/>
+        <Texture Name="kakariko3_sceneTex_008EF0" OutName="kakariko3_sceneTex_008EF0" Format="ci8" Width="32" Height="32" Offset="0x8EF0" AddedByScript="true"/>
+        <Scene Name="kakariko3_scene" Offset="0x0"/>
+    </File>
+    <File Name="kakariko3_room_0" Segment="3">
+        <Texture Name="kakariko3_room_0_tex_00CA40" OutName="kakariko3_room_0_tex_00CA40" Format="rgba16" Width="32" Height="32" Offset="0xCA40" AddedByScript="true"/>
+        <Texture Name="kakariko3_room_0_tex_00D240" OutName="kakariko3_room_0_tex_00D240" Format="rgba16" Width="32" Height="32" Offset="0xD240" AddedByScript="true"/>
+        <Texture Name="kakariko3_room_0_tex_00DA40" OutName="kakariko3_room_0_tex_00DA40" Format="rgba16" Width="32" Height="32" Offset="0xDA40" AddedByScript="true"/>
+        <Texture Name="kakariko3_room_0_tex_00E240" OutName="kakariko3_room_0_tex_00E240" Format="rgba16" Width="32" Height="32" Offset="0xE240" AddedByScript="true"/>
+        <Texture Name="kakariko3_room_0_tex_00EA40" OutName="kakariko3_room_0_tex_00EA40" Format="ia8" Width="8" Height="8" Offset="0xEA40" AddedByScript="true"/>
+        <Texture Name="kakariko3_room_0_tlut_00EA80" OutName="kakariko3_room_0_tlut_00EA80" Format="rgba16" Width="256" Height="1" Offset="0xEA80" AddedByScript="true"/>
+        <Texture Name="kakariko3_room_0_tex_00EC80" OutName="kakariko3_room_0_tex_00EC80" Format="ci8" Width="64" Height="16" Offset="0xEC80" TlutOffset="0xEA80" AddedByScript="true"/>
+        <Texture Name="kakariko3_room_0_tex_00F080" OutName="kakariko3_room_0_tex_00F080" Format="rgba16" Width="64" Height="32" Offset="0xF080" AddedByScript="true"/>
+        <Texture Name="kakariko3_room_0_tex_010080" OutName="kakariko3_room_0_tex_010080" Format="rgba16" Width="64" Height="16" Offset="0x10080" AddedByScript="true"/>
+        <Texture Name="kakariko3_room_0_tex_010880" OutName="kakariko3_room_0_tex_010880" Format="rgba16" Width="64" Height="32" Offset="0x10880" AddedByScript="true"/>
+        <Texture Name="kakariko3_room_0_tlut_011880" OutName="kakariko3_room_0_tlut_011880" Format="rgba16" Width="16" Height="1" Offset="0x11880" AddedByScript="true"/>
+        <Texture Name="kakariko3_room_0_tex_0118A0" OutName="kakariko3_room_0_tex_0118A0" Format="ci4" Width="64" Height="64" Offset="0x118A0" TlutOffset="0x11880" AddedByScript="true"/>
+        <Texture Name="kakariko3_room_0_tlut_0120A0" OutName="kakariko3_room_0_tlut_0120A0" Format="rgba16" Width="16" Height="1" Offset="0x120A0" AddedByScript="true"/>
+        <Texture Name="kakariko3_room_0_tex_0120C0" OutName="kakariko3_room_0_tex_0120C0" Format="ci4" Width="64" Height="64" Offset="0x120C0" TlutOffset="0x120A0" AddedByScript="true"/>
+        <Texture Name="kakariko3_room_0_tex_0128C0" OutName="kakariko3_room_0_tex_0128C0" Format="rgba16" Width="64" Height="32" Offset="0x128C0" AddedByScript="true"/>
+        <Texture Name="kakariko3_room_0_tlut_0138C0" OutName="kakariko3_room_0_tlut_0138C0" Format="rgba16" Width="16" Height="1" Offset="0x138C0" AddedByScript="true"/>
+        <Texture Name="kakariko3_room_0_tex_0138E0" OutName="kakariko3_room_0_tex_0138E0" Format="ci4" Width="64" Height="64" Offset="0x138E0" TlutOffset="0x138C0" AddedByScript="true"/>
+        <Texture Name="kakariko3_room_0_tlut_0140E0" OutName="kakariko3_room_0_tlut_0140E0" Format="rgba16" Width="256" Height="1" Offset="0x140E0" AddedByScript="true"/>
+        <Texture Name="kakariko3_room_0_tex_0142E0" OutName="kakariko3_room_0_tex_0142E0" Format="ci8" Width="32" Height="32" Offset="0x142E0" TlutOffset="0x140E0" AddedByScript="true"/>
+        <Room Name="kakariko3_room_0" Offset="0x0"/>
+    </File>
+</Root>
