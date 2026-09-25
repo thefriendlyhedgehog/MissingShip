@@ -108,4 +108,4 @@ Without the ROMs, code work (C ports from notes in `docs/`) still works, but the
 (`tools/*.py` need `tml_2_0.z64` and `PAL MQ (Debug).z64`) and the asset pipeline do not. Scripts
 also hardcode this machine's paths (`/Volumes/MacMiniExternal/AI_Projects/...`).
 
-Status and next steps: `docs/ML_ACTOR_INVENTORY.md` (actor todo list) and `docs/ENGINE_CHANGES.md`.
+Status, gameplan and the issue list: **`docs/ROADMAP.md`**. Per-actor detail: `docs/ML_ACTOR_INVENTORY.md`; engine ledger: `docs/ENGINE_CHANGES.md`.

@@ -1,7 +1,7 @@
 # Working notes (handoff state)
 
 Where the port stands, so a new session (local or cloud) can pick up without the chat history.
-Project memory notes from the local sessions are copied in `docs/notes/`.
+Project memory notes from the local sessions are copied in `docs/notes/`. The plan and issue list are in `ROADMAP.md`.
 
 ## Standing rules
 - No multi-agent swarms (conserve tokens). One game instance at a time; relaunching during testing is fine.
