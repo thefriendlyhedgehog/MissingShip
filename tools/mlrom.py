@@ -1,6 +1,9 @@
 """Shared helpers: load a ROM's dmadata, decompress files, find gActorOverlayTable."""
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..', 'pipeline'))
+from mspaths import PIPE
 import struct, sys
-sys.path.insert(0,'/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline')
+sys.path.insert(0,PIPE)
 from yaz0 import get_file
 
 class Rom:

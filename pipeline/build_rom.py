@@ -1,8 +1,9 @@
+from mspaths import ML_ROM, PIPE
 import struct, os, sys
-sys.path.insert(0,'/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline')
+sys.path.insert(0,PIPE)
 from yaz0 import get_file
 
-SRC='/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/tml_2_0.z64'; DST='/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/tml_zapd.z64'; DMA=0x12f70
+SRC=ML_ROM; DST=PIPE + '/tml_zapd.z64'; DMA=0x12f70
 rom=bytearray(open(SRC,'rb').read())
 E=[]; p=DMA
 while True:
@@ -516,7 +517,7 @@ for s,rooms in TARGETS.items():
 
 new[0x10:0x14]=(0x871E1C92).to_bytes(4,'big')
 open(DST,'wb').write(bytes(new))
-import json as _j; _j.dump(INLINED, open("/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/inlined.json","w"), indent=1)
-_j.dump(UNRESOLVED, open("/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/unresolved.json","w"), indent=1)
-_j.dump(ROOMLOCAL, open("/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/roomlocal.json","w"), indent=1)
+import json as _j; _j.dump(INLINED, open(PIPE + "/inlined.json","w"), indent=1)
+_j.dump(UNRESOLVED, open(PIPE + "/unresolved.json","w"), indent=1)
+_j.dump(ROOMLOCAL, open(PIPE + "/roomlocal.json","w"), indent=1)
 print("wrote", DST, "+ inlined.json")

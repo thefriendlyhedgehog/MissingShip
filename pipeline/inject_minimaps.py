@@ -12,12 +12,13 @@ over the matching vanilla resource, reusing vanilla's header so format and dimen
 MapData struct: code 0x108998, VRAM base **0x8001ce60** (derived from the struct's own internal
 offset signature; the 0x8000b2e0 base recorded earlier does not resolve these pointers).
 """
+from mspaths import ML_ROM, OOT_O2R, PIPE
 import struct, sys, zipfile, shutil, os
-sys.path.insert(0, '/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline')
+sys.path.insert(0, PIPE)
 from yaz0 import get_file
 
-OOT = '/Volumes/MacMiniExternal/AI_Projects/MissingShip/home/oot.o2r'
-MOD = '/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/ml.otr'
+OOT = OOT_O2R
+MOD = PIPE + '/ml.otr'
 BASE, T, BLOB_DMA = 0x8001ce60, 0x108998, 111
 
 AREA_TEX = {
@@ -36,7 +37,7 @@ AREA_TEX = {
     19:['gOutsideGanonsCastleMinimapTex'],
 }
 
-rom = open('/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/tml_2_0.z64', 'rb').read()
+rom = open(ML_ROM, 'rb').read()
 E = []; p = 0x12f70
 while True:
     a, b, c, d = struct.unpack('>IIII', rom[p:p+16])
@@ -44,7 +45,7 @@ while True:
     E.append((a, b, c, d)); p += 16
 blob = get_file(rom, *E[BLOB_DMA])
 
-code = open('/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/ml_code.bin', 'rb').read()
+code = open(PIPE + '/ml_code.bin', 'rb').read()
 ptrs = [struct.unpack('>I', code[T+i*4:T+i*4+4])[0] for i in range(28)]
 def arr(idx, n, signed=True):
     o = ptrs[idx] - BASE

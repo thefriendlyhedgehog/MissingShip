@@ -5,9 +5,12 @@ symbol by position. Instead: parse each simple numeric array out of SoH's kaleid
 values big-endian, find that byte string in MQ debug's kaleido data, and read ML's bytes at the same place.
 Prints only the arrays whose ML values differ. Usage: kaleido_arrays.py
 """
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..', 'pipeline'))
+from mspaths import SOH
 import re, struct, glob
 from pldiff import load, ML, DB
-KDIR = '/Volumes/MacMiniExternal/AI_Projects/Shipwright/soh/src/overlays/misc/ovl_kaleido_scope/'
+KDIR = SOH + '/src/overlays/misc/ovl_kaleido_scope/'
 ENUM = {'AGE_REQ_ADULT': 0, 'AGE_REQ_CHILD': 1, 'AGE_REQ_NONE': 9,
         'PAUSE_ITEM': 0, 'PAUSE_MAP': 1, 'PAUSE_QUEST': 2, 'PAUSE_EQUIP': 3}
 FMT = {'s8': 'b', 'u8': 'B', 's16': 'h', 'u16': 'H', 's32': 'i', 'u32': 'I', 'f32': 'f'}

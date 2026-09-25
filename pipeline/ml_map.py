@@ -7,8 +7,9 @@ game asks for that ID -- the scene table is ported by renaming, with no engine c
 Room lists come from each scene's header command 0x04, resolved back to dma indices via dmadata,
 so nothing here is guessed.
 """
+from mspaths import PIPE
 import json
-_M = json.load(open('/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/ml_full_map.json'))
+_M = json.load(open(PIPE + '/ml_full_map.json'))
 # dma index of scene -> {slot, scene ('xxx_scene'), enum, config, title_dma, rooms[dma...]}
 import os
 # Scenes 0..9 (+ Gerudo Training, Inside Ganon's Castle) are "non-shared": OTRPlay_SpawnScene looks

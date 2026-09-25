@@ -1,14 +1,15 @@
 #!/bin/bash
 # Rebuild the ML archive and reload it into the MissingShip.app package. One instance only.
 set -e
-MS=/Volumes/MacMiniExternal/AI_Projects/MissingShip
-cd /Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline
+source "$(dirname "${BASH_SOURCE[0]}")/mspaths.sh"   # MS_ROOT, MS_PIPE, MS_ZAPD, ... (MS-001)
+MS="$MS_ROOT"
+cd "$MS_PIPE"
 cp build_rom_inline.py build_rom.py
-python3 build_rom.py > /Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/cycle_build.log 2>&1
+python3 build_rom.py > "$MS_PIPE"/cycle_build.log 2>&1
 python3 - <<'EOG'
-import sys; sys.path.insert(0,'/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline')
+import os, sys; P=os.environ['MS_PIPE']; sys.path.insert(0,P)
 from ml_map import SCENES
-lines=open('/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/filelists/dbg.txt').read().split('\n')
+lines=open(P+'/filelists/dbg.txt').read().split('\n')
 while lines and lines[-1]=='': lines.pop()
 for i,l in enumerate(lines):
     if l.endswith('_scene') or '_room_' in l: lines[i]=f'mlfile_{i}'
@@ -43,23 +44,23 @@ for _i, _n in ML_OBJECTS.items(): lines[_i] = _n
 # dma 114 is ML's `code` file, which holds the audio tables. Audio.xml looks it up BY NAME,
 # so the rewrite above must not leave it as mlfile_114 or ZAPD's ZAudio segfaults on a null file.
 lines[114]='code'
-open('/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/filelists/dbg.txt','w').write('\n'.join(lines)+'\n')
+open(P+'/filelists/dbg.txt','w').write('\n'.join(lines)+'\n')
 EOG
-python3 /Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/gen_xml_inline.py
-cd /Volumes/MacMiniExternal/AI_Projects/SOHCombo/soh
-rm -f /Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/ml.otr
-../build-macos-sdl2/ZAPD/ZAPD.out ed -se OTR --otrfile /Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/ml.otr --portVer 9.1.1 \
-  -i /Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/xml/scenes -b /Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/tml_zapd.z64 -fl /Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/filelists \
-  -o /Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/out -osf /Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/out -gsf 0 -rconf /Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/Config_ML.xml \
-  > /Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/cycle_zapd.log 2>&1
-echo "texDecl errors: $(grep -c 'texDecl == nullptr' /Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/cycle_zapd.log || true)"
-ML_SKIP_SLOTS="" python3 /Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/inject_titles.py
-python3 /Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/inject_minimaps.py
-python3 /Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/inject_messages.py
-python3 /Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/inject_objects.py
-python3 /Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/inject_ui_textures.py
-python3 /Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/inject_audio.py
-cp /Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/ml.otr "$MS"/mod/MissingLink_Scenes.o2r
+python3 "$MS_PIPE"/gen_xml_inline.py
+cd "$MS_ZAPD_CWD"
+rm -f "$MS_PIPE"/ml.otr
+"$MS_ZAPD" ed -se OTR --otrfile "$MS_PIPE"/ml.otr --portVer 9.1.1 \
+  -i "$MS_PIPE"/xml/scenes -b "$MS_PIPE"/tml_zapd.z64 -fl "$MS_PIPE"/filelists \
+  -o "$MS_PIPE"/out -osf "$MS_PIPE"/out -gsf 0 -rconf "$(python3 "$MS_PIPE"/mspaths.py --zapd-config)" \
+  > "$MS_PIPE"/cycle_zapd.log 2>&1
+echo "texDecl errors: $(grep -c 'texDecl == nullptr' "$MS_PIPE"/cycle_zapd.log || true)"
+ML_SKIP_SLOTS="" python3 "$MS_PIPE"/inject_titles.py
+python3 "$MS_PIPE"/inject_minimaps.py
+python3 "$MS_PIPE"/inject_messages.py
+python3 "$MS_PIPE"/inject_objects.py
+python3 "$MS_PIPE"/inject_ui_textures.py
+python3 "$MS_PIPE"/inject_audio.py
+cp "$MS_PIPE"/ml.otr "$MS"/mod/MissingLink_Scenes.o2r
 pkill -x MissingShip 2>/dev/null || true
 sleep 1
-cd "$MS" && (nohup ./MissingShip.sh > /Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/ms_run.log 2>&1 &)
+cd "$MS" && (nohup ./MissingShip.sh > "$MS_PIPE"/ms_run.log 2>&1 &)

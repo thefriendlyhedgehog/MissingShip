@@ -1,8 +1,9 @@
+from mspaths import ML_ROM, PIPE
 import struct, sys, json
-sys.path.insert(0,'/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline')
+sys.path.insert(0,PIPE)
 from yaz0 import get_file
 
-rom = open('/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/tml_2_0.z64','rb').read()
+rom = open(ML_ROM,'rb').read()
 p=0x12f70; E=[]
 while True:
     vs,ve,rs,re = struct.unpack('>IIII', rom[p:p+16])
@@ -62,7 +63,7 @@ def scan_room(room_idx, scene_idx):
             if d: walk(d)
     return found, len(scene)
 
-import sys as _s; _s.path.insert(0,'/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline')
+import sys as _s; _s.path.insert(0,PIPE)
 from ml_map import SCENES
 TARGETS={k:(v['scene'][:-6], v['rooms']) for k,v in SCENES.items()}
 out={}
@@ -76,4 +77,4 @@ for sdma,(name,rooms) in TARGETS.items():
     for k in sorted(allf)[:4]:
         fmt,w,h,t = allf[k]
         print(f"   0x{k:06x} {fmt} {w}x{h} tlut={hex(t) if t else None}")
-json.dump({k:{hex(a):v for a,v in d.items()} for k,d in out.items()}, open('/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/scene_textures.json','w'), indent=1)
+json.dump({k:{hex(a):v for a,v in d.items()} for k,d in out.items()}, open(PIPE + '/scene_textures.json','w'), indent=1)

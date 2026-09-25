@@ -6,20 +6,23 @@ SoH entrance exists, its scene is the same slot and spawn, and the destination M
 Exit lists have no length field, so entries are read up to the next header data block (bounded by the smallest
 following segment offset) and anything >= 0x800 or beyond ML's table is reported as padding, not an error.
 """
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..', 'pipeline'))
+from mspaths import ML_ROM, PIPE, SOH
 import struct, sys, re, json
-sys.path.insert(0, '/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline')
+sys.path.insert(0, PIPE)
 from mlrom import Rom
 import ml_entrance as m
-ml = Rom('/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/tml_2_0.z64')
+ml = Rom(ML_ROM)
 rows = {}
-for l in open('/Volumes/MacMiniExternal/AI_Projects/Shipwright/soh/include/tables/entrance_table.h'):
+for l in open(SOH + '/include/tables/entrance_table.h'):
     mm = re.match(r'/\* 0x([0-9A-F]+) \*/ DEFINE_ENTRANCE\((\w+), (\w+), (\d+)', l)
     if mm: rows[int(mm.group(1), 16)] = (mm.group(2), mm.group(3), int(mm.group(4)))
 scenes = {}
-for l in open('/Volumes/MacMiniExternal/AI_Projects/Shipwright/soh/include/tables/scene_table.h'):
+for l in open(SOH + '/include/tables/scene_table.h'):
     mm = re.match(r'/\* 0x([0-9A-F]+) \*/ DEFINE_SCENE\(\w+, \w+, (\w+)', l)
     if mm: scenes[mm.group(2)] = int(mm.group(1), 16)
-sm = json.load(open('/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/ml_scene_map.json'))
+sm = json.load(open(PIPE + '/ml_scene_map.json'))
 by_slot = {v['slot']: (int(k), v['scene']) for k, v in sm.items()}
 def headers(d):
     out = []; p = 0

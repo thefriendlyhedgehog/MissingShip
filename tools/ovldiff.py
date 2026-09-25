@@ -1,10 +1,13 @@
 """Aligned instruction diff of one actor overlay, ML vs debug ROM, relocations masked."""
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..', 'pipeline'))
+from mspaths import DEBUG_ROM, ML_ROM
 import struct, sys, difflib
 from capstone import *
 from mlrom import Rom, entry
 md=Cs(CS_ARCH_MIPS, CS_MODE_MIPS32|CS_MODE_BIG_ENDIAN)
-ML=Rom('/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/tml_2_0.z64')
-DB=Rom('/Volumes/MacMiniExternal/Games/SHIPofHarkinian-ROMS/PAL MQ (Debug).z64')
+ML=Rom(ML_ROM)
+DB=Rom(DEBUG_ROM)
 def load(rom, codeidx, base, aid):
     vs,ve,vas,vae,_,ini=entry(rom.file(codeidx), base, 0x20, aid)
     d=rom.file_at_vrom(vs)

@@ -16,12 +16,13 @@ ML keeps vanilla's message SYSTEM but rewrote most of the text:
 Messages are terminated by 0x02 (MSG_END); slicing to the next entry's offset would include padding,
 so each message is trimmed at its terminator before comparison and export.
 """
+from mspaths import ML_ROM, OOT_O2R, PIPE
 import zipfile, struct, sys, shutil, os
-sys.path.insert(0, '/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline')
+sys.path.insert(0, PIPE)
 from yaz0 import get_file
 
-OOT = '/Volumes/MacMiniExternal/AI_Projects/MissingShip/home/oot.o2r'
-MOD = '/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/ml.otr'
+OOT = OOT_O2R
+MOD = PIPE + '/ml.otr'
 RES = 'text/nes_message_data_static/ntsc_nes_message_data_static'
 TABLE, NENT, BLOB_DMA = 0x12e4c8, 2115, 96
 
@@ -49,8 +50,8 @@ for _ in range(count):
     ln = struct.unpack('<I', d[off+4:off+8])[0]
     van[mid] = (typ, pos, d[off+8:off+8+ln]); order.append(mid); off += 8 + ln
 
-code = open('/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/ml_code.bin', 'rb').read()
-rom = open('/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/tml_2_0.z64', 'rb').read()
+code = open(PIPE + '/ml_code.bin', 'rb').read()
+rom = open(ML_ROM, 'rb').read()
 E = []; p = 0x12f70
 while True:
     a, b, c, e = struct.unpack('>IIII', rom[p:p+16])

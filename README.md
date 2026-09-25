@@ -95,13 +95,34 @@ cmake -S . -B build-ml && cmake --build build-ml --target soh -j8
 ### Mod archive
 
 ```bash
-cd pipeline && ./ms_cycle.sh      # rebuild ROM → ZAPD → inject text/audio/objects/UI → install → relaunch
+./pipeline/ms_cycle.sh      # rebuild ROM → ZAPD → inject text/audio/objects/UI → install → relaunch
 ```
 
-- **Inputs:** `pipeline/tml_2_0.z64` (the ML v2.0 ROM) and a built ZAPD.
-- **Analysis tools:** `tools/*.py` also need the OoT **PAL MQ Debug** ROM, which is not in the repo yet.
-- **Hardcoded paths:** scripts currently point at this machine's paths (`/Volumes/MacMiniExternal/AI_Projects/...`), and making them configurable is issue MS-001.
-- **Knobs:** `cycle.sh` restores old workarounds when set: `ML_STRIP_ACTORS`, `ML_REMAP_OBJECTS`, `ML_FIX_SETTIMG_FMT`, `ML_SCRUB`, `ML_STRIP_CS`, `ML_SKIP_FMT`, `ML_SKIP_SLOTS`, `ML_NO_START_FIX`. Their defaults are correct.
+- **Inputs:** `pipeline/tml_2_0.z64` (the ML v2.0 ROM), `home/oot.o2r`, and a built ZAPD.
+- **Analysis tools:** `tools/*.py` also need the OoT **PAL MQ Debug** ROM at `roms/oot-mq-debug-pal.z64`.
+- **Knobs:** set these env vars to restore old workarounds; the defaults are correct: `ML_STRIP_ACTORS`, `ML_REMAP_OBJECTS`, `ML_FIX_SETTIMG_FMT`, `ML_SCRUB`, `ML_STRIP_CS`, `ML_SKIP_FMT`, `ML_SKIP_SLOTS`, `ML_NO_START_FIX`.
+
+### Paths
+
+Every script finds its inputs through `pipeline/mspaths.py` (the shell scripts source `pipeline/mspaths.sh`). Defaults resolve from the repo's own location, so a fresh clone works anywhere. Check what it resolved with:
+
+```bash
+python3 pipeline/mspaths.py
+```
+
+Override any path with an env var:
+
+| Variable | Default |
+|---|---|
+| `MS_ML_ROM` | `pipeline/tml_2_0.z64` |
+| `MS_DEBUG_ROM` | `roms/oot-mq-debug-pal.z64` |
+| `MS_OOT_O2R` | `home/oot.o2r` |
+| `MS_SHIPWRIGHT` | `../Shipwright` (patched engine checkout, next to this repo) |
+| `MS_SOHCOMBO` | `../SOHCombo` (its ZAPD builds scenes, objects and UI textures) |
+| `MS_ZAPD`, `MS_ZAPD_CWD` | `$MS_SOHCOMBO/build-macos-sdl2/ZAPD/ZAPD.out`, `$MS_SOHCOMBO/soh` |
+| `MS_ZAPD_AUDIO` | `$MS_SHIPWRIGHT/build-ml/ZAPD/ZAPD.out` (needs our ZAudio patch) |
+
+ZAPD's config (`pipeline/Config_ML.xml`) is a template; each run writes the filled-in copy to `pipeline/out/`.
 
 ## Layout
 

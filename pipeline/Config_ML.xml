@@ -2,7 +2,7 @@
     <SymbolMap File="symbols/SymbolMap_OoTMqDbg.txt"/>
     <ActorList File="symbols/ActorList_OoTMqDbg.txt"/>
     <ObjectList File="symbols/ObjectList_OoTMqDbg.txt"/>
-    <ExternalXMLFolder Path="/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/xml/"/>
+    <ExternalXMLFolder Path="@PIPE@/xml/"/>
     <TexturePool File="TexturePool.xml"/>
     <ExternalFile XmlPath="scenes/ml/link_home.xml" OutPath="scenes/ml/"/>
 </Root>

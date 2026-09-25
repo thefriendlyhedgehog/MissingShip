@@ -8,26 +8,27 @@ verbatim -- same format and dimensions, only the pixels change.
 Resources live at textures/g_pn_XX/<Name>ENGTex and ...JPNTex; the g_pn_XX name for a scene id comes
 from scene_table.h's second DEFINE_SCENE argument.
 """
+from mspaths import ML_ROM, OOT_O2R, PIPE, SOHCOMBO_SOH
 import struct, sys, json, re, zipfile, shutil, os
-sys.path.insert(0, '/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline')
+sys.path.insert(0, PIPE)
 from yaz0 import get_file
 
-OOT = '/Volumes/MacMiniExternal/AI_Projects/MissingShip/home/oot.o2r'
-MOD = '/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/ml.otr'
+OOT = OOT_O2R
+MOD = PIPE + '/ml.otr'
 HDR = 0x50           # resource header size; payload follows
 
-rom = open('/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/tml_2_0.z64', 'rb').read()
+rom = open(ML_ROM, 'rb').read()
 E = []; p = 0x12f70
 while True:
     a, b, c, d = struct.unpack('>IIII', rom[p:p+16])
     if a == 0 and b == 0 and c == 0 and d == 0: break
     E.append((a, b, c, d)); p += 16
 
-sc = open('/Volumes/MacMiniExternal/AI_Projects/SOHCombo/soh/include/tables/scene_table.h').read()
+sc = open(SOHCOMBO_SOH + '/include/tables/scene_table.h').read()
 titles = {int(m.group(1), 16): m.group(3)
           for m in re.finditer(r'/\* 0x([0-9A-Fa-f]{2}) \*/ DEFINE_SCENE\((\w+),\s*(\w+),', sc)}
 
-st = json.load(open('/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/ml_scenetable.json'))
+st = json.load(open(PIPE + '/ml_scenetable.json'))
 oot = zipfile.ZipFile(OOT)
 by_pn = {}
 for n in oot.namelist():

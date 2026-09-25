@@ -5,11 +5,12 @@ for most of its slots (its grottos use SDC_GROTTOS, Deep Woods SDC_DEKU_TREE, ..
 that calls segment 8 runs whatever an actor last put there (a rupee texture -> crash entering the Colossus slot).
 Idempotent; rerun after ml_map changes.
 """
+from mspaths import PIPE, SOH
 import json, re
-T = '/Volumes/MacMiniExternal/AI_Projects/Shipwright/soh/include/tables/scene_table.h'
-E = '/Volumes/MacMiniExternal/AI_Projects/Shipwright/soh/include/z64scene.h'
+T = SOH + '/include/tables/scene_table.h'
+E = SOH + '/include/z64scene.h'
 sdc = [re.search(r'SDC_(\w+)', l).group(0) for l in open(E) if re.search(r'/\* +\d+ \*/ SDC_', l)]
-want = {v['slot']: sdc[v['config']] for v in json.load(open('/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/ml_scene_map.json')).values()}
+want = {v['slot']: sdc[v['config']] for v in json.load(open(PIPE + '/ml_scene_map.json')).values()}
 out = []; n = 0
 for l in open(T):
     m = re.match(r'(/\* 0x([0-9A-F]+) \*/ DEFINE_SCENE\(\w+, \w+, \w+, )(\w+)(, .*?\))(.*)$', l.rstrip('\n'))

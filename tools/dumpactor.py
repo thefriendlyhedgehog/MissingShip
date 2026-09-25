@@ -1,8 +1,11 @@
 """Disassemble one ML actor overlay with its ActorInit, sections and data (for porting). Usage: dumpactor.py 0xNNN"""
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..', 'pipeline'))
+from mspaths import ML_ROM
 import struct, sys
 from capstone import *
 from mlrom import Rom, entry
-ml = Rom('/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/tml_2_0.z64')
+ml = Rom(ML_ROM)
 code = ml.file(114)
 aid = int(sys.argv[1], 0)
 vs, ve, vas, vae, ld, ini = entry(code, 0xF9440, 0x20, aid)

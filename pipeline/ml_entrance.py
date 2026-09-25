@@ -10,13 +10,14 @@ entrance v with the SAME (scene, spawn) and write v in its place. SoH then resol
 own table and lands where ML meant. This works because ML scenes now occupy their real vanilla
 scene IDs (see ml_map.py), so the scene half of the destination already agrees.
 """
+from mspaths import PIPE, SOH
 import re, json, struct, os
 
 # Read the tables of the engine MissingShip actually ships (Shipwright), not SOHCombo's. Shipwright's
 # entrance table carries MissingShip's 32 appended entrances for ML (scene, spawn) pairs vanilla has no
 # entrance for; reading SOHCombo's unpatched copy hid them, so every exit needing one fell back to
 # spawn 0 -- the "clipped camera / void on arrival" transitions.
-_SHIP = '/Volumes/MacMiniExternal/AI_Projects/Shipwright/soh'
+_SHIP = SOH
 _SC = open(_SHIP + '/include/tables/scene_table.h').read()
 _EN = open(_SHIP + '/include/tables/entrance_table.h').read()
 _enum2id = {m.group(2): int(m.group(1), 16)
@@ -31,7 +32,7 @@ for _i, _d in sorted(VANILLA.items()):
     if _d[0] is not None:
         REV.setdefault(_d, _i)
 
-ML = [tuple(x) for x in json.load(open('/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/ml_entrancetable.json'))]
+ML = [tuple(x) for x in json.load(open(PIPE + '/ml_entrancetable.json'))]
 
 # ml_map moves malon_stable from its real slot 54 to slot 52 so the new game spawns somewhere real.
 # ML exit targets still say scene 54, so translate them or they fall through to whatever vanilla

@@ -1,10 +1,11 @@
+from mspaths import PIPE
 import json
-m=json.load(open('/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/inlined.json'))
-try: rl=json.load(open('/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/roomlocal.json'))
+m=json.load(open(PIPE + '/inlined.json'))
+try: rl=json.load(open(PIPE + '/roomlocal.json'))
 except Exception: rl={}
-scene_tex=json.load(open('/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/scene_textures.json'))
+scene_tex=json.load(open(PIPE + '/scene_textures.json'))
 FMT={0:'rgba',2:'ci',3:'ia',4:'i'}; SIZ={0:'4',1:'8',2:'16',3:'32'}
-import sys as _s, os as _o; _s.path.insert(0,'/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline')
+import sys as _s, os as _o; _s.path.insert(0,PIPE)
 from ml_map import SCENES
 # every ML scene goes in one flat folder; ZAPD exports OoT scenes to scenes/shared/<name>_scene
 # regardless of input folder (the nonmq/mq branch is MM-gated), so the folder name is cosmetic.
@@ -15,8 +16,8 @@ MQ_DUNGEONS={'ydan','ddan','bdan','Bmori1','HIDAN','MIZUsin','jyasinzou','HAKAda
              'ice_doukutu','men','ganontika'}
 MAP={v['scene'][:-6]:('dungeons' if v['scene'][:-6] in MQ_DUNGEONS else 'ml', len(v['rooms']))
      for v in SCENES.values()}
-_o.makedirs('/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/xml/scenes/dungeons', exist_ok=True)
-_o.makedirs('/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/xml/scenes/ml', exist_ok=True)
+_o.makedirs(PIPE + '/xml/scenes/dungeons', exist_ok=True)
+_o.makedirs(PIPE + '/xml/scenes/ml', exist_ok=True)
 VALID={'rgba16','rgba32','ci4','ci8','ia4','ia8','ia16','i4','i8'}
 # ML's entrance intro cutscenes: single source of truth lives in ml_entrance.py.
 from ml_entrance import ENTRANCE_CS
@@ -53,5 +54,5 @@ for nm,(folder,nrooms) in MAP.items():
             rd[e['addr']]='        <Texture Name="%s_local_%06X" OutName="%s_local_%06X" Format="%s" Width="%d" Height="%d" Offset="0x%X" AddedByScript="true"/>'%(key,e['addr'],key,e['addr'],fs,e['w'],e['h'],e['addr'])
         rbody="\n".join(rd[x] for x in sorted(rd))
         rooms.append('    <File Name="%s" Segment="3">\n%s\n        <Room Name="%s" Offset="0x0"/>\n    </File>'%(key,rbody,key))
-    open('/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/xml/scenes/%s/%s.xml'%(folder,nm),'w').write(
+    open(PIPE + '/xml/scenes/%s/%s.xml'%(folder,nm),'w').write(
         '<Root>\n    <File Name="%s_scene" Segment="2">\n%s\n        <Scene Name="%s_scene" Offset="0x0"/>\n    </File>\n'%(nm,sbody,nm)+"\n".join(rooms)+'\n</Root>\n')

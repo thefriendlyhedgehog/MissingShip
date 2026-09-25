@@ -1,0 +1,6 @@
+# Regenerated on every run -- never useful in history. (ROMs and built archives ARE committed on purpose; this repo is private.)
+__pycache__/
+*.pyc
+*.log
+pipeline/out/
+.DS_Store

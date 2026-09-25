@@ -4,11 +4,14 @@ Both ROMs keep the overlay's {vromStart, vromEnd, vramStart, vramEnd} at the sam
 (zero shift against MQ debug), so the entry offset locates each side. Reloc'd words are masked by the
 overlay's own relocation table so only real edits are reported. Usage: pldiff.py <code_offset_of_entry>
 """
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..', 'pipeline'))
+from mspaths import DEBUG_ROM, ML_ROM
 import struct, sys
 from capstone import *
 from mlrom import Rom
-ML=Rom('/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/tml_2_0.z64')
-DB=Rom('/Volumes/MacMiniExternal/Games/SHIPofHarkinian-ROMS/PAL MQ (Debug).z64')
+ML=Rom(ML_ROM)
+DB=Rom(DEBUG_ROM)
 md=Cs(CS_ARCH_MIPS, CS_MODE_MIPS32|CS_MODE_BIG_ENDIAN)
 def load(rom, codeidx, off):
     c=rom.file(codeidx)

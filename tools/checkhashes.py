@@ -4,6 +4,9 @@ LUS display lists reference textures, vertices and sub-DLs by CRC64 of the resou
 (G_SETTIMG_OTR_HASH 0x20, G_DL_OTR_HASH 0x31, G_VTX_OTR_HASH 0x32; the hash is the NEXT 8-byte word).
 A hash that matches nothing renders as garbage or crashes. Usage: checkhashes.py <mod.otr> [prefix...]
 """
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..', 'pipeline'))
+from mspaths import OOT_O2R
 import zipfile, struct, sys
 def crc64(s):
     c=0xFFFFFFFFFFFFFFFF
@@ -12,7 +15,7 @@ def crc64(s):
         for _ in range(8): c=((c<<1)^0x42F0E1EBA9EA3693)&0xFFFFFFFFFFFFFFFF if c&(1<<63) else (c<<1)&0xFFFFFFFFFFFFFFFF
     return c
 mod=zipfile.ZipFile(sys.argv[1])
-oot=zipfile.ZipFile('/Volumes/MacMiniExternal/AI_Projects/MissingShip/home/oot.o2r')
+oot=zipfile.ZipFile(OOT_O2R)
 known={crc64(n) for n in mod.namelist()} | {crc64(n) for n in oot.namelist()}
 prefixes=sys.argv[2:]
 bad=0; n=0

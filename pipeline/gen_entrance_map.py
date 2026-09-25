@@ -5,10 +5,11 @@ them through its own entrance table, where 370 of them mean a different place. S
 data; code that uses literal numbers calls MlEntrance_ToSoh / MlEntrance_FromSoh instead. Same mapping rule as
 ml_entrance.remap_exits (exact scene+spawn, else the scene's lowest entrance). Rerun after changing entrances.
 """
+from mspaths import PIPE, SOH
 import sys
-sys.path.insert(0, '/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline')
+sys.path.insert(0, PIPE)
 import ml_entrance as m
-OUT = '/Volumes/MacMiniExternal/AI_Projects/Shipwright/soh/src/code/ml_entrance_map.c'
+OUT = SOH + '/src/code/ml_entrance_map.c'
 to_soh = []
 for e, (sc, sp, _) in enumerate(m.ML):
     sc = m.SCENE_TRANSLATE.get(sc, sc)

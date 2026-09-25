@@ -6,12 +6,12 @@ vanilla names over unrelated ML data -- and this step maps the output back to te
 Only textures whose pixels differ from stock SoH's are shipped, so the mod overrides exactly what ML
 redrew. Pure data: drop-in compatible.
 """
+from mspaths import OOT_O2R, PIPE, ZAPD, ZAPD_CWD, zapd_config
 import subprocess, zipfile, os, sys
 
-P    = '/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline'
-ZAPD = '/Volumes/MacMiniExternal/AI_Projects/SOHCombo/build-macos-sdl2/ZAPD/ZAPD.out'
-CWD  = '/Volumes/MacMiniExternal/AI_Projects/SOHCombo/soh'
-OOT  = '/Volumes/MacMiniExternal/AI_Projects/MissingShip/home/oot.o2r'
+P    = PIPE
+CWD  = ZAPD_CWD
+OOT  = OOT_O2R
 OUT  = P + '/ml_ui.otr'
 MOD  = P + '/ml.otr'
 
@@ -21,7 +21,7 @@ r = subprocess.run([ZAPD, 'ed', '-se', 'OTR', '--otrfile', OUT, '--portVer', '9.
                     '-i', P + '/xml/ui', '-b', P + '/tml_zapd.z64',
                     '-fl', P + '/filelists', '-o', P + '/out',
                     '-osf', P + '/out', '-gsf', '0',
-                    '-rconf', P + '/Config_ML.xml'],
+                    '-rconf', zapd_config()],
                    cwd=CWD, capture_output=True, text=True)
 if r.returncode != 0 or not os.path.exists(OUT):
     print(f"UI texture extraction FAILED (exit {r.returncode})")

@@ -178,6 +178,7 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 | [MS-006](https://github.com/thefriendlyhedgehog/MissingShip/issues/6) | infra | `modcheck.py` only reports hooks below 0x80608000, and several of the "17 hooked overlays" in the ledger (0x09E, 0x0F4, 0x11B, 0x12E, 0x141, 0x173, 0x18A, 0x18B, 0x198, 0x199) are not actor slots with hooks in the current scan. | The hook list is re-derived across all overlay tables (actor, effect, gamestate) and all target ranges, and the ledger is corrected. |
 | [MS-007](https://github.com/thefriendlyhedgehog/MissingShip/issues/7) | infra | Engine changes live only as a 350 KB patch; code review and merges are painful. | Decide: a private Shipwright fork with a `missingship` branch (patch generated from it) vs. the patch-only workflow. |
 | [MS-008](https://github.com/thefriendlyhedgehog/MissingShip/issues/8) | infra | No automated checks. | A script that runs `checkexits.py`, `checkhashes.py`, the patch-applies check and a build; run it before every push (or in CI where ROMs are available). |
+| [MS-009](https://github.com/thefriendlyhedgehog/MissingShip/issues/51) | infra | The pipeline mixes two ZAPD builds (SOHCombo's for scenes/objects/UI, Shipwright's patched one for audio), and `inject_titles.py` reads SOHCombo's unpatched `scene_table.h`. The app's `Info.plist` has an absolute `SHIP_HOME` (double-click only). | One patched ZAPD + one table source; archive still identical; `MS_SOHCOMBO` removed. |
 
 ### M1: Verify
 
@@ -263,6 +264,8 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 
 ### Done
 
+- MS-001: all scripts resolve paths via `pipeline/mspaths.py` / `mspaths.sh` (env `MS_*` overrides); ZAPD config templated; archive verified identical (4636 resources).
+- MS-002: obsolete `cycle.sh` removed (it installed into the old `SOH/ml_profile` setup and skipped every injector); `ms_cycle.sh` is the only build script.
 - MS-004 — README corrected (this commit) — rewritten with the current status, platforms and goals.
 
 (Move closed issues here: `MS-nnn — commit — one line`.)

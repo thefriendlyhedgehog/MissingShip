@@ -9,11 +9,11 @@ we never have to describe a whole 54KB object by hand.
 Requires the object's dma index to be named in filelists/dbg.txt to match the XML's File Name --
 ms_cycle.sh rewrites that filelist every run, so the name is forced there (see ML_OBJECTS).
 """
+from mspaths import PIPE, SOH, ZAPD, ZAPD_CWD, zapd_config
 import subprocess, zipfile, shutil, os, sys
 
-P    = '/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline'
-ZAPD = '/Volumes/MacMiniExternal/AI_Projects/SOHCombo/build-macos-sdl2/ZAPD/ZAPD.out'
-CWD  = '/Volumes/MacMiniExternal/AI_Projects/SOHCombo/soh'
+P    = PIPE
+CWD  = ZAPD_CWD
 OUT  = P + '/ml_obj.otr'
 MOD  = P + '/ml.otr'
 
@@ -31,7 +31,7 @@ ALIASES = {
 # G_SETTIMG_OTR_HASH pointing at the stock resource: same fmt/siz/width, 16 bytes instead of 8 (LUS reads
 # display lists command by command until G_ENDDL, so growing one is safe).
 import re, struct
-GK_XML = '/Volumes/MacMiniExternal/AI_Projects/Shipwright/soh/assets/xml/GC_MQ_PAL_F/objects/gameplay_keep.xml'
+GK_XML = SOH + '/assets/xml/GC_MQ_PAL_F/objects/gameplay_keep.xml'
 GK_TEX = {int(m.group(2), 16): m.group(1) for m in
           re.finditer(r'<Texture Name="(\w+)"[^>]*Offset="(0x[0-9A-Fa-f]+)"', open(GK_XML).read())}
 
@@ -71,7 +71,7 @@ r = subprocess.run([ZAPD, 'ed', '-se', 'OTR', '--otrfile', OUT, '--portVer', '9.
                     '-i', P + '/xml/objects', '-b', P + '/tml_zapd.z64',
                     '-fl', P + '/filelists', '-o', P + '/out',
                     '-osf', P + '/out', '-gsf', '0',
-                    '-rconf', P + '/Config_ML.xml'],
+                    '-rconf', zapd_config()],
                    cwd=CWD, capture_output=True, text=True)
 if r.returncode != 0 or not os.path.exists(OUT):
     print(f"object extraction FAILED (exit {r.returncode})")

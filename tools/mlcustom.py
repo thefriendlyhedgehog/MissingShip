@@ -1,9 +1,12 @@
 """Disassemble a routine in ML's custom code (dma 507, loaded at 0x80600000). Usage: mlcustom.py 0xADDR [maxinsns]"""
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..', 'pipeline'))
+from mspaths import ML_ROM
 import sys
 from capstone import *
 from mlrom import Rom
 md = Cs(CS_ARCH_MIPS, CS_MODE_MIPS32 | CS_MODE_BIG_ENDIAN)
-C = Rom('/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/tml_2_0.z64').file(507)
+C = Rom(ML_ROM).file(507)
 def dis(a, n=400):
     rets = 0
     for i in md.disasm(C[a - 0x80600000:a - 0x80600000 + n * 4], a):

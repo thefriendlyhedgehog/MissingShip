@@ -1,8 +1,11 @@
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..', 'pipeline'))
+from mspaths import ML_ROM
 import struct, sys
 from capstone import *
 from mlrom import Rom, entry
 def disasm(dma, label):
-    ml=Rom('/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/tml_2_0.z64')
+    ml=Rom(ML_ROM)
     d=ml.file(dma)
     tail=struct.unpack('>I',d[-4:])[0]; o=len(d)-tail
     t,da,ro,bs,n=struct.unpack('>IIIII',d[o:o+20])

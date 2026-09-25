@@ -16,20 +16,21 @@ Audiobank/Audioseq/Audiotable names.
 Needs the ZAudio zero-size-soundfont guard (see docs/zapd-missingship.patch): ML zeroes out unused
 soundfonts while leaving their instrument counts, which crashed the stock extractor.
 """
+from mspaths import PIPE, SOH, ZAPD_AUDIO, zapd_config
 import subprocess, zipfile, shutil, os, sys
 
-ZAPD = '/Volumes/MacMiniExternal/AI_Projects/Shipwright/build-ml/ZAPD/ZAPD.out'
-CWD  = '/Volumes/MacMiniExternal/AI_Projects/Shipwright/soh'
-OUT  = '/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/ml_audio.otr'
-MOD  = '/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/ml.otr'
+ZAPD = ZAPD_AUDIO
+CWD  = SOH
+OUT  = PIPE + '/ml_audio.otr'
+MOD  = PIPE + '/ml.otr'
 
 if os.path.exists(OUT):
     os.remove(OUT)
 r = subprocess.run([ZAPD, 'ed', '-se', 'OTR', '--otrfile', OUT, '--portVer', '9.1.1',
-                    '-i', '/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/xml/audio', '-b', '/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/tml_zapd.z64',
-                    '-fl', '/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/filelists', '-o', '/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/out',
-                    '-osf', '/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/out', '-gsf', '0',
-                    '-rconf', '/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/Config_ML.xml'],
+                    '-i', PIPE + '/xml/audio', '-b', PIPE + '/tml_zapd.z64',
+                    '-fl', PIPE + '/filelists', '-o', PIPE + '/out',
+                    '-osf', PIPE + '/out', '-gsf', '0',
+                    '-rconf', zapd_config()],
                    cwd=CWD, capture_output=True, text=True)
 if r.returncode != 0 or not os.path.exists(OUT):
     print(f"audio extraction FAILED (exit {r.returncode})"); sys.exit(1)

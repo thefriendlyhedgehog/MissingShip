@@ -1,11 +1,14 @@
 """Diff one engine function between ML and the debug ROM, masking relocation-dependent immediates."""
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..', 'pipeline'))
+from mspaths import DEBUG_ROM, ML_ROM
 import struct, sys
 from capstone import *
 from mlrom import Rom
 B=0x8001CE60
 md=Cs(CS_ARCH_MIPS, CS_MODE_MIPS32|CS_MODE_BIG_ENDIAN)
-ML=Rom('/Volumes/MacMiniExternal/AI_Projects/MissingShip/pipeline/tml_2_0.z64').file(114)
-DB=Rom('/Volumes/MacMiniExternal/Games/SHIPofHarkinian-ROMS/PAL MQ (Debug).z64').file(28)
+ML=Rom(ML_ROM).file(114)
+DB=Rom(DEBUG_ROM).file(28)
 def body(code, fn, maxn=800):
     out=[]; ret=False
     for i in md.disasm(code[fn-B:fn-B+maxn*4], fn):
