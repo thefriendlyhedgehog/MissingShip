@@ -16,7 +16,7 @@ The code for every row lives in the private engine fork `MissingShip-Shipwright`
 ## Already drop-in compatible (data, shipped in `MissingLink_Scenes.o2r`)
 
 Scenes and rooms (textures, geometry, exit remaps, cutscene destinations) · audio (574, incl. the
-MEDIUM_CART → RAM sample fix) · text (269 messages) · credits (11 of 48, MS-024) · title cards · minimaps and dungeon maps · objects
+MEDIUM_CART → RAM sample fix) · text (269 messages) · credits (11 of 48, MS-024) · title cards · minimaps and dungeon maps · skyboxes (day, overcast sunset; MS-025) · objects
 (`object_ml_fishpond`, `object_ml_villager`, `object_ml_lift`, five `object_ml_gi_*` pickup models) · ML's 9 entrance
 intro-cutscene scripts · **pickup models shipped under vanilla paths** (Boomerang → Magic Hourglass, Gerudo Card →
 Deku Pass, Stone of Agony → Birth Certificate; `inject_objects.py` ALIASES) · **168 redrawn pause/HUD textures**

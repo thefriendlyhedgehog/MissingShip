@@ -1,4 +1,4 @@
-"""Port ML's overworld minimap textures, and its dungeon minimaps and pause dungeon maps (MS-022).
+"""Port ML's overworld minimap textures, its dungeon minimaps and pause dungeon maps (MS-022), and its skyboxes (MS-025).
 
 ML's minimap TABLES are byte-identical to vanilla (verified: owMinimapPosX/PosY/Width/Height and
 the entrance-icon arrays all match exactly), so there is nothing to port there -- the minimap was
@@ -12,8 +12,9 @@ over the matching vanilla resource, reusing vanilla's header so format and dimen
 MapData struct: code 0x108998, VRAM base **0x8001ce60** (derived from the struct's own internal
 offset signature; the 0x8000b2e0 base recorded earlier does not resolve these pointers).
 
-Dungeon maps: ML's map_i_static (dma 113, minimaps) and map_48x85_static (dma 112, pause maps) have the same size
-and layout as the MQ debug ROM's, so SoH's own XMLs give every texture's offset and size. A texture ships only if ML's
+Same-layout files: ML's map_i_static (dma 113, minimaps), map_48x85_static (dma 112, pause maps) and the vr_fine1 /
+vr_cloud2 skyboxes and palettes (dma 128/129, 138/139) have the same size and layout as the MQ debug ROM's, so SoH's own
+XMLs give every texture's offset and size, and stock stores the raw N64 bytes behind a 0x50-byte header. A texture ships only if ML's
 bytes differ from the debug ROM's (ML redrew it) and from stock's, the same baseline rule as inject_obj_textures.py.
 The engine side (minimap index room + 190, ML's map tables) is in z_map_exp.c / z_map_data.c.
 """
@@ -75,21 +76,25 @@ for area, texnames in AREA_TEX.items():
             continue
         added[path] = v[:0x50] + data
 
-# dungeon minimaps and pause dungeon maps (MS-022)
-DUNGEON_MAPS = {'map_i_static': 113, 'map_48x85_static': 112}      # SoH texture file -> ML dma index
-BPP = {'i4': 0.5, 'ci4': 0.5}
+# Texture files with the MQ debug ROM's layout: dungeon minimaps and pause dungeon maps (MS-022), and the day and
+# overcast-sunset skyboxes with their palettes (MS-025). SoH texture file -> (ML dma index, SoH XML holding its File).
+SAME_LAYOUT = {'map_i_static': (113, 'map_i_static.xml'), 'map_48x85_static': (112, 'map_48x85_static.xml'),
+               'vr_fine1_static': (128, 'skyboxes.xml'), 'vr_fine1_pal_static': (129, 'skyboxes.xml'),
+               'vr_cloud2_static': (138, 'skyboxes.xml'), 'vr_cloud2_pal_static': (139, 'skyboxes.xml')}
+BPP = {'i4': 0.5, 'ci4': 0.5, 'ci8': 1, 'rgba16': 2}
 dbg_rom = open(DEBUG_ROM, 'rb').read()
 dbg_names = open(os.path.join(SOH, 'assets', 'extractor', 'filelists', 'dbg.txt')).read().split('\n')
 def dbg_file(name):
     i = dbg_names.index(name)
     return get_file(dbg_rom, *struct.unpack('>IIII', dbg_rom[0x12f70 + 16 * i:0x12f70 + 16 * i + 16]))
 stock = set(oot.namelist())
-dungeon = {}
-for name, dma in DUNGEON_MAPS.items():
+same = {}
+for name, (dma, xml_name) in SAME_LAYOUT.items():
     ml, dbg = get_file(rom, *E[dma]), dbg_file(name)
     if len(ml) != len(dbg):
         sys.exit(f'{name}: ML dma {dma} is {len(ml)} bytes, debug is {len(dbg)}: layout assumption broken')
-    xml = open(os.path.join(SOH, 'assets', 'xml', 'GC_MQ_PAL_F', 'textures', name + '.xml')).read()
+    xml = open(os.path.join(SOH, 'assets', 'xml', 'GC_MQ_PAL_F', 'textures', xml_name)).read()
+    xml = re.search(rf'<File Name="{name}"[^>]*>(.*?)</File>', xml, re.S).group(1)
     for m in re.finditer(r'<Texture Name="(\w+)"[^>]*Format="(\w+)"[^>]*Width="(\d+)"[^>]*Height="(\d+)"'
                          r'[^>]*Offset="(0x[0-9A-Fa-f]+)"', xml):
         tn, fmt, w, h, o = m.group(1), m.group(2), int(m.group(3)), int(m.group(4)), int(m.group(5), 16)
@@ -101,8 +106,8 @@ for name, dma in DUNGEON_MAPS.items():
         if struct.unpack('<I', v[0x4C:0x50])[0] != n:
             sys.exit(f'{path}: stock holds {struct.unpack("<I", v[0x4C:0x50])[0]} bytes, expected {n}')
         if v[0x50:] != ml[o:o + n]:
-            dungeon[path] = v[:0x50] + ml[o:o + n]
-added.update(dungeon)
+            same[path] = v[:0x50] + ml[o:o + n]
+added.update(same)
 
 shutil.copy(MOD, MOD + '.tmp')
 with zipfile.ZipFile(MOD + '.tmp', 'a', zipfile.ZIP_DEFLATED) as z:
@@ -111,5 +116,8 @@ with zipfile.ZipFile(MOD + '.tmp', 'a', zipfile.ZIP_DEFLATED) as z:
         if path not in have:
             z.writestr(path, data)
 os.replace(MOD + '.tmp', MOD)
-print(f"injected {len(added) - len(dungeon)} overworld minimap textures, {len(dungeon)} dungeon map textures")
+by = {}
+for p_ in same:
+    by[p_.split('/')[1]] = by.get(p_.split('/')[1], 0) + 1
+print(f"injected {len(added) - len(same)} overworld minimap textures, {len(same)} same-layout textures {by}")
 for p_ in sorted(added): print("   ", '/'.join(p_.split('/')[-2:]))
