@@ -22,7 +22,7 @@ intro-cutscene scripts · **pickup models shipped under vanilla paths** (Boomera
 Deku Pass, Stone of Agony → Birth Certificate; `inject_objects.py` ALIASES) · **168 redrawn pause/HUD textures**
 (item icons, item names, area names, HUD; `inject_ui_textures.py`, only the ones that differ from stock) · **blank
 title cards** for the 8 scenes ML gives none (else stock SoH shows the vanilla slot's name, e.g. "Sacred Forest Meadow"
-over ML's Saria's house) · raw gameplay_keep texture pointers in ML display lists rewritten as resource hashes. · **textures ML redrew inside otherwise-vanilla objects** (MS-020, `inject_obj_textures.py`: the Triforce push blocks, chest, bomb-flower leaves, boss door, haka door) and the chest collision's surface material (wood → stone), shipped under vanilla paths. They are compared against the MQ debug ROM, so debug-vs-retail differences never ship.
+over ML's Saria's house) · raw gameplay_keep texture pointers in ML display lists rewritten as resource hashes. · **textures ML redrew inside otherwise-vanilla objects** (MS-020, `inject_obj_textures.py`: the Triforce push blocks, chest, bomb-flower leaves, boss door, haka door) and the chest collision's surface material (wood → stone), shipped under vanilla paths. They are compared against the MQ debug ROM, so debug-vs-retail differences never ship. · **ML's one-word object edits** reproduced by patching stock resources (MS-021, `inject_obj_patches.py`, each checked against the ML ROM): Beamos body and top-eyelid display lists end immediately (ML draws neither); Saria's right-hand limb uses the hand-holding-ocarina display list.
 
 ## Engine changes
 

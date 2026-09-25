@@ -64,6 +64,7 @@ python3 "$MS_PIPE"/inject_messages.py
 python3 "$MS_PIPE"/inject_objects.py
 python3 "$MS_PIPE"/inject_ui_textures.py
 python3 "$MS_PIPE"/inject_obj_textures.py
+python3 "$MS_PIPE"/inject_obj_patches.py
 python3 "$MS_PIPE"/inject_audio.py
 cp "$MS_PIPE"/ml.otr "$MS"/mod/MissingLink_Scenes.o2r
 pkill -x MissingShip 2>/dev/null || true
