@@ -84,11 +84,14 @@ for slot, (dma, name) in by_slot.items():
                 e = struct.unpack('>H', d[ptr+k*2:ptr+k*2+2])[0]
                 if e >= len(m.ML) or dest(e)[0] not in populated: break
                 used[e] += 1
-    offs = {o for o, _ in m.ENTRANCE_CS.get(name, [])} | {w & 0xFFFFFF for c, w in hdr if c == 0x17}
+    offs = ({o for o, _ in m.ENTRANCE_CS.get(name, []) + m.ACTOR_CS.get(name, [])}
+            | {w & 0xFFFFFF for c, w in hdr if c == 0x17})
     for cs in offs:                                     # cutscene destinations (ml_entrance.fix_cutscene_destinations)
         if cs and cs + 8 <= len(d):
             for at in m._cutscene_terminators(d, cs):
-                e = m.CODE_TO_ENTRANCE.get(struct.unpack('>H', d[at:at+2])[0])
+                code = struct.unpack('>H', d[at:at+2])[0]
+                if code in m.ML_PATCHED_CODES: continue  # ML's own case; its entrance is an MlEntrance_ToSoh literal
+                e = m.CODE_TO_ENTRANCE.get(code)
                 if e is not None: used[e] += 1
 rom = open(ML_ROM, 'rb').read()
 code = open(PIPE + '/ml_code.bin', 'rb').read()

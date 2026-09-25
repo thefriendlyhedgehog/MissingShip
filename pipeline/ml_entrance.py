@@ -104,6 +104,10 @@ ENTRANCE_CS = {'spot10': [(0x260, 'gMlSpot10IntroCs')], 'spot05': [(0x0E0, 'gMlS
                'link_home': [(0x0D8, 'gMlLinkHomeIntroCs')], 'spot09': [(0x428, 'gMlSpot09IntroCs')],
                'turibori': [(0xFB90, 'gMlTuriboriIntroCs')], 'spot04': [(0x210, 'gMlSpot04IntroCs')],
                'tokinoma': [(0x1A0, 'gMlTokinomaIntroCs')]}
+# Cutscenes an actor starts itself with Cutscene_SetSegment, exported under a name its C code can use.
+ACTOR_CS = {'HAKAdan_bs': [(0x168, 'gMlHakadanBsIntroCs'),       # Ml_BossVa: the boss wakes (also the header's)
+                           (0xACF0, 'gMlHakadanBsDeathCs'),      # Ml_BossVa: phase 1 health 0
+                           (0xB050, 'gMlHakadanBsKnockdownCs')]} # Ml_BossVa: phase 0 health 0
 
 
 def _destination_codes():
@@ -111,9 +115,9 @@ def _destination_codes():
 
     A terminator's `base` is a destination CODE, not an entrance: Cutscene_Command_Terminator's
     `switch (cmd->base)` (the second one in the function -- the first is an 11-case delay helper for
-    55..78) turns it into an entrance. ML's copy of that switch is byte-identical to vanilla's
-    (same jump table, same case bodies, e.g. case 119 at 0x80066F44 in both), so SoH's source is an
-    exact description of what ML does. The resulting entrance id is in ML's numbering, i.e. an index
+    55..78) turns it into an entrance. ML's copy of that switch matches vanilla's except
+    for the cases in ML_PATCHED_CODES (same jump table, e.g. case 119 at 0x80066F44 in both), so SoH's
+    source describes what ML does. The resulting entrance id is in ML's numbering, i.e. an index
     into ML's rebuilt entrance table -- resolved by the caller.
     """
     src = open(_SHIP + '/src/code/z_demo.c').read()
@@ -136,6 +140,10 @@ def _destination_codes():
 
 
 CODE_TO_ENTRANCE = _destination_codes()
+# Destination cases ML itself patched; the engine's switch reproduces them, so their codes are left alone.
+# 56: Kakariko gate (0xFFF4) -> ML entrance 0x420 with cutscene 0xFFF0 (code 0x80066050); only the
+# Fishing Pond intro uses it.
+ML_PATCHED_CODES = {56}
 
 
 def _cutscene_terminators(d, cs):
@@ -181,7 +189,7 @@ def fix_cutscene_destinations(d, populated, name=None):
     opening prologue (code 119 -> ML 0x5F0 -> tokinoma) to ML entrance 119 = the Lon Lon stable.
     """
     d = bytearray(d); fixed = 0; unresolved = []
-    offs = set(o for o, _ in ENTRANCE_CS.get(name, []))
+    offs = set(o for o, _ in ENTRANCE_CS.get(name, []) + ACTOR_CS.get(name, []))
     off = 0
     while off + 8 <= len(d):
         if d[off] == 0x14:
@@ -192,8 +200,8 @@ def fix_cutscene_destinations(d, populated, name=None):
     for cs in sorted(o for o in offs if o and o + 8 <= len(d)):
         for at in _cutscene_terminators(d, cs):
             code = struct.unpack('>H', d[at:at+2])[0]
-            if code & 0x8000:
-                continue                                   # already rewritten
+            if code & 0x8000 or code in ML_PATCHED_CODES:
+                continue                                   # already rewritten, or ML's own case
             e = CODE_TO_ENTRANCE.get(code)
             if e is None or e >= len(ML):
                 unresolved.append((cs, code, 'no destination case')); continue

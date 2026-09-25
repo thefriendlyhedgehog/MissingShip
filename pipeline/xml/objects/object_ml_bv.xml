@@ -1,0 +1,21 @@
+<Root>
+    <!-- ML object 0x8C (dma 26, ML-only; vanilla's object_bv is Barinade): the Shadow Temple boss for ovl_Ml_BossVa
+         and its projectile ovl_Ml_BossVaShot. -->
+    <File Name="object_ml_bv" Segment="6">
+        <Animation Name="gMlBossVaRiseAnim" Offset="0x18070"/>
+        <Animation Name="gMlBossVaLungeHoldAnim" Offset="0x192D8"/>
+        <Animation Name="gMlBossVaShootAnim" Offset="0x1A450"/>
+        <Animation Name="gMlBossVaRetreatAnim" Offset="0x1B5A4"/>
+        <Animation Name="gMlBossVaHurtAnim" Offset="0x20D14"/>
+        <Animation Name="gMlBossVaDeathAnim" Offset="0x26484"/>
+        <Animation Name="gMlBossVaLungeAnim" Offset="0x275D8"/>
+        <Animation Name="gMlBossVaIdleAnim" Offset="0x28E5C"/>
+        <Animation Name="gMlBossVaIntroAnim" Offset="0x2DAE4"/>
+        <Animation Name="gMlBossVaLungeHold2Anim" Offset="0x2F2E8"/>
+        <Animation Name="gMlBossVaTurnLeftAnim" Offset="0x306F0"/>
+        <Animation Name="gMlBossVaTurnRightAnim" Offset="0x31AC8"/>
+        <Skeleton Name="gMlBossVaSkel" Type="Flex" LimbType="Standard" Offset="0x31D00"/>
+        <Texture Name="gMlBossVaTitleCardTex" OutName="title_card" Format="i8" Width="128" Height="40" Offset="0x31D10"/>
+        <DList Name="gMlBossVaShotDL" Offset="0x34200"/>
+    </File>
+</Root>

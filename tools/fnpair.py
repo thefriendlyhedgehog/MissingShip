@@ -1,4 +1,6 @@
-"""Per-function diff of a recompiled actor overlay, ML vs debug ROM. Usage: fnpair.py 0xACTOR [-v]
+"""Per-function diff of a recompiled actor overlay, ML vs debug ROM. Usage: fnpair.py 0xACTOR [0xDBG_ACTOR] [-v]
+
+The optional second id compares an ML copy against the vanilla actor it was copied from (e.g. ML slot 0x01 vs En_Elf 0x18).
 
 ML rebuilt some vanilla overlays with a different compiler, so an aligned diff (ovldiff.py) drowns in scheduling
 noise. Compilers keep function order, though, so split both sides into functions (local jal targets plus code
@@ -41,8 +43,9 @@ def norm(s):
     return s
 
 def main():
-    aid = int(sys.argv[1], 0)
-    m, b = load(ML, 114, 0xF9440, aid), load(DB, 28, 0xF9440, aid)
+    ids = [int(a, 0) for a in sys.argv[1:] if not a.startswith('-')]
+    aid, did = ids[0], ids[1] if len(ids) > 1 else ids[0]
+    m, b = load(ML, 114, 0xF9440, aid), load(DB, 28, 0xF9440, did)
     fm, fb = functions(m), functions(b)
     print(f'actor {aid:#x}: {len(fm)} functions in ML, {len(fb)} in the debug ROM')
     for i in range(max(len(fm), len(fb))):

@@ -49,11 +49,11 @@ Last full review: **2026-09-25**, with every ML file compared against PAL MQ Deb
 | `night_shop` | En_Ossan (shopkeeper; also spawns En_GirlA, see B); En_Rd and Bg_Po_Event built in MS-034 |
 | `hairal_niwa2` | Bg_Po_Event ×2 (built in MS-034) |
 | `HAKAdan` (dungeon) | **Built (MS-036):** Boss_Tw ×26 (Ml_SlideBlock), ACTOR_UNSET_1A (Ml_RoomClearSwitch), Bg_Hidan_Dalm (Ml_ElevatorSpawner), Bg_Mori_Elevator (Ml_HakaLift), En_Floormas (giant), En_Kakasi ×2 (Ml_Elevator), En_Ssh ×4, Bg_Mizu_Shutter |
-| `HAKAdan_bs` (boss room) | **Boss_Va**: the whole boss fight, see C |
+| `HAKAdan_bs` (boss room) | **Built (MS-037):** Boss_Va (Ml_BossVa, ML's own boss on object_ml_bv) with Ml_BossVaShot, Ml_Elf, Ml_Light, En_Vm and Door_Warp1 |
 | `Bmori1` (dungeon) | En_Peehat, Boss_Dodongo ×2, En_Du ×3, En_Nb ×3, Bg_Jya_1flift |
 | `spot00` | En_Mag (title logo) |
 | `kakariko3` | Boss_Ganon2 |
-| Partial | none since MS-033: Ml_EventSpawner is complete (mode 3's trigger waits on MS-037), En_Niw_Lady and En_Hy were already complete, En_Ko was ported in MS-032 |
+| Partial | none since MS-033: Ml_EventSpawner is complete (mode 3's trigger, the pond after the Shadow boss, came with MS-037), En_Niw_Lady and En_Hy were already complete, En_Ko was ported in MS-032 |
 
 ### B. Changed actors that are not placed but are spawned at runtime
 
@@ -64,8 +64,8 @@ The old inventory only surveyed placed actors, so it missed these. A spawn scan 
 | **En_Elf (Navi)** | 4018 text words (a recompile) + hook `0x80602000` | **Ported** (MS-030): ML never draws Navi, and hides the other fairies after the Soul-Charged sword. |
 | En_Nutsball (Deku nut projectile) | rewritten (0x590 vs 0x550) | Deku Scrubs, already ported |
 | En_GirlA (shop items) | 8 data words (prices / items?) | En_Ossan |
-| Door_Warp1 (blue warp) | 5 text words | Boss_Va |
-| En_Vm (Beamos) | 1 data word; object DLs changed | Boss_Va (spawned as child) |
+| Door_Warp1 (blue warp) | 5 text words | **Ported** (MS-037): blue warps go to the Fishing Pond (ML entrance 0x41C) |
+| En_Vm (Beamos) | 1 data word; object DLs changed | **Ported** (MS-037: never Z-targetable; the DLs in MS-021). Boss_Va spawns three |
 | En_Bom_Chu | 974 text words + hook `0x80607A00` | Player (Bombchus exist; cap 20 is ported) |
 | Item_Shield | 1 text word | Player (dropped or burnt shield) |
 | Bg_Dy_Yoseizo, Bg_Haka_Huta | rewritten | spawner not found yet |
@@ -74,27 +74,20 @@ The old inventory only surveyed placed actors, so it missed these. A spawn scan 
 
 ### C. ML custom actors in slots vanilla leaves empty
 
-The 3, 5, 6 and 0x1F slots are ported. Still to do:
+All eight are ported: 3, 5, 6 and 0x1F earlier, 0x1A in MS-036, and the boss fight's three in MS-037:
 
-| Slot | Size | Category / object | Notes |
+| Slot | Size | Category / object | Ported as |
 |---|---|---|---|
-| 0x01 | 0x4AE0 | itemaction / gameplay_keep | spawned by Boss_Va (can also spawn Navi) |
-| 0x17 | 0x470 | prop / object_bv (0x8C) | spawned by Boss_Va |
-| 0x1A | 0x2B0 | bg / gameplay_keep | placed in HAKAdan |
-| 0x22 | 0xE90 | itemaction / gameplay_keep | spawned by Boss_Va |
-
-**Boss fight bundle:**
-- Boss_Va (0x2C00 bytes, a full rewrite);
-- object_bv (213 KB, heavily changed);
-- custom actors 0x01, 0x17 and 0x22;
-- En_Vm and Door_Warp1.
+| 0x01 | 0x4AE0 | itemaction / gameplay_keep | Ml_Elf (En_Elf copy): Boss_Va's fairies, and the Navi-type fairy at the pond |
+| 0x17 | 0x470 | prop / object_bv (0x8C) | Ml_BossVaShot: Boss_Va's projectile |
+| 0x1A | 0x2B0 | bg / gameplay_keep | Ml_RoomClearSwitch (HAKAdan) |
+| 0x22 | 0xE90 | itemaction / gameplay_keep | Ml_Light (En_Light copy): Boss_Va's death flames |
 
 ### D. Objects not yet ported
 
 | Object | What ML changed | Kind of work |
 |---|---|---|
 | object_link_child (0x15) | 35,836 words; Link's model | big: the "Link object port" |
-| object_bv (0x8C) | boss model | with Boss_Va |
 | object_tw, object_nb, object_du, object_mag, object_ganon2, object_ka, object_spot02_objects, object_mori_objects | redrawn for their rewritten actors | with each actor |
 | gameplay_keep | sword-turn recoveries `link_fighter_turn_kiruL_end` / `kiruR_end` (frames 16 → 13 / 14, ML's frames) done (MS-026; `kiruR` is unchanged); unused shape DLs; drop-bomb texture and grotto hole are done | data (animations) |
 | gameplay_dangeon_keep | push-block textures | **data only**: texture aliases |
@@ -225,7 +218,7 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 | [MS-034](https://github.com/thefriendlyhedgehog/MissingShip/issues/25) | port | `spot01`: En_Dodojr, Bg_Toki_Hikari, En_Rd, Bg_Po_Event, Bg_Spot02_Objects (+ object_spot02_objects), Bg_Spot16_Bombstone, En_Daiku, En_Hs, Obj_Makekinsuta. | **Built:** all nine ported as MS-096..104 (#60-#68); needs playtest. |
 | [MS-035](https://github.com/thefriendlyhedgehog/MissingShip/issues/26) | port | `night_shop`: En_Ossan + En_GirlA shop items (8 data words: prices?). | **Built:** En_Ossan (Init gate, shop music, bombchu shop always open, Link drawn, steady cursor) and En_GirlA bombchu prices 40/80; needs playtest. |
 | [MS-036](https://github.com/thefriendlyhedgehog/MissingShip/issues/27) | port | `HAKAdan`: Boss_Tw slot ×26 (small ML rewrite + object_tw), ACTOR_UNSET_1A (custom), Bg_Hidan_Dalm, Bg_Mori_Elevator (+ object_mori_objects), En_Floormas, En_Kakasi (+ object_ka), En_Ssh, Bg_Mizu_Shutter. | **Built:** all eight ported as MS-107..114 (#71-#78): sliding blocks, room-clear switch, two elevators + spawner, room 2 lift, giant Floormaster, key-giving cursed men, shutters; needs playtest. |
-| [MS-037](https://github.com/thefriendlyhedgehog/MissingShip/issues/28) | port | **Boss fight** (`HAKAdan_bs`): Boss_Va + object_bv + custom actors 0x01, 0x17, 0x22 + En_Vm + Door_Warp1. | The boss can be beaten and the warp works. |
+| [MS-037](https://github.com/thefriendlyhedgehog/MissingShip/issues/28) | port | **Boss fight** (`HAKAdan_bs`): Boss_Va + object_bv + custom actors 0x01, 0x17, 0x22 + En_Vm + Door_Warp1. | **Built:** ported as MS-121..126 (#85-#90): ML's two-phase Shadow boss and its projectile, the Ml_Elf/Ml_Light copies, untargetable Beamos, and blue warps to the Fishing Pond (with ML's patched pond cutscene destination and a new 8-entry pond entrance group); needs playtest. |
 | [MS-038](https://github.com/thefriendlyhedgehog/MissingShip/issues/29) | port | `Bmori1`: En_Peehat, Boss_Dodongo, En_Du (+ object_du), En_Nb (+ object_nb), Bg_Jya_1flift. | The dungeon can be completed. |
 | [MS-039](https://github.com/thefriendlyhedgehog/MissingShip/issues/30) | port | `kakariko3`: Boss_Ganon2 (+ object_ganon2). `spot00`: En_Mag (+ object_mag). | Ported. |
 | [MS-040](https://github.com/thefriendlyhedgehog/MissingShip/issues/31) | port | Port En_Dodongo (0x12; rewritten, placed in `spot10`). Find the spawners of Bg_Dy_Yoseizo, Bg_Haka_Huta, En_Ishi, En_Karebaba, Obj_Ice_Poly, Item_Shield, En_Bom_Chu (hook 0x80607A00). | Each one ported, or recorded as unreachable. |

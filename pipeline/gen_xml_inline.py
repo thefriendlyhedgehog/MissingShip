@@ -20,14 +20,14 @@ _o.makedirs(PIPE + '/xml/scenes/dungeons', exist_ok=True)
 _o.makedirs(PIPE + '/xml/scenes/ml', exist_ok=True)
 VALID={'rgba16','rgba32','ci4','ci8','ia4','ia8','ia16','i4','i8'}
 # ML's entrance intro cutscenes: single source of truth lives in ml_entrance.py.
-from ml_entrance import ENTRANCE_CS
+from ml_entrance import ENTRANCE_CS, ACTOR_CS
 for nm,(folder,nrooms) in MAP.items():
     sdecl={}
     for a_s,(fmt,w,h,tl) in sorted(scene_tex.get(nm,{}).items(), key=lambda kv:int(kv[0],16)):
         if fmt not in VALID: continue
         a=int(a_s,16)
         sdecl[a]='        <Texture Name="%s_sceneTex_%06X" OutName="%s_sceneTex_%06X" Format="%s" Width="%d" Height="%d" Offset="0x%X" AddedByScript="true"/>'%(nm,a,nm,a,fmt,w,h,a)
-    for off,csname in ENTRANCE_CS.get(nm,[]):
+    for off,csname in ENTRANCE_CS.get(nm,[])+ACTOR_CS.get(nm,[]):
         sdecl[off]='        <Cutscene Name="%s" Offset="0x%X"/>'%(csname,off)
     sbody="\n".join(sdecl[k] for k in sorted(sdecl))
     rooms=[]

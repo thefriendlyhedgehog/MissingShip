@@ -1,5 +1,6 @@
 <Root>
     <File Name="HAKAdan_bs_scene" Segment="2">
+        <Cutscene Name="gMlHakadanBsIntroCs" Offset="0x168"/>
         <Texture Name="HAKAdan_bs_sceneTex_001940" OutName="HAKAdan_bs_sceneTex_001940" Format="ci8" Width="32" Height="64" Offset="0x1940" AddedByScript="true"/>
         <Texture Name="HAKAdan_bs_sceneTex_002340" OutName="HAKAdan_bs_sceneTex_002340" Format="ci4" Width="64" Height="64" Offset="0x2340" AddedByScript="true"/>
         <Texture Name="HAKAdan_bs_sceneTex_002B60" OutName="HAKAdan_bs_sceneTex_002B60" Format="ci4" Width="32" Height="64" Offset="0x2B60" AddedByScript="true"/>
@@ -16,6 +17,8 @@
         <Texture Name="HAKAdan_bs_sceneTex_008DC0" OutName="HAKAdan_bs_sceneTex_008DC0" Format="ia8" Width="64" Height="64" Offset="0x8DC0" AddedByScript="true"/>
         <Texture Name="HAKAdan_bs_sceneTex_009DC0" OutName="HAKAdan_bs_sceneTex_009DC0" Format="ci8" Width="32" Height="32" Offset="0x9DC0" AddedByScript="true"/>
         <Texture Name="HAKAdan_bs_sceneTex_00A3C0" OutName="HAKAdan_bs_sceneTex_00A3C0" Format="rgba16" Width="32" Height="32" Offset="0xA3C0" AddedByScript="true"/>
+        <Cutscene Name="gMlHakadanBsDeathCs" Offset="0xACF0"/>
+        <Cutscene Name="gMlHakadanBsKnockdownCs" Offset="0xB050"/>
         <Scene Name="HAKAdan_bs_scene" Offset="0x0"/>
     </File>
     <File Name="HAKAdan_bs_room_0" Segment="3">

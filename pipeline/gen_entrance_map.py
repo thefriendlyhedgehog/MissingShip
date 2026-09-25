@@ -10,8 +10,15 @@ import sys
 sys.path.insert(0, PIPE)
 import ml_entrance as m
 OUT = SOH + '/src/code/ml_entrance_map.c'
+# ML entrances whose (scene, spawn) has a vanilla entrance but must stay distinguishable from it. 0x420 is the
+# Fishing Pond again, reached from ML's patched cutscene destination 56 with a cutscene layer; Ml_Fishpond tells
+# it apart from 0x41C (same spot) and the layer needs an 8-entry group (entrance_table.h 0x636).
+OVERRIDE = {e: 0x636 for e in range(0x420, 0x428)}
 to_soh = []
 for e, (sc, sp, _) in enumerate(m.ML):
+    if e in OVERRIDE:
+        to_soh.append(OVERRIDE[e])
+        continue
     sc = m.SCENE_TRANSLATE.get(sc, sc)
     v = m.REV.get((sc, sp))
     if v is None:
