@@ -17,6 +17,7 @@ Last full review: **2026-09-25**, with every ML file compared against PAL MQ Deb
 ## How we work
 
 - **Checks before pushing.** `python3 tools/check.py` must pass. The `.githooks/pre-push` hook runs it once enabled with `git config core.hooksPath .githooks`.
+- **No upstream PRs until the whole project is done** (owner decision, 2026-09-25). Collect candidates on MS-070.
 - **One issue per change.** Put the issue ID in the commit subject, e.g. `MS-014: port En_Nutsball`.
 - **The ledger rule.** Any engine change updates `ENGINE_CHANGES.md` in the same commit. An actor change also updates `ML_ACTOR_INVENTORY.md`.
 - **Engine work is commits.** Commit it on `missingship` in the engine fork (same `MS-nnn` subject), push, then run `tools/genpatch.py` so `docs/*.patch` match (`PORTING_ACTORS.md` step 6).
@@ -166,7 +167,7 @@ Milestones, in order. Each milestone lists its issue IDs.
 
 ## Issues
 
-Type: **bug** = something wrong in what we ship; **port** = ML content not yet in; **infra** = tooling / docs / process; **platform** = Windows / Linux support.
+Type: **bug** = something wrong in what we ship; **port** = ML content not yet in; **infra** = tooling / docs / process; **platform** = Windows / Linux support; **enhancement** = QoL.
 
 ### M0: Team footing
 
@@ -191,6 +192,8 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 | [MS-011](https://github.com/thefriendlyhedgehog/MissingShip/issues/10) | bug | Hard freeze pulling a crate in `malon_stable` room 3 (Bg_Spot15_Rrbox ×4, params 0). Suspected out-of-bounds read of `D_808B45C4` when switch 0 is set. Possibly a place the player isn't meant to reach yet. | Reproduced, root-caused, fixed or proven unreachable. |
 | [MS-012](https://github.com/thefriendlyhedgehog/MissingShip/issues/11) | bug? | "Deep Woods sometimes doesn't load the next zone." Probably fixed by the wall-skip port (ML's 0x80602C80). | Confirmed fixed in play, or reopened with a repro. |
 | [MS-013](https://github.com/thefriendlyhedgehog/MissingShip/issues/12) | port | Where is Malon's race? The finish-line Malon (params 0xFFFF) and ML entrances 0x138 / 0x13C aren't placed on the scene map yet. | The race is located and played start to finish. |
+| [MS-017](https://github.com/thefriendlyhedgehog/MissingShip/issues/55) | bug | Saria's Song at the song-block door shows vanilla's "talk to Saria?" prompt (Navi text 0xE0) before the door cutscene; ML skips it in its player hook 0x80600D90 (player +0x20F38). | No prompt at the door; the hook is ported and logged. |
+| [MS-018](https://github.com/thefriendlyhedgehog/MissingShip/issues/56) | enhancement | B should answer No / close yes-no prompts (at least the Saria prompt), not need another A. | B cancels safely on choice prompts; logged. |
 
 ### M2: Data-only quick wins (pipeline, no engine code)
 
@@ -269,7 +272,7 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 
 ### Done
 
-- MS-016: `GfxDpLoadBlock`'s `word_size_shift` is now signed (MissingShip-libultraship b0ea7db, engine 160ad6e, ledger row 44). A test of the exact expression gave 0 bytes for a 1024-texel 4b load before and 512 after (clang -O0 and -O2). Engine rebuilt and boots. Upstream PR to Kenix3/libultraship still to be opened (needs the owner's go-ahead).
+- MS-016: `GfxDpLoadBlock`'s `word_size_shift` is now signed (MissingShip-libultraship b0ea7db, engine 160ad6e, ledger row 44). A test of the exact expression gave 0 bytes for a 1024-texel 4b load before and 512 after (clang -O0 and -O2). Engine rebuilt and boots. Upstream PR deferred: none until the whole project is done (owner decision); tracked on MS-070.
 - MS-014: the engine fork is the `engine/` submodule (branch `missingship`); one `git clone --recursive` gets everything at matching versions. `mspaths` defaults to `engine/`; `tools/check.py` fails if `engine/` is not at the pinned commit. Locally the checkout was moved in (history kept) and `../Shipwright` is a compatibility symlink; the engine was reconfigured and rebuilt at the new path.
 - MS-009: every pipeline step uses the engine fork's ZAPD (`build-ml/ZAPD/ZAPD.out`, patched ZAPDTR) and its scene table; SOHCombo and `MS_SOHCOMBO`/`MS_ZAPD_AUDIO` removed. Archive verified byte-identical (4636 resources) both with the switch and on the new defaults; the two scene tables' title-card mapping is identical for all 110 slots. `MissingShip.sh` keeps `Info.plist`'s `SHIP_HOME` pointing at the checkout's `home/` so double-click works anywhere (plist not in the signature; committed in plutil's canonical format).
 - MS-008: `tools/check.py` runs every automated check in about 3 s: compile, engine fork clean and pushed, patches current, ledger, exits, resource hashes (the 9 deliberate IA4 skips allowed exactly, MS-015 filed), inventory vs ROMs; `--build` builds the engine. Committed `.githooks/pre-push` hook. Verified that injected faults fail it. Also: `survey_actors.py --check`, `checkexits.py` now exits 1 on problems; filed MS-014 (engine as submodule) and MS-015.
