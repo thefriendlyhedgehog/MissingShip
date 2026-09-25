@@ -8067,10 +8067,10 @@ index 0000000000000000000000000000000000000000..06fa57c60e7fa6c011d6b5e2b47c8af4
 +#endif
 diff --git a/soh/src/overlays/actors/ovl_Ml_FogWall/z_ml_fogwall.c b/soh/src/overlays/actors/ovl_Ml_FogWall/z_ml_fogwall.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..9ce7b332eb20418a556d0158a748514baacc1ce1
+index 0000000000000000000000000000000000000000..eed292abb5b99b13f0af69f0a81ee622fc87a778
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_FogWall/z_ml_fogwall.c
-@@ -0,0 +1,415 @@
+@@ -0,0 +1,434 @@
 +/*
 + * File: z_ml_fogwall.c
 + * Overlay: ovl_Ml_FogWall
@@ -8182,6 +8182,17 @@ index 0000000000000000000000000000000000000000..9ce7b332eb20418a556d0158a748514b
 +    Actor_ProcessInitChain(&this->actor, sInitChain);
 +    MlFogWall_ChooseAction(this);
 +    this->unk_14F = 0;
++
++    // MissingShip (MS-147): ML places these as room actors with params 0, so they all use transition entry 0 (Deep
++    // Woods rooms 2 <-> 1) although they stand in room 5. Crossing one then loads room 2, swaps the current and
++    // previous room every frame while Link is in range, and unloads whichever is "previous" when he leaves: half
++    // the time that is room 5, leaving Link in a black void. A wall whose own room is on neither side of its entry
++    // is a fog barrier only; it still draws, fades and loops the corridor, but loads no rooms.
++    {
++        TransitionActorEntry* entry = &play->transiActorCtx.list[(u16)thisx->params >> 0xA];
++
++        this->fogOnly = (entry->sides[0].room != thisx->room) && (entry->sides[1].room != thisx->room);
++    }
 +}
 +
 +void MlFogWall_Destroy(Actor* thisx, PlayState* play) {
@@ -8410,6 +8421,14 @@ index 0000000000000000000000000000000000000000..9ce7b332eb20418a556d0158a748514b
 +
 +        this->planeAlpha = (alpha < 255) ? alpha : 255;
 +    }
++    if (this->fogOnly) {
++        Vec3f vec;
++
++        // Only the side, which Draw uses to face the plane toward Link.
++        Actor_WorldToActorCoords(&this->actor, &vec, &player->actor.world.pos);
++        this->side = (vec.z < 0.0f) ? 0 : 1;
++        return;
++    }
 +    this->actionFunc(this, play);
 +}
 +
@@ -8488,10 +8507,10 @@ index 0000000000000000000000000000000000000000..9ce7b332eb20418a556d0158a748514b
 +}
 diff --git a/soh/src/overlays/actors/ovl_Ml_FogWall/z_ml_fogwall.h b/soh/src/overlays/actors/ovl_Ml_FogWall/z_ml_fogwall.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..d9728e0c1c0e835ec2f6239a963b6223115a0448
+index 0000000000000000000000000000000000000000..5e0fef881821fc06d3c425716f08205dda5a820b
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_FogWall/z_ml_fogwall.h
-@@ -0,0 +1,19 @@
+@@ -0,0 +1,20 @@
 +#ifndef Z_ML_FOGWALL_H
 +#define Z_ML_FOGWALL_H
 +
@@ -8508,7 +8527,8 @@ index 0000000000000000000000000000000000000000..d9728e0c1c0e835ec2f6239a963b6223
 +    /* 0x014E */ u8 side;
 +    /* 0x014F */ u8 unk_14F;
 +    /* 0x0150 */ MlFogWallActionFunc actionFunc;
-+} MlFogWall; // size = 0x0154
++    /* 0x0154 */ u8 fogOnly; // MissingShip (MS-147): the transition entry doesn't touch this wall's room
++} MlFogWall;
 +
 +#endif
 diff --git a/soh/src/overlays/actors/ovl_Ml_HakaLift/z_ml_hakalift.c b/soh/src/overlays/actors/ovl_Ml_HakaLift/z_ml_hakalift.c
