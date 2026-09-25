@@ -128,7 +128,7 @@ The 3, 5, 6 and 0x1F slots are ported. Still to do:
 - Navi 0x80602000.
 - Bombchu 0x80607A00.
 - Player hooks 0x80606BA0, 0x80606BC8, 0x80600480, 0x80600D90.
-- The code past 0x80608000 (0x8064xxxx, 0x807Cxxxx) has not been located yet.
+- There is no ML code past 0x80608000 (MS-006): the old 0x8064xxxx / 0x807Cxxxx targets were data. The custom code jumps into the player overlay, which always loads at RAM 0x804D23B0.
 
 ---
 
@@ -265,6 +265,8 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 
 ### Done
 
+- MS-006: `tools/hookscan.py` re-derives every hook from every overlay's relocation table (plus `code` words that differ from MQ Debug). There are 20 live hook sites outside the player/pause menu, not the claimed 17 overlays (ten of those were vanilla). There is no code past 0x80608000. The player overlay's fixed RAM address is 0x804D23B0. Ledger section rewritten with a per-target status table.
+- MS-055: resolved by MS-006. There is no ML code past 0x80608000; the reported targets were data decoded as jumps.
 - MS-005: `tools/survey_actors.py --write` regenerates the inventory from the ROMs (placements from every scene/room header, spawners from a text-section spawn scan, changes from modcheck); Status and Verified columns are carried over by slot, and regeneration is lossless. 62 placed + 11 spawned + 7 unreached actors; every todo links its issue. New find: En_Dodongo placed in `spot10`.
 - MS-003: ledger rows 30–43 (six repointed slots, eight in-place actor edits, the asset header); Malon/cucco moved out of the code-patch table; `tools/checkledger.py` fails when a patched file is missing from the ledger (87/87 covered).
 - MS-001: all scripts resolve paths via `pipeline/mspaths.py` / `mspaths.sh` (env `MS_*` overrides); ZAPD config templated; archive verified identical (4636 resources).
