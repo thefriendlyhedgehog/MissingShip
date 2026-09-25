@@ -1,14 +1,12 @@
-"""Disassemble one ML actor overlay with its ActorInit, sections and data (for porting). Usage: dumpactor.py 0xNNN"""
-import os as _os, sys as _sys
-_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..', 'pipeline'))
-from mspaths import ML_ROM
+"""Disassemble one actor overlay of the hack with its ActorInit, sections and data (for porting). Usage: dumpactor.py 0xNNN"""
 import struct, sys
 from capstone import *
-from mlrom import Rom, entry
-ml = Rom(ML_ROM)
-code = ml.file(114)
+from mlrom import entry
+import hack
+ml = hack.HACK
+code = ml.file(hack.H.code_dma)
 aid = int(sys.argv[1], 0)
-vs, ve, vas, vae, ld, ini = entry(code, 0xF9440, 0x20, aid)
+vs, ve, vas, vae, ld, ini = entry(code, hack.ACTOR_TABLE, hack.ACTOR_STRIDE, aid)
 d = ml.file_at_vrom(vs)
 tail = struct.unpack('>I', d[-4:])[0]; o = len(d) - tail
 t, da, ro, bs, n = struct.unpack('>IIIII', d[o:o+20])

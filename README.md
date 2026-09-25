@@ -155,6 +155,16 @@ Override any path with an env var:
 
 ZAPD's config (`pipeline/Config_ML.xml`) is a template; each run writes the filled-in copy to `pipeline/out/`.
 
+### The hack the tools analyse
+
+The ROM tools in `tools/` read the hack and its baseline from `hacks/<name>/hack.json` (MS-090): each ROM's
+dmadata and `code` / player dma indices, `code`'s VRAM, the actor table, `Actor_Spawn`, and the hack's custom-code
+files. `hacks/ml` is the default; `MS_HACK` picks another. `python3 tools/hack.py` shows what it resolved. The
+tools assume the hack's `code` has zero shift against the baseline, as ML's does against PAL MQ Debug.
+
+`hacks/selftest` compares PAL MQ Debug with itself: every tool runs on it with no other change and reports no
+differences, e.g. `MS_HACK=hacks/selftest python3 tools/codediff.py`.
+
 ## Layout
 
 | Path | What |
@@ -164,7 +174,8 @@ ZAPD's config (`pipeline/Config_ML.xml`) is a template; each run writes the fill
 | `home/` | self-contained SHIP_HOME (profile, saves, `oot.o2r`) |
 | `profile/` | seed settings copied into `home/` on first run |
 | `pipeline/` | ROM → `.o2r` pipeline: ZAPD XMLs (`xml/scenes`, `xml/objects`), injectors, maps |
-| `tools/` | ML-vs-debug analysis: `modcheck`, `aligndiff`, `dumpactor`, `codediff`, `pldiff`, `mlcustom`, … |
+| `tools/` | hack-vs-baseline analysis: `modcheck`, `aligndiff`, `dumpactor`, `codediff`, `pldiff`, `mlcustom`, …; project checks: `check`, `genpatch`, `survey_actors`, … |
+| `hacks/` | per-hack configs for `tools/` (`ml`, `selftest`) |
 | `docs/ROADMAP.md` | review, gameplan, issues |
 | `docs/ENGINE_CHANGES.md` | every engine change, why it exists, and its drop-in path |
 | `docs/ML_ACTOR_INVENTORY.md` | per-actor port status |

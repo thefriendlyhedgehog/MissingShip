@@ -18,16 +18,19 @@ _sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), 
 from mspaths import SOH
 import struct, sys, collections, re
 from ovldiff import ML, DB
+import hack
 
-BOOT = (0x80000460, 0x80000460 + 0x11F10)
-CODE = (0x8001CE60, 0x8001CE60 + 0x13AF30)
-CUSTOM = (0x80600000, 0x80608000)          # dma 507, loaded by boot's last loader entry
-CODE_DMA, CUSTOM_DMA = 114, 507
+BOOT = hack.BOOT
+CODE = (hack.CODE_VRAM, hack.CODE_VRAM + hack.CODE_LEN)
+# ML: dma 507 at 0x80600000, loaded by boot's last loader entry. A hack without custom code scans the rest anyway.
+CUSTOM_DMA, *CUSTOM = hack.custom_region() if hack.CUSTOM else (None, 0, 0)
+CODE_DMA = hack.H.code_dma
 RAM_END = 0x80800000                        # 8 MB: a "target" beyond this is data decoded as an instruction
-# ML's player overlay (dma 102, text 0x21200) always loads at this RAM address: ML's heap layout is fixed. Derived from
-# the Hourglass hook (player +0x17E5C replaces vanilla `jal 0x80848F9C` = player +0x16D8C; the custom routine calls
-# 0x804E913C = that function) and confirmed by the two trampoline returns (+0x17E68, +0x20F40).
-PLAYER_DMA, PLAYER_RAM, PLAYER_LEN = 102, 0x804D23B0, 0x21200 + 0x1E30 + 0x310
+# The player overlay's fixed RAM address, when the hack's heap layout makes it fixed (config `player_ram`). ML's
+# (dma 102) was derived from the Hourglass hook (player +0x17E5C replaces vanilla `jal 0x80848F9C` = player +0x16D8C;
+# the custom routine calls 0x804E913C = that function) and confirmed by the two trampoline returns (+0x17E68, +0x20F40).
+PLAYER_RAM = getattr(hack.H, 'player_ram', None)
+PLAYER_LEN = len(ML.file(hack.H.player_dma)) if PLAYER_RAM else 0
 
 def W(d, o): return struct.unpack('>I', d[o:o+4])[0]
 
@@ -35,7 +38,7 @@ def region(t):
     if BOOT[0] <= t < BOOT[1]: return 'boot'
     if CODE[0] <= t < CODE[1]: return 'code'
     if CUSTOM[0] <= t < CUSTOM[1]: return 'custom'
-    if PLAYER_RAM <= t < PLAYER_RAM + PLAYER_LEN: return f'player +{t - PLAYER_RAM:#x}'
+    if PLAYER_RAM and PLAYER_RAM <= t < PLAYER_RAM + PLAYER_LEN: return f'player +{t - PLAYER_RAM:#x}'
     if 0x80000400 <= t < RAM_END: return 'unknown'
     return None                                # not an address: data, not a jump
 
@@ -61,7 +64,7 @@ actor_names = {}
 for l in open(SOH + '/include/tables/actor_table.h'):
     m = re.match(r'/\* (0x[0-9A-F]+) \*/ DEFINE_ACTOR\w*\((\w+)', l)
     if m: actor_names[int(m.group(1), 16)] = m.group(2)
-mc, dc = ML.file(CODE_DMA), DB.file(28)
+mc, dc = ML.file(CODE_DMA), DB.file(hack.B.code_dma)
 refs = collections.defaultdict(set)
 for o in range(0, len(mc) - 8, 4):
     v = W(mc, o)
@@ -70,11 +73,11 @@ for o in range(0, len(mc) - 8, 4):
 
 def name(i):
     if i == CODE_DMA: return 'code'
-    if i == CUSTOM_DMA: return 'ML custom code (dma 507)'
+    if i == CUSTOM_DMA: return f'custom code (dma {CUSTOM_DMA})'
     labels = set()
     for o in refs.get(i, ()):
-        if 0xF9440 <= o < 0xF9440 + 0x20 * 0x1D7 and (o - 0xF9440) % 0x20 == 0:
-            a = (o - 0xF9440) // 0x20
+        if hack.ACTOR_TABLE <= o < hack.ACTOR_TABLE + hack.ACTOR_STRIDE * hack.N_ACTORS and (o - hack.ACTOR_TABLE) % hack.ACTOR_STRIDE == 0:
+            a = (o - hack.ACTOR_TABLE) // hack.ACTOR_STRIDE
             labels.add(f'actor {a:#05x} {actor_names.get(a, "?")}')
         else:
             dn = dbg_by_vrom.get(W(dc, o))
@@ -110,7 +113,7 @@ for i in range(len(ML.E)):
     if ov: scan(i, d, ov[0], ov[3])
 
 # ML's custom code: which of its own calls leave it (into code is normal; anything else is a lead)
-cc = ML.file(CUSTOM_DMA)
+cc = ML.file(CUSTOM_DMA) if CUSTOM_DMA is not None else b''
 out_of_custom = []          # (offset, insn, target, region) for targets outside code/boot/custom
 for o in range(0, len(cc), 4):
     w = W(cc, o)

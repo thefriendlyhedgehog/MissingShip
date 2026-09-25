@@ -10,11 +10,12 @@ _sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), 
 from mspaths import SOH
 import re, struct, glob
 from pldiff import load, ML, DB
+from hack import H, B
 KDIR = SOH + '/src/overlays/misc/ovl_kaleido_scope/'
 ENUM = {'AGE_REQ_ADULT': 0, 'AGE_REQ_CHILD': 1, 'AGE_REQ_NONE': 9,
         'PAUSE_ITEM': 0, 'PAUSE_MAP': 1, 'PAUSE_QUEST': 2, 'PAUSE_EQUIP': 3}
 FMT = {'s8': 'b', 'u8': 'B', 's16': 'h', 'u16': 'H', 's32': 'i', 'u32': 'I', 'f32': 'f'}
-m = load(ML, 114, 0x110344); b = load(DB, 28, 0x110344)
+m = load(ML, H.code_dma, B.kaleido_entry); b = load(DB, B.code_dma, B.kaleido_entry)
 mdat, bdat = m[0], b[0]
 start = m[1]
 def val(tok):

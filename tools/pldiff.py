@@ -4,14 +4,12 @@ Both ROMs keep the overlay's {vromStart, vromEnd, vramStart, vramEnd} at the sam
 (zero shift against MQ debug), so the entry offset locates each side. Reloc'd words are masked by the
 overlay's own relocation table so only real edits are reported. Usage: pldiff.py <code_offset_of_entry>
 """
-import os as _os, sys as _sys
-_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..', 'pipeline'))
-from mspaths import DEBUG_ROM, ML_ROM
 import struct, sys
 from capstone import *
-from mlrom import Rom
-ML=Rom(ML_ROM)
-DB=Rom(DEBUG_ROM)
+import hack
+from hack import H, B
+ML=hack.HACK
+DB=hack.BASE
 md=Cs(CS_ARCH_MIPS, CS_MODE_MIPS32|CS_MODE_BIG_ENDIAN)
 def load(rom, codeidx, off):
     c=rom.file(codeidx)
@@ -23,7 +21,7 @@ def load(rom, codeidx, off):
     relt={r&0xFFFFFF:(r>>24)&0x3F for r in rel}
     return d,t,da,ro,relt,vas
 def diff(off):
-    m=load(ML,114,off); b=load(DB,28,off)
+    m=load(ML,H.code_dma,off); b=load(DB,B.code_dma,off)
     print(f'ML text {m[1]:#x} data {m[2]:#x} rodata {m[3]:#x} | DBG text {b[1]:#x} data {b[2]:#x} rodata {b[3]:#x}')
     out=[]
     for o in range(0,min(m[1],b[1]),4):

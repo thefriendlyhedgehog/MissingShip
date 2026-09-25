@@ -1,12 +1,8 @@
-"""Identify ML code functions by the debug strings they reference (lui/addiu pairs -> C strings)."""
-import os as _os, sys as _sys
-_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..', 'pipeline'))
-from mspaths import ML_ROM
+"""Identify the hack's code functions by the debug strings they reference (lui/addiu pairs -> C strings)."""
 import struct, sys
 from capstone import *
-from mlrom import Rom
-ML=Rom(ML_ROM)
-code=ML.file(114); BASE=0x8001CE60
+import hack
+code=hack.HACK.file(hack.H.code_dma); BASE=hack.CODE_VRAM
 md=Cs(CS_ARCH_MIPS, CS_MODE_MIPS32|CS_MODE_BIG_ENDIAN); md.detail=True
 def cstr(addr):
     o=addr-BASE

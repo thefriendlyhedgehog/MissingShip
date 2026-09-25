@@ -1,9 +1,9 @@
 """Alignment-tolerant instruction diff (difflib over relocation-masked text) for actors ML patched with
 inserted/removed instructions. Usage: aligndiff.py 0xACTOR [mq_actor_id]"""
 import sys, difflib, re
-from ovldiff import load, ML, DB
+from ovldiff import load_pair
 aid = int(sys.argv[1], 0); bid = int(sys.argv[2], 0) if len(sys.argv) > 2 else aid
-m = load(ML, 114, 0xF9440, aid); b = load(DB, 28, 0xF9440, bid)
+m, b = load_pair(aid, bid)
 def norm(s):   # mask branch targets and local addresses so a shift does not flag every branch
     s = re.sub(r'0x[0-9a-f]{3,}$', 'X', s) if s.split()[0].startswith('b') or s.split()[0] in ('j', 'jal') else s
     return s

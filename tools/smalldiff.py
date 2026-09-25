@@ -2,14 +2,14 @@
 Text words are shown disassembled, data words raw with their section offset. Usage: smalldiff.py 0xID [...]"""
 import sys, struct
 from capstone import *
-from ovldiff import load, ML, DB
+from ovldiff import load_pair
 md = Cs(CS_ARCH_MIPS, CS_MODE_MIPS32 | CS_MODE_BIG_ENDIAN)
 def dis(w, a):
     l = list(md.disasm(struct.pack('>I', w), a))
     return f'{l[0].mnemonic} {l[0].op_str}' if l else f'.word {w:#010x}'
 for arg in sys.argv[1:]:
     aid = int(arg, 0)
-    m = load(ML, 114, 0xF9440, aid); b = load(DB, 28, 0xF9440, aid)
+    m, b = load_pair(aid)
     md_, bd = m[0], b[0]; t = m[1]
     print(f'== {aid:#05x} text {t:#x} data {m[2]:#x} rodata {m[3]:#x}')
     for o in range(0, t + m[2] + m[3], 4):

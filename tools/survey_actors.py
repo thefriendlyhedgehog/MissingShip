@@ -18,10 +18,10 @@ from ml_map import SCENES
 from modcheck import check
 from ovldiff import ML, DB
 from mlrom import entry
+import hack
 
-ACTOR_TABLE = 0xF9440
-N_ACTORS = 0x1D7
-SPAWN, SPAWN_CHILD = 0x80031F50, 0x80032458   # Actor_Spawn: id in $a2; Actor_SpawnAsChild: id in $a3
+ACTOR_TABLE, ACTOR_STRIDE, N_ACTORS = hack.ACTOR_TABLE, hack.ACTOR_STRIDE, hack.N_ACTORS
+SPAWN, SPAWN_CHILD = hack.SPAWN, hack.SPAWN_CHILD   # Actor_Spawn: id in $a2; Actor_SpawnAsChild: id in $a3
 INV = _os.path.join(ROOT, 'docs', 'ML_ACTOR_INVENTORY.md')
 
 # ---- names ---------------------------------------------------------------------------------------------------
@@ -115,16 +115,17 @@ def scan(d, label):
                 val = None                                    # any other write: id not known statically
         if val is not None and val < N_ACTORS: spawned[val].add(label)
 
-mc = ML.file(114)
-scan(mc, 'code'); scan(text_of(ML.file(102)), 'player'); scan(ML.file(507), 'custom code')
+mc = ML.file(hack.H.code_dma)
+scan(mc, 'code'); scan(text_of(ML.file(hack.H.player_dma)), 'player')
+for _dma, _ in hack.CUSTOM: scan(ML.file(_dma), 'custom code')
 for a in range(N_ACTORS):
-    vs = entry(mc, ACTOR_TABLE, 0x20, a)[0]
+    vs = entry(mc, ACTOR_TABLE, ACTOR_STRIDE, a)[0]
     if vs and vs in ML.byvrom: scan(text_of(ML.file(ML.byvrom[vs])), NAME.get(a, hex(a)))
 
 # ---- changes -------------------------------------------------------------------------------------------------
-dc = DB.file(28)
+dc = DB.file(hack.B.code_dma)
 def change(a):
-    mvs = entry(mc, ACTOR_TABLE, 0x20, a)[0]; dvs = entry(dc, ACTOR_TABLE, 0x20, a)[0]
+    mvs = entry(mc, ACTOR_TABLE, ACTOR_STRIDE, a)[0]; dvs = entry(dc, ACTOR_TABLE, ACTOR_STRIDE, a)[0]
     if not mvs and not dvs: return 'in code' if a in (0x15, 0x39) else None
     if not mvs: return 'deleted by ML'
     if not dvs: return f'ML custom ({ML.E[ML.byvrom[mvs]][1] - mvs:#x} bytes)'

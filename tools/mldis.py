@@ -1,11 +1,8 @@
-import os as _os, sys as _sys
-_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..', 'pipeline'))
-from mspaths import ML_ROM
 import struct, sys
 from capstone import *
-from mlrom import Rom, entry
+import hack
 def disasm(dma, label):
-    ml=Rom(ML_ROM)
+    ml=hack.HACK
     d=ml.file(dma)
     tail=struct.unpack('>I',d[-4:])[0]; o=len(d)-tail
     t,da,ro,bs,n=struct.unpack('>IIIII',d[o:o+20])

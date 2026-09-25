@@ -10,7 +10,7 @@ listed with what only one side has. -v also prints matching pairs.
 """
 import struct, sys, re
 from collections import Counter
-from ovldiff import load, ML, DB
+from ovldiff import load_pair
 
 def functions(side):
     d, t, da, ro, ins, vas = side
@@ -45,7 +45,7 @@ def norm(s):
 def main():
     ids = [int(a, 0) for a in sys.argv[1:] if not a.startswith('-')]
     aid, did = ids[0], ids[1] if len(ids) > 1 else ids[0]
-    m, b = load(ML, 114, 0xF9440, aid), load(DB, 28, 0xF9440, did)
+    m, b = load_pair(aid, did)
     fm, fb = functions(m), functions(b)
     print(f'actor {aid:#x}: {len(fm)} functions in ML, {len(fb)} in the debug ROM')
     for i in range(max(len(fm), len(fb))):

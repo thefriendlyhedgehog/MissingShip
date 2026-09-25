@@ -1,0 +1,26 @@
+{
+  "name": "Self-test: the baseline against itself",
+  "comment": "MS-090's second config. The 'hack' is PAL MQ Debug, so every tool must run with only this file changed and report no differences: MS_HACK=hacks/selftest python3 tools/<tool>.py ...",
+  "baseline": {
+    "name": "OoT PAL MQ Debug",
+    "rom": "roms/oot-mq-debug-pal.z64",
+    "dmadata": "0x12F70",
+    "boot_dma": "1",
+    "boot_vram": "0x80000460",
+    "code_dma": "28",
+    "code_vram": "0x8001CE60",
+    "player_dma": "34",
+    "actor_table": "0xF9440",
+    "actor_count": "0x1D7",
+    "actor_stride": "0x20",
+    "actor_spawn": "0x80031F50",
+    "actor_spawn_as_child": "0x80032458",
+    "kaleido_entry": "0x110344"
+  },
+  "hack": {
+    "rom": "roms/oot-mq-debug-pal.z64",
+    "dmadata": "0x12F70",
+    "code_dma": "28",
+    "player_dma": "34"
+  }
+}

@@ -1,15 +1,14 @@
 """Aligned instruction diff of one actor overlay, ML vs debug ROM, relocations masked."""
-import os as _os, sys as _sys
-_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..', 'pipeline'))
-from mspaths import DEBUG_ROM, ML_ROM
 import struct, sys, difflib
 from capstone import *
-from mlrom import Rom, entry
+from mlrom import entry
+import hack
+from hack import H, B, ACTOR_TABLE, ACTOR_STRIDE
 md=Cs(CS_ARCH_MIPS, CS_MODE_MIPS32|CS_MODE_BIG_ENDIAN)
-ML=Rom(ML_ROM)
-DB=Rom(DEBUG_ROM)
+ML=hack.HACK
+DB=hack.BASE
 def load(rom, codeidx, base, aid):
-    vs,ve,vas,vae,_,ini=entry(rom.file(codeidx), base, 0x20, aid)
+    vs,ve,vas,vae,_,ini=entry(rom.file(codeidx), base, ACTOR_STRIDE, aid)
     d=rom.file_at_vrom(vs)
     tail=struct.unpack('>I',d[-4:])[0]; o=len(d)-tail
     t,da,ro,bs,n=struct.unpack('>IIIII',d[o:o+20])
@@ -24,9 +23,12 @@ def load(rom, codeidx, base, aid):
         elif i.mnemonic in ('jal','j'): s=f'{i.mnemonic} {i.op_str}'   # absolute into code: keep (ML code shifts 0x20 though)
         ins.append((i.address,s,f'{i.mnemonic} {i.op_str}'))
     return d,t,da,ro,ins,vas
+def load_pair(aid, bid=None):
+    """load() of actor aid in the hack and of bid (default the same slot) in the baseline."""
+    return load(ML, H.code_dma, ACTOR_TABLE, aid), load(DB, B.code_dma, ACTOR_TABLE, aid if bid is None else bid)
 if __name__=='__main__':
     aid=int(sys.argv[1],0)
-    m=load(ML,114,0xF9440,aid); b=load(DB,28,0xF9440,aid)
+    m,b=load_pair(aid)
     def key(x):   # also neutralise the uniform 0x20 code shift in jal targets
         s=x[1]
         if s.startswith('jal 0x'): 

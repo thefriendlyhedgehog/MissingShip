@@ -1,0 +1,26 @@
+{
+  "name": "The Missing Link v2.0",
+  "comment": "Per-hack config for tools/ (MS-090). Numbers are strings so they can be hex. A ROM path is relative to the repo root; leave it out to use pipeline/mspaths.py's (MS_ML_ROM / MS_DEBUG_ROM). Sizes come from the files themselves.",
+  "baseline": {
+    "name": "OoT PAL MQ Debug",
+    "dmadata": "0x12F70",
+    "boot_dma": "1",
+    "boot_vram": "0x80000460",
+    "code_dma": "28",
+    "code_vram": "0x8001CE60",
+    "player_dma": "34",
+    "actor_table": "0xF9440",
+    "actor_count": "0x1D7",
+    "actor_stride": "0x20",
+    "actor_spawn": "0x80031F50",
+    "actor_spawn_as_child": "0x80032458",
+    "kaleido_entry": "0x110344"
+  },
+  "hack": {
+    "dmadata": "0x12F70",
+    "code_dma": "114",
+    "player_dma": "102",
+    "player_ram": "0x804D23B0",
+    "custom_code": [{"dma": "507", "vram": "0x80600000"}]
+  }
+}
