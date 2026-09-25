@@ -148,6 +148,7 @@ Milestones, in order. Each milestone lists its issue IDs.
    - Windows and Linux builds, like upstream SoH.
    - Long-term; macOS is the test platform until then.
 9. **Porting kit** (MS-090 … MS-093)
+   - **Deferred (owner, 2026-09-25):** MS-091 … MS-093 are done in a separate chat once Missing Link is finished (MS-090 is done). The Windows / Linux builds (MS-080 / MS-081, and MS-082's check on those OSes) also wait for the end.
    - Turn this repo's method and tools into a reusable way to port other OoT romhacks to the SoH engine, until there is a ready-made porting option or the hacks are all done.
 
 ---
