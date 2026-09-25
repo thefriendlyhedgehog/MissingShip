@@ -2507,7 +2507,7 @@ index f0ad28568bbc8ef2223b7330fa4300a1b1a6b0e9..c0ecf8d8ee231df0dee3d951bcbbdb92
      }
      return (Vec3s*)SEGMENTED_TO_VIRTUAL(cameraDataList[camId].camPosData);
 diff --git a/soh/src/code/z_demo.c b/soh/src/code/z_demo.c
-index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..d41aec8433916d3034c9d5ff4ff75dcde5a5a5f9 100644
+index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..7cf92c52250b382ce1b32f150a43598184721da3 100644
 --- a/soh/src/code/z_demo.c
 +++ b/soh/src/code/z_demo.c
 @@ -1,5 +1,7 @@
@@ -2596,7 +2596,20 @@ index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..d41aec8433916d3034c9d5ff4ff75dcd
          gSaveContext.cutsceneIndex = 0;
  
          switch (cmd->base) {
-@@ -920,14 +908,17 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
+@@ -731,9 +719,10 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
+                 if (GameInteractor_Should(VB_GIVE_ITEM_SONG, true, ITEM_SONG_REQUIEM)) {
+                     Item_Give(play, ITEM_SONG_REQUIEM);
+                 }
+-                play->nextEntranceIndex = ENTR_DESERT_COLOSSUS_EAST_EXIT;
++                // MissingShip (MS-151): ML's only user is Deku Road's cutscene layer after the ranch. ML reads 0x123 + layer
++                // 4 = its row 0x127 (the Deku Grove grotto, spawn 2), a scene with no layer 4, so no cutscene index.
++                play->nextEntranceIndex = MlEntrance_ToSoh(0x127);
+                 play->transitionTrigger = TRANS_TRIGGER_START;
+-                gSaveContext.cutsceneIndex = 0xFFF0;
+                 play->transitionType = TRANS_TYPE_FADE_WHITE;
+                 break;
+             case 23:
+@@ -920,14 +909,17 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
                  play->transitionType = TRANS_TYPE_FADE_BLACK;
                  break;
              case 55:
@@ -2618,7 +2631,7 @@ index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..d41aec8433916d3034c9d5ff4ff75dcd
                  play->transitionTrigger = TRANS_TRIGGER_START;
                  play->transitionType = TRANS_TYPE_FADE_BLACK;
                  break;
-@@ -956,7 +947,8 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
+@@ -956,7 +948,8 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
                  play->transitionType = TRANS_TYPE_FADE_BLACK;
                  break;
              case 61:
@@ -2628,7 +2641,7 @@ index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..d41aec8433916d3034c9d5ff4ff75dcd
                  gSaveContext.cutsceneIndex = 0xFFF0;
                  play->transitionTrigger = TRANS_TRIGGER_START;
                  play->transitionType = TRANS_TYPE_FADE_BLACK;
-@@ -982,8 +974,9 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
+@@ -982,8 +975,9 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
                  break;
              case 65:
                  play->linkAgeOnLoad = 1;
@@ -2640,7 +2653,7 @@ index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..d41aec8433916d3034c9d5ff4ff75dcd
                  play->transitionTrigger = TRANS_TRIGGER_START;
                  play->transitionType = TRANS_TYPE_FADE_BLACK;
                  break;
-@@ -1035,9 +1028,10 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
+@@ -1035,9 +1029,10 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
                  break;
              case 73:
                  play->linkAgeOnLoad = 1;
@@ -2653,7 +2666,7 @@ index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..d41aec8433916d3034c9d5ff4ff75dcd
                  play->transitionType = TRANS_TYPE_FADE_BLACK;
                  break;
              case 74:
-@@ -1215,9 +1209,10 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
+@@ -1215,9 +1210,10 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
                  }
                  break;
              case 105:
@@ -2666,7 +2679,7 @@ index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..d41aec8433916d3034c9d5ff4ff75dcd
                  play->transitionType = TRANS_TYPE_FADE_BLACK;
                  break;
              case 106:
-@@ -1317,6 +1312,28 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
+@@ -1317,6 +1313,28 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
                  play->transitionTrigger = TRANS_TRIGGER_START;
                  play->transitionType = TRANS_TYPE_FADE_WHITE;
                  break;
@@ -2695,7 +2708,7 @@ index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..d41aec8433916d3034c9d5ff4ff75dcd
          }
      }
  }
-@@ -2198,6 +2215,7 @@ void Cutscene_HandleEntranceTriggers(PlayState* play) {
+@@ -2198,6 +2216,7 @@ void Cutscene_HandleEntranceTriggers(PlayState* play) {
              (!Flags_GetEventChkInf(entranceCutscene->flag) || (entranceCutscene->flag == EVENTCHKINF_EPONA_OBTAINED)) &&
              (gSaveContext.cutsceneIndex < 0xFFF0) && ((u8)gSaveContext.linkAge == requiredAge) &&
              (gSaveContext.respawnFlag <= 0)) {
@@ -2703,7 +2716,7 @@ index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..d41aec8433916d3034c9d5ff4ff75dcd
              Flags_SetEventChkInf(entranceCutscene->flag);
              if (GameInteractor_Should(VB_PLAY_ENTRANCE_CS, true, entranceCutscene->flag, entranceCutscene->entrance)) {
                  Cutscene_SetSegment(play, entranceCutscene->segAddr);
-@@ -2261,6 +2279,7 @@ void Cutscene_HandleConditionalTriggers(PlayState* play) {
+@@ -2261,6 +2280,7 @@ void Cutscene_HandleConditionalTriggers(PlayState* play) {
  }
  
  void Cutscene_SetSegment(PlayState* play, void* segment) {
