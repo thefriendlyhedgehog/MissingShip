@@ -19,3 +19,10 @@ M5 Front end, M6 Drop-in, Platforms, Porting kit), labels port/infra/platform/ne
 carry the MS id and `Fixes #N`; move closed rows to ROADMAP's Done section. New issues take the next free MS id.
 
 Related: [[missingship-goal]], [[missing-link-soh-port]].
+
+**Paths (MS-001, 2026-09-25):** all tools/pipeline scripts resolve inputs via `pipeline/mspaths.py` / `mspaths.sh`
+(env `MS_*` overrides; `python3 pipeline/mspaths.py` prints them). Debug ROM default = `roms/oot-mq-debug-pal.z64`
+(locally it still lives at /Volumes/MacMiniExternal/Games/SHIPofHarkinian-ROMS/ -- set MS_DEBUG_ROM until the user
+commits it). `cycle.sh` is gone; `ms_cycle.sh` is the only build script. Verify pipeline refactors by comparing a
+per-entry md5 manifest of pipeline/ml.otr before/after, and `git restore` the rebuilt .o2r/.otr (identical content)
+instead of committing them.
