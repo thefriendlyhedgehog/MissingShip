@@ -1265,7 +1265,7 @@ index 0000000000000000000000000000000000000000..6e1151951b893dfd773edc4f5470296c
 +
 +#endif
 diff --git a/soh/src/code/z_actor.c b/soh/src/code/z_actor.c
-index 54c33e2cfa96fdcc53dc1cea4544383cfe034f0c..474c99065d8fd1bd22eb889dfd7b1b0cb47c124a 100644
+index 54c33e2cfa96fdcc53dc1cea4544383cfe034f0c..26249cfb40eb60572ad8828b6384f9368372f6c9 100644
 --- a/soh/src/code/z_actor.c
 +++ b/soh/src/code/z_actor.c
 @@ -1,4 +1,5 @@
@@ -1274,7 +1274,7 @@ index 54c33e2cfa96fdcc53dc1cea4544383cfe034f0c..474c99065d8fd1bd22eb889dfd7b1b0c
  #include "vt.h"
  
  #include "overlays/actors/ovl_Arms_Hook/z_arms_hook.h"
-@@ -1123,6 +1124,60 @@ void TitleCard_Update(PlayState* play, TitleCardContext* titleCtx) {
+@@ -1123,6 +1124,62 @@ void TitleCard_Update(PlayState* play, TitleCardContext* titleCtx) {
      }
  }
  
@@ -1290,7 +1290,9 @@ index 54c33e2cfa96fdcc53dc1cea4544383cfe034f0c..474c99065d8fd1bd22eb889dfd7b1b0c
 +    u8 g = 255;
 +    u8 b = 138;
 +    s32 x = 88;
-+    s32 y = 68;
++    // ML draws its 144x16 title at (88, 68). inject_titles.py pads it into SoH's 144x24 slot 4 rows down, so the
++    // padded texture starts 4 rows higher to put ML's rows exactly where ML draws them.
++    s32 y = 68 - 4;
 +
 +    switch (play->sceneNum) {
 +        case 0x55: // Kokiri Forest's slot
@@ -1335,7 +1337,7 @@ index 54c33e2cfa96fdcc53dc1cea4544383cfe034f0c..474c99065d8fd1bd22eb889dfd7b1b0c
  void TitleCard_Draw(PlayState* play, TitleCardContext* titleCtx) {
      s32 width;
      s32 height;
-@@ -1130,6 +1185,10 @@ void TitleCard_Draw(PlayState* play, TitleCardContext* titleCtx) {
+@@ -1130,6 +1187,10 @@ void TitleCard_Draw(PlayState* play, TitleCardContext* titleCtx) {
      s32 doubleWidth;
      s32 titleY;
  
@@ -1346,7 +1348,7 @@ index 54c33e2cfa96fdcc53dc1cea4544383cfe034f0c..474c99065d8fd1bd22eb889dfd7b1b0c
      if (titleCtx->alpha != 0) {
          width = titleCtx->width;
          height = titleCtx->height;
-@@ -1697,7 +1756,9 @@ void Actor_UpdateBgCheckInfo(PlayState* play, Actor* actor, f32 wallCheckHeight,
+@@ -1697,7 +1758,9 @@ void Actor_UpdateBgCheckInfo(PlayState* play, Actor* actor, f32 wallCheckHeight,
               BgCheck_EntitySphVsWall4(&play->colCtx, &sp64, &actor->world.pos, &actor->prevPos, wallCheckRadius,
                                        &actor->wallPoly, &bgId, actor, wallCheckHeight))) {
              wallPoly = actor->wallPoly;

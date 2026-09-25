@@ -5,6 +5,8 @@ IA8 **144x24** = 3456. The engine draws the card with hardcoded 144x24
 (z_player.c: TitleCard_InitPlaceName(..., 144, 24, 20)), so rather than patch the engine we pad
 ML's image into a 144x24 canvas (IA8 0x00 = transparent) and reuse VANILLA's resource header
 verbatim -- same format and dimensions, only the pixels change.
+The padding puts ML's rows 4 rows down, so the engine's ML title draw (z_actor.c MlTitleCard_Draw) starts the
+texture at y 64, not ML's 68 (MS-094: the titles sat 4 px low).
 Resources live at textures/g_pn_XX/<Name>ENGTex and ...JPNTex; the g_pn_XX name for a scene id comes
 from scene_table.h's second DEFINE_SCENE argument.
 """

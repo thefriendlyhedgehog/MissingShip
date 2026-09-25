@@ -234,7 +234,7 @@ override 0x806023E0.
 | Navi's sounds muted (fairy dash/vanish/fly, Hey/Listen/Watch out/call, NA_HELLO_2) + Skull Kid laugh | 0x800F738C → 0x80602D00 (IDs & 0xF1FF) | code_800F7260.c `MlAudio_IsMuted` |
 | Dispersed sparkles off (`EffectSsKiraKira_SpawnDispersed` returns at once) | 0x80028BB0 `jr $ra` | z_effect_soft_sprite_old_init.c |
 | Wall push-out skipped for 2 frames after a room/scene change, and for the next 2 calls after the Deep Woods corridor teleport | 0x8002E5CC → 0x80602C80; counters 0x80609FF0 (0x80600E80) / 0x80602038 | new `code/ml_state.c`, z_actor.c, Ml_FogWall, z_player.c |
-| Area title cards: ML ribbon (custom-code tex +0x3BE0, 160x8 IA16) tinted per scene + white title at (88,68); boss slot 0x18 vanilla | 0x800319A8 → 0x806037F0 | z_actor.c `MlTitleCard_Draw`, `ml_titlecard_banner.inc` |
+| Area title cards: ML ribbon (custom-code tex +0x3BE0, 160x8 IA16) tinted per scene + white title at (88,68) (drawn at y 64 because inject_titles.py pads ML's 144x16 image 4 rows down into the 144x24 slot; MS-094); boss slot 0x18 vanilla | 0x800319A8 → 0x806037F0 | z_actor.c `MlTitleCard_Draw`, `ml_titlecard_banner.inc` |
 | World-map area remap 1→4, 4→9, 10→6, 9→1, 6→10 | 0x800993E4 → 0x80607D00 | z_scene.c misc settings |
 | Save resumes at its saved entrance outside dungeons (vanilla default case nop'd) | 0x800A85CC.. | z_sram.c `Sram_OpenSave` |
 | `Player_IsChildWithHylianShield` true for a child with no shield | 0x8008E9E8 | z_player_lib.c |
