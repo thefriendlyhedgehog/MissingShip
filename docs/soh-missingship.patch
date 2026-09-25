@@ -9597,7 +9597,7 @@ index 0000000000000000000000000000000000000000..6b618fcef761cadd302b6be4d31eccae
 +#endif
 diff --git a/soh/src/overlays/actors/ovl_Ml_MThunder/z_ml_mthunder.c b/soh/src/overlays/actors/ovl_Ml_MThunder/z_ml_mthunder.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..edc85432b1a447cf4036397e2793e0947f111725
+index 0000000000000000000000000000000000000000..df243ecff69f85949adb370e50cfab3caac26820
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_MThunder/z_ml_mthunder.c
 @@ -0,0 +1,292 @@
@@ -9841,10 +9841,10 @@ index 0000000000000000000000000000000000000000..edc85432b1a447cf4036397e2793e094
 +// unsheathing: skelAnime.animation == gPlayerAnim_link_normal_normal2fighter_free, compared in z_player.c because
 +// SoH asset symbols are per-translation-unit copies, so the pointer only matches inside the file that set it.
 +void MlMThunder_PlayerUpdate(Player* player, PlayState* play, bool unsheathing) {
-+    // ML takes the sword back on this entrance (its entrance 0x400, remapped by the pipeline).
-+    if (gSaveContext.entranceIndex == ENTR_LON_LON_RANCH_ENTRANCE) {
-+        gSaveContext.inventory.ammo[SLOT_SLINGSHOT] = 0;
-+    }
++    // ML clears the sword marker while gSaveContext.entranceIndex == 0x400 in ML's own numbering (custom code
++    // 0x80602F94). Nothing in ML reaches 0x400: only cutscene destination 72 sets it, and no ML cutscene uses 72;
++    // no exit, grotto or code does either. It is not ported: 0x400 shares SoH's ranch entrance (0x157) with ML's
++    // ordinary ranch entrances, so the check fired on every ranch visit and took the sword away (MS-148).
 +
 +    if (gSaveContext.inventory.ammo[SLOT_SLINGSHOT] != 40) {
 +        return;
