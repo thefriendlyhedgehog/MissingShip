@@ -115,7 +115,7 @@ The 3, 5, 6 and 0x1F slots are ported. Still to do:
 | File select (dma 100) | 1 forced branch (+0xC9D8). Not ported. |
 | Opening (dma 99) | 3 words: new-game / attract-mode entrance and cutscene index. Not ported. |
 | map_mark_data (dma 103) | 58 data words: dungeon-map chest / boss markers. **Not ported.** |
-| map_i_static (dma 113), map_48x85_static (dma 112) | redrawn dungeon minimaps and pause dungeon maps. **Not ported** (the minimap index is room + 190). |
+| map_i_static (dma 113), map_48x85_static (dma 112) | redrawn dungeon minimaps and pause dungeon maps. **Ported** (MS-022: 32 textures, the room + 190 index and ML's map tables). |
 | staff_message_data_static (dma 110) | ML's credits text. Not ported. |
 | Skyboxes | `vr_fine1_static` and `vr_cloud2_static` (+ palettes) redrawn. Not ported. |
 | link_animetion (dma 146, 2.5 MB) | Link's animation data changed. Not ported (goes with the Link port). |
@@ -202,7 +202,7 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 |---|---|---|---|
 | [MS-020](https://github.com/thefriendlyhedgehog/MissingShip/issues/13) | port | Texture aliases (like `inject_objects.py` ALIASES): push blocks (gameplay_dangeon_keep), chests (object_box, plus the curve skeleton), bomb-flower leaves, boss door, haka door, `g1f1fiftTopTex`. | ML textures shown under the vanilla paths. |
 | [MS-021](https://github.com/thefriendlyhedgehog/MissingShip/issues/14) | port | Beamos (object_vm) body and eyelid DLs, Saria right-hand limb (object_sa). | DL aliases shipped. |
-| [MS-022](https://github.com/thefriendlyhedgehog/MissingShip/issues/15) | port | Dungeon minimaps and pause dungeon maps (map_i_static dma 113, map_48x85_static dma 112), plus ML's minimap index (room + 190, 0x80080D20). | ML's maps show in ydan / HAKAdan / Bmori1. |
+| [MS-022](https://github.com/thefriendlyhedgehog/MissingShip/issues/15) | port | Dungeon minimaps and pause dungeon maps (map_i_static dma 113, map_48x85_static dma 112), plus ML's minimap index (room + 190, 0x80080D20). | ML's maps show in ydan / HAKAdan / Bmori1. **Done:** 25 minimaps + 7 pause maps shipped, index and ML's map tables in the engine (ledger 48). In-game check pending. |
 | [MS-023](https://github.com/thefriendlyhedgehog/MissingShip/issues/16) | port | map_mark_data (dma 103, 58 data words): dungeon-map chest / boss markers. | Markers match ML. |
 | [MS-024](https://github.com/thefriendlyhedgehog/MissingShip/issues/17) | port | Credits text (staff_message_data_static, dma 110). | Injected as a resource. |
 | [MS-025](https://github.com/thefriendlyhedgehog/MissingShip/issues/18) | port | Skyboxes `vr_fine1` and `vr_cloud2` (+ palettes; ML dma 128/129, 138/139). | Injected. |
