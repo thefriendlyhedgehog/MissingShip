@@ -150,15 +150,15 @@ def _destination_codes():
 # entrance table at entrance + layer, so ML lands on its own row there (MS-151).
 CODE_LAYER = {}
 CODE_TO_ENTRANCE = _destination_codes()
-# Destination cases ML itself patched (code diff vs the MQ debug ROM at 0x80066000-0x80066B48): code -> the ML row it
+# Destination cases ML itself patched (code diff vs the MQ debug ROM at 0x80065428-0x80066B48): code -> the ML row it
 # lands on (entrance + layer 4; every one sets cutsceneIndex 0xFFF0). The engine's switch reproduces them with
-# MissingShip entrance groups, so their codes are left alone.
-# 56: the Fishing Pond intro -> 0x420 (pond). 55: the pond's second cutscene -> 0x3FC (Cluck Cluck Ranch).
-# 61: the ranch's -> 0x400 (Deku Road). 65, 73: -> 0x40C (Kokiri Forest). 105: Kokiri Forest's -> 0x410 (the Deep
-# Woods grotto). Before MS-151 only 56 was known, and the rest were rewritten to vanilla targets.
-# 22 is vanilla's in ML (it gives Requiem of Spirit), but the engine reproduces it in ML's terms too, so the song isn't
-# lost to the rewrite: Deku Road's layer -> 0x123 + layer 4 = 0x127 (the Deku Grove grotto).
-ML_PATCHED_CODES = {56: 0x424, 55: 0x400, 61: 0x404, 65: 0x410, 73: 0x410, 105: 0x414, 22: 0x127}
+# MissingShip entrance groups, so their codes are left alone. Together they are ML's credits tour after the Hollow
+# Root Keep boss: pond intro (56) -> pond (55) -> Cluck Cluck Ranch (61) -> Deku Road (22) -> Deku Grove (51) ->
+# Monktown Valley (65) -> Kokiri Forest (105) -> the Deep Woods grotto (3) -> Deep Woods, the ending card. 4 and 73
+# are patched too but unused. (ML also changed a case with vanilla entrance 0xDB to 0xDC, 42 or 47; unused.)
+# Before MS-151 only 56 was known, and the rest were rewritten to vanilla targets.
+ML_PATCHED_CODES = {56: 0x424, 55: 0x400, 61: 0x404, 22: 0x408, 51: 0x40C, 65: 0x410, 73: 0x410, 105: 0x414,
+                    3: 0x418, 4: 0x418}
 
 
 def cs_destination(code):
@@ -208,7 +208,7 @@ def fix_cutscene_destinations(d, populated, name=None):
     can never collide with a destination code. Covers header cutscenes and ML's entrance intros.
 
     Known loss: a destination case can also set state (e.g. case 119 sets noon and a white fade; 22 gives
-    Requiem of Spirit, now reproduced in the engine) and a cutscene layer; the bit-15 path only transitions. The target is ML's row at entrance +
+    Requiem of Spirit) and a cutscene layer; the bit-15 path only transitions. The target is ML's row at entrance +
     layer (MS-151), which is right wherever that scene has no header for the layer; the cases that do reach one are
     ML's patched ones, reproduced in the engine. Previously this read `base` as an ML ENTRANCE, which sent the
     opening prologue (code 119 -> ML 0x5F0 -> tokinoma) to ML entrance 119 = the Lon Lon stable.

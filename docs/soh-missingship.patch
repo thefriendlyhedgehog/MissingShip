@@ -553,10 +553,10 @@ index d05085f4d07788d84b76c9ab9a6d32b623c2cd42..cdb893786c4be6462d09fac779a030cb
  /* 0x01D3 */ DEFINE_ACTOR(En_Zl4, ACTOR_EN_ZL4, ALLOCTYPE_NORMAL)
  /* 0x01D4 */ DEFINE_ACTOR(En_Mm2, ACTOR_EN_MM2, ALLOCTYPE_NORMAL)
 diff --git a/soh/include/tables/entrance_table.h b/soh/include/tables/entrance_table.h
-index fe62e632b60506329faa58be591cf1adf70e643a..eddbca7d8032f5494234fffde52e7f403e64463a 100644
+index fe62e632b60506329faa58be591cf1adf70e643a..75597d3084df46c2958d330d32ea7ff463214fdc 100644
 --- a/soh/include/tables/entrance_table.h
 +++ b/soh/include/tables/entrance_table.h
-@@ -1931,4 +1931,113 @@
+@@ -1931,4 +1931,146 @@
  /* 0x610 */ DEFINE_ENTRANCE(ENTR_DESERT_COLOSSUS_SPIRIT_TEMPLE_BLUE_WARP, SCENE_DESERT_COLOSSUS, 8, false, true, TRANS_TYPE_FADE_WHITE, TRANS_TYPE_FADE_WHITE)
  /* 0x611 */ DEFINE_ENTRANCE(ENTR_DESERT_COLOSSUS_8_1, SCENE_DESERT_COLOSSUS, 8, false, true, TRANS_TYPE_FADE_WHITE, TRANS_TYPE_FADE_WHITE)
  /* 0x612 */ DEFINE_ENTRANCE(ENTR_DESERT_COLOSSUS_8_2, SCENE_DESERT_COLOSSUS, 8, false, true, TRANS_TYPE_FADE_WHITE, TRANS_TYPE_FADE_WHITE)
@@ -672,6 +672,39 @@ index fe62e632b60506329faa58be591cf1adf70e643a..eddbca7d8032f5494234fffde52e7f40
 +/* 0x65B */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_DEKU_TREE_EVENT_5, SCENE_DEKU_TREE, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
 +/* 0x65C */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_DEKU_TREE_EVENT_6, SCENE_DEKU_TREE, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
 +/* 0x65D */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_DEKU_TREE_EVENT_7, SCENE_DEKU_TREE, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++
++// MissingShip (MS-151): ML's patched cutscene destination 22 sets ML entrance 0x404 with cutsceneIndex 0xFFF0, so ML lands on its row
++// 0x408 (Deku Grove, spawn 0), flags 0xC102, on scene layer 4. Eight identical entries so base + layer 4 lands here too.
++/* 0x65E */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_GERUDOS_FORTRESS_EVENT, SCENE_GERUDOS_FORTRESS, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x65F */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_GERUDOS_FORTRESS_EVENT_1, SCENE_GERUDOS_FORTRESS, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x660 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_GERUDOS_FORTRESS_EVENT_2, SCENE_GERUDOS_FORTRESS, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x661 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_GERUDOS_FORTRESS_EVENT_3, SCENE_GERUDOS_FORTRESS, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x662 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_GERUDOS_FORTRESS_EVENT_4, SCENE_GERUDOS_FORTRESS, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x663 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_GERUDOS_FORTRESS_EVENT_5, SCENE_GERUDOS_FORTRESS, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x664 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_GERUDOS_FORTRESS_EVENT_6, SCENE_GERUDOS_FORTRESS, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x665 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_GERUDOS_FORTRESS_EVENT_7, SCENE_GERUDOS_FORTRESS, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++
++// MissingShip (MS-151): ML's patched cutscene destination 51 sets ML entrance 0x408 with cutsceneIndex 0xFFF0, so ML lands on its row
++// 0x40C (Monktown Valley, spawn 0), flags 0xC102, on scene layer 4. Eight identical entries so base + layer 4 lands here too.
++/* 0x666 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_KAKARIKO_VILLAGE_EVENT, SCENE_KAKARIKO_VILLAGE, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x667 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_KAKARIKO_VILLAGE_EVENT_1, SCENE_KAKARIKO_VILLAGE, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x668 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_KAKARIKO_VILLAGE_EVENT_2, SCENE_KAKARIKO_VILLAGE, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x669 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_KAKARIKO_VILLAGE_EVENT_3, SCENE_KAKARIKO_VILLAGE, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x66A */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_KAKARIKO_VILLAGE_EVENT_4, SCENE_KAKARIKO_VILLAGE, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x66B */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_KAKARIKO_VILLAGE_EVENT_5, SCENE_KAKARIKO_VILLAGE, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x66C */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_KAKARIKO_VILLAGE_EVENT_6, SCENE_KAKARIKO_VILLAGE, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x66D */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_KAKARIKO_VILLAGE_EVENT_7, SCENE_KAKARIKO_VILLAGE, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++
++// MissingShip (MS-151): ML's patched cutscene destinations 3 and 4 set ML entrance 0x414 with cutsceneIndex 0xFFF0, so ML lands on its row
++// 0x418 (Deep Woods, spawn 0; the ending card), flags 0xC102, on scene layer 4. Eight identical entries so base + layer 4 lands here too.
++/* 0x66E */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_LOST_WOODS_EVENT, SCENE_LOST_WOODS, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x66F */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_LOST_WOODS_EVENT_1, SCENE_LOST_WOODS, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x670 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_LOST_WOODS_EVENT_2, SCENE_LOST_WOODS, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x671 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_LOST_WOODS_EVENT_3, SCENE_LOST_WOODS, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x672 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_LOST_WOODS_EVENT_4, SCENE_LOST_WOODS, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x673 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_LOST_WOODS_EVENT_5, SCENE_LOST_WOODS, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x674 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_LOST_WOODS_EVENT_6, SCENE_LOST_WOODS, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
++/* 0x675 */ DEFINE_ENTRANCE(ENTR_MISSINGSHIP_LOST_WOODS_EVENT_7, SCENE_LOST_WOODS, 0, true, true, TRANS_TYPE_FADE_BLACK, TRANS_TYPE_FADE_BLACK)
 diff --git a/soh/include/tables/scene_table.h b/soh/include/tables/scene_table.h
 index da290bd00d8cd90dccf06eb83f0540363564cc65..45a4f13b9f05bd5c5f2f38287e02a131521d4a77 100644
 --- a/soh/include/tables/scene_table.h
@@ -1062,10 +1095,10 @@ index 6b2e1c721403c768e65f8ebbeef8764d00806ee0..a58c289a987fc589833caf41dccb4322
      strcpy(itemTimestampDisplayName[TIMESTAMP_FOUND_GREG],           "Greg Found:         ");
      strcpy(itemTimestampDisplayName[TIMESTAMP_TRIFORCE_COMPLETED],   "Triforce Completed: ");
 diff --git a/soh/soh/Enhancements/timesplits/TimeSplits.cpp b/soh/soh/Enhancements/timesplits/TimeSplits.cpp
-index e970b965cfe8b8227a17c15a88034111a21e14e3..248c747c10f5f3ab1b53930afe0ed12227a9710c 100644
+index e970b965cfe8b8227a17c15a88034111a21e14e3..327d9de32d6220eb592e53c622cf9935c8dcfe66 100644
 --- a/soh/soh/Enhancements/timesplits/TimeSplits.cpp
 +++ b/soh/soh/Enhancements/timesplits/TimeSplits.cpp
-@@ -60,174 +60,48 @@ std::vector<SplitObject> emptyList;
+@@ -60,174 +60,47 @@ std::vector<SplitObject> emptyList;
  
  std::vector<SplitObject> splitObjectList = {
      // clang-format off
@@ -1233,7 +1266,6 @@ index e970b965cfe8b8227a17c15a88034111a21e14e3..248c747c10f5f3ab1b53930afe0ed122
 +    { SPLIT_TYPE_QUEST,      ITEM_SONG_SARIA,                      "Saria's Song",                     "QUEST_SONG_SARIA",             COLOR_WHITE },
 +    { SPLIT_TYPE_QUEST,      ITEM_SONG_EPONA,                      "Epona's Song",                     "QUEST_SONG_EPONA",             COLOR_WHITE },
 +    { SPLIT_TYPE_QUEST,      ITEM_SONG_REQUIEM,                    "Requiem of Spirit",                "QUEST_SONG_REQUIEM",           COLOR_WHITE },
-+    { SPLIT_TYPE_QUEST,      ITEM_MEDALLION_FOREST,                "Forest Medallion",                 "QUEST_MEDALLION_FOREST",       COLOR_WHITE },
 +    { SPLIT_TYPE_QUEST,      ITEM_MEDALLION_SHADOW,                "Shadow Medallion",                 "QUEST_MEDALLION_SHADOW",       COLOR_WHITE },
 +    { SPLIT_TYPE_QUEST,      ITEM_STONE_OF_AGONY,                  "Birth Certificate",                "QUEST_STONE_OF_AGONY",         COLOR_WHITE },
 +    { SPLIT_TYPE_QUEST,      ITEM_GERUDO_CARD,                     "Deku Pass",                        "QUEST_GERUDO_CARD",            COLOR_WHITE },
@@ -2733,7 +2765,7 @@ index f0ad28568bbc8ef2223b7330fa4300a1b1a6b0e9..c0ecf8d8ee231df0dee3d951bcbbdb92
      }
      return (Vec3s*)SEGMENTED_TO_VIRTUAL(cameraDataList[camId].camPosData);
 diff --git a/soh/src/code/z_demo.c b/soh/src/code/z_demo.c
-index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..7cf92c52250b382ce1b32f150a43598184721da3 100644
+index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..82e0cedfd30f2261736cf7f3f60d7b6c339a3ff1 100644
 --- a/soh/src/code/z_demo.c
 +++ b/soh/src/code/z_demo.c
 @@ -1,5 +1,7 @@
@@ -2822,20 +2854,62 @@ index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..7cf92c52250b382ce1b32f150a435981
          gSaveContext.cutsceneIndex = 0;
  
          switch (cmd->base) {
-@@ -731,9 +719,10 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
+@@ -597,16 +585,19 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
+                 play->transitionType = TRANS_TYPE_FILL_WHITE;
+                 break;
+             case 3:
+-                play->nextEntranceIndex = ENTR_GERUDO_VALLEY_EAST_EXIT;
+-                gSaveContext.cutsceneIndex = 0xFFF1;
++                // MissingShip (MS-151): ML patches this case (0x80065428): ML entrance 0x414 + layer 4, Deep Woods (the ending card), black fade.
++                play->nextEntranceIndex = ENTR_MISSINGSHIP_LOST_WOODS_EVENT;
++                gSaveContext.cutsceneIndex = 0xFFF0;
+                 play->transitionTrigger = TRANS_TRIGGER_START;
+-                play->transitionType = TRANS_TYPE_FILL_WHITE;
++                play->transitionType = TRANS_TYPE_FADE_BLACK;
+                 break;
+             case 4:
+-                play->nextEntranceIndex = ENTR_DEATH_MOUNTAIN_TRAIL_BOTTOM_EXIT;
++                // MissingShip (MS-151): ML patches this case (0x80065464) like case 3; no ML cutscene uses it. ML also drops its break (it
++                // falls into case 5), which isn't reproduced.
++                play->nextEntranceIndex = ENTR_MISSINGSHIP_LOST_WOODS_EVENT;
+                 gSaveContext.cutsceneIndex = 0xFFF0;
+                 play->transitionTrigger = TRANS_TRIGGER_START;
+-                play->transitionType = TRANS_TYPE_FILL_WHITE;
++                play->transitionType = TRANS_TYPE_FADE_BLACK;
+                 break;
+             case 5:
+                 play->nextEntranceIndex = ENTR_KOKIRI_FOREST_0;
+@@ -731,10 +722,12 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
                  if (GameInteractor_Should(VB_GIVE_ITEM_SONG, true, ITEM_SONG_REQUIEM)) {
                      Item_Give(play, ITEM_SONG_REQUIEM);
                  }
 -                play->nextEntranceIndex = ENTR_DESERT_COLOSSUS_EAST_EXIT;
-+                // MissingShip (MS-151): ML's only user is Deku Road's cutscene layer after the ranch. ML reads 0x123 + layer
-+                // 4 = its row 0x127 (the Deku Grove grotto, spawn 2), a scene with no layer 4, so no cutscene index.
-+                play->nextEntranceIndex = MlEntrance_ToSoh(0x127);
++                // MissingShip (MS-151): ML patches this case (0x800658E8): ML entrance 0x404 + layer 4, Deku Grove, black fade. It keeps the
++                // song: the credits tour gives Requiem of Spirit.
++                play->nextEntranceIndex = ENTR_MISSINGSHIP_GERUDOS_FORTRESS_EVENT;
                  play->transitionTrigger = TRANS_TRIGGER_START;
--                gSaveContext.cutsceneIndex = 0xFFF0;
-                 play->transitionType = TRANS_TYPE_FADE_WHITE;
+                 gSaveContext.cutsceneIndex = 0xFFF0;
+-                play->transitionType = TRANS_TYPE_FADE_WHITE;
++                play->transitionType = TRANS_TYPE_FADE_BLACK;
                  break;
              case 23:
-@@ -920,14 +909,17 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
+                 play->nextEntranceIndex = ENTR_CUTSCENE_MAP_0;
+@@ -894,10 +887,11 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
+                 play->transitionType = TRANS_TYPE_FADE_WHITE_INSTANT;
+                 break;
+             case 51:
+-                play->nextEntranceIndex = ENTR_HYRULE_FIELD_PAST_BRIDGE_SPAWN;
+-                gSaveContext.cutsceneIndex = 0xFFF8;
++                // MissingShip (MS-151): ML patches this case (0x80065F04): ML entrance 0x408 + layer 4, Monktown Valley, black fade.
++                play->nextEntranceIndex = ENTR_MISSINGSHIP_KAKARIKO_VILLAGE_EVENT;
++                gSaveContext.cutsceneIndex = 0xFFF0;
+                 play->transitionTrigger = TRANS_TRIGGER_START;
+-                play->transitionType = TRANS_TYPE_CIRCLE(TCA_NORMAL, TCC_WHITE, TCS_SLOW);
++                play->transitionType = TRANS_TYPE_FADE_BLACK;
+                 break;
+             case 52:
+                 play->nextEntranceIndex = ENTR_TEMPLE_OF_TIME_ENTRANCE;
+@@ -920,14 +914,17 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
                  play->transitionType = TRANS_TYPE_FADE_BLACK;
                  break;
              case 55:
@@ -2857,7 +2931,7 @@ index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..7cf92c52250b382ce1b32f150a435981
                  play->transitionTrigger = TRANS_TRIGGER_START;
                  play->transitionType = TRANS_TYPE_FADE_BLACK;
                  break;
-@@ -956,7 +948,8 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
+@@ -956,7 +953,8 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
                  play->transitionType = TRANS_TYPE_FADE_BLACK;
                  break;
              case 61:
@@ -2867,7 +2941,7 @@ index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..7cf92c52250b382ce1b32f150a435981
                  gSaveContext.cutsceneIndex = 0xFFF0;
                  play->transitionTrigger = TRANS_TRIGGER_START;
                  play->transitionType = TRANS_TYPE_FADE_BLACK;
-@@ -982,8 +975,9 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
+@@ -982,8 +980,9 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
                  break;
              case 65:
                  play->linkAgeOnLoad = 1;
@@ -2879,7 +2953,7 @@ index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..7cf92c52250b382ce1b32f150a435981
                  play->transitionTrigger = TRANS_TRIGGER_START;
                  play->transitionType = TRANS_TYPE_FADE_BLACK;
                  break;
-@@ -1035,9 +1029,10 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
+@@ -1035,9 +1034,10 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
                  break;
              case 73:
                  play->linkAgeOnLoad = 1;
@@ -2892,7 +2966,7 @@ index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..7cf92c52250b382ce1b32f150a435981
                  play->transitionType = TRANS_TYPE_FADE_BLACK;
                  break;
              case 74:
-@@ -1215,9 +1210,10 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
+@@ -1215,9 +1215,10 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
                  }
                  break;
              case 105:
@@ -2905,7 +2979,7 @@ index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..7cf92c52250b382ce1b32f150a435981
                  play->transitionType = TRANS_TYPE_FADE_BLACK;
                  break;
              case 106:
-@@ -1317,6 +1313,28 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
+@@ -1317,6 +1318,28 @@ void Cutscene_Command_Terminator(PlayState* play, CutsceneContext* csCtx, CsCmdB
                  play->transitionTrigger = TRANS_TRIGGER_START;
                  play->transitionType = TRANS_TYPE_FADE_WHITE;
                  break;
@@ -2934,7 +3008,7 @@ index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..7cf92c52250b382ce1b32f150a435981
          }
      }
  }
-@@ -2198,6 +2216,7 @@ void Cutscene_HandleEntranceTriggers(PlayState* play) {
+@@ -2198,6 +2221,7 @@ void Cutscene_HandleEntranceTriggers(PlayState* play) {
              (!Flags_GetEventChkInf(entranceCutscene->flag) || (entranceCutscene->flag == EVENTCHKINF_EPONA_OBTAINED)) &&
              (gSaveContext.cutsceneIndex < 0xFFF0) && ((u8)gSaveContext.linkAge == requiredAge) &&
              (gSaveContext.respawnFlag <= 0)) {
@@ -2942,7 +3016,7 @@ index fda3cd0618c84ff4c8bdddf571ba1ed704f30350..7cf92c52250b382ce1b32f150a435981
              Flags_SetEventChkInf(entranceCutscene->flag);
              if (GameInteractor_Should(VB_PLAY_ENTRANCE_CS, true, entranceCutscene->flag, entranceCutscene->entrance)) {
                  Cutscene_SetSegment(play, entranceCutscene->segAddr);
-@@ -2261,6 +2280,7 @@ void Cutscene_HandleConditionalTriggers(PlayState* play) {
+@@ -2261,6 +2285,7 @@ void Cutscene_HandleConditionalTriggers(PlayState* play) {
  }
  
  void Cutscene_SetSegment(PlayState* play, void* segment) {
