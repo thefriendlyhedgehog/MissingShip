@@ -918,6 +918,91 @@ index a47a404ad1d016684eeb3b62538266483182bf1e..cab299d59cdb352159e39f47234d33f9
      ACTOR_UNSET_31,
      ACTOR_UNSET_36,
      ACTOR_UNSET_53,
+diff --git a/soh/soh/Enhancements/gameplaystats.cpp b/soh/soh/Enhancements/gameplaystats.cpp
+index 6b2e1c721403c768e65f8ebbeef8764d00806ee0..40a005c72d78eb0c5e00a48454632a5c8c17fbb6 100644
+--- a/soh/soh/Enhancements/gameplaystats.cpp
++++ b/soh/soh/Enhancements/gameplaystats.cpp
+@@ -1,3 +1,4 @@
++#include <unordered_map>
+ #include "gameplaystats.h"
+ 
+ #include "soh/SaveManager.h"
+@@ -399,7 +400,41 @@ bool compareTimestampInfoByTime(const TimestampInfo& a, const TimestampInfo& b)
+     return CVarGetInteger(CVAR_GAMEPLAY_STATS("ReverseTimestamps"), 0) ? a.time > b.time : a.time < b.time;
+ }
+ 
++// MissingShip (MS-145): ML's area names (hacks/ml/hack.json "areas"; keep in step). Scenes with a title card use
++// ML's card text; the rest are named after the area that leads into them.
++static const std::unordered_map<int, const char*> sMlAreas = {
++    { SCENE_DEKU_TREE, "Deep Woods grotto" },
++    { SCENE_FOREST_TEMPLE, "Monktown Sanctuary" },
++    { SCENE_SHADOW_TEMPLE, "Hollow Root Keep" },
++    { SCENE_SHADOW_TEMPLE_BOSS, "Hollow Root Keep boss room" },
++    { SCENE_KNOW_IT_ALL_BROS_HOUSE, "Kokiri Forest house" },
++    { SCENE_TWINS_HOUSE, "Kokiri Forest house" },
++    { SCENE_MIDOS_HOUSE, "Kokiri Forest house" },
++    { SCENE_KAKARIKO_CENTER_GUEST_HOUSE, "Monktown Valley house" },
++    { SCENE_BACK_ALLEY_HOUSE, "Library" },
++    { SCENE_BOMBCHU_SHOP, "Bombchu Shop" },
++    { SCENE_LINKS_HOUSE, "Link's house" },
++    { SCENE_STABLE, "Cluck Cluck Ranch stable" },
++    { SCENE_TEMPLE_OF_TIME, "Kokiri Forest interior" },
++    { SCENE_FISHING_POND, "Fishing Pond" },
++    { SCENE_HYRULE_FIELD, "Title screen" },
++    { SCENE_KAKARIKO_VILLAGE, "Monktown Valley" },
++    { SCENE_KOKIRI_FOREST, "Kokiri Forest" },
++    { SCENE_SACRED_FOREST_MEADOW, "Kokiri Forest side area" },
++    { SCENE_GERUDO_VALLEY, "Deku Road" },
++    { SCENE_LOST_WOODS, "Deep Woods" },
++    { SCENE_DESERT_COLOSSUS, "Deku Grove grotto" },
++    { SCENE_GERUDOS_FORTRESS, "Deku Grove" },
++    { SCENE_LON_LON_RANCH, "Cluck Cluck Ranch" },
++    { SCENE_HAIRAL_NIWA2, "Monktown Valley side area" },
++    { SCENE_TESTROOM, "Deku Road grotto" },
++};
++
+ const char* ResolveSceneID(int sceneID, int roomID) {
++    auto mlArea = sMlAreas.find(sceneID);
++    if (mlArea != sMlAreas.end()) {
++        return mlArea->second;
++    }
+     if (sceneID == SCENE_GROTTOS) {
+         switch (roomID) {
+             case 0:
+@@ -747,13 +782,15 @@ void SetupDisplayNames() {
+     strcpy(itemTimestampDisplayName[ITEM_LONGSHOT],         "Longshot:           ");
+     strcpy(itemTimestampDisplayName[ITEM_ARROW_ICE],        "Ice Arrows:         ");
+     strcpy(itemTimestampDisplayName[ITEM_FARORES_WIND],     "Farore's Wind:      ");
+-    strcpy(itemTimestampDisplayName[ITEM_BOOMERANG],        "Boomerang:          ");
++    strcpy(itemTimestampDisplayName[ITEM_BOOMERANG],        "Magic Hourglass:    ");
+     strcpy(itemTimestampDisplayName[ITEM_LENS],             "Lens of Truth:      ");
+     strcpy(itemTimestampDisplayName[ITEM_HAMMER],           "Megaton Hammer:     ");
+     strcpy(itemTimestampDisplayName[ITEM_ARROW_LIGHT],      "Light Arrows:       ");
+     strcpy(itemTimestampDisplayName[ITEM_BOTTLE],           "Bottle:             ");
+     strcpy(itemTimestampDisplayName[ITEM_LETTER_ZELDA],     "Zelda's Letter:     ");
+     strcpy(itemTimestampDisplayName[ITEM_SWORD_KOKIRI],     "Kokiri Sword:       ");
++    // MissingShip (MS-145): ML's Soul-Charged Kokiri Sword is the Bullet Bag 40 pickup (the slingshot-ammo marker).
++    strcpy(itemTimestampDisplayName[ITEM_BULLET_BAG_40],    "Soul-Charged Sword: ");
+     strcpy(itemTimestampDisplayName[ITEM_SWORD_MASTER],     "Master Sword:       ");
+     strcpy(itemTimestampDisplayName[ITEM_SWORD_BGS],        "Biggoron's Sword:   ");
+     strcpy(itemTimestampDisplayName[ITEM_SHIELD_DEKU],      "Deku Shield:        ");
+@@ -815,14 +852,14 @@ void SetupDisplayNames() {
+     // Other events
+     strcpy(itemTimestampDisplayName[TIMESTAMP_DEFEAT_GOHMA],         "Gohma Defeated:     ");
+     strcpy(itemTimestampDisplayName[TIMESTAMP_DEFEAT_KING_DODONGO],  "KD Defeated:        ");
+-    strcpy(itemTimestampDisplayName[TIMESTAMP_DEFEAT_BARINADE],      "Barinade Defeated:  ");
++    strcpy(itemTimestampDisplayName[TIMESTAMP_DEFEAT_BARINADE],      "Arborachnid Beaten: ");
+     strcpy(itemTimestampDisplayName[TIMESTAMP_DEFEAT_PHANTOM_GANON], "PG Defeated:        ");
+     strcpy(itemTimestampDisplayName[TIMESTAMP_DEFEAT_VOLVAGIA],      "Volvagia Defeated:  ");
+     strcpy(itemTimestampDisplayName[TIMESTAMP_DEFEAT_MORPHA],        "Morpha Defeated:    ");
+     strcpy(itemTimestampDisplayName[TIMESTAMP_DEFEAT_BONGO_BONGO],   "Bongo Defeated:     ");
+     strcpy(itemTimestampDisplayName[TIMESTAMP_DEFEAT_TWINROVA],      "Twinrova Defeated:  ");
+     strcpy(itemTimestampDisplayName[TIMESTAMP_DEFEAT_GANONDORF],     "Ganondorf Defeated: ");
+-    strcpy(itemTimestampDisplayName[TIMESTAMP_DEFEAT_GANON],         "Ganon Defeated:     ");
++    strcpy(itemTimestampDisplayName[TIMESTAMP_DEFEAT_GANON],         "Game Completed:     ");
+     strcpy(itemTimestampDisplayName[TIMESTAMP_BOSSRUSH_FINISH],      "Boss Rush Finished: ");
+     strcpy(itemTimestampDisplayName[TIMESTAMP_FOUND_GREG],           "Greg Found:         ");
+     strcpy(itemTimestampDisplayName[TIMESTAMP_TRIFORCE_COMPLETED],   "Triforce Completed: ");
 diff --git a/soh/soh/OTRGlobals.cpp b/soh/soh/OTRGlobals.cpp
 index 39f04ddbbd3a3894ac268a4364b3b7b711b3edee..ed9201e52a84271f28ff10417db4cac3d26cbff7 100644
 --- a/soh/soh/OTRGlobals.cpp
@@ -6393,10 +6478,10 @@ index 0000000000000000000000000000000000000000..42e5da789b656c1cd71c3e82f06fcdd7
 +#endif
 diff --git a/soh/src/overlays/actors/ovl_Ml_BossVa/z_ml_bossva.c b/soh/src/overlays/actors/ovl_Ml_BossVa/z_ml_bossva.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..42bf1e4543ff0fbf1469393c5bb3f68d924d009c
+index 0000000000000000000000000000000000000000..2e8e83effe33516c99a436e178eccefb606adea9
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_BossVa/z_ml_bossva.c
-@@ -0,0 +1,980 @@
+@@ -0,0 +1,982 @@
 +/*
 + * File: z_ml_bossva.c
 + * Overlay: ovl_Ml_BossVa
@@ -6421,6 +6506,7 @@ index 0000000000000000000000000000000000000000..42bf1e4543ff0fbf1469393c5bb3f68d
 + */
 +
 +#include "z_ml_bossva.h"
++#include "soh/Enhancements/game-interactor/GameInteractor_Hooks.h"
 +#include "assets/ml_assets.h"
 +#include "src/code/ml_state.h"
 +#include "overlays/actors/ovl_En_Elf/z_en_elf.h"
@@ -6989,6 +7075,7 @@ index 0000000000000000000000000000000000000000..42bf1e4543ff0fbf1469393c5bb3f68d
 +            }
 +            Actor_Spawn(&play->actorCtx, play, ACTOR_DOOR_WARP1, this->actor.home.pos.x, this->actor.home.pos.y,
 +                        this->actor.home.pos.z, 0, 0, 0, WARP_DUNGEON_ADULT);
++            GameInteractor_ExecuteOnBossDefeat(&this->actor); // MissingShip (MS-145): SoH's boss hooks (stats)
 +        }
 +        this->skelAnime.curFrame = Animation_GetLastFrame(sAnims[ML_BOSSVA_ANIM_DEATH]) - 1.0f;
 +        this->alpha -= 15;
@@ -7837,10 +7924,10 @@ index 0000000000000000000000000000000000000000..96294bd2625a25b7c07d73a143461b0e
 +#endif
 diff --git a/soh/src/overlays/actors/ovl_Ml_Ending/z_ml_ending.c b/soh/src/overlays/actors/ovl_Ml_Ending/z_ml_ending.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..d9e982ca869b5e2e0465c7d0e7d28928de60ceac
+index 0000000000000000000000000000000000000000..3d800d0bbe9a19b05a826dde54d219439b8eea69
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_Ending/z_ml_ending.c
-@@ -0,0 +1,131 @@
+@@ -0,0 +1,139 @@
 +/*
 + * File: z_ml_ending.c
 + * Overlay: ovl_Ml_Ending
@@ -7853,6 +7940,7 @@ index 0000000000000000000000000000000000000000..d9e982ca869b5e2e0465c7d0e7d28928
 + */
 +
 +#include "z_ml_ending.h"
++#include "soh/Enhancements/gameplaystats.h"
 +#include "objects/object_sa/object_sa.h"
 +#include "assets/ml_assets.h"
 +
@@ -7898,6 +7986,13 @@ index 0000000000000000000000000000000000000000..d9e982ca869b5e2e0465c7d0e7d28928
 +                       this->jointTable, this->morphTable, ML_ENDING_LIMB_MAX);
 +    this->alpha = 200;
 +    this->textColor = 0xAA825F00;
++
++    // MissingShip (MS-145): the ending card is ML's end of the game, so stop Gameplay Stats' timer here ("Game
++    // Completed", SoH's Ganon timestamp). It is only placed in Deep Woods' ending cutscene header.
++    if ((play->sceneNum == SCENE_LOST_WOODS) && !gSaveContext.ship.stats.gameComplete) {
++        gSaveContext.ship.stats.itemTimestamp[TIMESTAMP_DEFEAT_GANON] = GAMEPLAYSTAT_TOTAL_TIME;
++        gSaveContext.ship.stats.gameComplete = true;
++    }
 +}
 +
 +void MlEnding_Destroy(Actor* thisx, PlayState* play) {

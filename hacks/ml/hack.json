@@ -28,7 +28,7 @@
       }
     ]
   },
-  "areas_comment": "Player-facing area names by scene (MS-130), for docs and tool output. Scenes with a title card use ML's own card text (dma = the scene table's title file); the rest are named after the titled area that leads into them. Unnamed scenes print their slot name.",
+  "areas_comment": "Player-facing area names by scene (MS-130), for docs and tool output. Scenes with a title card use ML's own card text (dma = the scene table's title file); the rest are named after the titled area that leads into them. Unnamed scenes print their slot name. ML gives ydan, testroom, spot11, spot05, tokinoma, hairal_niwa2 and link_home no title card; their names here are MissingShip's (after the area whose exits or grottos lead in) and can be renamed. Gameplay Stats shows these names: keep engine/soh/soh/Enhancements/gameplaystats.cpp sMlAreas in step (MS-145).",
   "areas": {
     "Bmori1": "Monktown Sanctuary",
     "HAKAdan": "Hollow Root Keep",
@@ -47,6 +47,13 @@
     "kakariko": "Monktown Valley house",
     "malon_stable": "Cluck Cluck Ranch stable",
     "turibori": "Fishing Pond",
-    "spot00": "title screen"
+    "spot00": "title screen",
+    "ydan": "Deep Woods grotto",
+    "testroom": "Deku Road grotto",
+    "spot11": "Deku Grove grotto",
+    "spot05": "Kokiri Forest side area",
+    "tokinoma": "Kokiri Forest interior",
+    "hairal_niwa2": "Monktown Valley side area",
+    "link_home": "Link's house"
   }
 }
