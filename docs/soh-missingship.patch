@@ -1856,10 +1856,10 @@ index 0000000000000000000000000000000000000000..b3e5a87f7eed1795dea7fb1abc931997
 +#endif
 diff --git a/soh/src/code/ml_state.c b/soh/src/code/ml_state.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..6032fb8196b6b4e18231feb926c4bc2255be40ee
+index 0000000000000000000000000000000000000000..ba48dcd37b77caa07b679f1072572a29c38f1624
 --- /dev/null
 +++ b/soh/src/code/ml_state.c
-@@ -0,0 +1,323 @@
+@@ -0,0 +1,329 @@
 +#include "ml_state.h"
 +#include "ml_entrance_map.h"
 +#include "objects/gameplay_keep/gameplay_keep.h"
@@ -1872,7 +1872,7 @@ index 0000000000000000000000000000000000000000..6032fb8196b6b4e18231feb926c4bc22
 +//
 +// 0x80600E00 replaces Player_Update's call to Player_UpdateCommon (player +0x17E5C) and wraps it:
 +// - It keys the current scene and room as sceneNum | (roomNum << 4) and counts frames since the key changed
-+//   (0x80601680). At frame 17 it fills the whole Magic Hourglass history with Link's spot and jumps the count to its
++//   (0x80601680). At frame 17 (MissingShip: and not before the previous room has unloaded, MS-150) it fills the whole Magic Hourglass history with Link's spot and jumps the count to its
 +//   cap, 169, the value at which the Hourglass works.
 +// - It keeps that history: 164 entries of Link's position and facing, newest first, shifted every frame.
 +// - The Magic Hourglass (the boomerang slot: the throw sets gMlHourglassTrigger instead of spawning En_Boom): once
@@ -1966,6 +1966,12 @@ index 0000000000000000000000000000000000000000..6032fb8196b6b4e18231feb926c4bc22
 +            gMlRoomFrames = 0;
 +        }
 +        frames = gMlRoomFrames + 1;
++        // MissingShip (MS-150): ML refills the history 17 frames after curRoom changes, but a door changes it while
++        // Link is still in the doorway, so the refilled spot can be in the old room, which then unloads: rewinding
++        // there leaves Link behind a shut door in an undrawn room. Wait until the old room is gone instead.
++        if ((frames == 17) && (play->roomCtx.prevRoom.num >= 0)) {
++            frames = 16;
++        }
 +        if (frames == 17) {
 +            for (s32 i = 0; i < ML_REWIND_LEN; i++) {
 +                sMlRewind[i].pos = player->actor.world.pos;
