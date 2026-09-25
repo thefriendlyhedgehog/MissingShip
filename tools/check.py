@@ -56,15 +56,16 @@ else:
                         (_os.path.join(SHIPWRIGHT, 'ZAPDTR'), 'ZAPDTR')):
         dirty = [l for l in git(repo, 'status', '--porcelain').splitlines() if l.strip()]
         if dirty: problems.append(f'{label}: {len(dirty)} uncommitted change(s), e.g. {dirty[0].strip()}')
-        ahead = git(repo, 'rev-list', '--count', '@{u}..HEAD')
-        if ahead.isdigit() and int(ahead): problems.append(f'{label}: {ahead} unpushed commit(s)')
-        branch = git(repo, 'branch', '--show-current')
-        if branch != 'missingship': problems.append(f'{label}: on branch "{branch or "detached"}", expected missingship')
+        # Pushed = the checked-out commit is contained in origin/missingship. A detached checkout (what a fresh
+        # `clone --recursive` gives the submodules) is fine; switch to the branch only to commit.
+        pushed = subprocess.run(['git', '-C', repo, 'merge-base', '--is-ancestor', 'HEAD', 'origin/missingship'],
+                                capture_output=True).returncode == 0
+        if not pushed: problems.append(f'{label}: HEAD is not on origin/missingship (unpushed, or another branch)')
     if _os.path.realpath(SHIPWRIGHT) == _os.path.realpath(_os.path.join(ROOT, 'engine')):
         pin = git(ROOT, 'submodule', 'status', 'engine')      # '+' = checked-out commit differs from the pinned one
         if pin.startswith('+'):
             problems.append('engine/ is not at the commit MissingShip pins: commit the pointer (git add engine)')
-    report('engine', 'FAIL' if problems else 'PASS', '; '.join(problems) or 'fork clean, pushed and pinned (missingship)')
+    report('engine', 'FAIL' if problems else 'PASS', '; '.join(problems) or 'fork clean, pushed (on origin/missingship) and pinned')
 
 # patches / ledger ---------------------------------------------------------------------------------------------
 if engine:
