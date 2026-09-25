@@ -105,8 +105,8 @@ All eight are ported: 3, 5, 6 and 0x1F earlier, 0x1A in MS-036, and the boss fig
 | **Player overlay** (dma 102) | 88 changed words ≈ 20 distinct edits, **ported** (MS-051, MS-052, MS-053; see ENGINE_CHANGES rows 96–98). Originally: 30 `jal 0x806023E0` Link-animation overrides (**ported**, MS-051: the triple jump); fairy-release spawn replaced by a flag (+0x38CC); a second spawn removed (+0x74CC); a scene-gated music/sfx block (+0x7100); hooks into custom code at 0x80606BA0, 0x80606BC8, 0x80600480, 0x80600D90; Magic Hourglass `j 0x80600E00` (+0x17E5C); 4 forced branches; 3 constant changes (+0x6104, +0xA080, +0x14E20 0x78→0x50, +0x167E0). The Blade Beam works through a different route. |
 | Pause menu (dma 101) | 46 words; mostly ported (ledger row 24). Recheck the cursor. |
 | Boot screen (dma 97, `ovl_title`) | ML's rebuild of the N64-logo state: two error screens (Expansion Pak missing; "You've met with a terrible fate" for an emulator that fails its accuracy check) around the normal logo. **Out of scope** (MS-061): neither check applies to SoH, which shows its own boot logo. ML's actual title screen is En_Mag (MS-039). |
-| File select (dma 100) | 1 forced branch (+0xC9D8). Not ported. |
-| Opening (dma 99) | 3 words: new-game / attract-mode entrance and cutscene index. Not ported. |
+| File select (dma 100) | 1 forced branch (+0xC9D8): the debug ROM's File 1 → Map Select is never taken. **Nothing to port** (MS-062): SoH only does that with Developer Tools' Debug Enabled on. |
+| Opening (dma 99) | 3 words of the title setup: child Link, cutscene 0xFFF0, layer 0. **Ported** (MS-062, row 101); title checked in game. |
 | map_mark_data (dma 103) | 58 data words: dungeon-map chest / boss markers. **Ported** (MS-023, with the kaleido pause-map markers ML also edited). |
 | map_i_static (dma 113), map_48x85_static (dma 112) | redrawn dungeon minimaps and pause dungeon maps. **Ported** (MS-022: 32 textures, the room + 190 index and ML's map tables). |
 | staff_message_data_static (dma 110) | ML's credits text. **Ported** (MS-024: 11 of 48 credits rewritten by ML, via inject_messages.py). |
@@ -234,7 +234,7 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 |---|---|---|---|
 | [MS-060](https://github.com/thefriendlyhedgehog/MissingShip/issues/38) | port | HUD restyle: B/C button backs (0x80604E30, alpha cap 125), key counter (0x806053E0), colour 0x80089180. | **Built** (needs playtest): row 100. ML's "restyle" is drop shadows under the buttons and counters plus a new Start colour. |
 | [MS-061](https://github.com/thefriendlyhedgehog/MissingShip/issues/39) | port | Title screen (dma 97, ML's own). Decide whether it's in scope next to SoH's boot flow. | **Decided: out of scope.** dma 97 is only ML's Expansion Pak and bad-emulator error screens around the vanilla N64 logo; SoH needs neither. ML's title screen itself is ported (En_Mag, MS-039). |
-| [MS-062](https://github.com/thefriendlyhedgehog/MissingShip/issues/40) | port | File select (1 edit) and opening (3 words: new-game entrance / cutscene index). | Ported. |
+| [MS-062](https://github.com/thefriendlyhedgehog/MissingShip/issues/40) | port | File select (1 edit) and opening (3 words: new-game entrance / cutscene index). | **Done:** opening ported (row 101), title checked; file select needs nothing in SoH. |
 | [MS-063](https://github.com/thefriendlyhedgehog/MissingShip/issues/41) | port | Recheck the pause-menu quest-status cursor (a misalignment was reported before row 24). | Verified. |
 
 ### M6: Drop-in

@@ -12531,6 +12531,29 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..d6ffea40ca3a146fe2bb57589dbd6874
      this->exchangeItemId = EXCH_ITEM_NONE;
  
      if (actor->textId == 0xFFFF) {
+diff --git a/soh/src/overlays/gamestates/ovl_opening/z_opening.c b/soh/src/overlays/gamestates/ovl_opening/z_opening.c
+index a7087678791a605657b3acbeb51880f12006227e..5b0ca1cc53fd6a8881b7e5f1c8b20010bb49a2e4 100644
+--- a/soh/src/overlays/gamestates/ovl_opening/z_opening.c
++++ b/soh/src/overlays/gamestates/ovl_opening/z_opening.c
+@@ -11,12 +11,15 @@ void Sram_InitDebugSave(void);
+ void Opening_SetupTitleScreen(OpeningContext* this) {
+     gSaveContext.gameMode = GAMEMODE_TITLE_SCREEN;
+     this->state.running = false;
+-    gSaveContext.linkAge = 0;
++    // MissingShip: ML's title runs with child Link on its spot00 cutscene: linkAge 1, cutsceneIndex 0xFFF0 and layer 0
++    // (ML's opening, dma 99: vanilla's 0, 0xFFF3 and 7). ML's spot00 has no alternate headers, so either layer ends up on
++    // its main header and cutscene.
++    gSaveContext.linkAge = 1;
+     gSaveContext.fileNum = 0xFF;
+     gWalkSpeedToggle = 0;
+     Sram_InitDebugSave();
+-    gSaveContext.cutsceneIndex = 0xFFF3;
+-    gSaveContext.sceneSetupIndex = 7;
++    gSaveContext.cutsceneIndex = 0xFFF0;
++    gSaveContext.sceneSetupIndex = 0;
+     SET_NEXT_GAMESTATE(&this->state, Play_Init, PlayState);
+ }
+ 
 diff --git a/soh/src/overlays/misc/ovl_kaleido_scope/z_kaleido_collect.c b/soh/src/overlays/misc/ovl_kaleido_scope/z_kaleido_collect.c
 index ade62acc3e7057bd68fecb65746558fc1a2ba0c1..c90fe1047d5fd01af87083dad1136c3676c6611a 100644
 --- a/soh/src/overlays/misc/ovl_kaleido_scope/z_kaleido_collect.c
