@@ -13,6 +13,9 @@ Order of preference for any new fix: **data-side** → **generic data-driven SoH
 The code for every row lives in the private engine fork `MissingShip-Shipwright` (branch `missingship`, on SoH tag
 9.2.3); `docs/soh-missingship.patch` is generated from it by `tools/genpatch.py`.
 
+What each row needs to leave the fork (bugfix, data-driven feature, data-side retry, or mod code) is in
+[`DROPIN_PROPOSALS.md`](DROPIN_PROPOSALS.md) (MS-070).
+
 ## Already drop-in compatible (data, shipped in `MissingLink_Scenes.o2r`)
 
 Scenes and rooms (textures, geometry, exit remaps, cutscene destinations) · audio (574, incl. the
@@ -38,7 +41,7 @@ over ML's Saria's house) · raw gameplay_keep texture pointers in ML display lis
 | 8 | `z_bg_treemouth.c`: inert | ML gutted the Deku Tree mouth | **Needs mod code** — or upstream a "disable actor" data hook |
 | 9 | `actor_table.h` + `ActorDB.cpp` + `actorViewer.cpp`: slots 3, 6 | register ML's new actors | **Needs mod code** |
 | 10 | `ovl_Ml_Fishpond`, `ovl_Ml_Villager` | ML's new actors | **Needs mod code** |
-| 11 | libultraship `gfx_metal.cpp`: zero-dimension texture guard | engine crash any mod could trigger | **Upstream as a bugfix** |
+| 11 | libultraship `gfx_metal.cpp`: zero-dimension texture guard | engine crash any mod could trigger | **Already upstream** (Kenix3/libultraship#1040, adaad35d); drop on rebase |
 | 12 | `ovl_Ml_Lift`, `ovl_Ml_LiftBlock` + actor table slots 0x12C, 0xE3 | ML rewrote Obj_Lift (switch lift) and Bg_Mori_Hashira4 (quest-item barrier) wholesale; vanilla files untouched, slots repointed | **Needs mod code** |
 | 13 | `z_sram.c` `Sram_InitNewSave`: ML's starting loadout (Ocarina of Time, Kokiri Sword, Hylian Shield, Goron's Bracelet, Adult's Wallet, Epona's + Saria's Songs) | SoH builds new files in C, not from ML's new-save templates | **Upstream:** mods provide a new-save template resource |
 | 14 | `z_en_md.c` (Mido): Kokiri Forest uses the Mido's-House lines; Init always takes the stand-at-home branch; Update no longer calls `actionFunc`; 0x1046 → 0x1044 once slingshot ammo ≠ 0 | ML patched vanilla En_Md in 3 places (GetText branch, Init `beq $a0,$a0`, Update `jalr` → `j 0x80602200` into its custom code). Vanilla BlockPath slid him around / SetMovedPos teleported him along ML's unrelated path 0 | **Needs mod code** |

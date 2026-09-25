@@ -241,7 +241,7 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 
 | ID | Type | Issue | Done when |
 |---|---|---|---|
-| [MS-070](https://github.com/thefriendlyhedgehog/MissingShip/issues/42) | infra | Go through `ENGINE_CHANGES.md` and turn each row that can move into a data-side or upstream proposal: Metal texture guard, bgcheck NULL guard, Oceff widescreen fix (bugfixes); entrance table, cutscene / grotto / new-save tables, draw configs (data-driven features). | A proposal list, and the bugfix PRs upstream. |
+| [MS-070](https://github.com/thefriendlyhedgehog/MissingShip/issues/42) | infra | Go through `ENGINE_CHANGES.md` and turn each row that can move into a data-side or upstream proposal: Metal texture guard, bgcheck NULL guard, Oceff widescreen fix (bugfixes); entrance table, cutscene / grotto / new-save tables, draw configs (data-driven features). | **Proposals written:** [DROPIN_PROPOSALS.md](DROPIN_PROPOSALS.md) (4 bugfixes still needed upstream, the Metal guard already upstream; 11 data-driven features; 3 data-side retries; 67 mod-code rows). Upstream PRs held until the project is done, so the issue stays open. |
 | [MS-016](https://github.com/thefriendlyhedgehog/MissingShip/issues/54) | bug | libultraship `GfxDpLoadBlock`: `uint32_t word_size_shift = -1` for 4-bit loads makes the size `(lrs+1) << 0xFFFFFFFF`. ML and vanilla don't hit it; any mod that block-loads with SETTIMG siz=4b would. | Fixed on `missingship`, logged, proposed upstream with MS-070. |
 
 ### Platforms (long-term; macOS is the test platform for now)
