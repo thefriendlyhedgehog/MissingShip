@@ -833,7 +833,7 @@ index a47a404ad1d016684eeb3b62538266483182bf1e..cab299d59cdb352159e39f47234d33f9
      ACTOR_UNSET_36,
      ACTOR_UNSET_53,
 diff --git a/soh/soh/SohGui/SohMenuEnhancements.cpp b/soh/soh/SohGui/SohMenuEnhancements.cpp
-index 4cf7305373689a1e3d9a084f91a1a2693902dfde..6b6512c5cb91b7e8c43b83486bc774ccc3f7c2d4 100644
+index 4cf7305373689a1e3d9a084f91a1a2693902dfde..6ad92b2c90ff13618b1c6a88341663c8e9b548fa 100644
 --- a/soh/soh/SohGui/SohMenuEnhancements.cpp
 +++ b/soh/soh/SohGui/SohMenuEnhancements.cpp
 @@ -9,6 +9,7 @@
@@ -868,7 +868,7 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..6b6512c5cb91b7e8c43b83486bc774cc
      AddWidget(path, "Slow Text Speed: %dx", WIDGET_CVAR_SLIDER_INT)
          .CVar(CVAR_ENHANCEMENT("SlowTextSpeed"))
          .Options(IntSliderOptions().Min(1).Max(5).DefaultValue(1).Format("%dx").Tooltip(
-@@ -1926,6 +1935,42 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1926,6 +1935,50 @@ void SohMenu::AddMenuEnhancements() {
              .CVar(timer.timeEnable)
              .Callback([](WidgetInfo& info) { TimeDisplayUpdateDisplayOptions(); });
      }
@@ -908,6 +908,14 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..6b6512c5cb91b7e8c43b83486bc774cc
 +        .Options(CheckboxOptions().Tooltip("While playing the Ocarina, the D-pad plays the four C-button notes "
 +                                           "(the D-pad still uses items otherwise). Same setting as Settings > "
 +                                           "Controls > Ocarina Controls."));
++    AddWidget(path, "Items", WIDGET_SEPARATOR_TEXT);
++    AddWidget(path, "Keep Bunny Hood", WIDGET_CVAR_CHECKBOX)
++        .CVar(CVAR_ENHANCEMENT("MissingShip.KeepBunnyHood"))
++        .Options(CheckboxOptions()
++                     .DefaultValue(true)
++                     .Tooltip("If you're wearing the Bunny Hood when you void out or die, you still have it on "
++                              "after respawning or continuing. Other masks, and ordinary scene changes, work as "
++                              "usual (SoH's \"Persistent Masks\" keeps every mask through everything)."));
  }
  
  } // namespace SohGui
@@ -1497,10 +1505,10 @@ index 0000000000000000000000000000000000000000..b3e5a87f7eed1795dea7fb1abc931997
 +#endif
 diff --git a/soh/src/code/ml_state.c b/soh/src/code/ml_state.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..f357f73ac2b2f1093ab930e96a866677abb630c9
+index 0000000000000000000000000000000000000000..6032fb8196b6b4e18231feb926c4bc2255be40ee
 --- /dev/null
 +++ b/soh/src/code/ml_state.c
-@@ -0,0 +1,301 @@
+@@ -0,0 +1,323 @@
 +#include "ml_state.h"
 +#include "ml_entrance_map.h"
 +#include "objects/gameplay_keep/gameplay_keep.h"
@@ -1802,12 +1810,34 @@ index 0000000000000000000000000000000000000000..f357f73ac2b2f1093ab930e96a866677
 +    }
 +    MlSoulSword_SetBladeColor(sMlSoulGlow[0], sMlSoulGlow[1], sMlSoulGlow[2]);
 +}
++
++// MissingShip QoL, not ML: keep the Bunny Hood on through a void-out, a respawn or a game-over continue (option
++// "Keep Bunny Hood" on the MissingShip page, default on). Vanilla takes masks off on every scene load; SoH's
++// Persistent Masks keeps every mask through everything. This records the mask when the respawn is triggered and puts
++// it back on in the next Player_Init, so a mask taken off by an ordinary scene change stays off.
++static u8 sMlKeptMask = PLAYER_MASK_NONE;
++
++void MlState_RememberMask(PlayState* play) {
++    Player* player = GET_PLAYER(play);
++
++    sMlKeptMask = (CVarGetInteger(CVAR_ENHANCEMENT("MissingShip.KeepBunnyHood"), 1) && (player != NULL) &&
++                   (player->currentMask == PLAYER_MASK_BUNNY))
++                      ? PLAYER_MASK_BUNNY
++                      : PLAYER_MASK_NONE;
++}
++
++void MlState_RestoreMask(Player* player) {
++    if (sMlKeptMask != PLAYER_MASK_NONE) {
++        player->currentMask = sMlKeptMask;
++    }
++    sMlKeptMask = PLAYER_MASK_NONE;
++}
 diff --git a/soh/src/code/ml_state.h b/soh/src/code/ml_state.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..147e94717cd310830aa37c7fde6ef25a81f22294
+index 0000000000000000000000000000000000000000..bbd7651ec5e3de97e7e182214a83734cfba38e3c
 --- /dev/null
 +++ b/soh/src/code/ml_state.h
-@@ -0,0 +1,20 @@
+@@ -0,0 +1,22 @@
 +#ifndef ML_STATE_H
 +#define ML_STATE_H
 +
@@ -1826,6 +1856,8 @@ index 0000000000000000000000000000000000000000..147e94717cd310830aa37c7fde6ef25a
 +void MlState_LinkAnimation(LinkAnimationHeader** animation, f32* endFrame);
 +void MlState_JumpUpdate(Player* player);
 +s32 MlState_SkipWallPush(PlayState* play);
++void MlState_RememberMask(PlayState* play);
++void MlState_RestoreMask(Player* player);
 +
 +#endif
 diff --git a/soh/src/code/z_actor.c b/soh/src/code/z_actor.c
@@ -3134,16 +3166,17 @@ index 4b782d9540cfa2f235048c04c7811502db9225bd..b7d194857e49d5ecbd174446630b5b4a
  
                  if ((player->stateFlags1 & PLAYER_STATE1_ON_HORSE) || (play->shootingGalleryStatus > 1) ||
 diff --git a/soh/src/code/z_play.c b/soh/src/code/z_play.c
-index f73d076de42c85067bb5f8d6fc0b4be7cf1e4ca8..297fb48ec15443187df2699339dd83bf7c72ac03 100644
+index f73d076de42c85067bb5f8d6fc0b4be7cf1e4ca8..687f24bf3f33cd0ac1262b3d9a76c984f7643272 100644
 --- a/soh/src/code/z_play.c
 +++ b/soh/src/code/z_play.c
-@@ -1,4 +1,5 @@
+@@ -1,4 +1,6 @@
  #include "global.h"
 +#include "code/ml_entrance_flags.h"
++#include "code/ml_state.h"
  #include "vt.h"
  
  #include <string.h>
-@@ -382,6 +383,7 @@ void Play_Init(GameState* thisx) {
+@@ -382,6 +384,7 @@ void Play_Init(GameState* thisx) {
      s32 pad[2];
  
      enableBetaQuest();
@@ -3151,13 +3184,29 @@ index f73d076de42c85067bb5f8d6fc0b4be7cf1e4ca8..297fb48ec15443187df2699339dd83bf
  
      // Properly initialize the frame counter so it doesn't use garbage data
      if (!firstInit) {
-@@ -736,6 +738,7 @@ void Play_Update(PlayState* play) {
+@@ -736,6 +739,7 @@ void Play_Update(PlayState* play) {
  
      if (FrameAdvance_Update(&play->frameAdvCtx, &input[1])) {
          if ((play->transitionMode == TRANS_MODE_OFF) && (play->transitionTrigger != TRANS_TRIGGER_OFF)) {
 +            LUSLOG_INFO("MissingShip-TRACE transition start next=%#x trigger=%d", play->nextEntranceIndex, play->transitionTrigger);
              play->transitionMode = TRANS_MODE_SETUP;
          }
+ 
+@@ -2130,6 +2134,7 @@ void Play_SetupRespawnPoint(PlayState* play, s32 respawnMode, s32 playerParams)
+ }
+ 
+ void Play_TriggerVoidOut(PlayState* play) {
++    MlState_RememberMask(play); // MissingShip: keep the Bunny Hood on (QoL)
+     gSaveContext.respawn[RESPAWN_MODE_DOWN].tempSwchFlags = play->actorCtx.flags.tempSwch;
+     gSaveContext.respawn[RESPAWN_MODE_DOWN].tempCollectFlags = play->actorCtx.flags.tempCollect;
+     gSaveContext.respawnFlag = 1;
+@@ -2139,6 +2144,7 @@ void Play_TriggerVoidOut(PlayState* play) {
+ }
+ 
+ void Play_LoadToLastEntrance(PlayState* play) {
++    MlState_RememberMask(play); // MissingShip: keep the Bunny Hood on (QoL; respawns and game-over continue)
+     gSaveContext.respawnFlag = -1;
+     play->transitionTrigger = TRANS_TRIGGER_START;
  
 diff --git a/soh/src/code/z_player_lib.c b/soh/src/code/z_player_lib.c
 index 34750ed2cc7fc7cfc66f9999de6581ea2fc091b4..f284c4820e8ac2279131de089e907af4c89c8417 100644
@@ -12233,7 +12282,7 @@ index f0cf6dad0bee6c91a54576f87a18a1cbc02c741f..749055c3a78e1b2b72acfd278839a00a
  
      gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 diff --git a/soh/src/overlays/actors/ovl_player_actor/z_player.c b/soh/src/overlays/actors/ovl_player_actor/z_player.c
-index 5aa9d947048cdc4670e6c76ac55913860b7c4535..d6ffea40ca3a146fe2bb57589dbd6874f69cbf1d 100644
+index 5aa9d947048cdc4670e6c76ac55913860b7c4535..4cd7a934b80a4352863785fa1de66e464b4f4a72 100644
 --- a/soh/src/overlays/actors/ovl_player_actor/z_player.c
 +++ b/soh/src/overlays/actors/ovl_player_actor/z_player.c
 @@ -6,6 +6,7 @@
@@ -12374,7 +12423,15 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..d6ffea40ca3a146fe2bb57589dbd6874
      Math_AsymStepToF(&this->linearVelocity, arg1, REG(19) / 100.0f, 1.5f);
      Math_ScaledStepToS(&this->yaw, arg2, REG(27));
  }
-@@ -10882,7 +10918,8 @@ void Player_Init(Actor* thisx, PlayState* play2) {
+@@ -10839,6 +10875,7 @@ void Player_Init(Actor* thisx, PlayState* play2) {
+         }
+         this->currentMask = gSaveContext.ship.maskMemory;
+     }
++    MlState_RestoreMask(this); // MissingShip: the Bunny Hood worn at a void-out or death (QoL)
+     Player_InitCommon(this, play, gPlayerSkelHeaders[((void)0, gSaveContext.linkAge)]);
+     // `giObjectSegment` is used for both "get item" objects and title cards. The maximum size for
+     // get item objects is 0x2000 (see the assert in func_8083AE40), and the maximum size for
+@@ -10882,7 +10919,8 @@ void Player_Init(Actor* thisx, PlayState* play2) {
                   (Flags_GetEventChkInf(EVENTCHKINF_ENTERED_DODONGOS_CAVERN))) &&
                  ((play->sceneNum != SCENE_BOMBCHU_SHOP) ||
                   (Flags_GetEventChkInf(EVENTCHKINF_USED_DODONGOS_CAVERN_BLUE_WARP)))) {
@@ -12384,7 +12441,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..d6ffea40ca3a146fe2bb57589dbd6874
              }
          }
          gSaveContext.showTitleCard = true;
-@@ -11616,7 +11653,8 @@ void Player_UpdateCamAndSeqModes(PlayState* play, Player* this) {
+@@ -11616,7 +11654,8 @@ void Player_UpdateCamAndSeqModes(PlayState* play, Player* this) {
          }
  
          if (play->sceneNum != SCENE_FISHING_POND) {
@@ -12394,7 +12451,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..d6ffea40ca3a146fe2bb57589dbd6874
          }
      }
  }
-@@ -12147,7 +12185,8 @@ void Player_UpdateCommon(Player* this, PlayState* play, Input* input) {
+@@ -12147,7 +12186,8 @@ void Player_UpdateCommon(Player* this, PlayState* play, Input* input) {
          if (this->stateFlags1 & PLAYER_STATE1_IN_WATER) {
              sWaterSpeedFactor = 0.5f;
          } else {
@@ -12404,7 +12461,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..d6ffea40ca3a146fe2bb57589dbd6874
          }
  
          sInvWaterSpeedFactor = 1.0f / sWaterSpeedFactor;
-@@ -12319,9 +12358,23 @@ void Player_Update(Actor* thisx, PlayState* play) {
+@@ -12319,9 +12359,23 @@ void Player_Update(Actor* thisx, PlayState* play) {
              }
          }
  
@@ -12429,7 +12486,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..d6ffea40ca3a146fe2bb57589dbd6874
      MREG(52) = this->actor.world.pos.x;
      MREG(53) = this->actor.world.pos.y;
      MREG(54) = this->actor.world.pos.z;
-@@ -12541,6 +12594,7 @@ void Player_Draw(Actor* thisx, PlayState* play2) {
+@@ -12541,6 +12595,7 @@ void Player_Draw(Actor* thisx, PlayState* play2) {
          if (CVarGetInteger(CVAR_ENHANCEMENT("DisableLOD"), 0)) {
              lod = 0;
          }
@@ -12437,7 +12494,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..d6ffea40ca3a146fe2bb57589dbd6874
  
          func_80093C80(play);
          Gfx_SetupDL_25Xlu(play->state.gfxCtx);
-@@ -13002,7 +13056,9 @@ void Player_Action_Talk(Player* this, PlayState* play) {
+@@ -13002,7 +13057,9 @@ void Player_Action_Talk(Player* this, PlayState* play) {
      if (Message_GetState(&play->msgCtx) == TEXT_STATE_CLOSING) {
          this->actor.flags &= ~ACTOR_FLAG_TALK;
  
@@ -12448,7 +12505,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..d6ffea40ca3a146fe2bb57589dbd6874
              this->stateFlags2 &= ~PLAYER_STATE2_LOCK_ON_WITH_SWITCH;
          }
  
-@@ -14316,12 +14372,16 @@ void Player_Action_8084E3C4(Player* this, PlayState* play) {
+@@ -14316,12 +14373,16 @@ void Player_Action_8084E3C4(Player* this, PlayState* play) {
      if (play->msgCtx.ocarinaMode == OCARINA_MODE_04) {
          func_8005B1A4(Play_GetCamera(play, 0));
  
@@ -12467,7 +12524,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..d6ffea40ca3a146fe2bb57589dbd6874
          } else if (!Player_ActionHandler_13(this, play)) {
              func_8083A098(this, &gPlayerAnim_link_normal_okarina_end, play);
          }
-@@ -14392,7 +14452,11 @@ void Player_Action_8084E6D4(Player* this, PlayState* play) {
+@@ -14392,7 +14453,11 @@ void Player_Action_8084E6D4(Player* this, PlayState* play) {
                          this->exchangeItemId = EXCH_ITEM_NONE;
  
                          if (func_8084B4D4(play, this) == 0) {
@@ -12480,7 +12537,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..d6ffea40ca3a146fe2bb57589dbd6874
                          }
                      } else {
                          func_8084DFAC(play, this);
-@@ -14715,7 +14779,12 @@ void Player_Action_ExchangeItem(Player* this, PlayState* play) {
+@@ -14715,7 +14780,12 @@ void Player_Action_ExchangeItem(Player* this, PlayState* play) {
                  this->actor.flags |= ACTOR_FLAG_TALK;
              }
  
@@ -12494,7 +12551,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..d6ffea40ca3a146fe2bb57589dbd6874
          } else {
              GetItemEntry giEntry = ItemTable_Retrieve(D_80854528[this->exchangeItemId - 1]);
  
-@@ -14900,6 +14969,7 @@ void Player_Action_8084F88C(Player* this, PlayState* play) {
+@@ -14900,6 +14970,7 @@ void Player_Action_8084F88C(Player* this, PlayState* play) {
                      Grotto_ForceRegularVoidOut();
                  }
              } else if (GameInteractor_Should(VB_TRIGGER_VOIDOUT, true, this)) {
@@ -12502,7 +12559,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..d6ffea40ca3a146fe2bb57589dbd6874
                  Play_TriggerVoidOut(play);
              }
  
-@@ -14908,7 +14978,7 @@ void Player_Action_8084F88C(Player* this, PlayState* play) {
+@@ -14908,7 +14979,7 @@ void Player_Action_8084F88C(Player* this, PlayState* play) {
          } else {
              play->transitionType = TRANS_TYPE_FADE_BLACK;
              gSaveContext.nextTransitionType = TRANS_TYPE_FADE_WHITE;
@@ -12511,7 +12568,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..d6ffea40ca3a146fe2bb57589dbd6874
              gSaveContext.natureAmbienceId = 0xFF;
          }
  
-@@ -16642,12 +16712,17 @@ void Player_StartTalking(PlayState* play, Actor* actor) {
+@@ -16642,12 +16713,17 @@ void Player_StartTalking(PlayState* play, Actor* actor) {
      Player* this = GET_PLAYER(play);
      s32 pad;
  
