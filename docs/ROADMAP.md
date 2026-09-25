@@ -102,7 +102,7 @@ All eight are ported: 3, 5, 6 and 0x1F earlier, 0x1A in MS-036, and the boss fig
 
 | File | Status |
 |---|---|
-| **Player overlay** (dma 102) | 88 changed words ≈ 20 distinct edits, **ported** except the Magic Hourglass ones (MS-051, MS-052; see ENGINE_CHANGES rows 96–97). Originally: 30 `jal 0x806023E0` Link-animation overrides (**ported**, MS-051: the triple jump); fairy-release spawn replaced by a flag (+0x38CC); a second spawn removed (+0x74CC); a scene-gated music/sfx block (+0x7100); hooks into custom code at 0x80606BA0, 0x80606BC8, 0x80600480, 0x80600D90; Magic Hourglass `j 0x80600E00` (+0x17E5C); 4 forced branches; 3 constant changes (+0x6104, +0xA080, +0x14E20 0x78→0x50, +0x167E0). The Blade Beam works through a different route. |
+| **Player overlay** (dma 102) | 88 changed words ≈ 20 distinct edits, **ported** (MS-051, MS-052, MS-053; see ENGINE_CHANGES rows 96–98). Originally: 30 `jal 0x806023E0` Link-animation overrides (**ported**, MS-051: the triple jump); fairy-release spawn replaced by a flag (+0x38CC); a second spawn removed (+0x74CC); a scene-gated music/sfx block (+0x7100); hooks into custom code at 0x80606BA0, 0x80606BC8, 0x80600480, 0x80600D90; Magic Hourglass `j 0x80600E00` (+0x17E5C); 4 forced branches; 3 constant changes (+0x6104, +0xA080, +0x14E20 0x78→0x50, +0x167E0). The Blade Beam works through a different route. |
 | Pause menu (dma 101) | 46 words; mostly ported (ledger row 24). Recheck the cursor. |
 | Title screen (dma 97) | ML's own title: 0x1170 text + 76 KB of data (images). Not ported; SoH boots to file select. |
 | File select (dma 100) | 1 forced branch (+0xC9D8). Not ported. |
@@ -116,7 +116,6 @@ All eight are ported: 3, 5, 6 and 0x1F earlier, 0x1A in MS-036, and the boss fig
 
 ### F. ML custom code (dma 507) still unported
 
-- Magic Hourglass (0x80600E00, 0x80601000, 0x80601680, actor 0x18A).
 - Soul-Charged sword model and glow (patches object_link_child).
 - HUD restyle: 0x80604E30 (B/C buttons, alpha cap 125), 0x806053E0 (key counter), colour at 0x80089180.
 - Navi 0x80602000.
@@ -229,7 +228,7 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 | [MS-050](https://github.com/thefriendlyhedgehog/MissingShip/issues/32) | port | object_link_child (35,836 words changed) and link_animetion (dma 146). | **Built** (needs playtest): ML's child Link ships under the vanilla names; body, sword and Hylian Shield checked in game. link_animetion needed nothing beyond MS-026. Cosmetics editor item colours: MS-140 #104. |
 | [MS-051](https://github.com/thefriendlyhedgehog/MissingShip/issues/33) | port | Link animation override 0x806023E0 (30 call sites in the player overlay, 5 in `code`). | **Built** (needs playtest): ML's triple jump, Majora's Mask's, commonly ported into OoT hacks (a running jump plays run_jump, kiruL_end, kiruR_end in turn while each comes within 16 frames of landing) and the horse idle at the Fishing Pond cutscene entrance. |
 | [MS-052](https://github.com/thefriendlyhedgehog/MissingShip/issues/34) | port | The other player-overlay edits (see E): fairy-release flag, removed spawn, scene-gated audio block, custom hooks 0x80606BA0 / 0x80606BC8 / 0x80600480 / 0x80600D90, forced branches, constants. | **Built** (needs playtest): row 97. The Bunny Hood speed boost (MS-119), no void-out damage, music kept through hole falls and exits, and the smaller edits. The boomerang edits and the cucco check are the Hourglass (MS-053). |
-| [MS-053](https://github.com/thefriendlyhedgehog/MissingShip/issues/35) | port | Magic Hourglass: ring-buffer rewind (0x80600E00 / 0x80601000 / 0x80601680) + actor 0x18A. Right now the item throws a vanilla boomerang. | The item works as in ML. |
+| [MS-053](https://github.com/thefriendlyhedgehog/MissingShip/issues/35) | port | Magic Hourglass: ring-buffer rewind (0x80600E00 / 0x80601000 / 0x80601680) + actor 0x18A. Right now the item throws a vanilla boomerang. | **Built** (needs playtest): row 98. The item fires at once; after 17 frames in a room it rewinds Link about 3–8 seconds with the Song of Time wipe. Also ML's cucco keeper (0x80601000). |
 | [MS-054](https://github.com/thefriendlyhedgehog/MissingShip/issues/36) | port | Soul-Charged sword model and glow (actor 0x57 params 0xBEEF). Needs MS-050. | Visible on Link. |
 | [MS-055](https://github.com/thefriendlyhedgehog/MissingShip/issues/37) | infra | Locate ML code past 0x80608000 (0x8064xxxx, 0x807Cxxxx). | Mapped, and its features added to this list. |
 

@@ -1485,10 +1485,10 @@ index 0000000000000000000000000000000000000000..b3e5a87f7eed1795dea7fb1abc931997
 +#endif
 diff --git a/soh/src/code/ml_state.c b/soh/src/code/ml_state.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..ea385ae5cc7cee7652e7e34ef5e0da8623eab7f4
+index 0000000000000000000000000000000000000000..e3d05225693cb82afe3e6560beb625ce3cc61d12
 --- /dev/null
 +++ b/soh/src/code/ml_state.c
-@@ -0,0 +1,106 @@
+@@ -0,0 +1,220 @@
 +#include "ml_state.h"
 +#include "ml_entrance_map.h"
 +#include "objects/gameplay_keep/gameplay_keep.h"
@@ -1497,29 +1497,143 @@ index 0000000000000000000000000000000000000000..ea385ae5cc7cee7652e7e34ef5e0da86
 +
 +// MissingShip: ML's per-frame bookkeeping from its custom code.
 +//
-+// 0x80600E80 (called from Player_Update, player +0x17E5C) keys the current scene and room as
-+// sceneNum | (roomNum << 4); when the key changes it restarts a frame counter, which it caps at 169. The same counter
-+// sizes the Magic Hourglass rewind buffer (not ported yet).
++// 0x80600E00 replaces Player_Update's call to Player_UpdateCommon (player +0x17E5C) and wraps it:
++// - It keys the current scene and room as sceneNum | (roomNum << 4) and counts frames since the key changed
++//   (0x80601680). At frame 17 it fills the whole Magic Hourglass history with Link's spot and jumps the count to its
++//   cap, 169, the value at which the Hourglass works.
++// - It keeps that history: 164 entries of Link's position and facing, newest first, shifted every frame.
++// - The Magic Hourglass (the boomerang slot: the throw sets gMlHourglassTrigger instead of spawning En_Boom): once
++//   the count is at its cap, it spawns the Song of Time wipe and rewinds Link through entries 69..161, 4 a frame, with
++//   Player_UpdateCommon skipped until it ends. Otherwise the trigger is dropped.
++// - Then the cucco keeper (0x80601000, see MlState_CuccoFrame).
 +// 0x80602C80 (replacing the Math_Vec3f_Copy that applies a wall push-out in Actor_UpdateBgCheckInfo) skips the push
-+// while that counter is below 2, and, in Deep Woods, for the next gMlWallSkip calls after its looping corridor
++// while the room counter is below 2, and, in Deep Woods, for the next gMlWallSkip calls after its looping corridor
 +// teleports Link (set to 2 by the teleport, 0x80602188).
 +
-+u16 gMlRoomFrames = 0;
++u16 gMlRoomFrames = 0;   // 0x80609FF0
 +s32 gMlWallSkip = 0;
-+// ML sets this while the Magic Hourglass rewinds (0x80600E00). Nothing sets it until the Hourglass is ported
-+// (MS-053); ML's tall HAKAdan elevator (En_Kakasi) and Boss_Va read it.
-+u16 gMlRewindStep = 0;
-+static u16 sMlRoomKey = 0;
++u16 gMlRewindStep = 0;   // 0x80609FF4: read by ML's tall HAKAdan elevator (En_Kakasi) and Boss_Va too
++u8 gMlHourglassTrigger = 0; // 0x80609FFF
++static u16 sMlRoomKey = 0;  // 0x80609FF2
++static Actor* sMlHourglassWipe = NULL; // 0x80609FEC
 +
-+void MlState_PlayerUpdate(PlayState* play) {
-+    u16 key = play->sceneNum | (play->roomCtx.curRoom.num << 4);
++#define ML_REWIND_LEN 164
++typedef struct {
++    Vec3f pos;
++    s16 yaw;
++} MlRewindEntry;
++static MlRewindEntry sMlRewind[ML_REWIND_LEN]; // 0x8060AC00
 +
-+    if (key != sMlRoomKey) {
-+        sMlRoomKey = key;
-+        gMlRoomFrames = 0;
-+    } else if (gMlRoomFrames < 169) {
-+        gMlRoomFrames++;
++// 0x80600AA8 / 0x80600AAA: ML's cucco carried through a void-out.
++static u16 sMlCuccoHealth = 0;
++static u16 sMlCuccoVoided = 0;
++
++static s32 MlCucco_Is(Actor* actor) {
++    // ML's copy keeps En_Niw's InitVars id; SoH's Ml_Cucco has its own slot's id.
++    return (actor->id == ACTOR_EN_NIW) || (actor->id == ACTOR_EN_POH);
++}
++
++static s32 MlCucco_InRoom(PlayState* play) {
++    for (Actor* actor = play->actorCtx.actorLists[ACTORCAT_PROP].head; actor != NULL; actor = actor->next) {
++        if (MlCucco_Is(actor)) {
++            return true;
++        }
 +    }
++    return false;
++}
++
++// 0x80600480, before Play_TriggerVoidOut in the void-out action.
++void MlState_VoidOut(PlayState* play) {
++    gMlRoomFrames = 0;
++    if (MlCucco_InRoom(play)) {
++        sMlCuccoHealth = 0x77;
++        sMlCuccoVoided = 1;
++    }
++}
++
++// 0x80601000: one frame into a room after a void-out with a cucco around (not at Lon Lon Ranch or in the Shadow
++// Temple slot), and with none here, ML spawns its own cucco beside Link, in no room so it follows him. While Link holds
++// a cucco, the health it keeps is recorded; ML's own starts at 0x77.
++static void MlState_CuccoFrame(Player* player, PlayState* play) {
++    if ((gMlRoomFrames == 1) && (play->sceneNum != SCENE_LON_LON_RANCH) && (play->sceneNum != SCENE_SHADOW_TEMPLE) &&
++        (sMlCuccoHealth == 0x77) && !MlCucco_InRoom(play)) {
++        s16 yaw = player->actor.focus.rot.y;
++        Actor* cucco = Actor_Spawn(&play->actorCtx, play, ACTOR_EN_POH, player->actor.world.pos.x + Math_SinS(yaw) * 152.0f,
++                                   player->actor.world.pos.y, player->actor.world.pos.z + Math_CosS(yaw) * 184.0f, 0,
++                                   yaw, 0, 0x77);
++        if (cucco != NULL) {
++            cucco->room = -1;
++        }
++        sMlCuccoVoided = 0;
++    }
++    if (sMlCuccoVoided == 0) {
++        Actor* held = player->actor.child;
++
++        sMlCuccoHealth = 0xFFFF;
++        if ((held != NULL) && MlCucco_Is(held)) {
++            sMlCuccoHealth = held->colChkInfo.health;
++        }
++    }
++}
++
++// Returns whether Player_UpdateCommon should run this frame.
++s32 MlState_PlayerFrame(Player* player, PlayState* play) {
++    s32 runUpdate = false;
++
++    if (gMlRewindStep == 0) {
++        u16 key = play->sceneNum | (play->roomCtx.curRoom.num << 4);
++        u16 frames;
++
++        memmove(&sMlRewind[1], &sMlRewind[0], sizeof(sMlRewind[0]) * (ML_REWIND_LEN - 1));
++        sMlRewind[0].pos = player->actor.world.pos;
++        sMlRewind[0].yaw = player->actor.shape.rot.y;
++
++        if (key != sMlRoomKey) {
++            sMlRoomKey = key;
++            gMlRoomFrames = 0;
++        }
++        frames = gMlRoomFrames + 1;
++        if (frames == 17) {
++            for (s32 i = 0; i < ML_REWIND_LEN; i++) {
++                sMlRewind[i].pos = player->actor.world.pos;
++                sMlRewind[i].yaw = 0; // ML stores the facing as a word here, so it reads back as 0
++            }
++            frames = 178;
++        }
++        gMlRoomFrames = MIN(frames, 169);
++
++        if ((gMlRoomFrames == 169) && gMlHourglassTrigger) {
++            gMlRewindStep = 1;
++            sMlHourglassWipe = Actor_Spawn(&play->actorCtx, play, ACTOR_OCEFF_WIPE, player->actor.world.pos.x,
++                                           player->actor.world.pos.y, player->actor.world.pos.z, 0, 0, 0, 1);
++            Audio_PlayActorSound2(&player->actor, NA_SE_IT_SHIELD_REFLECT_MG);
++        } else {
++            gMlHourglassTrigger = 0;
++            runUpdate = true;
++        }
++    } else {
++        MlRewindEntry* entry;
++
++        gMlRoomFrames = 0;
++        gMlRewindStep += 4;
++        entry = &sMlRewind[64 + gMlRewindStep];
++        player->actor.world.pos = player->actor.home.pos = entry->pos;
++        player->actor.shape.rot.y = entry->yaw;
++        if (sMlHourglassWipe != NULL) {
++            sMlHourglassWipe->world.pos = entry->pos;
++            sMlHourglassWipe->shape.rot.y = entry->yaw;
++        }
++        gMlHourglassTrigger = 0;
++        if (gMlRewindStep == 97) {
++            gMlRewindStep = 0;
++        }
++    }
++    return runUpdate;
++}
++
++// Called after Player_UpdateCommon (or in its place).
++void MlState_PlayerFrameEnd(Player* player, PlayState* play) {
++    MlState_CuccoFrame(player, play);
 +}
 +
 +s32 MlState_SkipWallPush(PlayState* play) {
@@ -1597,10 +1711,10 @@ index 0000000000000000000000000000000000000000..ea385ae5cc7cee7652e7e34ef5e0da86
 +}
 diff --git a/soh/src/code/ml_state.h b/soh/src/code/ml_state.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..6b02777f951215d319bbda40b12ecf37afa2fd73
+index 0000000000000000000000000000000000000000..5d8e3479956eb7fd3941f9638d6603eb8e2781dc
 --- /dev/null
 +++ b/soh/src/code/ml_state.h
-@@ -0,0 +1,16 @@
+@@ -0,0 +1,19 @@
 +#ifndef ML_STATE_H
 +#define ML_STATE_H
 +
@@ -1609,9 +1723,12 @@ index 0000000000000000000000000000000000000000..6b02777f951215d319bbda40b12ecf37
 +// MissingShip: engine state ML keeps in its custom-code region (0x80600000). See ml_state.c.
 +extern u16 gMlRoomFrames; // 0x80609FF0: frames since Link's scene/room last changed, capped at 169
 +extern s32 gMlWallSkip;   // 0x80602038: wall push-outs to skip in Deep Woods after its corridor teleport
-+extern u16 gMlRewindStep; // 0x80609FF4: Magic Hourglass rewind step, non-zero while a rewind plays (0 until MS-053)
++extern u16 gMlRewindStep; // 0x80609FF4: Magic Hourglass rewind step, non-zero while a rewind plays
++extern u8 gMlHourglassTrigger; // 0x80609FFF: set by the Hourglass (boomerang) throw
 +
-+void MlState_PlayerUpdate(PlayState* play);
++s32 MlState_PlayerFrame(Player* player, PlayState* play);
++void MlState_PlayerFrameEnd(Player* player, PlayState* play);
++void MlState_VoidOut(PlayState* play);
 +void MlState_LinkAnimation(LinkAnimationHeader** animation, f32* endFrame);
 +void MlState_JumpUpdate(Player* player);
 +s32 MlState_SkipWallPush(PlayState* play);
@@ -11876,7 +11993,7 @@ index f0cf6dad0bee6c91a54576f87a18a1cbc02c741f..749055c3a78e1b2b72acfd278839a00a
  
      gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 diff --git a/soh/src/overlays/actors/ovl_player_actor/z_player.c b/soh/src/overlays/actors/ovl_player_actor/z_player.c
-index 5aa9d947048cdc4670e6c76ac55913860b7c4535..956f0a20dd5af25e438dc1f8d4e71f19a67b6bbb 100644
+index 5aa9d947048cdc4670e6c76ac55913860b7c4535..4c71dd1ef9ff73dc8ee02d9ecf2c78c1217d5ade 100644
 --- a/soh/src/overlays/actors/ovl_player_actor/z_player.c
 +++ b/soh/src/overlays/actors/ovl_player_actor/z_player.c
 @@ -6,6 +6,7 @@
@@ -11908,7 +12025,37 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..956f0a20dd5af25e438dc1f8d4e71f19
  void Player_Action_80840450(Player* this, PlayState* play);
  void Player_Action_808407CC(Player* this, PlayState* play);
  void Player_Action_Idle(Player* this, PlayState* play);
-@@ -4735,8 +4743,8 @@ s32 func_808382DC(Player* this, PlayState* play) {
+@@ -3246,7 +3254,8 @@ s32 func_808358F0(Player* this, PlayState* play) {
+ 
+     func_80834EB8(this, play);
+ 
+-    if (!sHeldItemButtonIsHeldDown) {
++    // MissingShip: ML's Magic Hourglass fires at once, with no aiming hold (player +0x378C).
++    if (true) {
+         Player_SetUpperActionFunc(this, func_808359FC);
+         LinkAnimation_PlayOnce(play, &this->upperSkelAnime,
+                                (this->unk_870 < 0.5f) ? &gPlayerAnim_link_boom_throwR : &gPlayerAnim_link_boom_throwL);
+@@ -3263,11 +3272,15 @@ s32 func_808359FC(Player* this, PlayState* play) {
+         f32 posX = (Math_SinS(this->actor.shape.rot.y) * 10.0f) + this->actor.world.pos.x;
+         f32 posZ = (Math_CosS(this->actor.shape.rot.y) * 10.0f) + this->actor.world.pos.z;
+         s32 yaw = (this->focusActor != NULL) ? this->actor.shape.rot.y + 14000 : this->actor.shape.rot.y;
+-        EnBoom* boomerang =
+-            (EnBoom*)Actor_Spawn(&play->actorCtx, play, ACTOR_EN_BOOM, posX, this->actor.world.pos.y + 30.0f, posZ,
+-                                 this->actor.focus.rot.x, yaw, 0, 0);
++        // MissingShip: the Magic Hourglass: no boomerang, just the rewind trigger (player +0x38CC; see ml_state.c).
++        EnBoom* boomerang = NULL;
++
++        gMlHourglassTrigger = 1;
++        (void)posX;
++        (void)posZ;
++        (void)yaw;
+ 
+-        this->boomerangActor = &boomerang->actor;
++        this->boomerangActor = NULL;
+ 
+         if (boomerang != NULL) {
+             boomerang->moveTo = this->focusActor;
+@@ -4735,8 +4748,8 @@ s32 func_808382DC(Player* this, PlayState* play) {
  
      if (this->unk_A86 != 0) {
          if (!Player_InBlockingCsMode(play, this)) {
@@ -11919,7 +12066,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..956f0a20dd5af25e438dc1f8d4e71f19
              this->unk_A86 = 0;
          }
      } else {
-@@ -5189,10 +5197,13 @@ s32 Player_HandleExitsAndVoids(PlayState* play, Player* this, CollisionPoly* pol
+@@ -5189,10 +5202,13 @@ s32 Player_HandleExitsAndVoids(PlayState* play, Player* this, CollisionPoly* pol
                  ((sp34 < 100) || (this->actor.bgCheckFlags & 1))) {
  
                  if (temp == 11) {
@@ -11937,7 +12084,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..956f0a20dd5af25e438dc1f8d4e71f19
                  } else {
                      speedXZ = this->linearVelocity;
  
-@@ -5280,6 +5291,12 @@ Actor* Player_SpawnFairy(PlayState* play, Player* this, Vec3f* arg2, Vec3f* arg3
+@@ -5280,6 +5296,12 @@ Actor* Player_SpawnFairy(PlayState* play, Player* this, Vec3f* arg2, Vec3f* arg3
  
      Player_GetRelativePosition(this, arg2, arg3, &pos);
  
@@ -11950,7 +12097,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..956f0a20dd5af25e438dc1f8d4e71f19
      return Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ELF, pos.x, pos.y, pos.z, 0, 0, 0, type);
  }
  
-@@ -6229,6 +6246,9 @@ s32 Player_ActionHandler_Talk(Player* this, PlayState* play) {
+@@ -6229,6 +6251,9 @@ s32 Player_ActionHandler_Talk(Player* this, PlayState* play) {
                      // text will be used. This is especially important to prevent unwanted behavior with regards to mask
                      // trading.
                      this->currentMask = sSavedCurrentMask;
@@ -11960,7 +12107,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..956f0a20dd5af25e438dc1f8d4e71f19
                      Player_StartTalking(play, talkOfferActor);
                      return true;
                  }
-@@ -6462,7 +6482,7 @@ s32 Player_ActionHandler_Roll(Player* this, PlayState* play) {
+@@ -6462,7 +6487,7 @@ s32 Player_ActionHandler_Roll(Player* this, PlayState* play) {
          } else if ((this->putAwayCooldownTimer == 0) && (this->heldItemAction >= PLAYER_IA_SWORD_MASTER)) {
              Player_UseItem(play, this, ITEM_NONE);
          } else {
@@ -11969,7 +12116,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..956f0a20dd5af25e438dc1f8d4e71f19
          }
      }
  
-@@ -7125,6 +7145,17 @@ void func_8083DDC8(Player* this, PlayState* play) {
+@@ -7125,6 +7150,17 @@ void func_8083DDC8(Player* this, PlayState* play) {
  }
  
  void func_8083DF68(Player* this, f32 arg1, s16 arg2) {
@@ -11987,7 +12134,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..956f0a20dd5af25e438dc1f8d4e71f19
      Math_AsymStepToF(&this->linearVelocity, arg1, REG(19) / 100.0f, 1.5f);
      Math_ScaledStepToS(&this->yaw, arg2, REG(27));
  }
-@@ -10882,7 +10913,8 @@ void Player_Init(Actor* thisx, PlayState* play2) {
+@@ -10882,7 +10918,8 @@ void Player_Init(Actor* thisx, PlayState* play2) {
                   (Flags_GetEventChkInf(EVENTCHKINF_ENTERED_DODONGOS_CAVERN))) &&
                  ((play->sceneNum != SCENE_BOMBCHU_SHOP) ||
                   (Flags_GetEventChkInf(EVENTCHKINF_USED_DODONGOS_CAVERN_BLUE_WARP)))) {
@@ -11997,7 +12144,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..956f0a20dd5af25e438dc1f8d4e71f19
              }
          }
          gSaveContext.showTitleCard = true;
-@@ -11616,7 +11648,8 @@ void Player_UpdateCamAndSeqModes(PlayState* play, Player* this) {
+@@ -11616,7 +11653,8 @@ void Player_UpdateCamAndSeqModes(PlayState* play, Player* this) {
          }
  
          if (play->sceneNum != SCENE_FISHING_POND) {
@@ -12007,7 +12154,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..956f0a20dd5af25e438dc1f8d4e71f19
          }
      }
  }
-@@ -12147,7 +12180,8 @@ void Player_UpdateCommon(Player* this, PlayState* play, Input* input) {
+@@ -12147,7 +12185,8 @@ void Player_UpdateCommon(Player* this, PlayState* play, Input* input) {
          if (this->stateFlags1 & PLAYER_STATE1_IN_WATER) {
              sWaterSpeedFactor = 0.5f;
          } else {
@@ -12017,11 +12164,19 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..956f0a20dd5af25e438dc1f8d4e71f19
          }
  
          sInvWaterSpeedFactor = 1.0f / sWaterSpeedFactor;
-@@ -12322,6 +12356,13 @@ void Player_Update(Actor* thisx, PlayState* play) {
-         Player_UpdateCommon(this, play, &sp44);
+@@ -12319,9 +12358,20 @@ void Player_Update(Actor* thisx, PlayState* play) {
+             }
+         }
+ 
+-        Player_UpdateCommon(this, play, &sp44);
++        // MissingShip: ML's frame hook (player +0x17E5C -> 0x80600E00): room counter, Magic Hourglass history and
++        // rewind (which skips this update), then its cucco keeper.
++        if (MlState_PlayerFrame(this, play)) {
++            Player_UpdateCommon(this, play, &sp44);
++        }
++        MlState_PlayerFrameEnd(this, play);
      }
  
-+    MlState_PlayerUpdate(play); // MissingShip: ML's room frame counter (0x80600E80)
 +    MlState_JumpUpdate(this);   // MissingShip: ML's triple-jump step (0x80602DE0's tail)
 +
 +    // MissingShip: ML's Blade Beam spawner (its custom code at 0x80602DE0, hooked into the player draw).
@@ -12031,7 +12186,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..956f0a20dd5af25e438dc1f8d4e71f19
      MREG(52) = this->actor.world.pos.x;
      MREG(53) = this->actor.world.pos.y;
      MREG(54) = this->actor.world.pos.z;
-@@ -12541,6 +12582,7 @@ void Player_Draw(Actor* thisx, PlayState* play2) {
+@@ -12541,6 +12591,7 @@ void Player_Draw(Actor* thisx, PlayState* play2) {
          if (CVarGetInteger(CVAR_ENHANCEMENT("DisableLOD"), 0)) {
              lod = 0;
          }
@@ -12039,7 +12194,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..956f0a20dd5af25e438dc1f8d4e71f19
  
          func_80093C80(play);
          Gfx_SetupDL_25Xlu(play->state.gfxCtx);
-@@ -13002,7 +13044,9 @@ void Player_Action_Talk(Player* this, PlayState* play) {
+@@ -13002,7 +13053,9 @@ void Player_Action_Talk(Player* this, PlayState* play) {
      if (Message_GetState(&play->msgCtx) == TEXT_STATE_CLOSING) {
          this->actor.flags &= ~ACTOR_FLAG_TALK;
  
@@ -12050,7 +12205,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..956f0a20dd5af25e438dc1f8d4e71f19
              this->stateFlags2 &= ~PLAYER_STATE2_LOCK_ON_WITH_SWITCH;
          }
  
-@@ -14316,12 +14360,16 @@ void Player_Action_8084E3C4(Player* this, PlayState* play) {
+@@ -14316,12 +14369,16 @@ void Player_Action_8084E3C4(Player* this, PlayState* play) {
      if (play->msgCtx.ocarinaMode == OCARINA_MODE_04) {
          func_8005B1A4(Play_GetCamera(play, 0));
  
@@ -12069,7 +12224,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..956f0a20dd5af25e438dc1f8d4e71f19
          } else if (!Player_ActionHandler_13(this, play)) {
              func_8083A098(this, &gPlayerAnim_link_normal_okarina_end, play);
          }
-@@ -14392,7 +14440,11 @@ void Player_Action_8084E6D4(Player* this, PlayState* play) {
+@@ -14392,7 +14449,11 @@ void Player_Action_8084E6D4(Player* this, PlayState* play) {
                          this->exchangeItemId = EXCH_ITEM_NONE;
  
                          if (func_8084B4D4(play, this) == 0) {
@@ -12082,7 +12237,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..956f0a20dd5af25e438dc1f8d4e71f19
                          }
                      } else {
                          func_8084DFAC(play, this);
-@@ -14715,7 +14767,12 @@ void Player_Action_ExchangeItem(Player* this, PlayState* play) {
+@@ -14715,7 +14776,12 @@ void Player_Action_ExchangeItem(Player* this, PlayState* play) {
                  this->actor.flags |= ACTOR_FLAG_TALK;
              }
  
@@ -12096,15 +12251,15 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..956f0a20dd5af25e438dc1f8d4e71f19
          } else {
              GetItemEntry giEntry = ItemTable_Retrieve(D_80854528[this->exchangeItemId - 1]);
  
-@@ -14900,6 +14957,7 @@ void Player_Action_8084F88C(Player* this, PlayState* play) {
+@@ -14900,6 +14966,7 @@ void Player_Action_8084F88C(Player* this, PlayState* play) {
                      Grotto_ForceRegularVoidOut();
                  }
              } else if (GameInteractor_Should(VB_TRIGGER_VOIDOUT, true, this)) {
-+                gMlRoomFrames = 0; // MissingShip: ML's hook before the void-out (player +0x1D728 -> 0x80600480)
++                MlState_VoidOut(play); // MissingShip: ML's hook before the void-out (player +0x1D728 -> 0x80600480)
                  Play_TriggerVoidOut(play);
              }
  
-@@ -14908,7 +14966,7 @@ void Player_Action_8084F88C(Player* this, PlayState* play) {
+@@ -14908,7 +14975,7 @@ void Player_Action_8084F88C(Player* this, PlayState* play) {
          } else {
              play->transitionType = TRANS_TYPE_FADE_BLACK;
              gSaveContext.nextTransitionType = TRANS_TYPE_FADE_WHITE;
@@ -12113,7 +12268,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..956f0a20dd5af25e438dc1f8d4e71f19
              gSaveContext.natureAmbienceId = 0xFF;
          }
  
-@@ -16642,12 +16700,17 @@ void Player_StartTalking(PlayState* play, Actor* actor) {
+@@ -16642,12 +16709,17 @@ void Player_StartTalking(PlayState* play, Actor* actor) {
      Player* this = GET_PLAYER(play);
      s32 pad;
  
