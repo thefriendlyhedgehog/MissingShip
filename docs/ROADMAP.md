@@ -235,7 +235,7 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 | [MS-060](https://github.com/thefriendlyhedgehog/MissingShip/issues/38) | port | HUD restyle: B/C button backs (0x80604E30, alpha cap 125), key counter (0x806053E0), colour 0x80089180. | **Built** (needs playtest): row 100. ML's "restyle" is drop shadows under the buttons and counters plus a new Start colour. |
 | [MS-061](https://github.com/thefriendlyhedgehog/MissingShip/issues/39) | port | Title screen (dma 97, ML's own). Decide whether it's in scope next to SoH's boot flow. | **Decided: out of scope.** dma 97 is only ML's Expansion Pak and bad-emulator error screens around the vanilla N64 logo; SoH needs neither. ML's title screen itself is ported (En_Mag, MS-039). |
 | [MS-062](https://github.com/thefriendlyhedgehog/MissingShip/issues/40) | port | File select (1 edit) and opening (3 words: new-game entrance / cutscene index). | **Done:** opening ported (row 101), title checked; file select needs nothing in SoH. |
-| [MS-063](https://github.com/thefriendlyhedgehog/MissingShip/issues/41) | port | Recheck the pause-menu quest-status cursor (a misalignment was reported before row 24). | Verified. |
+| [MS-063](https://github.com/thefriendlyhedgehog/MissingShip/issues/41) | port | Recheck the pause-menu quest-status cursor (a misalignment was reported before row 24). | **Verified by code:** ML's 9-entry redirect table (0x806001C0) and its helper (0x80600690) match `sMlQuestCursorRedirects` and its logic in z_kaleido_collect.c, and both sides call it from the same 4 places. No change; in-game look on #9. |
 
 ### M6: Drop-in
 
