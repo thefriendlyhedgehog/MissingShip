@@ -66,7 +66,8 @@ The old inventory only surveyed placed actors, so it missed these. A spawn scan 
 | En_Vm (Beamos) | 1 data word; object DLs changed | Boss_Va (spawned as child) |
 | En_Bom_Chu | 974 text words + hook `0x80607A00` | Player (Bombchus exist; cap 20 is ported) |
 | Item_Shield | 1 text word | Player (dropped or burnt shield) |
-| Bg_Dy_Yoseizo, En_Dodongo (0x12), Bg_Haka_Huta | rewritten | spawner not found yet |
+| Bg_Dy_Yoseizo, Bg_Haka_Huta | rewritten | spawner not found yet |
+| En_Dodongo (0x12) | rewritten (0x840 vs 0x2570) | **placed once in `spot10`** (found by `survey_actors.py`; the first survey missed it) |
 | En_Ishi (rocks), En_Karebaba, Obj_Ice_Poly, En_GirlA | data / 1 word | spawner not found yet |
 
 ### C. ML custom actors in slots vanilla leaves empty
@@ -214,9 +215,9 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 | [MS-035](https://github.com/thefriendlyhedgehog/MissingShip/issues/26) | port | `night_shop`: En_Ossan + En_GirlA shop items (8 data words: prices?). | The shop works as in ML. |
 | [MS-036](https://github.com/thefriendlyhedgehog/MissingShip/issues/27) | port | `HAKAdan`: Boss_Tw slot ×26 (small ML rewrite + object_tw), ACTOR_UNSET_1A (custom), Bg_Hidan_Dalm, Bg_Mori_Elevator (+ object_mori_objects), En_Floormas, En_Kakasi (+ object_ka), En_Ssh, Bg_Mizu_Shutter. | The dungeon can be completed. |
 | [MS-037](https://github.com/thefriendlyhedgehog/MissingShip/issues/28) | port | **Boss fight** (`HAKAdan_bs`): Boss_Va + object_bv + custom actors 0x01, 0x17, 0x22 + En_Vm + Door_Warp1. | The boss can be beaten and the warp works. |
-| [MS-038](https://github.com/thefriendlyhedgehog/MissingShip/issues/29) | port | `Bmori1`: En_Peehat, Boss_Dodongo (+ rewritten En_Dodongo 0x12?), En_Du (+ object_du), En_Nb (+ object_nb), Bg_Jya_1flift. | The dungeon can be completed. |
+| [MS-038](https://github.com/thefriendlyhedgehog/MissingShip/issues/29) | port | `Bmori1`: En_Peehat, Boss_Dodongo, En_Du (+ object_du), En_Nb (+ object_nb), Bg_Jya_1flift. | The dungeon can be completed. |
 | [MS-039](https://github.com/thefriendlyhedgehog/MissingShip/issues/30) | port | `kakariko3`: Boss_Ganon2 (+ object_ganon2). `spot00`: En_Mag (+ object_mag). | Ported. |
-| [MS-040](https://github.com/thefriendlyhedgehog/MissingShip/issues/31) | port | Find the spawners of Bg_Dy_Yoseizo, En_Dodongo, Bg_Haka_Huta, En_Ishi, En_Karebaba, Obj_Ice_Poly, Item_Shield, En_Bom_Chu (hook 0x80607A00). | Each one ported, or recorded as unreachable. |
+| [MS-040](https://github.com/thefriendlyhedgehog/MissingShip/issues/31) | port | Port En_Dodongo (0x12; rewritten, placed in `spot10`). Find the spawners of Bg_Dy_Yoseizo, Bg_Haka_Huta, En_Ishi, En_Karebaba, Obj_Ice_Poly, Item_Shield, En_Bom_Chu (hook 0x80607A00). | Each one ported, or recorded as unreachable. |
 
 ### M4: Link
 
@@ -264,6 +265,7 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 
 ### Done
 
+- MS-005: `tools/survey_actors.py --write` regenerates the inventory from the ROMs (placements from every scene/room header, spawners from a text-section spawn scan, changes from modcheck); Status and Verified columns are carried over by slot, and regeneration is lossless. 62 placed + 11 spawned + 7 unreached actors; every todo links its issue. New find: En_Dodongo placed in `spot10`.
 - MS-003: ledger rows 30–43 (six repointed slots, eight in-place actor edits, the asset header); Malon/cucco moved out of the code-patch table; `tools/checkledger.py` fails when a patched file is missing from the ledger (87/87 covered).
 - MS-001: all scripts resolve paths via `pipeline/mspaths.py` / `mspaths.sh` (env `MS_*` overrides); ZAPD config templated; archive verified identical (4636 resources).
 - MS-002: obsolete `cycle.sh` removed (it installed into the old `SOH/ml_profile` setup and skipped every injector); `ms_cycle.sh` is the only build script.

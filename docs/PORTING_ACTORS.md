@@ -131,7 +131,10 @@ Then copy `build-ml/soh/soh-macos` over `MissingShip.app/Contents/MacOS/MissingS
 ### 6. Regenerate the engine patch
 
 Then add the change to `docs/ENGINE_CHANGES.md` and run `python3 tools/checkledger.py`, which fails if any
-patched file is missing from the ledger.
+patched file is missing from the ledger. Set the actor's **Status** in `docs/ML_ACTOR_INVENTORY.md` to `ported (...)`,
+and its **Verified** cell to `yes (date)` only once it has been seen working in the game. To refresh the
+inventory's machine columns (changes, placements, spawners), run `python3 tools/survey_actors.py --write`; hand-edited
+cells survive.
 
 New actor files are untracked, so a plain `git diff` silently omits them. Mark them
 intent-to-add first, and exclude the submodules, which carry their own patches:
