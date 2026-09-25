@@ -1485,11 +1485,15 @@ index 0000000000000000000000000000000000000000..b3e5a87f7eed1795dea7fb1abc931997
 +#endif
 diff --git a/soh/src/code/ml_state.c b/soh/src/code/ml_state.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..96cc843fab18c898c0d1814f1ef7f43d618537d6
+index 0000000000000000000000000000000000000000..ea385ae5cc7cee7652e7e34ef5e0da8623eab7f4
 --- /dev/null
 +++ b/soh/src/code/ml_state.c
-@@ -0,0 +1,39 @@
+@@ -0,0 +1,106 @@
 +#include "ml_state.h"
++#include "ml_entrance_map.h"
++#include "objects/gameplay_keep/gameplay_keep.h"
++#include "soh/ResourceManagerHelpers.h"
++#include <string.h>
 +
 +// MissingShip: ML's per-frame bookkeeping from its custom code.
 +//
@@ -1528,12 +1532,75 @@ index 0000000000000000000000000000000000000000..96cc843fab18c898c0d1814f1ef7f43d
 +    }
 +    return false;
 +}
++
++// ML's triple jump. ML routes every LinkAnimation_Change call (the player overlay's 29, code's 5) through 0x806023E0.
++// When a running jump starts, it plays sMlJumpAnims[sMlJumpStep] instead: the second and third jumps reuse the two
++// sword-turn recovery slots, whose data ML replaced (gPlayerAnimData_114420 / _114FB0, shipped by MS-026). Its
++// per-frame part (the tail of 0x80602DE0, hooked into the player draw) advances the step after each jump and drops
++// it back to the first jump once Link has been out of all three for 16 frames.
++static const char* sMlJumpAnims[] = {
++    gPlayerAnim_link_normal_run_jump,
++    gPlayerAnim_link_fighter_turn_kiruL_end,
++    gPlayerAnim_link_fighter_turn_kiruR_end,
++};
++static s8 sMlJumpStep = 0;     // 0x80600008
++static s8 sMlJumpPlayed = -1;  // 0x80600004: the jump LinkAnimation_Change just started, as an sMlJumpAnims index
++static u32 sMlJumpTimer = 0;   // 0x80603614: frames since Link left the last jump
++
++// Animations are resource paths here; each file has its own copy of a path, so compare the text.
++static s32 MlAnim_Is(const void* animation, const char* path) {
++    return animation == path || (ResourceMgr_OTRSigCheck((char*)animation) && strcmp(animation, path) == 0);
++}
++
++void MlState_LinkAnimation(LinkAnimationHeader** animation, f32* endFrame) {
++    if (MlAnim_Is(*animation, gPlayerAnim_link_normal_run_jump)) {
++        *animation = (LinkAnimationHeader*)sMlJumpAnims[sMlJumpStep];
++        *endFrame = Animation_GetLastFrame(*animation);
++        sMlJumpPlayed = sMlJumpStep;
++    }
++    // ML's Fishing Pond cutscene entrance: Link only ever plays the horse idle (ML entrance 0x420, see Ml_Fishpond).
++    if (gSaveContext.entranceIndex == MlEntrance_ToSoh(0x420)) {
++        *animation = (LinkAnimationHeader*)gPlayerAnim_link_uma_wait_2;
++        *endFrame = Animation_GetLastFrame(*animation);
++    }
++}
++
++void MlState_JumpUpdate(Player* player) {
++    if (sMlJumpTimer >= 16) {
++        sMlJumpStep = 0;
++    }
++    switch (sMlJumpPlayed) {
++        case 0:
++            sMlJumpStep = 1;
++            sMlJumpTimer = 1;
++            break;
++        case 1:
++            sMlJumpStep = 2;
++            sMlJumpTimer = 1;
++            break;
++        case 2:
++            sMlJumpStep = 0;
++            sMlJumpTimer = 0;
++            break;
++        default:
++            if (sMlJumpStep != 0) {
++                sMlJumpTimer++;
++            }
++            break;
++    }
++    sMlJumpPlayed = -1;
++    for (s32 i = 0; i < ARRAY_COUNT(sMlJumpAnims); i++) {
++        if (MlAnim_Is(player->skelAnime.animation, sMlJumpAnims[i])) {
++            sMlJumpTimer = 0;
++        }
++    }
++}
 diff --git a/soh/src/code/ml_state.h b/soh/src/code/ml_state.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..8eaa9a163ac0daade39911fbc610010a21e54447
+index 0000000000000000000000000000000000000000..6b02777f951215d319bbda40b12ecf37afa2fd73
 --- /dev/null
 +++ b/soh/src/code/ml_state.h
-@@ -0,0 +1,14 @@
+@@ -0,0 +1,16 @@
 +#ifndef ML_STATE_H
 +#define ML_STATE_H
 +
@@ -1545,6 +1612,8 @@ index 0000000000000000000000000000000000000000..8eaa9a163ac0daade39911fbc610010a
 +extern u16 gMlRewindStep; // 0x80609FF4: Magic Hourglass rewind step, non-zero while a rewind plays (0 until MS-053)
 +
 +void MlState_PlayerUpdate(PlayState* play);
++void MlState_LinkAnimation(LinkAnimationHeader** animation, f32* endFrame);
++void MlState_JumpUpdate(Player* player);
 +s32 MlState_SkipWallPush(PlayState* play);
 +
 +#endif
@@ -2852,6 +2921,26 @@ index 090d52fa669b430d62a246cd9a9dc4382e46f686..ece4ce9de8f58d45fccbc3a48751b343
  }
  
  void* D_8012A2F8[] = {
+diff --git a/soh/src/code/z_skelanime.c b/soh/src/code/z_skelanime.c
+index 4335df0c8f476d9951e99cd01c4ab44eccff1288..37a260e5db063013c2fcff9bd0a8774e0c0c6418 100644
+--- a/soh/src/code/z_skelanime.c
++++ b/soh/src/code/z_skelanime.c
+@@ -4,6 +4,7 @@
+ #include <stdio.h>
+ #include <assert.h>
+ #include "soh/ResourceManagerHelpers.h"
++#include "ml_state.h"
+ #include "soh/Enhancements/game-interactor/GameInteractor_Hooks.h"
+ 
+ #define ANIM_INTERP 1
+@@ -1257,6 +1258,7 @@ void Animation_SetMorph(PlayState* play, SkelAnime* skelAnime, f32 morphFrames)
+  */
+ void LinkAnimation_Change(PlayState* play, SkelAnime* skelAnime, LinkAnimationHeader* animation, f32 playSpeed,
+                           f32 startFrame, f32 endFrame, u8 mode, f32 morphFrames) {
++    MlState_LinkAnimation(&animation, &endFrame); // MissingShip: ML's replacement, 0x806023E0 (triple jump)
+     LinkAnimationHeader* ogAnim = animation;
+ 
+     if (ResourceMgr_OTRSigCheck(animation) != 0)
 diff --git a/soh/src/code/z_sram.c b/soh/src/code/z_sram.c
 index 7abc221a4aa050d0048d36703194649ae6ffceff..28df7a5d7c0b868df6e0f4822e7d5facccd6407f 100644
 --- a/soh/src/code/z_sram.c
@@ -11787,7 +11876,7 @@ index f0cf6dad0bee6c91a54576f87a18a1cbc02c741f..749055c3a78e1b2b72acfd278839a00a
  
      gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 diff --git a/soh/src/overlays/actors/ovl_player_actor/z_player.c b/soh/src/overlays/actors/ovl_player_actor/z_player.c
-index 5aa9d947048cdc4670e6c76ac55913860b7c4535..d1656dd5e52bc009c45540bee6aa0f5dd6edbee1 100644
+index 5aa9d947048cdc4670e6c76ac55913860b7c4535..73ff750bdd5c9b310d81e04d4d3955f4d0609059 100644
 --- a/soh/src/overlays/actors/ovl_player_actor/z_player.c
 +++ b/soh/src/overlays/actors/ovl_player_actor/z_player.c
 @@ -6,6 +6,7 @@
@@ -11829,11 +11918,12 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..d1656dd5e52bc009c45540bee6aa0f5d
                      Player_StartTalking(play, talkOfferActor);
                      return true;
                  }
-@@ -12322,6 +12333,12 @@ void Player_Update(Actor* thisx, PlayState* play) {
+@@ -12322,6 +12333,13 @@ void Player_Update(Actor* thisx, PlayState* play) {
          Player_UpdateCommon(this, play, &sp44);
      }
  
 +    MlState_PlayerUpdate(play); // MissingShip: ML's room frame counter (0x80600E80)
++    MlState_JumpUpdate(this);   // MissingShip: ML's triple-jump step (0x80602DE0's tail)
 +
 +    // MissingShip: ML's Blade Beam spawner (its custom code at 0x80602DE0, hooked into the player draw).
 +    MlMThunder_PlayerUpdate(this, play,
@@ -11842,7 +11932,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..d1656dd5e52bc009c45540bee6aa0f5d
      MREG(52) = this->actor.world.pos.x;
      MREG(53) = this->actor.world.pos.y;
      MREG(54) = this->actor.world.pos.z;
-@@ -14316,12 +14333,16 @@ void Player_Action_8084E3C4(Player* this, PlayState* play) {
+@@ -14316,12 +14334,16 @@ void Player_Action_8084E3C4(Player* this, PlayState* play) {
      if (play->msgCtx.ocarinaMode == OCARINA_MODE_04) {
          func_8005B1A4(Play_GetCamera(play, 0));
  
@@ -11861,7 +11951,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..d1656dd5e52bc009c45540bee6aa0f5d
          } else if (!Player_ActionHandler_13(this, play)) {
              func_8083A098(this, &gPlayerAnim_link_normal_okarina_end, play);
          }
-@@ -14392,7 +14413,11 @@ void Player_Action_8084E6D4(Player* this, PlayState* play) {
+@@ -14392,7 +14414,11 @@ void Player_Action_8084E6D4(Player* this, PlayState* play) {
                          this->exchangeItemId = EXCH_ITEM_NONE;
  
                          if (func_8084B4D4(play, this) == 0) {
@@ -11874,7 +11964,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..d1656dd5e52bc009c45540bee6aa0f5d
                          }
                      } else {
                          func_8084DFAC(play, this);
-@@ -14715,7 +14740,12 @@ void Player_Action_ExchangeItem(Player* this, PlayState* play) {
+@@ -14715,7 +14741,12 @@ void Player_Action_ExchangeItem(Player* this, PlayState* play) {
                  this->actor.flags |= ACTOR_FLAG_TALK;
              }
  
@@ -11888,7 +11978,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..d1656dd5e52bc009c45540bee6aa0f5d
          } else {
              GetItemEntry giEntry = ItemTable_Retrieve(D_80854528[this->exchangeItemId - 1]);
  
-@@ -16642,6 +16672,10 @@ void Player_StartTalking(PlayState* play, Actor* actor) {
+@@ -16642,6 +16673,10 @@ void Player_StartTalking(PlayState* play, Actor* actor) {
      Player* this = GET_PLAYER(play);
      s32 pad;
  

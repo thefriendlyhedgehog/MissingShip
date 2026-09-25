@@ -123,6 +123,7 @@ over ML's Saria's house) · raw gameplay_keep texture pointers in ML display lis
 | 93 | `z_en_bom_chu.c` Update: HAKAdan Bombchu rail (`EnBomChu_MlRail`) (MS-139) | ML's only change: `jal 0x80607A00` at the end of Update; that custom routine inlined |
 | 94 | `z_en_karebaba.c` FLAGS without `ACTOR_FLAG_HOSTILE`; `z_obj_ice_poly.c` Idle no longer sets the ice's AT (MS-040) | ML's only changes: InitVars flags 5 -> 1; one `CollisionCheck_SetAT` nopped. Neither actor is placed or spawned in ML, so both are unreachable; ported for completeness |
 | 95 | `z_player_lib.c`: the child entries of `sPlayerRightHandHookshotDLs` / `sPlayerLeftHandHammerDLs` are the closed right hand and the left fist; `ml_assets.h`'s child Hylian Shield hand moves to `object_link_child` (MS-050) | ML's `code` tables at 0x108D14-0x1092E4 point these entries at those hands. The model itself is data: `object_link_child` (dma 6) ships under the vanilla path and names, one LOD (the Far names are copies, `inject_obj_patches.py` LC_ALIASES) |
+| 96 | `z_skelanime.c` LinkAnimation_Change calls `MlState_LinkAnimation`; `z_player.c` Update calls `MlState_JumpUpdate` (`ml_state.c`): ML's triple jump. A running jump plays run_jump, then kiruL_end, then kiruR_end (ML's replaced data) while each follows within 16 frames of landing. At the Fishing Pond cutscene entrance (ML 0x420) every Link animation is the horse idle (MS-051) | ML routes all 34 LinkAnimation_Change calls through 0x806023E0; the step is kept by the tail of 0x80602DE0 (hooked into Player_DrawImpl), ticked here at the end of Player_Update instead, which is the same point in the frame for Link |
 | — | Scene draw configs set to ML's (`pipeline/gen_scene_config.py` → `scene_table.h`, 17 slots) | ML changed the draw config of most slots it uses (grotto scenes → SDC_GROTTOS, Deep Woods/Deku Road → SDC_DEKU_TREE, ...). Vanilla's left segment 8 unset in the grotto scenes, so their DLs ran a rupee texture as commands (crash entering the Colossus-slot grotto) | engine table: the scene table is code, so a drop-in .o2r cannot change it; needs a SoH hook that lets a scene resource override its draw config |
 | — | Pipeline: `remap_exits` no longer stops at entrance 0 | ML entrance 0 is real (Deep Woods spawn 0); 6 scenes had later exits left unmapped (Deku Road's last three, the grotto arena's, ...). Each list is now bounded by the next header data block: without the 0 terminator the scan ran into tokinoma's player entries and rewrote Player's actor id 0, so Player never spawned after the prologue (crash in `func_800304DC`). `tools/checkexits.py` verifies all 104 real exit slots end to end | data (fixed) |
 | — | ZAPD `ZAudio.cpp`: zero-size soundfont guard | pipeline only, never shipped | Upstream as a bugfix (optional) |
@@ -209,7 +210,7 @@ Descriptions of unported targets are a first reading of the code; confirm them w
 | 0x80607D00 | code +0x7C584 | world-map area remap | **ported** |
 | 0x80602D00 | code +0xDA52C | Navi / Skull Kid sound mute | **ported** |
 | 0x80604E30, 0x806053E0 | code +0x6BE84, +0x6DC88 | HUD restyle: B/C button backs, key counter | not ported (MS-060) |
-| 0x806023E0 | code ×5, player ×29 | Link animation override (skips / substitutes animations) | not ported (MS-051) |
+| 0x806023E0 | code ×5, player ×29 | Link animation override: the triple jump, and the horse idle at Fishing Pond cutscene entrance 0x420 | ported (MS-051, row 96) |
 | 0x80600690, 0x80606C90, 0x80607F20 | pause menu | quest-status layout and cursor, vertical move on the equipment page, world-map points | **ported** (row 24; world-map points in the item-restriction table) |
 | 0x80600E00 (+ 0x80601000, 0x80601680) | player +0x17E5C | Magic Hourglass: position ring buffer and rewind, then calls the displaced player function (+0x16D8C) and returns to +0x17E68 | not ported (MS-053) |
 | 0x80600D90 | player +0x20F38 | `Player_StartTalking` returns to ra + 8 (skipping each caller's branch) when the actor's text is 0xE0, the "talk to Saria?" prompt; else re-runs the prologue and continues | **ported** (row 46, MS-017), with player +0x1C2B0 |
@@ -266,10 +267,10 @@ Item restrictions and related hooks (ported):
 | Overworld minimap never drawn; L no longer toggles it there | 0x80081AA0 → 0x80602DA0, 0x80082184 | z_map_exp.c: already an opt-in cosmetic (hidden by default); L toggle now only when it is shown |
 
 `0x806023E0` (hooked into five LinkAnimation calls at 0x800A3B70..0x800A41E4) is not a restriction routine: it swaps
-Link's animation (skips gameplay_keep 0x04003148, substitutes others at entrance 0x420) -- part of the sword visuals.
+Link's animation: a running jump (gameplay_keep 0x04003148) becomes the next step of ML's triple jump, and at
+entrance 0x420 every Link animation becomes the horse idle. Ported as row 96.
 
-Still open: the scene draw-config handlers (0x80099550-0x800A06F4), which ML rewrote wholesale; the Link animation
-override 0x806023E0.
+Still open: the scene draw-config handlers (0x80099550-0x800A06F4), which ML rewrote wholesale.
 
 ## ML `code` patches (full pass, 0x8001CE60-0x80114000 word diff vs MQ debug; `tools/codediff.py`)
 
