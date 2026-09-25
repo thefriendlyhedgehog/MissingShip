@@ -15,7 +15,7 @@ from then. Every upstream PR needs a public fork to open from; the MissingShip r
 | B3 | 44 | libultraship `GfxDpLoadBlock`: `word_size_shift` `uint32_t` → `int32_t` | Still `uint32_t` on `main`. One line |
 | B4 | 64 | Place-name card: skip it when the scene has no title card, as vanilla did | Still unchecked on `develop` (the size line is commented out). Our fork hardcodes ML's titled slots; the upstream form should check the scene's title texture resource instead |
 | B5 | — | ZAPD `ZAudio.cpp`: zero-size soundfont guard | Optional. Pipeline only |
-| — | 11 | libultraship Metal: zero-size texture guard | **Already upstream:** Kenix3/libultraship#1040 (adaad35d, 2026-04-06) adds the same `width == 0 \|\| height == 0` return. Drop our copy when we rebase onto a SoH release that pins it |
+| — | 11 | libultraship Metal, OpenGL and DX11: zero-size texture guard | **Already upstream:** Kenix3/libultraship#1040 (adaad35d, 2026-04-06) adds the same `width == 0 \|\| height == 0` return. Drop our copy when we rebase onto a SoH release that pins it |
 
 ## 2. Data-driven features: new resource types a mod `.o2r` could carry
 

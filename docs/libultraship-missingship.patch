@@ -1,3 +1,19 @@
+diff --git a/src/fast/backends/gfx_direct3d11.cpp b/src/fast/backends/gfx_direct3d11.cpp
+index b2edaa97541d08bf43baa5cba75b47b9991390a0..6872dab0f3c320b7325e01eb8b293358725b07c1 100644
+--- a/src/fast/backends/gfx_direct3d11.cpp
++++ b/src/fast/backends/gfx_direct3d11.cpp
+@@ -547,6 +547,11 @@ static D3D11_TEXTURE_ADDRESS_MODE gfx_cm_to_d3d11(uint32_t val) {
+ }
+ 
+ void GfxRenderingAPIDX11::UploadTexture(const uint8_t* rgba32_buf, uint32_t width, uint32_t height) {
++    // MissingShip: same zero-dimension guard as gfx_metal.cpp (MS-083); upstream has it since Kenix3/libultraship#1040.
++    if (width == 0 || height == 0) {
++        return;
++    }
++
+     // Create texture
+ 
+     TextureData* texture_data = &mTextures[mCurrentTextureIds[mCurrentTile]];
 diff --git a/src/fast/backends/gfx_metal.cpp b/src/fast/backends/gfx_metal.cpp
 index 9f9ea33905e73fdc95f76f7bf4de1b67c693ded4..fd23962f9fd611b08603881b95857d6b16051fd4 100644
 --- a/src/fast/backends/gfx_metal.cpp
@@ -18,6 +34,21 @@ index 9f9ea33905e73fdc95f76f7bf4de1b67c693ded4..fd23962f9fd611b08603881b95857d6b
      TextureDataMetal* texture_data = &mTextures[mCurrentTextureIds[mCurrentTile]];
  
      NS::AutoreleasePool* autorelease_pool = NS::AutoreleasePool::alloc()->init();
+diff --git a/src/fast/backends/gfx_opengl.cpp b/src/fast/backends/gfx_opengl.cpp
+index c0746d307b103e877a6aa3bbaa684b22aecec14b..959abc5f27a7674382b9b842dcfa2217c0d3f92d 100644
+--- a/src/fast/backends/gfx_opengl.cpp
++++ b/src/fast/backends/gfx_opengl.cpp
+@@ -551,6 +551,10 @@ void GfxRenderingAPIOGL::SelectTexture(int tile, GLuint texture_id) {
+ }
+ 
+ void GfxRenderingAPIOGL::UploadTexture(const uint8_t* rgba32_buf, uint32_t width, uint32_t height) {
++    // MissingShip: same zero-dimension guard as gfx_metal.cpp (MS-083); upstream has it since Kenix3/libultraship#1040.
++    if (width == 0 || height == 0) {
++        return;
++    }
+     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgba32_buf);
+     textures[mCurrentTextureIds[mCurrentTile]].width = width;
+     textures[mCurrentTextureIds[mCurrentTile]].height = height;
 diff --git a/src/fast/interpreter.cpp b/src/fast/interpreter.cpp
 index 73a293360f019921da52caa5fc8a12e8f7072aa1..a1b11c4c9f97dc6bc4dd9448c5079cd6e26af2e6 100644
 --- a/src/fast/interpreter.cpp
