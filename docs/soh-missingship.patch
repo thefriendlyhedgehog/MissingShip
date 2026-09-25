@@ -545,7 +545,7 @@ index a47a404ad1d016684eeb3b62538266483182bf1e..e79cc4da63f07cd4e9e7c0bec53e9410
      ACTOR_UNSET_31,
      ACTOR_UNSET_36,
 diff --git a/soh/soh/SohGui/SohMenuEnhancements.cpp b/soh/soh/SohGui/SohMenuEnhancements.cpp
-index 4cf7305373689a1e3d9a084f91a1a2693902dfde..897e1c0a8bd40ee0f55d836eaa4bd50cb90882aa 100644
+index 4cf7305373689a1e3d9a084f91a1a2693902dfde..6b6512c5cb91b7e8c43b83486bc774ccc3f7c2d4 100644
 --- a/soh/soh/SohGui/SohMenuEnhancements.cpp
 +++ b/soh/soh/SohGui/SohMenuEnhancements.cpp
 @@ -9,6 +9,7 @@
@@ -580,7 +580,7 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..897e1c0a8bd40ee0f55d836eaa4bd50c
      AddWidget(path, "Slow Text Speed: %dx", WIDGET_CVAR_SLIDER_INT)
          .CVar(CVAR_ENHANCEMENT("SlowTextSpeed"))
          .Options(IntSliderOptions().Min(1).Max(5).DefaultValue(1).Format("%dx").Tooltip(
-@@ -1926,6 +1935,34 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1926,6 +1935,42 @@ void SohMenu::AddMenuEnhancements() {
              .CVar(timer.timeEnable)
              .Callback([](WidgetInfo& info) { TimeDisplayUpdateDisplayOptions(); });
      }
@@ -600,6 +600,14 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..897e1c0a8bd40ee0f55d836eaa4bd50c
 +                              "D-Down: keeps the C buttons free. Needs \"Equip Items on Dpad\"; without it the "
 +                              "Ocarina goes on C-Left instead.\n\n"
 +                              "C-Left: The Missing Link's own new-game setup."));
++    AddWidget(path, "Dialogue", WIDGET_SEPARATOR_TEXT);
++    AddWidget(path, "B Cancels Choices", WIDGET_CVAR_CHECKBOX)
++        .CVar(CVAR_ENHANCEMENT("MissingShip.BCancelsChoice"))
++        .Options(CheckboxOptions()
++                     .DefaultValue(true)
++                     .Tooltip("On a Yes/No prompt, B picks the \"no\" / cancel answer instead of whatever is "
++                              "highlighted, and holding B to skip text never answers a prompt. Where a prompt has no "
++                              "cancel answer (e.g. \"Use it now / Get rid of it\"), B does nothing: press A."));
 +
 +    path.column = SECTION_COLUMN_2;
 +    AddWidget(path, "Controls", WIDGET_SEPARATOR_TEXT);
@@ -1439,7 +1447,7 @@ index 44b5b43b5d6d26a2bdb559e8fe80be90cf9f9757..56920e24289838ad81e0dbcf86019183
                      if (!R_MINIMAP_DISABLED) { Audio_PlaySoundGeneral(NA_SE_SY_CAMERA_ZOOM_UP, &gSfxDefaultPos, 4,
                                                                        &gSfxDefaultFreqAndVolScale, &gSfxDefaultFreqAndVolScale, &gSfxDefaultReverb); }
 diff --git a/soh/src/code/z_message_PAL.c b/soh/src/code/z_message_PAL.c
-index ce09fe27168d77ea579150b2f6249f7eed9b523b..f0da1903df2a9638a4590735709173114a5782e6 100644
+index ce09fe27168d77ea579150b2f6249f7eed9b523b..3c95700a277824bc3b3b331aa1badbca184ff27b 100644
 --- a/soh/src/code/z_message_PAL.c
 +++ b/soh/src/code/z_message_PAL.c
 @@ -105,7 +105,7 @@ void Message_ResetOcarinaNoteState(void) {
@@ -1451,7 +1459,97 @@ index ce09fe27168d77ea579150b2f6249f7eed9b523b..f0da1903df2a9638a459073570917311
      sOcarinaNoteABtnEnv = (Color_RGB8){ 10, 10, 10 };
      sOcarinaNoteCBtnPrim = (Color_RGB8){ 255, 255, 50 };
      sOcarinaNoteCBtnEnv = (Color_RGB8){ 10, 10, 10 };
-@@ -967,7 +967,7 @@ void Message_DrawTextJPN(PlayState* play, Gfx** gfxP) {
+@@ -157,9 +157,77 @@ void Message_UpdateOcarinaGame(PlayState* play) {
+     Message_ResetOcarinaNoteState();
+ }
+ 
++// MissingShip (MS-018): with "B Cancels Choices" on (Enhancements > MissingShip, default on), B on a choice prompt
++// selects the "no / cancel" option and confirms it, and holding B (Skip Text) no longer confirms the highlighted
++// option, so skipping dialogue can't accept anything. B selects the LAST option: in 128 of the 142 choice messages
++// that is a refusal. The rest, found by tools/audit_choices.py (which also checks this table covers them), are:
++typedef struct {
++    u16 textId;
++    s8 bChoice; // option B selects, or -1: B does nothing (no cancel option; press A)
++} MlChoiceBException;
++
++static const MlChoiceBException sMlChoiceBException[] = {
++    { 0x003B, 2 },  // Farore's Wind: Return / Dispel / Exit
++    { 0x006A, 1 },  // shop: I want to shop / Just looking
++    { 0x10B3, 1 },  // OK / I can't
++    { 0x2036, 0 },  // "go home?": No, I want to ride / Yes, I'm done  (refusal first)
++    { 0x2066, 1 },  // "Did you get all that?": No / Yes  (Yes ends the explanation)
++    { 0x4084, 2 },  // fishing: Weigh my fish / Let's talk / I want to quit
++    { 0x4098, 0 },  // No, I don't want it / Yes, I want to keep it anyway  (refusal first)
++    { 0x4099, 1 },  // Keep it anyway / I don't want it
++    { 0x409A, -1 }, // Use it now / Get rid of it  (both act; B must not discard)
++    { 0x1035, -1 }, // question menus: no cancel option
++    { 0x300A, -1 },
++    { 0x3034, -1 },
++    { 0x6020, -1 }, // story reply: What if I am? / I hate Ganondorf!
++    { 0x703A, 1 },  // OK / I don't believe you
++};
++
++// The option B selects on the current choice prompt, or -1 when B does nothing there.
++static s32 MlChoice_BIndex(MessageContext* msgCtx) {
++    for (u32 i = 0; i < ARRAY_COUNT(sMlChoiceBException); i++) {
++        if (sMlChoiceBException[i].textId == msgCtx->textId) {
++            return sMlChoiceBException[i].bChoice;
++        }
++    }
++    return (msgCtx->textboxEndType == TEXTBOX_ENDTYPE_3_CHOICE) ? 2 : 1;
++}
++
++// On a choice prompt, returns whether this frame's input answers it: A or C-Up confirm the highlighted option as
++// usual; a B press selects the option from MlChoice_BIndex. Returns -1 when not on a choice prompt (vanilla rules).
++static s32 MlChoice_ShouldAdvance(PlayState* play) {
++    MessageContext* msgCtx = &play->msgCtx;
++    Input* input = &play->state.input[0];
++
++    if (!CVarGetInteger(CVAR_ENHANCEMENT("MissingShip.BCancelsChoice"), 1) ||
++        Message_GetState(msgCtx) != TEXT_STATE_CHOICE) {
++        return -1;
++    }
++    if (CHECK_BTN_ALL(input->press.button, BTN_A) || CHECK_BTN_ALL(input->press.button, BTN_CUP)) {
++        return true;
++    }
++    if (CHECK_BTN_ALL(input->press.button, BTN_B)) {
++        s32 index = MlChoice_BIndex(msgCtx);
++        if (index >= 0) {
++            msgCtx->choiceIndex = index;
++            return true;
++        }
++    }
++    return false;
++}
++
+ u8 Message_ShouldAdvance(PlayState* play) {
+     Input* input = &play->state.input[0];
+ 
++    s32 choice = MlChoice_ShouldAdvance(play);
++    if (choice >= 0) {
++        if (choice) {
++            Audio_PlaySoundGeneral(NA_SE_SY_MESSAGE_PASS, &gSfxDefaultPos, 4, &gSfxDefaultFreqAndVolScale,
++                                   &gSfxDefaultFreqAndVolScale, &gSfxDefaultReverb);
++        }
++        return choice;
++    }
++
+     bool isB_Held = CVarGetInteger(CVAR_ENHANCEMENT("SkipText"), 0) != 0 ? CHECK_BTN_ALL(input->cur.button, BTN_B)
+                                                                          : CHECK_BTN_ALL(input->press.button, BTN_B);
+ 
+@@ -173,6 +241,11 @@ u8 Message_ShouldAdvance(PlayState* play) {
+ u8 Message_ShouldAdvanceSilent(PlayState* play) {
+     Input* input = &play->state.input[0];
+ 
++    s32 choice = MlChoice_ShouldAdvance(play);
++    if (choice >= 0) {
++        return choice;
++    }
++
+     bool isB_Held = CVarGetInteger(CVAR_ENHANCEMENT("SkipText"), 0) != 0 ? CHECK_BTN_ALL(input->cur.button, BTN_B)
+                                                                          : CHECK_BTN_ALL(input->press.button, BTN_B);
+ 
+@@ -967,7 +1040,7 @@ void Message_DrawTextJPN(PlayState* play, Gfx** gfxP) {
      msgCtx->unk_E3D0 = 0;
      charTexIdx = 0;
  
@@ -1460,7 +1558,7 @@ index ce09fe27168d77ea579150b2f6249f7eed9b523b..f0da1903df2a9638a459073570917311
      gSlowTextSpeed = CVarGetInteger(CVAR_ENHANCEMENT("SlowTextSpeed"), gTextSpeed);
  
      for (i = 0; i < msgCtx->textDrawPos; i++) {
-@@ -1282,7 +1282,7 @@ void Message_DrawTextJPN(PlayState* play, Gfx** gfxP) {
+@@ -1282,7 +1355,7 @@ void Message_DrawTextJPN(PlayState* play, Gfx** gfxP) {
              msgCtx->textDrawPos = msgCtx->decodedTextLen + 1;
          }
      } else if (msgCtx->textDelayTimer == 0) {
@@ -1469,7 +1567,7 @@ index ce09fe27168d77ea579150b2f6249f7eed9b523b..f0da1903df2a9638a459073570917311
          msgCtx->textDelayTimer = msgCtx->textDelay;
      } else if (msgCtx->textDelayTimer <= gSlowTextSpeed) {
          msgCtx->textDelayTimer = 0;
-@@ -1327,7 +1327,7 @@ void Message_DrawText(PlayState* play, Gfx** gfxP) {
+@@ -1327,7 +1400,7 @@ void Message_DrawText(PlayState* play, Gfx** gfxP) {
      msgCtx->unk_E3D0 = 0;
      charTexIdx = 0;
  
@@ -1478,7 +1576,7 @@ index ce09fe27168d77ea579150b2f6249f7eed9b523b..f0da1903df2a9638a459073570917311
      gSlowTextSpeed = CVarGetInteger(CVAR_ENHANCEMENT("SlowTextSpeed"), gTextSpeed);
  
      for (i = 0; i < msgCtx->textDrawPos; i++) {
-@@ -1629,7 +1629,7 @@ void Message_DrawText(PlayState* play, Gfx** gfxP) {
+@@ -1629,7 +1702,7 @@ void Message_DrawText(PlayState* play, Gfx** gfxP) {
      if (msgCtx->textDelay == 0) {
          msgCtx->textDrawPos = i + gTextSpeed;
      } else if (msgCtx->textDelayTimer == 0) {

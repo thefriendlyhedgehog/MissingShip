@@ -13,6 +13,7 @@ Each check prints PASS, FAIL or SKIP (a missing optional input, e.g. the debug R
   exits      every ML exit remaps to the right SoH entrance          (tools/checkexits.py)
   hashes     every resource reference in the mod archive resolves, except any texture the pipeline records as
              deliberately skipped in pipeline/unresolved.json (none since MS-015)   (tools/checkhashes.py)
+  choices    every choice prompt whose last option isn't a refusal has a B entry (tools/audit_choices.py, MS-018)
   inventory  ML_ACTOR_INVENTORY.md matches the ROMs                  (tools/survey_actors.py --check; needs the debug ROM)
   build      the engine builds                                       (--build only)
 """
@@ -100,6 +101,13 @@ else:
     else:
         report('hashes', 'PASS', last_line(out).replace(' unresolved', f' unresolved, all {total} listed in pipeline/unresolved.json'
                                                          if total else ' unresolved'))
+
+# choices ------------------------------------------------------------------------------------------------------
+if not (_os.path.exists(mod) and engine):
+    report('choices', 'SKIP', 'needs pipeline/ml.otr and the engine checkout')
+else:
+    rc, out = run(_os.path.join(TOOLS, 'audit_choices.py'))
+    report('choices', 'FAIL' if rc else 'PASS', last_line(out))
 
 # inventory ----------------------------------------------------------------------------------------------------
 if not (_os.path.exists(DEBUG_ROM) and _os.path.exists(ML_ROM)):
