@@ -264,6 +264,7 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 
 ### Done
 
+- MS-003: ledger rows 30–43 (six repointed slots, eight in-place actor edits, the asset header); Malon/cucco moved out of the code-patch table; `tools/checkledger.py` fails when a patched file is missing from the ledger (87/87 covered).
 - MS-001: all scripts resolve paths via `pipeline/mspaths.py` / `mspaths.sh` (env `MS_*` overrides); ZAPD config templated; archive verified identical (4636 resources).
 - MS-002: obsolete `cycle.sh` removed (it installed into the old `SOH/ml_profile` setup and skipped every injector); `ms_cycle.sh` is the only build script.
 - MS-004 — README corrected (this commit) — rewritten with the current status, platforms and goals.

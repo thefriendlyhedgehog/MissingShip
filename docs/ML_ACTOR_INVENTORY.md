@@ -45,7 +45,7 @@ with the survey in `tools/` (see PORTING_ACTORS.md). Ported ones say so in the S
 | Obj_Oshihiki | 0 text / 6 data words differ | {'ydan': 2, 'HAKAdan': 1} | ported (ML colours) |
 | En_Poh (not placed; spawned by Ml_Malon) | ML's En_Niw copy, object 0x09 recoloured cucco | Ml_Malon params 4 | ported (Ml_Cucco: En_Niw variant, health 0x77, no CRY_M/CRY_A) |
 | En_Skj | REWRITTEN (text 0x4c0 vs 0x3390) | {'spot09': 2} | ported (Ml_SkullKid) |
-| Demo_Shd | REWRITTEN (text 0x1040 vs 0x430) | {'spot11': 1} | ported (En_Dns copy: grotto heart-piece scrub) |
+| Demo_Shd | REWRITTEN (text 0x1040 vs 0x430) | {'spot11': 1} | ported (Ml_DnsShop: En_Dns copy, grotto heart-piece scrub) |
 | En_Dns | REWRITTEN (text 0x1080 vs 0x1070) | {'spot11': 2, 'spot12': 3} | ported |
 | En_Fz | REWRITTEN (text 0xba0 vs 0x1db0) | {'spot09': 11, 'spot20': 1, 'testroom': 1} | partial: modes 2,5,6,7 (Ml_EventSpawner) |
 | Obj_Bombiwa | 0 text / 1 data words differ | {'spot01': 4, 'spot09': 1} | ported (update-culling off) |

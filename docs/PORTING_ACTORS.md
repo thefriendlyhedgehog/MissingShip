@@ -130,6 +130,9 @@ Then copy `build-ml/soh/soh-macos` over `MissingShip.app/Contents/MacOS/MissingS
 
 ### 6. Regenerate the engine patch
 
+Then add the change to `docs/ENGINE_CHANGES.md` and run `python3 tools/checkledger.py`, which fails if any
+patched file is missing from the ledger.
+
 New actor files are untracked, so a plain `git diff` silently omits them. Mark them
 intent-to-add first, and exclude the submodules, which carry their own patches:
 
