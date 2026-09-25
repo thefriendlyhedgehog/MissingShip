@@ -61,7 +61,7 @@ The old inventory only surveyed placed actors, so it missed these. A spawn scan 
 
 | Actor | Change | Reached from |
 |---|---|---|
-| **En_Elf (Navi)** | 4018 text words + hook `0x80602000` | Spawned by `code`: always present. Only her sounds are ported. |
+| **En_Elf (Navi)** | 4018 text words (a recompile) + hook `0x80602000` | **Ported** (MS-030): ML never draws Navi, and hides the other fairies after the Soul-Charged sword. |
 | En_Nutsball (Deku nut projectile) | rewritten (0x590 vs 0x550) | Deku Scrubs, already ported |
 | En_GirlA (shop items) | 8 data words (prices / items?) | En_Ossan |
 | Door_Warp1 (blue warp) | 5 text words | Boss_Va |
@@ -214,7 +214,7 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 
 | ID | Type | Issue | Done when |
 |---|---|---|---|
-| [MS-030](https://github.com/thefriendlyhedgehog/MissingShip/issues/21) | port | **En_Elf (Navi)**: 4018 words + custom hook 0x80602000. She's in every scene, so this comes first. | Behaviour diffed and ported. |
+| [MS-030](https://github.com/thefriendlyhedgehog/MissingShip/issues/21) | port | **En_Elf (Navi)**: 4018 words + custom hook 0x80602000. She's in every scene, so this comes first. | Behaviour diffed and ported. **Done:** two real edits found and ported (ledger 51). In-game check pending. |
 | [MS-031](https://github.com/thefriendlyhedgehog/MissingShip/issues/22) | port | En_Nutsball (rewritten), fired by the Deku Scrubs we already ship. | Ported, and the scrubs verified with it. |
 | [MS-032](https://github.com/thefriendlyhedgehog/MissingShip/issues/23) | port | En_Ko: Kokiri text swaps + texture patch (hook 0x80602200, shared with Mido). | Ported. |
 | [MS-033](https://github.com/thefriendlyhedgehog/MissingShip/issues/24) | port | Finish the partial actors: En_Fz / Ml_EventSpawner (remaining modes), En_Niw_Lady, En_Hy. | Full behaviour. |
