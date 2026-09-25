@@ -27,6 +27,8 @@ Deku Pass, Stone of Agony → Birth Certificate; `inject_objects.py` ALIASES) ·
 title cards** for the 8 scenes ML gives none (else stock SoH shows the vanilla slot's name, e.g. "Sacred Forest Meadow"
 over ML's Saria's house) · raw gameplay_keep texture pointers in ML display lists rewritten as resource hashes. · **textures ML redrew inside otherwise-vanilla objects** (MS-020, `inject_obj_textures.py`: the Triforce push blocks, chest, bomb-flower leaves, boss door, haka door) and the chest collision's surface material (wood → stone), shipped under vanilla paths. They are compared against the MQ debug ROM, so debug-vs-retail differences never ship. · **ML's one-word object edits** reproduced by patching stock resources (MS-021, `inject_obj_patches.py`, each checked against the ML ROM): Beamos body and top-eyelid display lists end immediately (ML draws neither); Saria's right-hand limb uses the hand-holding-ocarina display list. Link's sword-turn recoveries (MS-026): `gPlayerAnim_link_fighter_turn_kiruL_end` / `_kiruR_end` run 13 / 14 frames instead of 16, and play ML's re-animated frames (`misc/link_animetion/gPlayerAnimData_114420` / `_114FB0`).
 
+Every resource in the archive is marked **custom** in its header (MS-140, `ms_cycle.py` `mark_custom`), as other SoH mods mark theirs. SoH's by-index display-list patches (cosmetics colours, age-dependent equipment, Temple of Time medallions, ...) skip custom resources. On ours they would overwrite whatever ML command sits at vanilla's index.
+
 ## Engine changes
 
 | # | Change | Why it exists | Drop-in path |

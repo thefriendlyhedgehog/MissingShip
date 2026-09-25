@@ -5,10 +5,10 @@
     python3 pipeline/ms_cycle.py --no-launch  build and install only (any OS)
 
 Steps: rebuild the ROM -> name ML's files in the filelist -> generate XMLs -> ZAPD -> the inject_* steps ->
-copy pipeline/ml.otr to mod/MissingLink_Scenes.o2r. Paths come from mspaths.py (MS-001), so MS_* env overrides
+mark every resource custom -> copy pipeline/ml.otr to mod/MissingLink_Scenes.o2r. Paths come from mspaths.py (MS-001), so MS_* env overrides
 work as before. Relaunching only exists for the macOS app so far; Windows and Linux packages are MS-080 / MS-081.
 """
-import os, shutil, subprocess, sys, time
+import os, shutil, subprocess, sys, time, zipfile
 
 import mspaths
 from mspaths import ROOT, PIPE
@@ -109,6 +109,22 @@ def zapd():
     print(f'texDecl errors: {errors}', flush=True)
 
 
+def mark_custom():
+    """Set the header's "custom" byte on every resource (MS-140). ZAPD writes 0, the value for assets extracted from
+    the player's own ROM, but everything here is a mod asset, as other SoH mods mark theirs. SoH's by-index DL patches
+    (cosmetics colours, age-dependent equipment, Temple of Time medallions, ...) skip custom resources; on ours they
+    would overwrite whatever command of ML's display list sits at vanilla's index."""
+    path = os.path.join(PIPE, 'ml.otr')
+    tmp = path + '.tmp'
+    with zipfile.ZipFile(path) as src, zipfile.ZipFile(tmp, 'w') as dst:
+        for info in src.infolist():
+            data = src.read(info.filename)
+            if len(data) >= 0x40 and data[0] in (0, 1) and data[4:8].isalpha():   # an OTR resource header
+                data = data[:1] + b'\x01' + data[2:]
+            dst.writestr(info, data)
+    os.replace(tmp, path)
+
+
 def relaunch():
     if sys.platform != 'darwin':
         print('Built and installed. Launching is macOS-only until the Windows/Linux packages (MS-080/081).')
@@ -130,6 +146,7 @@ def main():
     py('inject_titles.py', cwd=mspaths.ZAPD_CWD, ML_SKIP_SLOTS='')
     for step in ('minimaps', 'messages', 'objects', 'ui_textures', 'obj_textures', 'obj_patches', 'audio'):
         py(f'inject_{step}.py', cwd=mspaths.ZAPD_CWD)
+    mark_custom()
     shutil.copy(os.path.join(PIPE, 'ml.otr'), os.path.join(ROOT, 'mod', 'MissingLink_Scenes.o2r'))
     if '--no-launch' not in sys.argv[1:]:
         relaunch()
