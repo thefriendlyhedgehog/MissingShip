@@ -6,8 +6,11 @@ metadata:
 ---
 
 https://github.com/thefriendlyhedgehog/MissingShip (private). Its own git repo nested in the AI_Projects repo.
-Engine = docs/soh-missingship.patch (+ zapd/libultraship patches) against Shipwright cb71e22; regenerate per
-docs/PORTING_ACTORS.md step 6 and commit+push after engine work.
+**Engine (MS-007, 2026-09-25): private repos MissingShip-Shipwright / MissingShip-libultraship / MissingShip-ZAPDTR,
+branch `missingship`** (full SoH history; base tag 9.2.3 = cb71e22; NOT GitHub forks -- forks of public repos are
+always public). Local ../Shipwright: remote `origin` = private fork, `upstream` = HarbourMasters. Engine work = commits
+on missingship (MS-nnn subject) + push, then `tools/genpatch.py` regenerates docs/*.patch (generated, not the source
+of truth; `--check` for staleness). Submodule changes: commit+push in the submodule first, then the pointer.
 
 The user deliberately committed the ROMs, .o2r archives and the app ("Add everything", 2026-09-25) so cloud sessions
 can work, and removed .gitignore. **The repo must stay private forever** -- never make it public or copy those files
