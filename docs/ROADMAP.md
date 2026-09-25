@@ -116,10 +116,7 @@ All eight are ported: 3, 5, 6 and 0x1F earlier, 0x1A in MS-036, and the boss fig
 
 ### F. ML custom code (dma 507) still unported
 
-- HUD restyle: 0x80604E30 (B/C buttons, alpha cap 125), 0x806053E0 (key counter), colour at 0x80089180.
-- Navi 0x80602000.
-- Bombchu 0x80607A00.
-- Player hooks 0x80606BA0, 0x80606BC8, 0x80600480, 0x80600D90.
+- None left: every hook in ENGINE_CHANGES' hook table is ported or recorded (Navi MS-030, Bombchu MS-139, player hooks MS-017 / MS-052 / MS-053, sword MS-054, HUD MS-060).
 - There is no ML code past 0x80608000 (MS-006): the old 0x8064xxxx / 0x807Cxxxx targets were data. The custom code jumps into the player overlay, which always loads at RAM 0x804D23B0.
 
 ---
@@ -235,7 +232,7 @@ Type: **bug** = something wrong in what we ship; **port** = ML content not yet i
 
 | ID | Type | Issue | Done when |
 |---|---|---|---|
-| [MS-060](https://github.com/thefriendlyhedgehog/MissingShip/issues/38) | port | HUD restyle: B/C button backs (0x80604E30, alpha cap 125), key counter (0x806053E0), colour 0x80089180. | Matches ML. |
+| [MS-060](https://github.com/thefriendlyhedgehog/MissingShip/issues/38) | port | HUD restyle: B/C button backs (0x80604E30, alpha cap 125), key counter (0x806053E0), colour 0x80089180. | **Built** (needs playtest): row 100. ML's "restyle" is drop shadows under the buttons and counters plus a new Start colour. |
 | [MS-061](https://github.com/thefriendlyhedgehog/MissingShip/issues/39) | port | Title screen (dma 97, ML's own). Decide whether it's in scope next to SoH's boot flow. | Decided; ported or recorded as out of scope. |
 | [MS-062](https://github.com/thefriendlyhedgehog/MissingShip/issues/40) | port | File select (1 edit) and opening (3 words: new-game entrance / cutscene index). | Ported. |
 | [MS-063](https://github.com/thefriendlyhedgehog/MissingShip/issues/41) | port | Recheck the pause-menu quest-status cursor (a misalignment was reported before row 24). | Verified. |
