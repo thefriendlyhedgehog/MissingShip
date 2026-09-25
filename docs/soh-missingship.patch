@@ -3451,6 +3451,53 @@ index 4e204fac5de9e45547ff1fca7d7204cf93757523..f28d2131317bcc14f9a388695cfa33ea
              } else {
                  // Circumvent the item offer action
                  this->actionFunc = func_80ABAC84;
+diff --git a/soh/src/overlays/actors/ovl_En_Nutsball/z_en_nutsball.c b/soh/src/overlays/actors/ovl_En_Nutsball/z_en_nutsball.c
+index ed2cfe90da6bdb5f768436f265fb5003c5492a5d..d473b2abb9db8f191bcae98be142916bbd682681 100644
+--- a/soh/src/overlays/actors/ovl_En_Nutsball/z_en_nutsball.c
++++ b/soh/src/overlays/actors/ovl_En_Nutsball/z_en_nutsball.c
+@@ -5,7 +5,9 @@
+  */
+ 
+ #include "z_en_nutsball.h"
++#include <string.h>
+ #include "overlays/effects/ovl_Effect_Ss_Hahen/z_eff_ss_hahen.h"
++#include "objects/gameplay_keep/gameplay_keep.h"
+ #include "objects/object_gi_nuts/object_gi_nuts.h"
+ #include "objects/object_dekunuts/object_dekunuts.h"
+ #include "objects/object_hintnuts/object_hintnuts.h"
+@@ -122,8 +124,9 @@ void func_80ABBBA8(EnNutsball* this, PlayState* play) {
+         (this->collider.base.acFlags & AC_HIT) || (this->collider.base.ocFlags1 & OC1_HIT)) {
+         // Checking if the player is using a shield that reflects projectiles
+         // And if so, reflects the projectile on impact
+-        if ((player->currentShield == PLAYER_SHIELD_DEKU) ||
+-            ((player->currentShield == PLAYER_SHIELD_HYLIAN) && LINK_IS_ADULT)) {
++        // MissingShip: ML reflects nuts off the Hylian Shield only, at any age; the Deku Shield no longer does
++        // (ML En_Nutsball +0x208).
++        if (player->currentShield == PLAYER_SHIELD_HYLIAN) {
+             if ((this->collider.base.atFlags & AT_HIT) && (this->collider.base.atFlags & AT_TYPE_ENEMY) &&
+                 (this->collider.base.atFlags & AT_BOUNCED)) {
+                 this->collider.base.atFlags &= ~AT_TYPE_ENEMY & ~AT_BOUNCED & ~AT_HIT;
+@@ -149,6 +152,20 @@ void func_80ABBBA8(EnNutsball* this, PlayState* play) {
+             Actor_Kill(&this->actor);
+         }
+     }
++
++    // MissingShip: ML also shatters the nut while Link plays gameplay_keep's swim_15step_up animation (ML En_Nutsball
++    // +0x300; it checks after the hit test, so a nut that just broke bursts twice, as in ML). SoH's animation
++    // pointers are per-file path strings, so compare the path.
++    if ((player->skelAnime.animation != NULL) &&
++        (strcmp((const char*)player->skelAnime.animation, gPlayerAnim_link_swimer_swim_15step_up) == 0)) {
++        sp40.x = this->actor.world.pos.x;
++        sp40.y = this->actor.world.pos.y + 4;
++        sp40.z = this->actor.world.pos.z;
++
++        EffectSsHahen_SpawnBurst(play, &sp40, 6.0f, 0, 7, 3, 15, HAHEN_OBJECT_DEFAULT, 10, NULL);
++        SoundSource_PlaySfxAtFixedWorldPos(play, &this->actor.world.pos, 20, NA_SE_EN_OCTAROCK_ROCK);
++        Actor_Kill(&this->actor);
++    }
+ }
+ 
+ void EnNutsball_Update(Actor* thisx, PlayState* play) {
 diff --git a/soh/src/overlays/actors/ovl_En_St/z_en_st.c b/soh/src/overlays/actors/ovl_En_St/z_en_st.c
 index 99f4617bb9aae2f179bf2b59f7245ef426f468e0..adafde99b678fb69a9751e2f2aa4c995f84f4aef 100644
 --- a/soh/src/overlays/actors/ovl_En_St/z_en_st.c

@@ -94,7 +94,7 @@ Actors living in `code` (En_Item00, En_A_Obj) and slots ML deleted are left out;
 | `0x05d` Door_Warp1 | 5 text / 0 data words differ | — | Boss_Va | todo: MS-037 | no |
 | `0x08a` En_Vm | 0 text / 1 data words differ | — | Boss_Va | todo: MS-037 | no |
 | `0x0ee` Item_Shield | 1 text / 0 data words differ | — | player | todo: MS-040 | no |
-| `0x193` En_Nutsball | REWRITTEN (text 0x590 vs 0x550) | — | En_Dekunuts, En_Shopnuts | todo: MS-031 | no |
+| `0x193` En_Nutsball | REWRITTEN (text 0x590 vs 0x550) | — | En_Dekunuts, En_Shopnuts | ported (MS-031) | no |
 
 ## Changed, but no placement or spawner found (7)
 
