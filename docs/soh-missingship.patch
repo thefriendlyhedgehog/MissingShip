@@ -7595,10 +7595,10 @@ index 0000000000000000000000000000000000000000..33452a760878a65be4627b5183662c48
 +#endif
 diff --git a/soh/src/overlays/actors/ovl_Ml_EventSpawner/z_ml_eventspawner.c b/soh/src/overlays/actors/ovl_Ml_EventSpawner/z_ml_eventspawner.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..ab70ed2f46b3b09c44ec402bc0a64353977f1715
+index 0000000000000000000000000000000000000000..8f462ba558136e23844cc5ae1fb6a620378cae3d
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_EventSpawner/z_ml_eventspawner.c
-@@ -0,0 +1,300 @@
+@@ -0,0 +1,303 @@
 +/*
 + * File: z_ml_eventspawner.c
 + * Overlay: ovl_Ml_EventSpawner
@@ -7675,6 +7675,9 @@ index 0000000000000000000000000000000000000000..ab70ed2f46b3b09c44ec402bc0a64353
 +    Skin_Init(play, &this->skin, &gChildEponaSkel, &gChildEponaIdleAnim);
 +    Animation_PlayOnceSetSpeed(&this->skin.skelAnime, &gChildEponaIdleAnim, 0.0f);
 +    Animation_MorphToLoop(&this->skin.skelAnime, &gChildEponaIdleAnim, -5.0f);
++    // An actor is drawn once before its first Update, so the eyes need a texture now; a NULL segment 8 crashes
++    // the renderer (MS-144).
++    this->eyeTex = sEyeTextures[0];
 +}
 +
 +static void MlEventSpawner_StartChase(MlEventSpawner* this, PlayState* play) {
@@ -11203,10 +11206,10 @@ index 0000000000000000000000000000000000000000..91fbf1ef07545ea070252750c101519b
 +#endif
 diff --git a/soh/src/overlays/actors/ovl_Ml_Thief/z_ml_thief.c b/soh/src/overlays/actors/ovl_Ml_Thief/z_ml_thief.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..37e15001fb50669571fe6d7e3ab79daf5f5cf5e2
+index 0000000000000000000000000000000000000000..8c7304fe90fe6297b224ef2b04356c6a73cdbbea
 --- /dev/null
 +++ b/soh/src/overlays/actors/ovl_Ml_Thief/z_ml_thief.c
-@@ -0,0 +1,189 @@
+@@ -0,0 +1,190 @@
 +/*
 + * File: z_ml_thief.c
 + * Overlay: ovl_Ml_Thief
@@ -11302,6 +11305,7 @@ index 0000000000000000000000000000000000000000..37e15001fb50669571fe6d7e3ab79daf
 +                           this->jointTable, this->morphTable, ML_THIEF_LIMB_MAX);
 +    }
 +    ActorShape_Init(&this->actor.shape, 0.0f, ActorShadow_DrawCircle, 23.0f);
++    this->eyeTexture = sEyeTextures[0]; // drawn once before the first Update (MS-144)
 +}
 +
 +void MlThief_Destroy(Actor* thisx, PlayState* play) {
