@@ -20,7 +20,7 @@ message_static
 message_texture_static
 nes_font_static
 nes_message_data_static
-ger_message_data_static
+object_ml_hakalift
 fra_message_data_static
 object_ml_treebridge
 map_grand_static
@@ -49,7 +49,7 @@ mlfile_047
 mlfile_048
 mlfile_049
 mlfile_050
-mlfile_051
+object_ml_slideblock
 object_ml_gi_dekupass
 mlfile_053
 mlfile_054
@@ -378,7 +378,7 @@ object_ml_gi_certificate
 mlfile_377
 mlfile_378
 mlfile_379
-mlfile_380
+object_ml_elevator
 mlfile_381
 mlfile_382
 mlfile_383

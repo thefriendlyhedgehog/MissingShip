@@ -1,0 +1,6 @@
+<Root>
+    <File Name="object_ml_hakalift" Segment="6">
+        <Collision Name="gMlHakaLiftCol" Offset="0xF00"/>
+        <DList Name="gMlHakaLiftDL" Offset="0x2460"/>
+    </File>
+</Root>

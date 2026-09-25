@@ -1,0 +1,18 @@
+<Root>
+    <File Name="object_ml_slideblock" Segment="6">
+        <DList Name="gMlSlideBlockModel0DL" Offset="0x1EC0"/>
+        <DList Name="gMlSlideBlockModel1DL" Offset="0x2170"/>
+        <DList Name="gMlSlideBlockModel2DL" Offset="0x2420"/>
+        <DList Name="gMlSlideBlockModel3DL" Offset="0x26D0"/>
+        <DList Name="gMlSlideBlock0DL" Offset="0x2960"/>
+        <DList Name="gMlSlideBlock1DL" Offset="0x2970"/>
+        <DList Name="gMlSlideBlock2DL" Offset="0x2980"/>
+        <DList Name="gMlSlideBlock3DL" Offset="0x2990"/>
+        <DList Name="gMlSlideBlock4DL" Offset="0x29A0"/>
+        <DList Name="gMlSlideBlock5DL" Offset="0x29B0"/>
+        <DList Name="gMlSlideBlock6DL" Offset="0x29C0"/>
+        <DList Name="gMlSlideBlock7DL" Offset="0x29D0"/>
+        <Collision Name="gMlSlideBlock0Col" Offset="0x1C00"/>
+        <Collision Name="gMlSlideBlock1Col" Offset="0x2840"/>
+    </File>
+</Root>

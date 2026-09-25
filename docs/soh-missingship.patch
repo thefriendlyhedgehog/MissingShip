@@ -1,9 +1,9 @@
 diff --git a/soh/assets/ml_assets.h b/soh/assets/ml_assets.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..2ec593c2fb46493a0621fd89e190edc4be68e97c
+index 0000000000000000000000000000000000000000..3e879805a59cc108a5c04b8684722e1c65333575
 --- /dev/null
 +++ b/soh/assets/ml_assets.h
-@@ -0,0 +1,153 @@
+@@ -0,0 +1,189 @@
 +#ifndef ML_ASSETS_H
 +#define ML_ASSETS_H
 +
@@ -156,9 +156,45 @@ index 0000000000000000000000000000000000000000..2ec593c2fb46493a0621fd89e190edc4
 +#define dgMlMalonMouthHappyTex "__OTR__objects/object_ml_ma1/gMlMalonMouthHappyTex"
 +static const ALIGN_ASSET(2) char gMlMalonMouthHappyTex[] = dgMlMalonMouthHappyTex;
 +
++// ML object 0xD3 (dma 51, vanilla object_tw's slot): Ml_SlideBlock's eight coloured models and two collisions in HAKAdan.
++#define dgMlSlideBlock0DL "__OTR__objects/object_ml_slideblock/gMlSlideBlock0DL"
++static const ALIGN_ASSET(2) char gMlSlideBlock0DL[] = dgMlSlideBlock0DL;
++#define dgMlSlideBlock1DL "__OTR__objects/object_ml_slideblock/gMlSlideBlock1DL"
++static const ALIGN_ASSET(2) char gMlSlideBlock1DL[] = dgMlSlideBlock1DL;
++#define dgMlSlideBlock2DL "__OTR__objects/object_ml_slideblock/gMlSlideBlock2DL"
++static const ALIGN_ASSET(2) char gMlSlideBlock2DL[] = dgMlSlideBlock2DL;
++#define dgMlSlideBlock3DL "__OTR__objects/object_ml_slideblock/gMlSlideBlock3DL"
++static const ALIGN_ASSET(2) char gMlSlideBlock3DL[] = dgMlSlideBlock3DL;
++#define dgMlSlideBlock4DL "__OTR__objects/object_ml_slideblock/gMlSlideBlock4DL"
++static const ALIGN_ASSET(2) char gMlSlideBlock4DL[] = dgMlSlideBlock4DL;
++#define dgMlSlideBlock5DL "__OTR__objects/object_ml_slideblock/gMlSlideBlock5DL"
++static const ALIGN_ASSET(2) char gMlSlideBlock5DL[] = dgMlSlideBlock5DL;
++#define dgMlSlideBlock6DL "__OTR__objects/object_ml_slideblock/gMlSlideBlock6DL"
++static const ALIGN_ASSET(2) char gMlSlideBlock6DL[] = dgMlSlideBlock6DL;
++#define dgMlSlideBlock7DL "__OTR__objects/object_ml_slideblock/gMlSlideBlock7DL"
++static const ALIGN_ASSET(2) char gMlSlideBlock7DL[] = dgMlSlideBlock7DL;
++#define dgMlSlideBlock0Col "__OTR__objects/object_ml_slideblock/gMlSlideBlock0Col"
++static const ALIGN_ASSET(2) char gMlSlideBlock0Col[] = dgMlSlideBlock0Col;
++#define dgMlSlideBlock1Col "__OTR__objects/object_ml_slideblock/gMlSlideBlock1Col"
++static const ALIGN_ASSET(2) char gMlSlideBlock1Col[] = dgMlSlideBlock1Col;
++
++// ML object 0x154 (dma 380, vanilla object_ka's slot): Ml_Elevator's model (tall one: params 1) and collision in HAKAdan.
++#define dgMlElevatorCol "__OTR__objects/object_ml_elevator/gMlElevatorCol"
++static const ALIGN_ASSET(2) char gMlElevatorCol[] = dgMlElevatorCol;
++#define dgMlElevatorTallDL "__OTR__objects/object_ml_elevator/gMlElevatorTallDL"
++static const ALIGN_ASSET(2) char gMlElevatorTallDL[] = dgMlElevatorTallDL;
++#define dgMlElevatorDL "__OTR__objects/object_ml_elevator/gMlElevatorDL"
++static const ALIGN_ASSET(2) char gMlElevatorDL[] = dgMlElevatorDL;
++
++// ML object 0x72 (dma 22, vanilla object_mori_objects' slot): Ml_HakaLift's model and collision in HAKAdan.
++#define dgMlHakaLiftCol "__OTR__objects/object_ml_hakalift/gMlHakaLiftCol"
++static const ALIGN_ASSET(2) char gMlHakaLiftCol[] = dgMlHakaLiftCol;
++#define dgMlHakaLiftDL "__OTR__objects/object_ml_hakalift/gMlHakaLiftDL"
++static const ALIGN_ASSET(2) char gMlHakaLiftDL[] = dgMlHakaLiftDL;
++
 +#endif
 diff --git a/soh/include/tables/actor_table.h b/soh/include/tables/actor_table.h
-index d05085f4d07788d84b76c9ab9a6d32b623c2cd42..f30b07fd93a090892959dec0f9bce63103eddce0 100644
+index d05085f4d07788d84b76c9ab9a6d32b623c2cd42..bc773253cd3c26dc8049f0b8e23e5216ec2fbfaf 100644
 --- a/soh/include/tables/actor_table.h
 +++ b/soh/include/tables/actor_table.h
 @@ -13,17 +13,17 @@
@@ -183,9 +219,12 @@ index d05085f4d07788d84b76c9ab9a6d32b623c2cd42..f30b07fd93a090892959dec0f9bce631
  /* 0x000E */ DEFINE_ACTOR(En_Okuta, ACTOR_EN_OKUTA, ALLOCTYPE_NORMAL)
  /* 0x000F */ DEFINE_ACTOR(Bg_Ydan_Sp, ACTOR_BG_YDAN_SP, ALLOCTYPE_NORMAL)
  /* 0x0010 */ DEFINE_ACTOR(En_Bom, ACTOR_EN_BOM, ALLOCTYPE_PERMANENT)
-@@ -38,10 +38,10 @@
+@@ -36,12 +36,12 @@
+ /* 0x0017 */ DEFINE_ACTOR_UNSET(ACTOR_UNSET_17)
+ /* 0x0018 */ DEFINE_ACTOR(En_Elf, ACTOR_EN_ELF, ALLOCTYPE_NORMAL)
  /* 0x0019 */ DEFINE_ACTOR(En_Niw, ACTOR_EN_NIW, ALLOCTYPE_NORMAL)
- /* 0x001A */ DEFINE_ACTOR_UNSET(ACTOR_UNSET_1A)
+-/* 0x001A */ DEFINE_ACTOR_UNSET(ACTOR_UNSET_1A)
++/* 0x001A */ DEFINE_ACTOR(Ml_RoomClearSwitch, ACTOR_ML_ROOMCLEARSWITCH, ALLOCTYPE_NORMAL) // MissingShip: ML custom actor
  /* 0x001B */ DEFINE_ACTOR(En_Tite, ACTOR_EN_TITE, ALLOCTYPE_NORMAL)
 -/* 0x001C */ DEFINE_ACTOR(En_Reeba, ACTOR_EN_REEBA, ALLOCTYPE_NORMAL)
 +/* 0x001C */ DEFINE_ACTOR(Ml_BeamHeart, ACTOR_EN_REEBA, ALLOCTYPE_NORMAL) // MissingShip: ML rewrite (Blade Beam Piece of Heart)
@@ -196,6 +235,15 @@ index d05085f4d07788d84b76c9ab9a6d32b623c2cd42..f30b07fd93a090892959dec0f9bce631
  /* 0x0020 */ DEFINE_ACTOR(En_Insect, ACTOR_EN_INSECT, ALLOCTYPE_NORMAL)
  /* 0x0021 */ DEFINE_ACTOR(En_Fish, ACTOR_EN_FISH, ALLOCTYPE_NORMAL)
  /* 0x0022 */ DEFINE_ACTOR_UNSET(ACTOR_UNSET_22)
+@@ -74,7 +74,7 @@
+ /* 0x003D */ DEFINE_ACTOR(En_Ossan, ACTOR_EN_OSSAN, ALLOCTYPE_NORMAL)
+ /* 0x003E */ DEFINE_ACTOR(Bg_Treemouth, ACTOR_BG_TREEMOUTH, ALLOCTYPE_NORMAL)
+ /* 0x003F */ DEFINE_ACTOR(Bg_Dodoago, ACTOR_BG_DODOAGO, ALLOCTYPE_NORMAL)
+-/* 0x0040 */ DEFINE_ACTOR(Bg_Hidan_Dalm, ACTOR_BG_HIDAN_DALM, ALLOCTYPE_NORMAL)
++/* 0x0040 */ DEFINE_ACTOR(Ml_ElevatorSpawner, ACTOR_BG_HIDAN_DALM, ALLOCTYPE_NORMAL) // MissingShip: ML rewrite
+ /* 0x0041 */ DEFINE_ACTOR(Bg_Hidan_Hrock, ACTOR_BG_HIDAN_HROCK, ALLOCTYPE_NORMAL)
+ /* 0x0042 */ DEFINE_ACTOR(En_Horse_Ganon, ACTOR_EN_HORSE_GANON, ALLOCTYPE_NORMAL)
+ /* 0x0043 */ DEFINE_ACTOR(Bg_Hidan_Rock, ACTOR_BG_HIDAN_ROCK, ALLOCTYPE_NORMAL)
 @@ -97,7 +97,7 @@
  /* 0x0054 */ DEFINE_ACTOR(En_Am, ACTOR_EN_AM, ALLOCTYPE_NORMAL)
  /* 0x0055 */ DEFINE_ACTOR(En_Dekubaba, ACTOR_EN_DEKUBABA, ALLOCTYPE_NORMAL)
@@ -214,6 +262,15 @@ index d05085f4d07788d84b76c9ab9a6d32b623c2cd42..f30b07fd93a090892959dec0f9bce631
  /* 0x006B */ DEFINE_ACTOR(En_Yukabyun, ACTOR_EN_YUKABYUN, ALLOCTYPE_NORMAL)
  /* 0x006C */ DEFINE_ACTOR(Bg_Toki_Swd, ACTOR_BG_TOKI_SWD, ALLOCTYPE_NORMAL)
  /* 0x006D */ DEFINE_ACTOR(En_Fhg_Fire, ACTOR_EN_FHG_FIRE, ALLOCTYPE_NORMAL)
+@@ -145,7 +145,7 @@
+ /* 0x0084 */ DEFINE_ACTOR(En_Ta, ACTOR_EN_TA, ALLOCTYPE_NORMAL)
+ /* 0x0085 */ DEFINE_ACTOR(En_Tk, ACTOR_EN_TK, ALLOCTYPE_NORMAL)
+ /* 0x0086 */ DEFINE_ACTOR(Bg_Mori_Bigst, ACTOR_BG_MORI_BIGST, ALLOCTYPE_NORMAL)
+-/* 0x0087 */ DEFINE_ACTOR(Bg_Mori_Elevator, ACTOR_BG_MORI_ELEVATOR, ALLOCTYPE_NORMAL)
++/* 0x0087 */ DEFINE_ACTOR(Ml_HakaLift, ACTOR_BG_MORI_ELEVATOR, ALLOCTYPE_NORMAL) // MissingShip: ML rewrite
+ /* 0x0088 */ DEFINE_ACTOR(Bg_Mori_Kaitenkabe, ACTOR_BG_MORI_KAITENKABE, ALLOCTYPE_NORMAL)
+ /* 0x0089 */ DEFINE_ACTOR(Bg_Mori_Rakkatenjo, ACTOR_BG_MORI_RAKKATENJO, ALLOCTYPE_NORMAL)
+ /* 0x008A */ DEFINE_ACTOR(En_Vm, ACTOR_EN_VM, ALLOCTYPE_NORMAL)
 @@ -157,7 +157,7 @@
  /* 0x0090 */ DEFINE_ACTOR(En_Rd, ACTOR_EN_RD, ALLOCTYPE_NORMAL)
  /* 0x0091 */ DEFINE_ACTOR(En_Po_Sisters, ACTOR_EN_PO_SISTERS, ALLOCTYPE_NORMAL)
@@ -223,7 +280,15 @@ index d05085f4d07788d84b76c9ab9a6d32b623c2cd42..f30b07fd93a090892959dec0f9bce631
  /* 0x0094 */ DEFINE_ACTOR(Obj_Mure, ACTOR_OBJ_MURE, ALLOCTYPE_NORMAL)
  /* 0x0095 */ DEFINE_ACTOR(En_Sw, ACTOR_EN_SW, ALLOCTYPE_NORMAL)
  /* 0x0096 */ DEFINE_ACTOR(Boss_Fd, ACTOR_BOSS_FD, ALLOCTYPE_NORMAL)
-@@ -237,11 +237,11 @@
+@@ -230,18 +230,18 @@
+ /* 0x00D9 */ DEFINE_ACTOR(En_Ma2, ACTOR_EN_MA2, ALLOCTYPE_NORMAL)
+ /* 0x00DA */ DEFINE_ACTOR(En_Bom_Chu, ACTOR_EN_BOM_CHU, ALLOCTYPE_NORMAL)
+ /* 0x00DB */ DEFINE_ACTOR(En_Horse_Game_Check, ACTOR_EN_HORSE_GAME_CHECK, ALLOCTYPE_NORMAL)
+-/* 0x00DC */ DEFINE_ACTOR(Boss_Tw, ACTOR_BOSS_TW, ALLOCTYPE_NORMAL)
++/* 0x00DC */ DEFINE_ACTOR(Ml_SlideBlock, ACTOR_BOSS_TW, ALLOCTYPE_NORMAL) // MissingShip: ML rewrite
+ /* 0x00DD */ DEFINE_ACTOR(En_Rr, ACTOR_EN_RR, ALLOCTYPE_NORMAL)
+ /* 0x00DE */ DEFINE_ACTOR(En_Ba, ACTOR_EN_BA, ALLOCTYPE_NORMAL)
+ /* 0x00DF */ DEFINE_ACTOR(En_Bx, ACTOR_EN_BX, ALLOCTYPE_NORMAL)
  /* 0x00E0 */ DEFINE_ACTOR(En_Anubice, ACTOR_EN_ANUBICE, ALLOCTYPE_NORMAL)
  /* 0x00E1 */ DEFINE_ACTOR(En_Anubice_Fire, ACTOR_EN_ANUBICE_FIRE, ALLOCTYPE_NORMAL)
  /* 0x00E2 */ DEFINE_ACTOR(Bg_Mori_Hashigo, ACTOR_BG_MORI_HASHIGO, ALLOCTYPE_NORMAL)
@@ -269,7 +334,7 @@ index d05085f4d07788d84b76c9ab9a6d32b623c2cd42..f30b07fd93a090892959dec0f9bce631
  /* 0x012D */ DEFINE_ACTOR(Obj_Hsblock, ACTOR_OBJ_HSBLOCK, ALLOCTYPE_NORMAL)
  /* 0x012E */ DEFINE_ACTOR(En_Okarina_Tag, ACTOR_EN_OKARINA_TAG, ALLOCTYPE_NORMAL)
  /* 0x012F */ DEFINE_ACTOR(En_Yabusame_Mark, ACTOR_EN_YABUSAME_MARK, ALLOCTYPE_NORMAL)
-@@ -382,7 +382,7 @@
+@@ -382,14 +382,14 @@
  /* 0x0171 */ DEFINE_ACTOR(En_Mag, ACTOR_EN_MAG, ALLOCTYPE_NORMAL)
  /* 0x0172 */ DEFINE_ACTOR(Door_Gerudo, ACTOR_DOOR_GERUDO, ALLOCTYPE_NORMAL)
  /* 0x0173 */ DEFINE_ACTOR(Elf_Msg2, ACTOR_ELF_MSG2, ALLOCTYPE_NORMAL)
@@ -278,6 +343,14 @@ index d05085f4d07788d84b76c9ab9a6d32b623c2cd42..f30b07fd93a090892959dec0f9bce631
  /* 0x0175 */ DEFINE_ACTOR(En_Po_Field, ACTOR_EN_PO_FIELD, ALLOCTYPE_NORMAL)
  /* 0x0176 */ DEFINE_ACTOR(Efc_Erupc, ACTOR_EFC_ERUPC, ALLOCTYPE_NORMAL)
  /* 0x0177 */ DEFINE_ACTOR(Bg_Zg, ACTOR_BG_ZG, ALLOCTYPE_NORMAL)
+ /* 0x0178 */ DEFINE_ACTOR(En_Heishi4, ACTOR_EN_HEISHI4, ALLOCTYPE_NORMAL)
+ /* 0x0179 */ DEFINE_ACTOR(En_Zl3, ACTOR_EN_ZL3, ALLOCTYPE_NORMAL)
+ /* 0x017A */ DEFINE_ACTOR(Boss_Ganon2, ACTOR_BOSS_GANON2, ALLOCTYPE_NORMAL)
+-/* 0x017B */ DEFINE_ACTOR(En_Kakasi, ACTOR_EN_KAKASI, ALLOCTYPE_NORMAL)
++/* 0x017B */ DEFINE_ACTOR(Ml_Elevator, ACTOR_EN_KAKASI, ALLOCTYPE_NORMAL) // MissingShip: ML rewrite
+ /* 0x017C */ DEFINE_ACTOR(En_Takara_Man, ACTOR_EN_TAKARA_MAN, ALLOCTYPE_NORMAL)
+ /* 0x017D */ DEFINE_ACTOR(Obj_Makeoshihiki, ACTOR_OBJ_MAKEOSHIHIKI, ALLOCTYPE_NORMAL)
+ /* 0x017E */ DEFINE_ACTOR(Oceff_Spot, ACTOR_OCEFF_SPOT, ALLOCTYPE_ABSOLUTE)
 @@ -406,13 +406,13 @@
  /* 0x0189 */ DEFINE_ACTOR(En_Sth, ACTOR_EN_STH, ALLOCTYPE_NORMAL)
  /* 0x018A */ DEFINE_ACTOR(Oceff_Wipe, ACTOR_OCEFF_WIPE, ALLOCTYPE_ABSOLUTE)
@@ -460,10 +533,10 @@ index da290bd00d8cd90dccf06eb83f0540363564cc65..45a4f13b9f05bd5c5f2f38287e02a131
 \ No newline at end of file
 +/* 0x6D */ DEFINE_SCENE(testroom_scene, none, SCENE_TESTROOM, SDC_GROTTOS, 0, 0) // MissingShip: ML draw config (was SDC_DEFAULT)
 diff --git a/soh/soh/ActorDB.cpp b/soh/soh/ActorDB.cpp
-index 70ea29675e664b080ecb268571ea6d0f1249d208..1eb47c0f76ca9e1b8360458b47c796ac80edb48c 100644
+index 70ea29675e664b080ecb268571ea6d0f1249d208..748038f5969765cfb23d766eb27f45e7af499fad 100644
 --- a/soh/soh/ActorDB.cpp
 +++ b/soh/soh/ActorDB.cpp
-@@ -34,6 +34,10 @@ static constexpr AddPair initialActorTable[] = {
+@@ -34,6 +34,11 @@ static constexpr AddPair initialActorTable[] = {
  // https://wiki.cloudmodding.com/oot/Actor_List_(Variables)
  static constexpr std::pair<u16, const char*> actorDescriptionData[] = {
      { ACTOR_PLAYER, "Link" },
@@ -471,10 +544,11 @@ index 70ea29675e664b080ecb268571ea6d0f1249d208..1eb47c0f76ca9e1b8360458b47c796ac
 +    { ACTOR_ML_VILLAGER, "Missing Link Kakariko Villager" },
 +    { ACTOR_ML_TREEBRIDGE, "Missing Link Tree Bridge" },
 +    { ACTOR_ML_PROLOGUE, "Missing Link Prologue Illustrations" },
++    { ACTOR_ML_ROOMCLEARSWITCH, "Missing Link Room-Clear Switch" },
      { ACTOR_EN_TEST, "Stalfos" },
      { ACTOR_EN_GIRLA, "Shop Items" },
      { ACTOR_EN_PART, "Body Parts" },
-@@ -109,7 +113,7 @@ static constexpr std::pair<u16, const char*> actorDescriptionData[] = {
+@@ -109,7 +114,7 @@ static constexpr std::pair<u16, const char*> actorDescriptionData[] = {
      { ACTOR_EN_AM, "Armos Statue" },
      { ACTOR_EN_DEKUBABA, "Deku Baba" },
      { ACTOR_EN_M_FIRE1, "Thrown Deku Nut" },
@@ -483,7 +557,7 @@ index 70ea29675e664b080ecb268571ea6d0f1249d208..1eb47c0f76ca9e1b8360458b47c796ac
      { ACTOR_BG_DDAN_JD, "Rising Stone Platform (Dodongo's Cavern)" },
      { ACTOR_BG_BREAKWALL, "Bombable Wall" },
      { ACTOR_EN_JJ, "Lord Jabu-Jabu" },
-@@ -234,7 +238,7 @@ static constexpr std::pair<u16, const char*> actorDescriptionData[] = {
+@@ -234,7 +239,7 @@ static constexpr std::pair<u16, const char*> actorDescriptionData[] = {
      { ACTOR_EN_ANUBICE, "Anubis (Body)" },
      { ACTOR_EN_ANUBICE_FIRE, "Anubis Fire Attack" },
      { ACTOR_BG_MORI_HASHIGO, "Ladder (Forest Temple)" },
@@ -492,7 +566,7 @@ index 70ea29675e664b080ecb268571ea6d0f1249d208..1eb47c0f76ca9e1b8360458b47c796ac
      { ACTOR_BG_MORI_IDOMIZU, "Well Water (Forest Temple)" },
      { ACTOR_BG_SPOT16_DOUGHNUT, "Cloud Ring (Death Mountain)" },
      { ACTOR_BG_BDAN_SWITCH, "Switches (Inside Lord Jabu-Jabu)" },
-@@ -288,7 +292,7 @@ static constexpr std::pair<u16, const char*> actorDescriptionData[] = {
+@@ -288,7 +293,7 @@ static constexpr std::pair<u16, const char*> actorDescriptionData[] = {
      { ACTOR_OBJ_ICE_POLY, "Ice spawned by red ice? frozen actors" },
      { ACTOR_BG_SPOT03_TAKI, "Zora's River Waterfall" },
      { ACTOR_BG_SPOT07_TAKI, "Zora's Domain Waterfall and Ice" },
@@ -501,7 +575,7 @@ index 70ea29675e664b080ecb268571ea6d0f1249d208..1eb47c0f76ca9e1b8360458b47c796ac
      { ACTOR_EN_PO_RELAY, "Dampe's Ghost" },
      { ACTOR_BG_RELAY_OBJECTS, "Windmill Objects" },
      { ACTOR_EN_DIVING_GAME, "Zora Diving Game" },
-@@ -297,7 +301,7 @@ static constexpr std::pair<u16, const char*> actorDescriptionData[] = {
+@@ -297,7 +302,7 @@ static constexpr std::pair<u16, const char*> actorDescriptionData[] = {
      { ACTOR_OBJ_BOMBIWA, "Brown Bombable Boulder" },
      { ACTOR_OBJ_SWITCH, "Switches" },
      { ACTOR_OBJ_ELEVATOR, "Huge Stone Elevator" },
@@ -510,7 +584,7 @@ index 70ea29675e664b080ecb268571ea6d0f1249d208..1eb47c0f76ca9e1b8360458b47c796ac
      { ACTOR_OBJ_HSBLOCK, "Stone Hookshot Target" },
      { ACTOR_EN_OKARINA_TAG, "Ocarina Music Staff Spot" },
      { ACTOR_EN_YABUSAME_MARK, "Horseback Archery Target" },
-@@ -365,7 +369,7 @@ static constexpr std::pair<u16, const char*> actorDescriptionData[] = {
+@@ -365,7 +370,7 @@ static constexpr std::pair<u16, const char*> actorDescriptionData[] = {
      { ACTOR_EN_MAG, "Title Screen Manager" },
      { ACTOR_DOOR_GERUDO, "Cell Door (Gerudo Fortress)" },
      { ACTOR_ELF_MSG2, "Navi Information Spot (Targetable, Green)" },
@@ -519,7 +593,7 @@ index 70ea29675e664b080ecb268571ea6d0f1249d208..1eb47c0f76ca9e1b8360458b47c796ac
      { ACTOR_EN_PO_FIELD, "Big/Small Poe Spawn Point" },
      { ACTOR_EFC_ERUPC, "Lava Particle Fountain (Death Mountain panorama)" },
      { ACTOR_BG_ZG, "Metal Bars (Ganon's Castle)" },
-@@ -394,7 +398,7 @@ static constexpr std::pair<u16, const char*> actorDescriptionData[] = {
+@@ -394,7 +399,7 @@ static constexpr std::pair<u16, const char*> actorDescriptionData[] = {
      { ACTOR_BG_JYA_HAHENIRON, "Chunks of Iron Knucle Chair and Pillar" },
      { ACTOR_BG_SPOT12_GATE, "Gerudo Fortress Wooden Gate" },
      { ACTOR_BG_SPOT12_SAKU, "Gerudo Fortress Training Area Gate" },
@@ -528,7 +602,7 @@ index 70ea29675e664b080ecb268571ea6d0f1249d208..1eb47c0f76ca9e1b8360458b47c796ac
      { ACTOR_EN_NUTSBALL, "Deku Scrub Nut Attack" },
      { ACTOR_BG_SPOT00_BREAK, "Broken Drawbridge, Fences" },
      { ACTOR_EN_SHOPNUTS, "Grounded Sales Scrub" },
-@@ -456,7 +460,7 @@ static constexpr std::pair<u16, const char*> actorDescriptionData[] = {
+@@ -456,7 +461,7 @@ static constexpr std::pair<u16, const char*> actorDescriptionData[] = {
      { ACTOR_EN_ZO, "Zora" },
      { ACTOR_OBJ_MAKEKINSUTA, "Skulltula Sprouting from Bean Spot" },
      { ACTOR_EN_GE3, "Gerudo Fortress Leader" },
@@ -552,10 +626,10 @@ index 96581703010c097c8dc647f7035abbe334eda9ce..5922381972ce8419855aede989ea4a89
      enMThunder->actor.update = Custom_EnMThunder_Update;
  }
 diff --git a/soh/soh/Enhancements/debugger/actorViewer.cpp b/soh/soh/Enhancements/debugger/actorViewer.cpp
-index a47a404ad1d016684eeb3b62538266483182bf1e..e79cc4da63f07cd4e9e7c0bec53e94103c2eaaf3 100644
+index a47a404ad1d016684eeb3b62538266483182bf1e..4705b789996b730bd3df0ab376b2ac62bdf8b01f 100644
 --- a/soh/soh/Enhancements/debugger/actorViewer.cpp
 +++ b/soh/soh/Enhancements/debugger/actorViewer.cpp
-@@ -190,12 +190,8 @@ static std::vector<u16> noParamsActors = {
+@@ -190,12 +190,7 @@ static std::vector<u16> noParamsActors = {
      ACTOR_OCEFF_SPOT,
  
      ACTOR_UNSET_1,
@@ -563,7 +637,7 @@ index a47a404ad1d016684eeb3b62538266483182bf1e..e79cc4da63f07cd4e9e7c0bec53e9410
 -    ACTOR_UNSET_5,
 -    ACTOR_UNSET_6,
      ACTOR_UNSET_17,
-     ACTOR_UNSET_1A,
+-    ACTOR_UNSET_1A,
 -    ACTOR_UNSET_1F,
      ACTOR_UNSET_22,
      ACTOR_UNSET_31,
@@ -1229,10 +1303,10 @@ index 0000000000000000000000000000000000000000..b3e5a87f7eed1795dea7fb1abc931997
 +#endif
 diff --git a/soh/src/code/ml_state.c b/soh/src/code/ml_state.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..b6bfce6476c31a489d01a0c72cea768c74b4c895
+index 0000000000000000000000000000000000000000..96cc843fab18c898c0d1814f1ef7f43d618537d6
 --- /dev/null
 +++ b/soh/src/code/ml_state.c
-@@ -0,0 +1,36 @@
+@@ -0,0 +1,39 @@
 +#include "ml_state.h"
 +
 +// MissingShip: ML's per-frame bookkeeping from its custom code.
@@ -1246,6 +1320,9 @@ index 0000000000000000000000000000000000000000..b6bfce6476c31a489d01a0c72cea768c
 +
 +u16 gMlRoomFrames = 0;
 +s32 gMlWallSkip = 0;
++// ML sets this while the Magic Hourglass rewinds (0x80600E00). Nothing sets it until the Hourglass is ported
++// (MS-053); ML's tall HAKAdan elevator (En_Kakasi) and Boss_Va read it.
++u16 gMlRewindStep = 0;
 +static u16 sMlRoomKey = 0;
 +
 +void MlState_PlayerUpdate(PlayState* play) {
@@ -1271,10 +1348,10 @@ index 0000000000000000000000000000000000000000..b6bfce6476c31a489d01a0c72cea768c
 +}
 diff --git a/soh/src/code/ml_state.h b/soh/src/code/ml_state.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..6e1151951b893dfd773edc4f5470296ca398e5a8
+index 0000000000000000000000000000000000000000..8eaa9a163ac0daade39911fbc610010a21e54447
 --- /dev/null
 +++ b/soh/src/code/ml_state.h
-@@ -0,0 +1,13 @@
+@@ -0,0 +1,14 @@
 +#ifndef ML_STATE_H
 +#define ML_STATE_H
 +
@@ -1283,6 +1360,7 @@ index 0000000000000000000000000000000000000000..6e1151951b893dfd773edc4f5470296c
 +// MissingShip: engine state ML keeps in its custom-code region (0x80600000). See ml_state.c.
 +extern u16 gMlRoomFrames; // 0x80609FF0: frames since Link's scene/room last changed, capped at 169
 +extern s32 gMlWallSkip;   // 0x80602038: wall push-outs to skip in Deep Woods after its corridor teleport
++extern u16 gMlRewindStep; // 0x80609FF4: Magic Hourglass rewind step, non-zero while a rewind plays (0 until MS-053)
 +
 +void MlState_PlayerUpdate(PlayState* play);
 +s32 MlState_SkipWallPush(PlayState* play);
@@ -2761,6 +2839,28 @@ index 0625c6ab87d330ebf312f7a9e25f5038c5b8e543..fecae2ace76a2b41539dc73b0619d2d9
      };
      s32 pad;
      CollisionHeader* colHeader = NULL;
+diff --git a/soh/src/overlays/actors/ovl_Bg_Mizu_Shutter/z_bg_mizu_shutter.c b/soh/src/overlays/actors/ovl_Bg_Mizu_Shutter/z_bg_mizu_shutter.c
+index 19985b2ce956da218c8d753db9bf75f9f908dd91..3fc9cd07bdef3a0979ddd481131f83cb41694f07 100644
+--- a/soh/src/overlays/actors/ovl_Bg_Mizu_Shutter/z_bg_mizu_shutter.c
++++ b/soh/src/overlays/actors/ovl_Bg_Mizu_Shutter/z_bg_mizu_shutter.c
+@@ -94,13 +94,11 @@ void BgMizuShutter_Destroy(BgMizuShutter* thisx, PlayState* play) {
+ 
+ void BgMizuShutter_WaitForSwitch(BgMizuShutter* this, PlayState* play) {
+     if (Flags_GetSwitch(play, (u16)this->dyna.actor.params & 0x3F)) {
+-        if (ABS(this->dyna.actor.world.rot.x) > 0x2C60) {
+-            OnePointCutscene_Init(play, 4510, -99, &this->dyna.actor, MAIN_CAM);
+-        } else {
+-            OnePointCutscene_Attention(play, &this->dyna.actor);
+-        }
++        // MissingShip: ML drops the camera cutscene for steep shutters (keeping the attention call for all) and
++        // waits 6 frames instead of 30
++        OnePointCutscene_Attention(play, &this->dyna.actor);
+         this->actionFunc = BgMizuShutter_WaitForCutscene;
+-        this->timer = 30;
++        this->timer = 6;
+     }
+ }
+ 
 diff --git a/soh/src/overlays/actors/ovl_Bg_Spot02_Objects/z_bg_spot02_objects.c b/soh/src/overlays/actors/ovl_Bg_Spot02_Objects/z_bg_spot02_objects.c
 index d649f7d95bfe807feb71413d94c17265c8c4c4c7..3aec11b2f1de0aa1ab3b4969fb4c27b7f883d488 100644
 --- a/soh/src/overlays/actors/ovl_Bg_Spot02_Objects/z_bg_spot02_objects.c
@@ -3380,6 +3480,110 @@ index cda0fb18ad89bea5da77eaf48c902f1de9d1585a..f8fe6736326195bec1cf58eb5d673df5
  
  void EnFirefly_Init(Actor* thisx, PlayState* play);
  void EnFirefly_Destroy(Actor* thisx, PlayState* play);
+diff --git a/soh/src/overlays/actors/ovl_En_Floormas/z_en_floormas.c b/soh/src/overlays/actors/ovl_En_Floormas/z_en_floormas.c
+index caea853340b0ab88d21f844b3f2a6129b6366781..810ccf0d117665e5b5ec70a799ce2f2a20fd5e95 100644
+--- a/soh/src/overlays/actors/ovl_En_Floormas/z_en_floormas.c
++++ b/soh/src/overlays/actors/ovl_En_Floormas/z_en_floormas.c
+@@ -13,6 +13,7 @@
+ 
+ #define SPAWN_INVISIBLE 0x8000
+ #define SPAWN_SMALL 0x10
++#define ML_SPAWN_GIANT 0x20 // MissingShip: ML's giant Floormaster
+ 
+ #define MERGE_MASTER 0x40
+ #define MERGE_SLAVE 0x20
+@@ -149,6 +150,14 @@ void EnFloormas_Init(Actor* thisx, PlayState* play2) {
+         this->actor.draw = NULL;
+         this->actor.flags &= ~ACTOR_FLAG_ATTENTION_ENABLED;
+         this->actionFunc = EnFloormas_SmWait;
++    } else if (this->actor.params == ML_SPAWN_GIANT) {
++        // MissingShip: ML's giant Floormaster (HAKAdan room 20): 1.6x size, 3x collider, mini-boss music, and no
++        // small partners until it splits (see EnFloormas_Die)
++        Actor_SetScale(&this->actor, 0.016f);
++        this->collider.dim.radius = sCylinderInit.dim.radius * 3.0f;
++        this->collider.dim.height = sCylinderInit.dim.height * 3.0f;
++        func_800F5ACC(NA_BGM_MINI_BOSS);
++        EnFloormas_SetupBigDecideAction(this);
+     } else {
+         // spawn first small floormaster
+         this->actor.parent =
+@@ -306,6 +315,14 @@ void EnFloormas_SetupSplit(EnFloormas* this) {
+     this->actionFunc = EnFloormas_Split;
+ }
+ 
++// MissingShip: ML's split for its giant Floormaster (params 0x20): like EnFloormas_SetupSplit, but the pieces are
++// full-size Floormasters (scale 0.01, params 0) instead of small ones
++void EnFloormas_MlSetupGiantSplit(EnFloormas* this) {
++    EnFloormas_SetupSplit(this);
++    Actor_SetScale(&this->actor, 0.01f);
++    this->actor.params = 0;
++}
++
+ void EnFloormas_SetupSmWalk(EnFloormas* this) {
+     Animation_PlayLoopSetSpeed(&this->skelAnime, &gWallmasterWalkAnim, 4.5f);
+     this->actionFunc = EnFloormas_SmWalk;
+@@ -431,8 +448,59 @@ void EnFloormas_SetupFreeze(EnFloormas* this) {
+ }
+ 
+ void EnFloormas_Die(EnFloormas* this, PlayState* play) {
+-    // Originally was doing > 0.004f, better fix thanks Gary :D
+-    if (this->actor.scale.x > (f32)0.004f) {
++    if (this->actor.scale.x > 0.01f) {
++        // MissingShip: ML's giant splits into three full-size Floormasters. The two new ones get their own small
++        // partners from their Init; the giant gets fresh ones here.
++        Actor* piece;
++
++        piece = Actor_Spawn(&play->actorCtx, play, ACTOR_EN_FLOORMAS, this->actor.world.pos.x,
++                            this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, 0);
++        this->actor.parent = piece;
++        if (piece == NULL) {
++            Actor_Kill(&this->actor);
++            return;
++        }
++        piece->flags &= ~ACTOR_FLAG_ATTENTION_ENABLED;
++        piece->draw = NULL;
++        ((EnFloormas*)piece)->actionFunc = EnFloormas_SmWait;
++        piece = Actor_Spawn(&play->actorCtx, play, ACTOR_EN_FLOORMAS, this->actor.world.pos.x,
++                            this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, 0);
++        this->actor.child = piece;
++        if (piece == NULL) {
++            Actor_Kill(this->actor.parent); // ML passes the NULL child here
++            Actor_Kill(&this->actor);
++            return;
++        }
++        piece->flags &= ~ACTOR_FLAG_ATTENTION_ENABLED;
++        piece->draw = NULL;
++        ((EnFloormas*)piece)->actionFunc = EnFloormas_SmWait;
++
++        this->actor.shape.rot.y = this->actor.yawTowardsPlayer + 0x8000;
++        EnFloormas_MlSetupGiantSplit((EnFloormas*)this->actor.child);
++        EnFloormas_MlSetupGiantSplit((EnFloormas*)this->actor.parent);
++        EnFloormas_MlSetupGiantSplit(this);
++        Audio_PlayActorSound2(&this->actor, NA_SE_EN_FLOORMASTER_SPLIT);
++
++        this->actor.parent = Actor_Spawn(&play->actorCtx, play, ACTOR_EN_FLOORMAS, this->actor.world.pos.x,
++                                         this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, SPAWN_SMALL);
++        if (this->actor.parent == NULL) {
++            Actor_Kill(&this->actor);
++            return;
++        }
++        this->actor.child = Actor_Spawn(&play->actorCtx, play, ACTOR_EN_FLOORMAS, this->actor.world.pos.x,
++                                        this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, SPAWN_SMALL);
++        if (this->actor.child == NULL) {
++            Actor_Kill(this->actor.parent);
++            Actor_Kill(&this->actor);
++            return;
++        }
++        this->actor.parent->child = &this->actor;
++        this->actor.parent->parent = this->actor.child;
++        this->actor.child->parent = &this->actor;
++        this->actor.child->child = this->actor.parent;
++        EnFloormas_SetupBigDecideAction(this);
++    } else if (this->actor.scale.x > (f32)0.004f) {
++        // Originally was doing > 0.004f, better fix thanks Gary :D
+         // split
+         this->actor.shape.rot.y = this->actor.yawTowardsPlayer + 0x8000;
+         EnFloormas_SetupSplit((EnFloormas*)this->actor.child);
 diff --git a/soh/src/overlays/actors/ovl_En_GirlA/z_en_girla.c b/soh/src/overlays/actors/ovl_En_GirlA/z_en_girla.c
 index 9576c7a82fab771762bb74ef03df928f7e37160a..521c5c7ccad2383b5ac157600d7eaf4f8ccb2f06 100644
 --- a/soh/src/overlays/actors/ovl_En_GirlA/z_en_girla.c
@@ -4103,6 +4307,66 @@ index 062be3268d79d1962ef0be03f7deeb0ede102d29..afb51f099efd972d1d69c8d6dbb9272a
                  } else {
                      func_80AE3A8C(this);
                  }
+diff --git a/soh/src/overlays/actors/ovl_En_Ssh/z_en_ssh.c b/soh/src/overlays/actors/ovl_En_Ssh/z_en_ssh.c
+index 37c9df3d30b037dd59883b7141fa3a478f101cdb..249a4754e4bb11384bdbb44570c9bfa9e7d68e4d 100644
+--- a/soh/src/overlays/actors/ovl_En_Ssh/z_en_ssh.c
++++ b/soh/src/overlays/actors/ovl_En_Ssh/z_en_ssh.c
+@@ -666,8 +666,14 @@ void EnSsh_Wait(EnSsh* this, PlayState* play) {
+ 
+ void EnSsh_Talk(EnSsh* this, PlayState* play) {
+     EnSsh_Bob(this, play);
+-    if (Actor_TextboxIsClosing(&this->actor, play)) {
++    // MissingShip: ML waits until Link is out of cutscene mode, then gives a small key once per man (chest flag
++    // params of the room)
++    if (Actor_TextboxIsClosing(&this->actor, play) && !Player_InCsMode(play)) {
+         this->actionFunc = EnSsh_Idle;
++        if (!Flags_GetTreasure(play, this->actor.params)) {
++            Flags_SetTreasure(play, this->actor.params);
++            Actor_OfferGetItem(&this->actor, play, GI_KEY_SMALL, 960.0f, 960.0f);
++        }
+     }
+ }
+ 
+@@ -699,36 +705,9 @@ void EnSsh_Idle(EnSsh* this, PlayState* play) {
+                 this->sfxTimer = 64;
+             }
+             EnSsh_Bob(this, play);
+-            if ((this->unkTimer == 0) && (this->animTimer == 0)) {
+-                this->actor.textId = Text_GetFaceReaction(play, 0xD);
+-                if (this->actor.textId == 0) {
+-                    if (this->actor.params == ENSSH_FATHER) {
+-                        // #region SOH [Randomizer] Skip the complexity of the father's text when he should just give a
+-                        // hint
+-                        if (IS_RANDO && Randomizer_GetSettingValue(RSK_KAK_100_SKULLS_HINT)) {
+-                            this->actor.textId = 0x27;
+-                            // #endregion
+-                        } else {
+-                            if (gSaveContext.inventory.gsTokens >= 50) {
+-                                this->actor.textId = 0x29;
+-                            } else if (gSaveContext.inventory.gsTokens >= 10) {
+-                                if (Flags_GetInfTable(INFTABLE_197)) {
+-                                    this->actor.textId = 0x24;
+-                                } else {
+-                                    this->actor.textId = 0x25;
+-                                }
+-                            } else {
+-                                if (Flags_GetInfTable(INFTABLE_196)) {
+-                                    this->actor.textId = 0x27;
+-                                } else {
+-                                    this->actor.textId = 0x26;
+-                                }
+-                            }
+-                        }
+-                    } else {
+-                        this->actor.textId = 0x22;
+-                    }
+-                }
++            // MissingShip: ML only waits for unkTimer, and each man says text 0x22 + params until his key is given
++            if (this->unkTimer == 0) {
++                this->actor.textId = Flags_GetTreasure(play, this->actor.params) ? 0x22 : 0x22 + this->actor.params;
+                 func_8002F2CC(&this->actor, play, 100.0f);
+             }
+         }
 diff --git a/soh/src/overlays/actors/ovl_En_St/z_en_st.c b/soh/src/overlays/actors/ovl_En_St/z_en_st.c
 index 99f4617bb9aae2f179bf2b59f7245ef426f468e0..adafde99b678fb69a9751e2f2aa4c995f84f4aef 100644
 --- a/soh/src/overlays/actors/ovl_En_St/z_en_st.c
@@ -4499,6 +4763,247 @@ index 0000000000000000000000000000000000000000..42e5da789b656c1cd71c3e82f06fcdd7
 +    /* 0x0000 */ Actor actor;
 +    /* 0x014C */ u8 played;
 +} MlBgmTrigger; // ML instanceSize = 0x150
++
++#endif
+diff --git a/soh/src/overlays/actors/ovl_Ml_Elevator/z_ml_elevator.c b/soh/src/overlays/actors/ovl_Ml_Elevator/z_ml_elevator.c
+new file mode 100644
+index 0000000000000000000000000000000000000000..9ec0a9bd56b29963b9970d2dee1e897b3402807b
+--- /dev/null
++++ b/soh/src/overlays/actors/ovl_Ml_Elevator/z_ml_elevator.c
+@@ -0,0 +1,135 @@
++/*
++ * File: z_ml_elevator.c
++ * Overlay: ovl_Ml_Elevator
++ * Description: The Missing Link - HAKAdan's elevators (ML's rewrite of En_Kakasi, slot 0x17B)
++ *
++ * Source overlay: ML dma 290, text 0x390, on ML's own object 0x154 (dma 380). params 0: rises 309 units at 10 per
++ * frame (placed twice in room 16). params 1: rises 1784 units at 45 per frame (spawned by Ml_ElevatorSpawner).
++ * Standing on it sends it to the other end, where it waits until Link steps off. It comes back down when Link is
++ * below its top, and the tall one also drops while a Magic Hourglass rewind plays with Link within 100 units.
++ * While the tall one carries Link, the camera switches to setting 9.
++ * ML's Update is branchy compiler output; the flow below follows it label by label.
++ */
++
++#include "z_ml_elevator.h"
++#include "assets/ml_assets.h"
++#include "src/code/ml_state.h"
++
++#define FLAGS ACTOR_FLAG_UPDATE_CULLING_DISABLED
++
++void MlElevator_Init(Actor* thisx, PlayState* play);
++void MlElevator_Destroy(Actor* thisx, PlayState* play);
++void MlElevator_Update(Actor* thisx, PlayState* play);
++void MlElevator_Draw(Actor* thisx, PlayState* play);
++
++const ActorInit Ml_Elevator_InitVars = {
++    ACTOR_EN_KAKASI,
++    ACTORCAT_BG,
++    FLAGS,
++    OBJECT_KA,
++    sizeof(MlElevator),
++    (ActorFunc)MlElevator_Init,
++    (ActorFunc)MlElevator_Destroy,
++    (ActorFunc)MlElevator_Update,
++    (ActorFunc)MlElevator_Draw,
++    NULL,
++};
++
++static InitChainEntry sInitChain[] = {
++    ICHAIN_VEC3F_DIV1000(scale, 1000, ICHAIN_CONTINUE),
++    ICHAIN_F32(uncullZoneForward, 3000, ICHAIN_CONTINUE),
++    ICHAIN_F32(uncullZoneScale, 500, ICHAIN_CONTINUE),
++    ICHAIN_F32(uncullZoneDownward, 1000, ICHAIN_STOP),
++};
++
++void MlElevator_Init(Actor* thisx, PlayState* play) {
++    MlElevator* this = (MlElevator*)thisx;
++    CollisionHeader* colHeader = NULL;
++
++    Actor_ProcessInitChain(thisx, sInitChain);
++    DynaPolyActor_Init(&this->dyna, DPM_PLAYER);
++    CollisionHeader_GetVirtual(gMlElevatorCol, &colHeader);
++    this->dyna.bgId = DynaPoly_SetBgActor(play, &play->colCtx.dyna, thisx, colHeader);
++    this->state = 0;
++    this->dir = 0;
++    this->bottomY = thisx->world.pos.y;
++    this->topY = thisx->world.pos.y + ((thisx->params != 0) ? 1784.0f : 309.0f);
++}
++
++void MlElevator_Destroy(Actor* thisx, PlayState* play) {
++    MlElevator* this = (MlElevator*)thisx;
++
++    DynaPoly_DeleteBgActor(play, &play->colCtx.dyna, this->dyna.bgId);
++}
++
++void MlElevator_Update(Actor* thisx, PlayState* play) {
++    MlElevator* this = (MlElevator*)thisx;
++    Player* player = GET_PLAYER(play);
++    s32 onTop = DynaPolyActor_IsPlayerOnTop(&this->dyna);
++    f32 speed = (thisx->params != 0) ? 45.0f : 10.0f;
++    f32* y = &thisx->world.pos.y;
++
++    if (onTop || ((this->bottomY < *y) && (player->actor.world.pos.y < this->topY - 50.0f))) {
++        if (this->state == 0) {
++            this->state = (this->dir == 0) ? 1 : this->dir;
++        }
++        if (this->state == 1) {
++            goto rising;
++        }
++        goto lowering;
++    }
++    if (this->state == 2) {
++        this->state = 0;
++        goto recall;
++    }
++    if (this->state == 1) {
++        goto recall;
++    }
++
++lowering:
++    if (this->state != -1) {
++        goto recall;
++    }
++lower:
++    Audio_PlayActorSound2(thisx, NA_SE_EV_BUYOSTAND_FALL - SFX_FLAG);
++    *y -= speed;
++    if (*y <= this->bottomY) {
++        this->dir = 1;
++        *y = this->bottomY;
++        this->state = 2;
++        return;
++    }
++    goto tail;
++
++rising:
++    if (!onTop) {
++        goto recall;
++    }
++    *y += speed;
++    Audio_PlayActorSound2(thisx, NA_SE_EV_BUYOSTAND_RISING - SFX_FLAG);
++    if (this->topY <= *y) {
++        this->dir = -1;
++        *y = this->topY;
++        this->state = 2;
++        return;
++    }
++    goto tail;
++
++recall:
++    // Called back down: Link is below its top, or (tall one) an Hourglass rewind plays nearby
++    if ((this->bottomY < *y) && (player->actor.world.pos.y < this->topY - 50.0f)) {
++        goto lower;
++    }
++    if ((gMlRewindStep != 0) && (thisx->params != 0) && (this->bottomY < *y) && (thisx->xzDistToPlayer < 100.0f)) {
++        goto lower;
++    }
++
++tail:
++    if (((this->state == 1) || (this->state == -1)) && onTop && (thisx->params == 1)) {
++        Camera_ChangeDataIdx(&play->mainCamera, 9);
++    }
++}
++
++void MlElevator_Draw(Actor* thisx, PlayState* play) {
++    Gfx_DrawDListOpa(play, (Gfx*)((thisx->params != 0) ? gMlElevatorTallDL : gMlElevatorDL));
++}
+diff --git a/soh/src/overlays/actors/ovl_Ml_Elevator/z_ml_elevator.h b/soh/src/overlays/actors/ovl_Ml_Elevator/z_ml_elevator.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..9141a307b166b76236c37361fccd59530046275b
+--- /dev/null
++++ b/soh/src/overlays/actors/ovl_Ml_Elevator/z_ml_elevator.h
+@@ -0,0 +1,16 @@
++#ifndef Z_ML_ELEVATOR_H
++#define Z_ML_ELEVATOR_H
++
++#include <libultraship/libultra.h>
++#include "global.h"
++
++// ML's layout (size 0x178), for reference against its overlay; SoH's own offsets differ.
++typedef struct MlElevator {
++    /* 0x000 */ DynaPolyActor dyna;
++    /* 0x168 */ f32 topY;
++    /* 0x16C */ f32 bottomY;
++    /* 0x170 */ s32 state; // 0 idle, 1 rising, -1 lowering, 2 arrived (until Link steps off)
++    /* 0x174 */ s32 dir;   // direction of the next trip: 0 before the first, then 1 (up) or -1 (down)
++} MlElevator;
++
++#endif
+diff --git a/soh/src/overlays/actors/ovl_Ml_ElevatorSpawner/z_ml_elevatorspawner.c b/soh/src/overlays/actors/ovl_Ml_ElevatorSpawner/z_ml_elevatorspawner.c
+new file mode 100644
+index 0000000000000000000000000000000000000000..fd75e24220469bdfe4d58929af0a54432e97509c
+--- /dev/null
++++ b/soh/src/overlays/actors/ovl_Ml_ElevatorSpawner/z_ml_elevatorspawner.c
+@@ -0,0 +1,54 @@
++/*
++ * File: z_ml_elevatorspawner.c
++ * Overlay: ovl_Ml_ElevatorSpawner
++ * Description: The Missing Link - spawns HAKAdan's tall elevator once (ML's rewrite of Bg_Hidan_Dalm, slot 0x040)
++ *
++ * Source overlay: ML dma 184, text 0x100. Placed once, in HAKAdan room 19. Init looks for an Ml_Elevator among the
++ * BG actors; if there is none it spawns the tall one (params 1) at (-1154, -1685, -627), yaw 0x42D8, with room -1 so
++ * it survives room changes. Either way it then removes itself.
++ */
++
++#include "z_ml_elevatorspawner.h"
++
++#define FLAGS ACTOR_FLAG_UPDATE_CULLING_DISABLED
++
++void MlElevatorSpawner_Init(Actor* thisx, PlayState* play);
++void MlElevatorSpawner_Destroy(Actor* thisx, PlayState* play);
++void MlElevatorSpawner_Update(Actor* thisx, PlayState* play);
++
++const ActorInit Ml_ElevatorSpawner_InitVars = {
++    ACTOR_BG_HIDAN_DALM,
++    ACTORCAT_BG,
++    FLAGS,
++    OBJECT_GAMEPLAY_KEEP,
++    sizeof(MlElevatorSpawner),
++    (ActorFunc)MlElevatorSpawner_Init,
++    (ActorFunc)MlElevatorSpawner_Destroy,
++    (ActorFunc)MlElevatorSpawner_Update,
++    NULL,
++    NULL,
++};
++
++void MlElevatorSpawner_Init(Actor* thisx, PlayState* play) {
++    MlElevatorSpawner* this = (MlElevatorSpawner*)thisx;
++    Actor* actor;
++
++    for (actor = play->actorCtx.actorLists[ACTORCAT_BG].head; actor != NULL; actor = actor->next) {
++        if (actor->id == ACTOR_EN_KAKASI) {
++            this->found = true;
++        }
++    }
++    if (!this->found) {
++        actor = Actor_Spawn(&play->actorCtx, play, ACTOR_EN_KAKASI, -1154.0f, -1685.0f, -627.0f, 0, 0x42D8, 0, 1);
++        if (actor != NULL) { // ML doesn't check
++            actor->room = -1;
++        }
++    }
++    Actor_Kill(thisx);
++}
++
++void MlElevatorSpawner_Destroy(Actor* thisx, PlayState* play) {
++}
++
++void MlElevatorSpawner_Update(Actor* thisx, PlayState* play) {
++}
+diff --git a/soh/src/overlays/actors/ovl_Ml_ElevatorSpawner/z_ml_elevatorspawner.h b/soh/src/overlays/actors/ovl_Ml_ElevatorSpawner/z_ml_elevatorspawner.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..96294bd2625a25b7c07d73a143461b0eed41c936
+--- /dev/null
++++ b/soh/src/overlays/actors/ovl_Ml_ElevatorSpawner/z_ml_elevatorspawner.h
+@@ -0,0 +1,12 @@
++#ifndef Z_ML_ELEVATORSPAWNER_H
++#define Z_ML_ELEVATORSPAWNER_H
++
++#include <libultraship/libultra.h>
++#include "global.h"
++
++typedef struct MlElevatorSpawner {
++    /* 0x000 */ Actor actor;
++    /* 0x14C */ u8 found;
++} MlElevatorSpawner; // size = 0x150
 +
 +#endif
 diff --git a/soh/src/overlays/actors/ovl_Ml_EventSpawner/z_ml_eventspawner.c b/soh/src/overlays/actors/ovl_Ml_EventSpawner/z_ml_eventspawner.c
@@ -5393,6 +5898,137 @@ index 0000000000000000000000000000000000000000..d9728e0c1c0e835ec2f6239a963b6223
 +    /* 0x014F */ u8 unk_14F;
 +    /* 0x0150 */ MlFogWallActionFunc actionFunc;
 +} MlFogWall; // size = 0x0154
++
++#endif
+diff --git a/soh/src/overlays/actors/ovl_Ml_HakaLift/z_ml_hakalift.c b/soh/src/overlays/actors/ovl_Ml_HakaLift/z_ml_hakalift.c
+new file mode 100644
+index 0000000000000000000000000000000000000000..cace811bfecdc9fa5f9859aae7cf3d7a19d7d067
+--- /dev/null
++++ b/soh/src/overlays/actors/ovl_Ml_HakaLift/z_ml_hakalift.c
+@@ -0,0 +1,103 @@
++/*
++ * File: z_ml_hakalift.c
++ * Overlay: ovl_Ml_HakaLift
++ * Description: The Missing Link - HAKAdan's room 2 lift (ML's rewrite of Bg_Mori_Elevator, slot 0x087)
++ *
++ * Source overlay: ML dma 206, text 0x280, on ML's own object 0x72 (dma 22). Standing on it sends it 675 units to
++ * the other end at 17 per frame; it waits there until Link steps off, and it doesn't come back by itself. It
++ * starts at the top when Link loads in above it. While Link stands on it the camera uses setting 9.
++ */
++
++#include "z_ml_hakalift.h"
++#include "assets/ml_assets.h"
++
++#define FLAGS ACTOR_FLAG_UPDATE_CULLING_DISABLED
++
++void MlHakaLift_Init(Actor* thisx, PlayState* play);
++void MlHakaLift_Destroy(Actor* thisx, PlayState* play);
++void MlHakaLift_Update(Actor* thisx, PlayState* play);
++void MlHakaLift_Draw(Actor* thisx, PlayState* play);
++
++const ActorInit Ml_HakaLift_InitVars = {
++    ACTOR_BG_MORI_ELEVATOR,
++    ACTORCAT_BG,
++    FLAGS,
++    OBJECT_MORI_OBJECTS,
++    sizeof(MlHakaLift),
++    (ActorFunc)MlHakaLift_Init,
++    (ActorFunc)MlHakaLift_Destroy,
++    (ActorFunc)MlHakaLift_Update,
++    (ActorFunc)MlHakaLift_Draw,
++    NULL,
++};
++
++static InitChainEntry sInitChain[] = {
++    ICHAIN_F32(uncullZoneForward, 2000, ICHAIN_CONTINUE),
++    ICHAIN_F32(uncullZoneScale, 600, ICHAIN_CONTINUE),
++    ICHAIN_F32(uncullZoneDownward, 2000, ICHAIN_STOP),
++};
++
++void MlHakaLift_Init(Actor* thisx, PlayState* play) {
++    MlHakaLift* this = (MlHakaLift*)thisx;
++    CollisionHeader* colHeader = NULL;
++
++    Actor_SetScale(thisx, 0.1f);
++    Actor_ProcessInitChain(thisx, sInitChain);
++    DynaPolyActor_Init(&this->dyna, DPM_PLAYER);
++    CollisionHeader_GetVirtual(gMlHakaLiftCol, &colHeader);
++    this->dyna.bgId = DynaPoly_SetBgActor(play, &play->colCtx.dyna, thisx, colHeader);
++    this->bottomY = thisx->world.pos.y;
++    this->topY = thisx->world.pos.y + 675.0f;
++    this->state = 0;
++    this->dir = 0;
++    if (this->topY - 50.0f < GET_PLAYER(play)->actor.world.pos.y) {
++        thisx->world.pos.y = this->topY;
++        this->dir = -1;
++    }
++}
++
++void MlHakaLift_Destroy(Actor* thisx, PlayState* play) {
++    MlHakaLift* this = (MlHakaLift*)thisx;
++
++    DynaPoly_DeleteBgActor(play, &play->colCtx.dyna, this->dyna.bgId);
++}
++
++void MlHakaLift_Update(Actor* thisx, PlayState* play) {
++    MlHakaLift* this = (MlHakaLift*)thisx;
++    s32 onTop = DynaPolyActor_IsPlayerOnTop(&this->dyna);
++
++    if (onTop) {
++        if (this->state == 0) {
++            this->state = (this->dir == 0) ? 1 : this->dir;
++        }
++    } else if (this->state == 2) {
++        this->state = 0;
++        return;
++    }
++
++    if (this->state == 1) {
++        thisx->world.pos.y += 17.0f;
++        Audio_PlayActorSound2(thisx, NA_SE_EV_ELEVATOR_MOVE - SFX_FLAG);
++        if (this->topY <= thisx->world.pos.y) {
++            this->dir = -1;
++            thisx->world.pos.y = this->topY;
++            this->state = 2;
++        }
++    } else if (this->state == -1) {
++        thisx->world.pos.y -= 17.0f;
++        Audio_PlayActorSound2(thisx, NA_SE_EV_ELEVATOR_MOVE - SFX_FLAG);
++        if (thisx->world.pos.y <= this->bottomY) {
++            thisx->world.pos.y = this->bottomY;
++            this->dir = 1;
++            this->state = 2;
++        }
++    }
++
++    if (onTop) {
++        Camera_ChangeDataIdx(&play->mainCamera, 9);
++    }
++}
++
++void MlHakaLift_Draw(Actor* thisx, PlayState* play) {
++    Gfx_DrawDListOpa(play, (Gfx*)gMlHakaLiftDL);
++}
+diff --git a/soh/src/overlays/actors/ovl_Ml_HakaLift/z_ml_hakalift.h b/soh/src/overlays/actors/ovl_Ml_HakaLift/z_ml_hakalift.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..e50226a5b2e609248f38e289ab0f313bf2fdc1e0
+--- /dev/null
++++ b/soh/src/overlays/actors/ovl_Ml_HakaLift/z_ml_hakalift.h
+@@ -0,0 +1,16 @@
++#ifndef Z_ML_HAKALIFT_H
++#define Z_ML_HAKALIFT_H
++
++#include <libultraship/libultra.h>
++#include "global.h"
++
++// ML's layout (size 0x174), for reference against its overlay; SoH's own offsets differ.
++typedef struct MlHakaLift {
++    /* 0x000 */ DynaPolyActor dyna;
++    /* 0x164 */ f32 topY;
++    /* 0x168 */ f32 bottomY;
++    /* 0x16C */ s32 state; // 0 idle, 1 rising, -1 lowering, 2 arrived (until Link steps off)
++    /* 0x170 */ s32 dir;   // direction of the next trip: 0 before the first, then 1 (up) or -1 (down)
++} MlHakaLift;
 +
 +#endif
 diff --git a/soh/src/overlays/actors/ovl_Ml_HintNuts/z_ml_hintnuts.c b/soh/src/overlays/actors/ovl_Ml_HintNuts/z_ml_hintnuts.c
@@ -7223,6 +7859,84 @@ index 0000000000000000000000000000000000000000..11a0c606dfcbe330dfe792d005763250
 +} MlPrologue;
 +
 +#endif
+diff --git a/soh/src/overlays/actors/ovl_Ml_RoomClearSwitch/z_ml_roomclearswitch.c b/soh/src/overlays/actors/ovl_Ml_RoomClearSwitch/z_ml_roomclearswitch.c
+new file mode 100644
+index 0000000000000000000000000000000000000000..b228561facbf221dd4568cdae97d707b82225480
+--- /dev/null
++++ b/soh/src/overlays/actors/ovl_Ml_RoomClearSwitch/z_ml_roomclearswitch.c
+@@ -0,0 +1,54 @@
++/*
++ * File: z_ml_roomclearswitch.c
++ * Overlay: ovl_Ml_RoomClearSwitch
++ * Description: The Missing Link - holds switch 0x25 while the room still has enemies (ML custom actor, slot 0x01A)
++ *
++ * Source overlay: ML dma 164, text 0x260 (ML's own code in vanilla's unset slot 0x1A). Placed once, in HAKAdan
++ * room 20. After 34 frames it sets switch 0x25 every frame until the room is cleared, then unsets it and removes
++ * itself. It removes itself at once if the room was already cleared. Nothing is drawn.
++ */
++
++#include "z_ml_roomclearswitch.h"
++
++#define FLAGS (ACTOR_FLAG_UPDATE_CULLING_DISABLED | ACTOR_FLAG_DRAW_CULLING_DISABLED)
++
++#define ML_ROOM_CLEAR_SWITCH 0x25
++
++void MlRoomClearSwitch_Init(Actor* thisx, PlayState* play);
++void MlRoomClearSwitch_Destroy(Actor* thisx, PlayState* play);
++void MlRoomClearSwitch_Update(Actor* thisx, PlayState* play);
++
++const ActorInit Ml_RoomClearSwitch_InitVars = {
++    ACTOR_ML_ROOMCLEARSWITCH,
++    ACTORCAT_BG,
++    FLAGS,
++    OBJECT_GAMEPLAY_KEEP,
++    sizeof(MlRoomClearSwitch),
++    (ActorFunc)MlRoomClearSwitch_Init,
++    (ActorFunc)MlRoomClearSwitch_Destroy,
++    (ActorFunc)MlRoomClearSwitch_Update,
++    NULL,
++    NULL,
++};
++
++void MlRoomClearSwitch_Init(Actor* thisx, PlayState* play) {
++    if (Flags_GetClear(play, thisx->room)) {
++        Actor_Kill(thisx);
++    }
++}
++
++void MlRoomClearSwitch_Destroy(Actor* thisx, PlayState* play) {
++}
++
++void MlRoomClearSwitch_Update(Actor* thisx, PlayState* play) {
++    MlRoomClearSwitch* this = (MlRoomClearSwitch*)thisx;
++
++    if (this->timer < 34) {
++        this->timer++;
++    } else if (Flags_GetClear(play, thisx->room)) {
++        Flags_UnsetSwitch(play, ML_ROOM_CLEAR_SWITCH);
++        Actor_Kill(thisx);
++    } else {
++        Flags_SetSwitch(play, ML_ROOM_CLEAR_SWITCH);
++    }
++}
+diff --git a/soh/src/overlays/actors/ovl_Ml_RoomClearSwitch/z_ml_roomclearswitch.h b/soh/src/overlays/actors/ovl_Ml_RoomClearSwitch/z_ml_roomclearswitch.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..777d4933305037930521df109c93930d01d7d2a8
+--- /dev/null
++++ b/soh/src/overlays/actors/ovl_Ml_RoomClearSwitch/z_ml_roomclearswitch.h
+@@ -0,0 +1,12 @@
++#ifndef Z_ML_ROOMCLEARSWITCH_H
++#define Z_ML_ROOMCLEARSWITCH_H
++
++#include <libultraship/libultra.h>
++#include "global.h"
++
++typedef struct MlRoomClearSwitch {
++    /* 0x000 */ Actor actor;
++    /* 0x14C */ s32 timer;
++} MlRoomClearSwitch; // size = 0x150 (ML allocates 0x154)
++
++#endif
 diff --git a/soh/src/overlays/actors/ovl_Ml_SkullKid/z_ml_skullkid.c b/soh/src/overlays/actors/ovl_Ml_SkullKid/z_ml_skullkid.c
 new file mode 100644
 index 0000000000000000000000000000000000000000..a8cb2367e1ab6f388646df84b09f8fa7e7f3c68e
@@ -7418,6 +8132,157 @@ index 0000000000000000000000000000000000000000..3b489e5c50c803fc82247cb7101dcff0
 +    s16 state;         // params 2: 0 offer talk, 1 talking, 2 event, 3 give heart, 4 done
 +    s16 inContact;     // params 2: the one-frame auto-accept pulse inside 40 units has fired
 +} MlSkullKid;
++
++#endif
+diff --git a/soh/src/overlays/actors/ovl_Ml_SlideBlock/z_ml_slideblock.c b/soh/src/overlays/actors/ovl_Ml_SlideBlock/z_ml_slideblock.c
+new file mode 100644
+index 0000000000000000000000000000000000000000..4ca46d7b529cd419de0657714414f2991fd2898f
+--- /dev/null
++++ b/soh/src/overlays/actors/ovl_Ml_SlideBlock/z_ml_slideblock.c
+@@ -0,0 +1,123 @@
++/*
++ * File: z_ml_slideblock.c
++ * Overlay: ovl_Ml_SlideBlock
++ * Description: The Missing Link - a switch-driven sliding block (ML's rewrite of Boss_Tw, slot 0x0DC)
++ *
++ * Source overlay: ML dma 234, text 0x490, hand-written. Placed 26 times in HAKAdan, all on room switch 0x20.
++ * params: low byte = switch flag. High byte: bit 0 inverts the switch (and draws teal instead of orange),
++ * bit 1 picks the second model and collision, bit 4 the third/fourth model, bit 5 scale 1.0 instead of 0.5.
++ * When the switch (xor the invert bit) is set the block slides 10 frames of 20 units x scale along its own down
++ * axis; when it clears, it slides back. It starts out already moved if the switch is set on load.
++ */
++
++#include "z_ml_slideblock.h"
++#include "assets/ml_assets.h"
++
++#define FLAGS ACTOR_FLAG_UPDATE_CULLING_DISABLED
++
++#define ML_HB(thisx) (((thisx)->params >> 8) & 0xFF)
++
++void MlSlideBlock_Init(Actor* thisx, PlayState* play);
++void MlSlideBlock_Destroy(Actor* thisx, PlayState* play);
++void MlSlideBlock_Update(Actor* thisx, PlayState* play);
++void MlSlideBlock_Draw(Actor* thisx, PlayState* play);
++
++const ActorInit Ml_SlideBlock_InitVars = {
++    ACTOR_BOSS_TW,
++    ACTORCAT_BG,
++    FLAGS,
++    OBJECT_TW,
++    sizeof(MlSlideBlock),
++    (ActorFunc)MlSlideBlock_Init,
++    (ActorFunc)MlSlideBlock_Destroy,
++    (ActorFunc)MlSlideBlock_Update,
++    (ActorFunc)MlSlideBlock_Draw,
++    NULL,
++};
++
++static InitChainEntry sInitChain[] = {
++    ICHAIN_VEC3F_DIV1000(scale, 100, ICHAIN_CONTINUE),
++    ICHAIN_F32(uncullZoneForward, 12800, ICHAIN_CONTINUE),
++    ICHAIN_F32(uncullZoneScale, 1300, ICHAIN_CONTINUE),
++    ICHAIN_F32(uncullZoneDownward, 1300, ICHAIN_STOP),
++};
++
++// Each ML display list sets the primitive colour, then branches to one of four models.
++static Gfx* sDLists[] = {
++    (Gfx*)gMlSlideBlock0DL, (Gfx*)gMlSlideBlock1DL, (Gfx*)gMlSlideBlock2DL, (Gfx*)gMlSlideBlock3DL,
++    (Gfx*)gMlSlideBlock4DL, (Gfx*)gMlSlideBlock5DL, (Gfx*)gMlSlideBlock6DL, (Gfx*)gMlSlideBlock7DL,
++};
++
++static s32 MlSlideBlock_SwitchOn(MlSlideBlock* this, PlayState* play) {
++    s32 flag = Flags_GetSwitch(play, this->dyna.actor.params & 0xFF);
++
++    return (ML_HB(&this->dyna.actor) & 1) ? !flag : flag;
++}
++
++void MlSlideBlock_Init(Actor* thisx, PlayState* play) {
++    MlSlideBlock* this = (MlSlideBlock*)thisx;
++    s32 hb = ML_HB(thisx);
++    CollisionHeader* colHeader = NULL;
++    f32 side;
++    f32 back;
++
++    Actor_ProcessInitChain(thisx, sInitChain);
++    DynaPolyActor_Init(&this->dyna, DPM_PLAYER);
++    Actor_SetScale(thisx, (hb & 0x20) ? 1.0f : 0.5f);
++    CollisionHeader_GetVirtual((hb & 2) ? gMlSlideBlock1Col : gMlSlideBlock0Col, &colHeader);
++    this->dyna.bgId = DynaPoly_SetBgActor(play, &play->colCtx.dyna, thisx, colHeader);
++
++    // The block's local down axis, 20 units long at scale 1.0
++    side = Math_SinS(thisx->shape.rot.z) * 20.0f;
++    back = Math_SinS(thisx->shape.rot.x) * 20.0f;
++    this->step.x = (side * Math_SinS(thisx->shape.rot.y + 0x3FFF) + back * Math_SinS(thisx->shape.rot.y + 0x7FFF)) *
++                   thisx->scale.x;
++    this->step.y = Math_CosS(thisx->shape.rot.z) * (-20.0f * thisx->scale.x) * Math_CosS(thisx->shape.rot.x);
++    this->step.z = (side * Math_CosS(thisx->shape.rot.y + 0x3FFF) + back * Math_CosS(thisx->shape.rot.y + 0x7FFF)) *
++                   thisx->scale.x;
++
++    if (MlSlideBlock_SwitchOn(this, play)) {
++        thisx->world.pos.x += this->step.x * 10.0f;
++        thisx->world.pos.y += this->step.y * 10.0f;
++        thisx->world.pos.z += this->step.z * 10.0f;
++        this->isOut = true;
++    }
++}
++
++void MlSlideBlock_Destroy(Actor* thisx, PlayState* play) {
++    MlSlideBlock* this = (MlSlideBlock*)thisx;
++
++    DynaPoly_DeleteBgActor(play, &play->colCtx.dyna, this->dyna.bgId);
++}
++
++void MlSlideBlock_Update(Actor* thisx, PlayState* play) {
++    MlSlideBlock* this = (MlSlideBlock*)thisx;
++
++    if (this->state == 1 || this->state == 2) {
++        f32 dir = (this->state == 2) ? 1.0f : -1.0f;
++
++        thisx->world.pos.x += this->step.x * dir;
++        thisx->world.pos.y += this->step.y * dir;
++        thisx->world.pos.z += this->step.z * dir;
++        if (--this->timer == 0) {
++            this->isOut = (this->state == 2);
++            this->state = 0;
++        }
++    } else if (MlSlideBlock_SwitchOn(this, play)) {
++        if (!this->isOut) {
++            this->state = 2;
++            this->timer = 10;
++            SoundSource_PlaySfxAtFixedWorldPos(play, &thisx->world.pos, 30, NA_SE_EV_METALDOOR_OPEN);
++        }
++    } else if (this->isOut) {
++        this->state = 1;
++        this->timer = 10;
++        SoundSource_PlaySfxAtFixedWorldPos(play, &thisx->world.pos, 30, NA_SE_EV_METALDOOR_CLOSE);
++    }
++}
++
++void MlSlideBlock_Draw(Actor* thisx, PlayState* play) {
++    s32 hb = ML_HB(thisx);
++
++    Gfx_DrawDListOpa(play, sDLists[(hb & 1) * 2 + ((hb >> 1) & 1) + ((hb >> 4) & 1) * 4]);
++}
+diff --git a/soh/src/overlays/actors/ovl_Ml_SlideBlock/z_ml_slideblock.h b/soh/src/overlays/actors/ovl_Ml_SlideBlock/z_ml_slideblock.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..1018260e3e6f5b98cfa6e2ad6c8ac5dc22fbb891
+--- /dev/null
++++ b/soh/src/overlays/actors/ovl_Ml_SlideBlock/z_ml_slideblock.h
+@@ -0,0 +1,16 @@
++#ifndef Z_ML_SLIDEBLOCK_H
++#define Z_ML_SLIDEBLOCK_H
++
++#include <libultraship/libultra.h>
++#include "global.h"
++
++// ML's layout (size 0x1A0), for reference against its overlay; SoH's own offsets differ.
++typedef struct MlSlideBlock {
++    /* 0x000 */ DynaPolyActor dyna;
++    /* 0x180 */ s8 state;   // 0 idle, 1 sliding back, 2 sliding out
++    /* 0x181 */ s8 timer;
++    /* 0x182 */ s8 isOut;
++    /* 0x18C */ Vec3f step; // one frame of travel along the block's own down axis
++} MlSlideBlock;
 +
 +#endif
 diff --git a/soh/src/overlays/actors/ovl_Ml_SongBlock/z_ml_songblock.c b/soh/src/overlays/actors/ovl_Ml_SongBlock/z_ml_songblock.c

@@ -1,0 +1,7 @@
+<Root>
+    <File Name="object_ml_elevator" Segment="6">
+        <Collision Name="gMlElevatorCol" Offset="0x1220"/>
+        <DList Name="gMlElevatorTallDL" Offset="0x1690"/>
+        <DList Name="gMlElevatorDL" Offset="0x1A20"/>
+    </File>
+</Root>

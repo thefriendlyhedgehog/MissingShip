@@ -23,7 +23,7 @@ Actors living in `code` (En_Item00, En_A_Obj) and slots ML deleted are left out;
 | `0x012` En_Dodongo | REWRITTEN (text 0x840 vs 0x2570) | spot10 | — | todo: new find, placed in spot10 (missing from the old inventory) — MS-040 | no |
 | `0x013` En_Firefly | 0 text / 1 data words differ | HAKAdan ×7, kakariko ×6, spot00 ×4, spot10 ×10, ydan ×2 | — | ported | no |
 | `0x019` En_Niw | 0 text / 1 data words differ | malon_stable ×4, spot20 ×4 | En_Niw_Girl | no change (padding byte) | no |
-| `0x01a` ACTOR_UNSET_1A | ML custom (0x2b0 bytes) | HAKAdan | — | todo: MS-036 | no |
+| `0x01a` Ml_RoomClearSwitch | ML custom (0x2b0 bytes) | HAKAdan | — | ported (Ml_RoomClearSwitch, MS-108) | no |
 | `0x01c` Ml_BeamHeart (was En_Reeba) | REWRITTEN (text 0x130 vs 0x1890) | spot09 | En_Encount1 | ported (Ml_BeamHeart: Blade Beam Piece of Heart) | no |
 | `0x01d` En_Peehat | REWRITTEN (text 0x3290 vs 0x3280) | Bmori1 | — | todo: MS-038 | no |
 | `0x01f` Ml_Prologue | ML custom (0x4b0 bytes) | link_home | — | ported (Ml_Prologue) | no |
@@ -32,12 +32,12 @@ Actors living in `code` (En_Item00, En_A_Obj) and slots ML deleted are left out;
 | `0x037` En_St | 0 text / 1 data words differ | HAKAdan ×8, spot12 | — | ported (not hostile) | no |
 | `0x03d` En_Ossan | 5818 text / 0 data words differ | night_shop | — | ported (MS-035) | no |
 | `0x03e` Bg_Treemouth | REWRITTEN (text 0x230 vs 0x920) | spot00, spot10 ×6 | — | ported | no |
-| `0x040` Bg_Hidan_Dalm | REWRITTEN (text 0x100 vs 0x660) | HAKAdan | — | todo: MS-036 | no |
+| `0x040` Ml_ElevatorSpawner (was Bg_Hidan_Dalm) | REWRITTEN (text 0x100 vs 0x660) | HAKAdan | — | ported (Ml_ElevatorSpawner, MS-109) | no |
 | `0x055` En_Dekubaba | 1 text / 1 data words differ | HAKAdan ×12, spot09 ×5, spot10 ×4, spot12 ×9, testroom ×2, ydan ×5 | Ml_EventSpawner | ported | no |
 | `0x060` En_Dekunuts | 1 text / 0 data words differ  hooks ['0x806008e0'] | spot10 ×3, ydan ×3 | — | ported | no |
 | `0x06a` Ml_TalkSpot (was Bg_Toki_Hikari) | REWRITTEN (text 0x80 vs 0xd50) | spot01 | — | ported (Ml_TalkSpot, MS-103) | no |
-| `0x087` Bg_Mori_Elevator | REWRITTEN (text 0x280 vs 0xa10) | HAKAdan | — | todo: MS-036 | no |
-| `0x08e` En_Floormas | REWRITTEN (text 0x32e0 vs 0x2f40) | HAKAdan | — | todo: MS-036 | no |
+| `0x087` Ml_HakaLift (was Bg_Mori_Elevator) | REWRITTEN (text 0x280 vs 0xa10) | HAKAdan | — | ported (Ml_HakaLift, MS-111) | no |
+| `0x08e` En_Floormas | REWRITTEN (text 0x32e0 vs 0x2f40) | HAKAdan | — | ported (giant variant, MS-112) | no |
 | `0x090` En_Rd | REWRITTEN (text 0x2490 vs 0x24a0) | night_shop, spot01 ×6 | En_Nb | ported (MS-099) | no |
 | `0x093` Ml_BgmTrigger (was Bg_Po_Event) | REWRITTEN (text 0x170 vs 0x1aa0) | hairal_niwa2 ×2, night_shop, spot01 ×2 | — | ported (Ml_BgmTrigger, MS-104) | no |
 | `0x095` En_Sw | 0 text / 1 data words differ | HAKAdan ×8 | En_Wood02, Obj_Kibako2 | ported (not hostile) | no |
@@ -48,7 +48,7 @@ Actors living in `code` (En_Item00, En_A_Obj) and slots ML deleted are left out;
 | `0x0c3` En_Nb | REWRITTEN (text 0x590 vs 0x3550) | Bmori1 ×3 | — | todo: MS-038 | no |
 | `0x0cd` Bg_Spot16_Bombstone | 322 text / 0 data words differ | spot01 | — | ported (MS-096) | no |
 | `0x0cf` Bg_Hidan_Kowarerukabe | 0 text / 7 data words differ | ydan | — | ported (object_ml_crackwall) | no |
-| `0x0dc` Boss_Tw | REWRITTEN (text 0x490 vs 0x11ae0) | HAKAdan ×26 | — | todo: MS-036 | no |
+| `0x0dc` Ml_SlideBlock (was Boss_Tw) | REWRITTEN (text 0x490 vs 0x11ae0) | HAKAdan ×26 | — | ported (Ml_SlideBlock, MS-107) | no |
 | `0x0e3` Ml_LiftBlock (was Bg_Mori_Hashira4) | REWRITTEN (text 0x130 vs 0x540) | spot10 | — | ported | no |
 | `0x0e7` Ml_Malon (was En_Ma1) | REWRITTEN (text 0xbf0 vs 0xf90) | spot20 | Ml_EventSpawner | ported (Ml_Malon: new model object_ml_ma1, race host + finish line; spawns Ml_Cucco) | no |
 | `0x0ff` Obj_Oshihiki | 0 text / 6 data words differ | HAKAdan, ydan ×2 | — | ported (ML colours) | no |
@@ -70,12 +70,12 @@ Actors living in `code` (En_Item00, En_A_Obj) and slots ML deleted are left out;
 | `0x171` En_Mag | REWRITTEN (text 0x1730 vs 0x23a0) | spot00 | — | todo: MS-039 | no |
 | `0x174` Ml_FogWall (was Demo_Gt) | REWRITTEN (text 0xe70 vs 0x4f50) | spot10 ×9 | — | ported | no |
 | `0x17a` Boss_Ganon2 | REWRITTEN (text 0x1690 vs 0x9e00) | kakariko3 | — | todo: MS-039 | no |
-| `0x17b` En_Kakasi | REWRITTEN (text 0x390 vs 0xc70) | HAKAdan ×2 | Bg_Hidan_Dalm | todo: MS-036 | no |
-| `0x188` En_Ssh | REWRITTEN (text 0x20e0 vs 0x2150) | HAKAdan ×4 | — | todo: MS-036 | no |
+| `0x17b` Ml_Elevator (was En_Kakasi) | REWRITTEN (text 0x390 vs 0xc70) | HAKAdan ×2 | Ml_ElevatorSpawner | ported (Ml_Elevator, MS-110) | no |
+| `0x188` En_Ssh | REWRITTEN (text 0x20e0 vs 0x2150) | HAKAdan ×4 | — | ported (MS-113) | no |
 | `0x18c` Ml_HoleScrub (was En_Weiyer) | REWRITTEN (text 0x1910 vs 0x17e0) | ydan | — | ported (Ml_HoleScrub: hole-hopping scrub) | no |
 | `0x18e` Bg_Jya_1flift | REWRITTEN (text 0x540 vs 0x580) | Bmori1 | — | todo: MS-038 | no |
 | `0x192` Ml_HintNuts (was En_Hintnuts) | REWRITTEN (text 0x7f0 vs 0x17e0) | spot09 ×3, spot10 ×2, spot12, ydan ×2 | — | ported | no |
-| `0x1bb` Bg_Mizu_Shutter | 252 text / 0 data words differ | HAKAdan | — | todo: MS-036 | no |
+| `0x1bb` Bg_Mizu_Shutter | 252 text / 0 data words differ | HAKAdan | — | ported (MS-114) | no |
 | `0x1c6` En_Cow | 1 text / 0 data words differ | spot01, spot20 | — | ported (limb 5 drawn) | no |
 | `0x1cf` Obj_Makekinsuta | REWRITTEN (text 0x1a0 vs 0x1a0) | spot01 | — | ported (MS-102) | no |
 | `0x1d1` Ml_SongBlock (was Obj_Timeblock) | REWRITTEN (text 0x260 vs 0xb30) | spot04 | — | ported | no |
