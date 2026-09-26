@@ -24,7 +24,7 @@ def align4(d):
     if len(d)%4: d += b'\x00'*(4-(len(d)%4))
     return d
 
-def mesh0_to_mesh2(d):
+def mesh0_to_mesh2(d, extra_opa=()):
     """ZAPD treats meshHeaderType 0 as RoomShapeCullable; vanilla rooms are type 2.
     Rewrite type-0 (8-byte entries) as type-2 (16-byte entries, never culled)."""
     d=bytearray(d); cmdoff=None; H=None
@@ -32,7 +32,8 @@ def mesh0_to_mesh2(d):
         if c==0x0A: cmdoff=off; H=struct.unpack('>I',raw[4:8])[0]&0xFFFFFF
     if H is None or d[H]!=0: return bytes(d),0
     n=d[H+1]; start=struct.unpack('>I',d[H+4:H+8])[0]&0xFFFFFF
-    ents=[struct.unpack('>II', d[start+i*8:start+i*8+8]) for i in range(n)]
+    ents=[struct.unpack('>II', d[start+i*8:start+i*8+8]) for i in range(n)] + [(0x03000000|o, 0) for o in extra_opa]
+    n=len(ents)
     d=bytearray(align4(bytes(d))); base=len(d); eo=base+12
     d += struct.pack('>BBHII', 2, n, 0, 0x03000000|eo, 0x03000000|(eo+n*16))
     for opa,xlu in ents:
@@ -432,6 +433,7 @@ def stub_cutscenes(d):
     return bytes(d), n
 
 from ml_map import TARGETS, NAMES, SCENES
+from grass_floor import add_grass_underlayer
 from ml_entrance import remap_exits, fix_cutscene_destinations
 _POP={v['slot'] for v in SCENES.values()}   # all 25 ML scenes at their real vanilla scene IDs
 new=bytearray(rom); ap=len(new)
@@ -448,7 +450,10 @@ for s,rooms in TARGETS.items():
         d=get_file(bytes(rom),vs,ve,rs,re)
         note=[]
         if isroom:
-            d,n=mesh0_to_mesh2(d)
+            # Owner's request: a copy of ML's tall grass at walking height, for when the camera slips under it
+            d,extra,gt=add_grass_underlayer(d, scene_bytes)
+            if gt: note.append(f"grass_underlayer={gt}")
+            d,n=mesh0_to_mesh2(d, extra)
             if n: note.append(f"mesh0->2({n})")
         # OFF BY DEFAULT (MS-151). The lists hold ML's credits-tour layer (setup 4: the ending cutscenes and
         # their room actors); stripping them sent every tour stop to the main header, which has no cutscene.
