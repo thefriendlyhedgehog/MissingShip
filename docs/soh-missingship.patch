@@ -879,6 +879,65 @@ index 70ea29675e664b080ecb268571ea6d0f1249d208..bf614774bc192b32459b7ed9fa075645
      { ACTOR_OBJ_HAMISHI, "Bronze Boulder" },
      { ACTOR_EN_ZL4, "Zelda (Child)" },
      { ACTOR_EN_MM2, "Running Man (Adult Era)" },
+diff --git a/soh/soh/Enhancements/MlScrubShopText.cpp b/soh/soh/Enhancements/MlScrubShopText.cpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..6f03cb9fcd1a7c320bd4928ac20b6e657a21d980
+--- /dev/null
++++ b/soh/soh/Enhancements/MlScrubShopText.cpp
+@@ -0,0 +1,53 @@
++#include "soh/Enhancements/game-interactor/GameInteractor_Hooks.h"
++#include "soh/Enhancements/custom-message/CustomMessageManager.h"
++#include "soh/ShipInit.hpp"
++
++extern "C" {
++#include "z64.h"
++#include "functions.h"
++extern PlayState* gPlayState;
++}
++
++// MissingShip: the grotto scrub in the upper Deku Grove grotto (ML's Demo_Shd copy of En_Dns, in the Desert Colossus
++// slot) sells its Piece of Heart once; after that ML hands over a Recovery Heart for the same 99 Rupees but keeps the
++// Piece of Heart sales line (0x10A2). At the owner's request the line says what is really for sale once switch 9 (set
++// by the sale, see z_en_dns.c) is set. Same layout as ML's line, and it still leads on to the buy prompt 0x10A3.
++#define ML_SCRUB_HEART_TEXT 0x10A2
++#define ML_SCRUB_SHOP_SWITCH 9
++
++static void MlScrubShop_SoldOutText(uint16_t* textId, bool* loadFromMessageTable) {
++    if (gPlayState == nullptr || gPlayState->sceneNum != SCENE_DESERT_COLOSSUS ||
++        !Flags_GetSwitch(gPlayState, ML_SCRUB_SHOP_SWITCH)) {
++        return;
++    }
++    // Raw message bytes (no formatting pass): 0x12 sound, 0x05 colours, 0x01 newline, 0x07 next text, 0x02 end.
++    std::string text = "\x12\x38\x82"
++                       "My last "
++                       "\x05"
++                       "CPiece of Heart"
++                       "\x05"
++                       "@ is gone!"
++                       "\x01"
++                       "Now I am selling a "
++                       "\x05"
++                       "CRecovery Heart"
++                       "\x05"
++                       "@"
++                       "\x01"
++                       "for only "
++                       "\x05"
++                       "A99 Rupees"
++                       "\x05"
++                       "@!"
++                       "\x07\x10\xA3"
++                       "\x02";
++    CustomMessage msg = CustomMessage(text, text, text, TEXTBOX_TYPE_BLACK, TEXTBOX_POS_VARIABLE);
++    msg.LoadIntoFont();
++    *loadFromMessageTable = false;
++}
++
++static void RegisterMlScrubShopText() {
++    COND_ID_HOOK(OnOpenText, ML_SCRUB_HEART_TEXT, true, MlScrubShop_SoldOutText);
++}
++
++static RegisterShipInitFunc initFunc(RegisterMlScrubShopText, {});
 diff --git a/soh/soh/Enhancements/Presets/Presets.cpp b/soh/soh/Enhancements/Presets/Presets.cpp
 index 12354dce415ff53f9f9f4493ffa2ac92162204bd..2eb752c01849455fe165beb30e8ecb1bb2cb22c8 100644
 --- a/soh/soh/Enhancements/Presets/Presets.cpp

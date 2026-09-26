@@ -50,30 +50,24 @@ index c0746d307b103e877a6aa3bbaa684b22aecec14b..959abc5f27a7674382b9b842dcfa2217
      textures[mCurrentTextureIds[mCurrentTile]].width = width;
      textures[mCurrentTextureIds[mCurrentTile]].height = height;
 diff --git a/src/fast/interpreter.cpp b/src/fast/interpreter.cpp
-index 73a293360f019921da52caa5fc8a12e8f7072aa1..f1466e249eed3348b11892d8fa26a35d367a090e 100644
+index 73a293360f019921da52caa5fc8a12e8f7072aa1..ea5b3f2cc61b2ad93245d2226fa6423a6944e070 100644
 --- a/src/fast/interpreter.cpp
 +++ b/src/fast/interpreter.cpp
-@@ -1521,7 +1521,18 @@ void Interpreter::GfxSpTri1(uint8_t vtx1_idx, uint8_t vtx2_idx, uint8_t vtx3_idx
+@@ -1521,7 +1521,12 @@ void Interpreter::GfxSpTri1(uint8_t vtx1_idx, uint8_t vtx2_idx, uint8_t vtx3_idx
      auto shader = mRdp->current_shader;
  
      if (texture_edge) {
 -        if (use_alpha) {
-+        // MissingShip: with ALPHA_CVG_SEL and no FORCE_BL the blender's alpha is coverage (times texel alpha) and the
-+        // RDP only blends partly covered pixels. For a texture whose alpha is a single bit (RGBA16, or CI with an
-+        // RGBA16 palette) the only partial alpha comes from filtering, so a (CLR_MEM, 1MA) blender is still an
-+        // alpha-tested surface. The Missing Link uses such a mode (0xC8103078) for its foliage, gates and trims;
-+        // blending them drew a halo of whatever was behind at draw time around every edge. Textures with graded
-+        // alpha (the title screen's text backdrops) keep blending.
-+        const auto& tile0 = mRdp->texture_tile[mRdp->first_tile_index];
-+        bool oneBitAlpha =
-+            (tile0.fmt == G_IM_FMT_RGBA && tile0.siz == G_IM_SIZ_16b) ||
-+            (tile0.fmt == G_IM_FMT_CI && (mRdp->other_mode_h & (3U << G_MDSFT_TEXTLUT)) == G_TT_RGBA16);
-+        bool cvgAlphaOnly = oneBitAlpha && (mRdp->other_mode_l & (ALPHA_CVG_SEL | FORCE_BL)) == ALPHA_CVG_SEL;
++        // MissingShip: with ALPHA_CVG_SEL and no FORCE_BL the blender's alpha is coverage and the RDP only blends
++        // partly covered edge pixels, so a (CLR_MEM, 1MA) blender is still an alpha-tested surface. The Missing
++        // Link uses such a mode (0xC8103078) for its foliage, gates and trims; blending it drew a halo of whatever
++        // was behind at draw time around every edge.
++        bool cvgAlphaOnly = (mRdp->other_mode_l & (ALPHA_CVG_SEL | FORCE_BL)) == ALPHA_CVG_SEL;
 +        if (use_alpha && !cvgAlphaOnly) {
              alpha_threshold = true;
              texture_edge = false;
          }
-@@ -2092,7 +2103,9 @@ void Interpreter::GfxDpLoadBlock(uint8_t tile, uint32_t uls, uint32_t ult, uint3
+@@ -2092,7 +2097,9 @@ void Interpreter::GfxDpLoadBlock(uint8_t tile, uint32_t uls, uint32_t ult, uint3
      SUPPORT_CHECK(ult == 0);
  
      // The lrs field rather seems to be number of pixels to load
