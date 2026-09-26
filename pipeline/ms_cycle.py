@@ -113,7 +113,10 @@ def mark_custom():
     """Set the header's "custom" byte on every resource (MS-140). ZAPD writes 0, the value for assets extracted from
     the player's own ROM, but everything here is a mod asset, as other SoH mods mark theirs. SoH's by-index DL patches
     (cosmetics colours, age-dependent equipment, Temple of Time medallions, ...) skip custom resources; on ours they
-    would overwrite whatever command of ML's display list sits at vanilla's index."""
+    would overwrite whatever command of ML's display list sits at vanilla's index.
+
+    Every entry's timestamp is pinned too: ZAPD and the inject steps stamp entries with the build time, so an unchanged
+    build still gave git a new 14 MB binary."""
     path = os.path.join(PIPE, 'ml.otr')
     tmp = path + '.tmp'
     with zipfile.ZipFile(path) as src, zipfile.ZipFile(tmp, 'w') as dst:
@@ -121,6 +124,7 @@ def mark_custom():
             data = src.read(info.filename)
             if len(data) >= 0x40 and data[0] in (0, 1) and data[4:8].isalpha():   # an OTR resource header
                 data = data[:1] + b'\x01' + data[2:]
+            info.date_time = (1980, 1, 1, 0, 0, 0)   # the earliest a zip can store
             dst.writestr(info, data)
     os.replace(tmp, path)
 
