@@ -1221,8 +1221,39 @@ index a47a404ad1d016684eeb3b62538266483182bf1e..cab299d59cdb352159e39f47234d33f9
      ACTOR_UNSET_31,
      ACTOR_UNSET_36,
      ACTOR_UNSET_53,
+diff --git a/soh/soh/Enhancements/debugger/debugSaveEditor.cpp b/soh/soh/Enhancements/debugger/debugSaveEditor.cpp
+index 3c99ea19ee08f8ff6aa9606a6e317725b3b6a482..ce52c61b861d4d5baa1986be1a118b86375c0f0e 100644
+--- a/soh/soh/Enhancements/debugger/debugSaveEditor.cpp
++++ b/soh/soh/Enhancements/debugger/debugSaveEditor.cpp
+@@ -1321,7 +1321,7 @@ void DrawEquipmentTab() {
+         ITEM_BULLET_BAG_40,
+         ITEM_BULLET_BAG_50,
+     };
+-    DrawUpgradeIcon("Bullet Bag", UPG_BULLET_BAG, bulletBagValues);
++    DrawUpgradeIcon("Soul-Charged Sword", UPG_BULLET_BAG, bulletBagValues); // MissingShip (MS-145): ML's name
+ 
+     ImGui::SameLine();
+ 
+@@ -1640,7 +1640,7 @@ void DrawPlayerTab() {
+                 curShield = "Deku Shield";
+                 break;
+             case PLAYER_SHIELD_HYLIAN:
+-                curShield = "Hylian Shield";
++                curShield = "Hero's Shield"; // MissingShip (MS-145): ML's name
+                 break;
+             case PLAYER_SHIELD_MIRROR:
+                 curShield = "Mirror Shield";
+@@ -1798,7 +1798,7 @@ void DrawPlayerTab() {
+                         player->currentShield = PLAYER_SHIELD_DEKU;
+                         Inventory_ChangeEquipment(EQUIP_TYPE_SHIELD, EQUIP_VALUE_SHIELD_DEKU);
+                     }
+-                    if (ImGui::Selectable("Hylian Shield")) {
++                    if (ImGui::Selectable("Hero's Shield")) {
+                         player->currentShield = PLAYER_SHIELD_HYLIAN;
+                         Inventory_ChangeEquipment(EQUIP_TYPE_SHIELD, EQUIP_VALUE_SHIELD_HYLIAN);
+                     }
 diff --git a/soh/soh/Enhancements/gameplaystats.cpp b/soh/soh/Enhancements/gameplaystats.cpp
-index 6b2e1c721403c768e65f8ebbeef8764d00806ee0..a58c289a987fc589833caf41dccb432224ed1d17 100644
+index 6b2e1c721403c768e65f8ebbeef8764d00806ee0..33eadd43d14c0e5c9a6a2fa555b656e2a1727cc7 100644
 --- a/soh/soh/Enhancements/gameplaystats.cpp
 +++ b/soh/soh/Enhancements/gameplaystats.cpp
 @@ -1,3 +1,4 @@
@@ -1272,7 +1303,7 @@ index 6b2e1c721403c768e65f8ebbeef8764d00806ee0..a58c289a987fc589833caf41dccb4322
      if (sceneID == SCENE_GROTTOS) {
          switch (roomID) {
              case 0:
-@@ -747,13 +782,15 @@ void SetupDisplayNames() {
+@@ -747,17 +782,19 @@ void SetupDisplayNames() {
      strcpy(itemTimestampDisplayName[ITEM_LONGSHOT],         "Longshot:           ");
      strcpy(itemTimestampDisplayName[ITEM_ARROW_ICE],        "Ice Arrows:         ");
      strcpy(itemTimestampDisplayName[ITEM_FARORES_WIND],     "Farore's Wind:      ");
@@ -1289,6 +1320,11 @@ index 6b2e1c721403c768e65f8ebbeef8764d00806ee0..a58c289a987fc589833caf41dccb4322
      strcpy(itemTimestampDisplayName[ITEM_SWORD_MASTER],     "Master Sword:       ");
      strcpy(itemTimestampDisplayName[ITEM_SWORD_BGS],        "Biggoron's Sword:   ");
      strcpy(itemTimestampDisplayName[ITEM_SHIELD_DEKU],      "Deku Shield:        ");
+-    strcpy(itemTimestampDisplayName[ITEM_SHIELD_HYLIAN],    "Hylian Shield:      ");
++    strcpy(itemTimestampDisplayName[ITEM_SHIELD_HYLIAN],    "Hero's Shield:      "); // MissingShip: ML's name
+     strcpy(itemTimestampDisplayName[ITEM_SHIELD_MIRROR],    "Mirror Shield:      ");
+     strcpy(itemTimestampDisplayName[ITEM_TUNIC_GORON],      "Goron Tunic:        ");
+     strcpy(itemTimestampDisplayName[ITEM_TUNIC_ZORA],       "Zora Tunic:         ");
 @@ -772,7 +809,9 @@ void SetupDisplayNames() {
      strcpy(itemTimestampDisplayName[ITEM_WALLET_ADULT],     "Adult's Wallet:     ");
      strcpy(itemTimestampDisplayName[ITEM_WALLET_GIANT],     "Giant's Wallet:     ");
@@ -2529,6 +2565,100 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
  }
  
  } // namespace SohGui
+diff --git a/soh/soh/util.cpp b/soh/soh/util.cpp
+index b3bc053f107700fc8df4635a50a4c47d1fd9f7c0..7d851af9de6ecbc8cb83cd957f7bb6d7e8a6fbfb 100644
+--- a/soh/soh/util.cpp
++++ b/soh/soh/util.cpp
+@@ -125,6 +125,8 @@ std::vector<std::string> sceneNames = {
+     "Unknown",
+ };
+ 
++// MissingShip (MS-145): English names follow ML's pause-menu labels for the items ML gives (Magic Hourglass, Deku Nut
++// Milk, Red Potion for the blue one, Deku Milk, Hero's Shield, Soul-Charged Sword, Birth Certificate, Deku Pass).
+ std::vector<std::string> itemNamesEng = {
+     "Deku Stick",
+     "Deku Nut",
+@@ -140,24 +142,24 @@ std::vector<std::string> itemNamesEng = {
+     "Longshot",
+     "Ice Arrow",
+     "Farore's Wind",
+-    "Boomerang",
++    "Magic Hourglass",
+     "Lens of Truth",
+     "Magic Bean",
+     "Megaton Hammer",
+     "Light Arrow",
+     "Nayru's Love",
+     "Empty Bottle",
+-    "Red Potion",
++    "Deku Nut Milk",
+     "Green Potion",
+-    "Blue Potion",
++    "Red Potion",
+     "Bottled Fairy",
+     "Fish",
+-    "Lon Lon Milk & Bottle",
++    "Deku Milk & Bottle",
+     "Ruto's Letter",
+     "Blue Fire",
+     "Bug",
+     "Big Poe",
+-    "Lon Lon Milk (Half)",
++    "Deku Milk (Half)",
+     "Poe",
+     "Weird Egg",
+     "Chicken",
+@@ -189,7 +191,7 @@ std::vector<std::string> itemNamesEng = {
+     "Master Sword",
+     "Giant's Knife & Biggoron's Sword",
+     "Deku Shield",
+-    "Hylian Shield",
++    "Hero's Shield",
+     "Mirror Shield",
+     "Kokiri Tunic",
+     "Goron Tunic",
+@@ -197,9 +199,9 @@ std::vector<std::string> itemNamesEng = {
+     "Kokiri Boots",
+     "Iron Boots",
+     "Hover Boots",
+-    "Bullet Bag (30)",
+-    "Bullet Bag (40)",
+-    "Bullet Bag (50)",
++    "Soul-Charged Sword",
++    "Soul-Charged Sword",
++    "Soul-Charged Sword",
+     "Quiver (30)",
+     "Big Quiver (40)",
+     "Biggest Quiver (50)",
+@@ -237,8 +239,8 @@ std::vector<std::string> itemNamesEng = {
+     "Kokiri's Emerald",
+     "Goron's Ruby",
+     "Zora's Sapphire",
+-    "Stone of Agony",
+-    "Gerudo's Card",
++    "Birth Certificate",
++    "Deku Pass",
+     "Gold Skulltula Token",
+     "Heart Container",
+     "Piece of Heart",
+@@ -256,7 +258,7 @@ std::vector<std::string> itemNamesEng = {
+     "[Removed]",
+     "[Removed]",
+     "[Removed]",
+-    "Lon Lon Milk",
++    "Deku Milk",
+     "Recovery Heart",
+     "Green Rupee",
+     "Blue Rupee",
+@@ -607,7 +609,7 @@ std::vector<std::string> questItemNamesEng = {
+     "Light Medallion",    "Minuet of Forest", "Bolero of Fire",  "Serenade of Water",    "Requiem of Spirit",
+     "Nocturne of Shadow", "Prelude of Light", "Zelda's Lullaby", "Epona's Song",         "Saria's Song",
+     "Sun's Song",         "Song of Time",     "Song of Storms",  "Kokiri's Emerald",     "Goron's Ruby",
+-    "Zora's Sapphire",    "Stone of Agony",   "Gerudo's Card",   "Gold Skulltula Token",
++    "Zora's Sapphire",    "Birth Certificate", "Deku Pass",      "Gold Skulltula Token", // MissingShip (MS-145)
+ };
+ 
+ std::vector<std::string> questItemNamesFra = {
 diff --git a/soh/soh/z_scene_otr.cpp b/soh/soh/z_scene_otr.cpp
 index 2ac7b8e3839e20d97f49866280004382915182df..3ad525f36dd8f002066a374788826e25cd1f6879 100644
 --- a/soh/soh/z_scene_otr.cpp
