@@ -131,6 +131,15 @@ def _xz_area(pos):
     return ((pos[1][0] - pos[0][0]) * (pos[2][2] - pos[0][2]) - (pos[2][0] - pos[0][0]) * (pos[1][2] - pos[0][2])) / 2
 
 
+def _is_floor(pos):
+    """Upward-facing and no steeper than a walkable floor (normal y >= 0.7, as collision floors)."""
+    ax, ay, az = [pos[1][k] - pos[0][k] for k in range(3)]
+    bx, by, bz = [pos[2][k] - pos[0][k] for k in range(3)]
+    nx, ny, nz = ay * bz - az * by, az * bx - ax * bz, ax * by - ay * bx
+    length = (nx * nx + ny * ny + nz * nz) ** 0.5
+    return length > 0 and _xz_area(pos) < -64 and abs(ny) / length >= 0.7
+
+
 def _uv_map(verts, pos):
     """Affine (x, z) -> (u, v) of an upward-facing triangle."""
     (x1, _, z1), (x2, _, z2), (x3, _, z3) = pos
@@ -159,7 +168,7 @@ def add_grass_underlayer(room, scene):
     sunk, ground = [], []
     for verts, material in _opa_tris(room, scene):
         pos = [struct.unpack('>hhh', v[:6]) for v in verts]
-        if _xz_area(pos) > -64:          # not an upward-facing floor (ML's floors wind this way)
+        if not _is_floor(pos):          # walls and slopes (ML's floors wind so their xz area is negative)
             continue
         cx = sum(p[0] for p in pos) / 3
         cy = sum(p[1] for p in pos) / 3
@@ -186,10 +195,12 @@ def add_grass_underlayer(room, scene):
         uvs = [uv(x, z) for x, _, z in pos]
         su = pu * (min(u for u, _ in uvs) // pu)
         sv = pv * (min(v for _, v in uvs) // pv)
+        drops = [_floor_below(floors, x, y, z, tol=0.02) for x, y, z in pos]
+        if None in drops:               # a corner with no floor under it: leave the triangle alone
+            continue
         new = []
-        for v, (x, y, z), (u, t) in zip(verts, pos, uvs):
-            f = _floor_below(floors, x, y, z, tol=0.02)
-            ny = round(f[0]) if f else y
+        for v, (x, y, z), (u, t), f in zip(verts, pos, uvs, drops):
+            ny = min(y, round(f[0]))    # never above ML's own surface
             u = max(-32768, min(32767, round(u - su)))
             t = max(-32768, min(32767, round(t - sv)))
             new.append(struct.pack('>hhhHhh', x, ny, z, 0, u, t) + v[12:])

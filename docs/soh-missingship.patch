@@ -939,7 +939,7 @@ index 0000000000000000000000000000000000000000..6f03cb9fcd1a7c320bd4928ac20b6e65
 +
 +static RegisterShipInitFunc initFunc(RegisterMlScrubShopText, {});
 diff --git a/soh/soh/Enhancements/Presets/Presets.cpp b/soh/soh/Enhancements/Presets/Presets.cpp
-index 12354dce415ff53f9f9f4493ffa2ac92162204bd..2eb752c01849455fe165beb30e8ecb1bb2cb22c8 100644
+index 12354dce415ff53f9f9f4493ffa2ac92162204bd..106fe37478ba0e18f8614323386e7af1a39bccaa 100644
 --- a/soh/soh/Enhancements/Presets/Presets.cpp
 +++ b/soh/soh/Enhancements/Presets/Presets.cpp
 @@ -1,3 +1,4 @@
@@ -947,7 +947,19 @@ index 12354dce415ff53f9f9f4493ffa2ac92162204bd..2eb752c01849455fe165beb30e8ecb1b
  #include "Presets.h"
  #include <string>
  #include <fstream>
-@@ -127,6 +128,7 @@ void applyPreset(std::string presetName, std::vector<PresetSection> includeSecti
+@@ -71,6 +72,11 @@ static BlockInfo blockInfo[PRESET_SECTION_MAX] = {
+     { { CVAR_PREFIX_REMOTE }, ICON_FA_WIFI, { "Network", "network" } },
+ };
+ 
++// MissingShip: the Randomizer and Network tabs are hidden, so their preset sections are too.
++static bool SectionShown(int i) {
++    return i != PRESET_SECTION_RANDOMIZER && i != PRESET_SECTION_NETWORK;
++}
++
+ std::string FormatPresetPath(std::string name) {
+     return fmt::format("{}/{}.json", presetFolder, name);
+ }
+@@ -127,6 +133,7 @@ void applyPreset(std::string presetName, std::vector<PresetSection> includeSecti
              }
          }
      }
@@ -955,6 +967,62 @@ index 12354dce415ff53f9f9f4493ffa2ac92162204bd..2eb752c01849455fe165beb30e8ecb1b
      ShipInit::InitAll();
      OTRGlobals::Instance->ScaleImGui();
  }
+@@ -242,6 +249,11 @@ void LoadPresets() {
+             Ship::Context::GetInstance()->GetResourceManager()->LoadResource(filePath, true, initData));
+ 
+         std::string fileName = filePath.substr(start, filePath.size() - start - 5); // 5 for length of ".json"
++        // MissingShip: SoH's randomizer presets (seed settings, "Curated Randomizer") and its curated enhancement sets
++        // for vanilla OoT ("Curated First Time / Returning Vanilla") are left out; "Reset to Default" stays.
++        if (json->Data["blocks"].contains("rando") || fileName.find("Curated") != std::string::npos) {
++            continue;
++        }
+         ParsePreset(json->Data, fileName);
+     }
+ }
+@@ -284,6 +296,9 @@ void DrawNewPresetPopup() {
+         (newPresetName.empty() ? "Preset name is empty"
+                                : (noneSelected ? "No sections selected" : "Preset name already exists"));
+     for (int i = PRESET_SECTION_SETTINGS; i < PRESET_SECTION_MAX; i++) {
++        if (!SectionShown(i)) {
++            continue;
++        }
+         UIWidgets::Checkbox(fmt::format("Save {}", blockInfo[i].names[0]).c_str(), &saveSection[i],
+                             UIWidgets::CheckboxOptions().Color(THEME_COLOR).Padding({ 6.0f, 6.0f }));
+     }
+@@ -378,9 +393,12 @@ void PresetsCustomWidget(WidgetInfo& info) {
+                             UIWidgets::CheckboxOptions().Color(THEME_COLOR));
+     bool hideBuiltIn = CVarGetInteger(CVAR_GENERAL("HideBuiltInPresets"), 0);
+     UIWidgets::PushStyleTabs(THEME_COLOR);
+-    if (ImGui::BeginTable("PresetWidgetTable", PRESET_SECTION_MAX + 3)) {
++    if (ImGui::BeginTable("PresetWidgetTable", PRESET_SECTION_MAX + 3 - 2)) { // MissingShip: 2 sections hidden
+         ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed, 400);
+         for (int i = PRESET_SECTION_SETTINGS; i < PRESET_SECTION_MAX; i++) {
++            if (!SectionShown(i)) {
++                continue;
++            }
+             ImGui::TableSetupColumn(blockInfo[i].names[0].c_str());
+         }
+         ImGui::TableSetupColumn("Apply", ImGuiTableColumnFlags_WidthFixed,
+@@ -391,6 +409,9 @@ void PresetsCustomWidget(WidgetInfo& info) {
+         ImGui::TableNextRow();
+         ImGui::TableNextColumn();
+         for (int i = PRESET_SECTION_SETTINGS; i < PRESET_SECTION_MAX; i++) {
++            if (!SectionShown(i)) {
++                continue;
++            }
+             ImGui::TableNextColumn();
+             ImGui::Button(fmt::format("{}##header{}", blockInfo[i].icon, blockInfo[i].names[1]).c_str());
+             UIWidgets::Tooltip(blockInfo[i].names[0].c_str());
+@@ -416,6 +437,9 @@ void PresetsCustomWidget(WidgetInfo& info) {
+             ImGui::AlignTextToFramePadding();
+             ImGui::Text("%s", name.c_str());
+             for (int i = PRESET_SECTION_SETTINGS; i < PRESET_SECTION_MAX; i++) {
++                if (!SectionShown(i)) {
++                    continue;
++                }
+                 ImGui::TableNextColumn();
+                 DrawSectionCheck(name, !info.presetValues["blocks"].contains(blockInfo[i].names[1]), &info.apply[i],
+                                  blockInfo[i].names[1]);
 diff --git a/soh/soh/Enhancements/RemoteBombchu.cpp b/soh/soh/Enhancements/RemoteBombchu.cpp
 index 1813db23d533f0673c4f7d76929da2531ed015c6..9082f0494378f917cf9220a958cc8df93ad83ed0 100644
 --- a/soh/soh/Enhancements/RemoteBombchu.cpp
@@ -1003,7 +1071,7 @@ index 96581703010c097c8dc647f7035abbe334eda9ce..5922381972ce8419855aede989ea4a89
      enMThunder->actor.update = Custom_EnMThunder_Update;
  }
 diff --git a/soh/soh/Enhancements/TimeDisplay/TimeDisplay.cpp b/soh/soh/Enhancements/TimeDisplay/TimeDisplay.cpp
-index 5e213d26d3b86035539a646ebad81c16273a2c18..93dfea96cbe8cef2386b814dca231066a23ba81d 100644
+index 5e213d26d3b86035539a646ebad81c16273a2c18..4714ffe5be3ec45653c3d577c0cac122672397b2 100644
 --- a/soh/soh/Enhancements/TimeDisplay/TimeDisplay.cpp
 +++ b/soh/soh/Enhancements/TimeDisplay/TimeDisplay.cpp
 @@ -40,7 +40,8 @@ const std::vector<TimeObject> timeDisplayList = {
@@ -1016,6 +1084,17 @@ index 5e213d26d3b86035539a646ebad81c16273a2c18..93dfea96cbe8cef2386b814dca231066
  };
  
  static std::vector<TimeObject> activeTimers;
+@@ -113,8 +114,9 @@ static void TimeDisplayGetTimer(uint32_t timeID) {
+                             : itemMapping[ITEM_TUNIC_ZORA].name);
+                 }
+                 if (gSaveContext.timerState >= TIMER_STATE_DOWN_PREVIEW) {
++                    // MissingShip (owner): the Kokiri Sword, not the Master Sword ML doesn't have
+                     textureDisplay = Ship::Context::GetInstance()->GetWindow()->GetGui()->GetTextureByName(
+-                        itemMapping[ITEM_SWORD_MASTER].name);
++                        itemMapping[ITEM_SWORD_KOKIRI].name);
+                 }
+             } else {
+                 textureDisplay = Ship::Context::GetInstance()->GetWindow()->GetGui()->GetTextureByName(
 diff --git a/soh/soh/Enhancements/TimeSavers/SkipCutscene/SkipIntro.cpp b/soh/soh/Enhancements/TimeSavers/SkipCutscene/SkipIntro.cpp
 index d9e08b3dafe51861746db65ae542f04b4d8ba83d..e9f32c61f4af5ae0f8c48e02844fe31f22586f39 100644
 --- a/soh/soh/Enhancements/TimeSavers/SkipCutscene/SkipIntro.cpp
@@ -1113,34 +1192,43 @@ index 5659de99fa5f5211cac29b257b87e63667559c94..b2245cbabc35e85b39069d46dcee115c
  bool AudioCollection_HasSequenceNum(uint16_t seqId);
  size_t AudioCollection_SequenceMapSize();
 diff --git a/soh/soh/Enhancements/audio/AudioEditor.cpp b/soh/soh/Enhancements/audio/AudioEditor.cpp
-index 6139da7c0c3cae056726255c865664bf44a6e9f5..08607d5608debc7d865c9d24ff73f29454d11a47 100644
+index 6139da7c0c3cae056726255c865664bf44a6e9f5..b4870f2832b241d4a9a19b764c0855b33999f63a 100644
 --- a/soh/soh/Enhancements/audio/AudioEditor.cpp
 +++ b/soh/soh/Enhancements/audio/AudioEditor.cpp
-@@ -28,10 +28,8 @@ s8 reverbAdd = 0;
+@@ -28,10 +28,7 @@ s8 reverbAdd = 0;
  using namespace UIWidgets;
  
  static WidgetInfo lowHpAlarm;
 -static WidgetInfo naviCall;
  static WidgetInfo enemyProx;
- static WidgetInfo leeverProx;
+-static WidgetInfo leeverProx;
 -static WidgetInfo leadingMusic;
  static WidgetInfo displaySeqName;
  static WidgetInfo ovlDuration;
  static WidgetInfo voicePitch;
-@@ -582,12 +580,10 @@ void AudioEditor::DrawElement() {
+@@ -82,7 +79,7 @@ size_t AuthenticCountBySequenceType(SeqType type) {
+ static const std::map<int32_t, const char*> audioRandomizerModes = {
+     { RANDOMIZE_OFF, "Manual" },
+     { RANDOMIZE_ON_NEW_SCENE, "On New Scene" },
+-    { RANDOMIZE_ON_RANDO_GEN_ONLY, "On Rando Gen Only" },
++    // MissingShip: no "On Rando Gen Only" -- MissingShip has no randomizer (a stored choice is cleared at boot)
+     { RANDOMIZE_ON_FILE_LOAD, "On File Load" },
+     { RANDOMIZE_ON_FILE_LOAD_SEEDED, "On File Load (Seeded)" },
+ };
+@@ -582,12 +579,7 @@ void AudioEditor::DrawElement() {
              ImGui::TableNextColumn();
              if (ImGui::BeginChild("SfxOptions", ImVec2(0, -8))) {
                  SohGui::mSohMenu->MenuDrawItem(lowHpAlarm, ImGui::GetContentRegionAvail().x, THEME_COLOR);
 -                SohGui::mSohMenu->MenuDrawItem(naviCall, ImGui::GetContentRegionAvail().x, THEME_COLOR);
                  SohGui::mSohMenu->MenuDrawItem(enemyProx, ImGui::GetContentRegionAvail().x, THEME_COLOR);
-                 if (!CVarGetInteger(CVAR_AUDIO("EnemyBGMDisable"), 0)) {
-                     SohGui::mSohMenu->MenuDrawItem(leeverProx, ImGui::GetContentRegionAvail().x, THEME_COLOR);
-                 }
+-                if (!CVarGetInteger(CVAR_AUDIO("EnemyBGMDisable"), 0)) {
+-                    SohGui::mSohMenu->MenuDrawItem(leeverProx, ImGui::GetContentRegionAvail().x, THEME_COLOR);
+-                }
 -                SohGui::mSohMenu->MenuDrawItem(leadingMusic, ImGui::GetContentRegionAvail().x, THEME_COLOR);
                  SohGui::mSohMenu->MenuDrawItem(displaySeqName, ImGui::GetContentRegionAvail().x, THEME_COLOR);
                  SohGui::mSohMenu->MenuDrawItem(ovlDuration, ImGui::GetContentRegionAvail().x, THEME_COLOR);
                  SohGui::mSohMenu->MenuDrawItem(voicePitch, ImGui::GetContentRegionAvail().x, THEME_COLOR);
-@@ -867,16 +863,13 @@ void AudioEditor_UnlockAll() {
+@@ -867,16 +859,13 @@ void AudioEditor_UnlockAll() {
  }
  
  void RegisterAudioWidgets() {
@@ -1159,10 +1247,16 @@ index 6139da7c0c3cae056726255c865664bf44a6e9f5..08607d5608debc7d865c9d24ff73f294
      enemyProx = { .name = "Disable Enemy Proximity Music", .type = WidgetType::WIDGET_CVAR_CHECKBOX };
      enemyProx.CVar(CVAR_AUDIO("EnemyBGMDisable"))
          .Options(CheckboxOptions()
-@@ -890,16 +883,6 @@ void RegisterAudioWidgets() {
-                      .Color(THEME_COLOR)
-                      .Tooltip("Plays the battle music when getting close to a Leever, like in Majora's Mask."));
+@@ -884,21 +873,8 @@ void RegisterAudioWidgets() {
+                      .Tooltip("Disables the music change when getting close to enemies. Useful for hearing "
+                               "your custom music for each scene more often."));
  
+-    leeverProx = { .name = "Enable Enemy Proximity Music for Leever", .type = WidgetType::WIDGET_CVAR_CHECKBOX };
+-    leeverProx.CVar(CVAR_AUDIO("LeeverEnemyBGM"))
+-        .Options(CheckboxOptions()
+-                     .Color(THEME_COLOR)
+-                     .Tooltip("Plays the battle music when getting close to a Leever, like in Majora's Mask."));
+-
 -    leadingMusic = { .name = "Disable Leading Music in Lost Woods", .type = WidgetType::WIDGET_CVAR_CHECKBOX };
 -    leadingMusic.CVar(CVAR_AUDIO("LostWoodsConsistentVolume"))
 -        .Options(CheckboxOptions()
@@ -1172,15 +1266,27 @@ index 6139da7c0c3cae056726255c865664bf44a6e9f5..08607d5608debc7d865c9d24ff73f294
 -                              "the volume changing provides. If toggling this while in the Lost Woods, reload "
 -                              "the area for the effect to kick in."));
 -    SohGui::mSohMenu->AddSearchWidget({ leadingMusic, "Enhancements", "Audio Editor", "Audio Options" });
--
++    // MissingShip (owner's review): no "Enable Enemy Proximity Music for Leever" -- ML has no Leevers (its Leever slot is
++    // Ml_BeamHeart). The CVar is cleared at boot (MissingShip_ClearRetiredOptions).
+ 
      displaySeqName = { .name = "Display Sequence Name in Notifications", .type = WidgetType::WIDGET_CVAR_CHECKBOX };
      displaySeqName.CVar(CVAR_AUDIO("SeqNameNotification"))
-         .Options(CheckboxOptions()
+@@ -936,9 +912,8 @@ void RegisterAudioWidgets() {
+                     "- Manual: Manually randomize music or sound effects by pressing the 'Randomize all Groups' "
+                     "button\n"
+                     "- On New Scene : Randomizes when you enter a new scene.\n"
+-                    "- On Rando Gen Only: Randomizes only when you generate a new randomizer.\n"
+                     "- On File Load: Randomizes on File Load.\n"
+-                    "- On File Load (Seeded): Randomizes on file load based on the current randomizer seed/file."));
++                    "- On File Load (Seeded): Randomizes on file load based on the current file."));
+     SohGui::mSohMenu->AddSearchWidget({ randomAudioGenModes, "Enhancements", "Audio Editor", "Audio Options" });
+ 
+     lowerOctaves = { .name = "Lower Octaves of Unplayable High Notes", .type = WidgetType::WIDGET_CVAR_CHECKBOX };
 diff --git a/soh/soh/Enhancements/bootcommands.c b/soh/soh/Enhancements/bootcommands.c
-index b9838cf66ad00fe4a7e4cfc4c6f11eaa38edbc3d..fa70a530897102abf7982262b806a2b75f9b1d9b 100644
+index b9838cf66ad00fe4a7e4cfc4c6f11eaa38edbc3d..b03d3fb1ff8f5d7174efc4758180646e05b8e3c7 100644
 --- a/soh/soh/Enhancements/bootcommands.c
 +++ b/soh/soh/Enhancements/bootcommands.c
-@@ -15,3 +15,62 @@ void BootCommands_Init() {
+@@ -15,3 +15,118 @@ void BootCommands_Init() {
      CVarRegisterInteger(CVAR_IMGUI_CONTROLLER_NAV, 1); // always enable controller nav on switch/wii u
  #endif
  }
@@ -1236,11 +1342,67 @@ index b9838cf66ad00fe4a7e4cfc4c6f11eaa38edbc3d..fa70a530897102abf7982262b806a2b7
 +    CVAR_ENHANCEMENT("DisableLinkSpinWithGoronPot"), CVAR_ENHANCEMENT("VisualAgony"),
 +    // Audio editor
 +    CVAR_AUDIO("DisableNaviCallAudio"), CVAR_AUDIO("LostWoodsConsistentVolume"),
++    // MissingShip's own "Keep Bunny Hood" (MS-141): SoH's Persistent Masks covers it
++    CVAR_ENHANCEMENT("MissingShip.KeepBunnyHood"),
++    // Settings > General > Languages: ML is English only
++    CVAR_SETTING("Languages"), CVAR_SETTING("TitleScreenTranslation"),
++    // Settings > General > Accessibility: ML has no Jabu-Jabu's Belly
++    CVAR_SETTING("A11yNoJabuWobble"),
++    // Enhancements review (owner): Containers Match Contents, Nighttime GS Always Spawn
++    CVAR_ENHANCEMENT("ChestSizeAndTextureMatchContents"), CVAR_ENHANCEMENT("NightGSAlwaysSpawn"),
++    // Skips & Speed-ups review (owner)
++    CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.LearnSong"), CVAR_ENHANCEMENT("GlitchAidingCrawlspaces"),
++    CVAR_ENHANCEMENT("SkulltulaFreeze"), CVAR_ENHANCEMENT("FasterBeanSkull"),
++    // Graphics review (owner)
++    CVAR_ENHANCEMENT("3DSceneRender"), CVAR_ENHANCEMENT("EquipmentAlwaysVisible"),
++    CVAR_ENHANCEMENT("ScaleAdultEquipmentAsChild"), CVAR_ENHANCEMENT("DisableTunicWarningText"),
++    CVAR_ENHANCEMENT("ExtendedCullingExcludeGlitchActors"),
++    // Items review (owner)
++    CVAR_ENHANCEMENT("ToggleStrength"), CVAR_ENHANCEMENT("TimeTravel"), CVAR_ENHANCEMENT("AdultMasks"),
++    CVAR_ENHANCEMENT("MaskSelect"), CVAR_ENHANCEMENT("BetterBombchuShopping"), CVAR_ENHANCEMENT("SeparateArrows"),
++    CVAR_ENHANCEMENT("SkipArrowAnimation"), CVAR_ENHANCEMENT("BlueFireArrows"), CVAR_ENHANCEMENT("SunlightArrows"),
++    CVAR_ENHANCEMENT("BowSlingshotAmmoFix"), CVAR_ENHANCEMENT("BowReticle"), CVAR_ENHANCEMENT("BowArrowCycle"),
++    CVAR_ENHANCEMENT("HookshotableReticle"), CVAR_ENHANCEMENT("FastBoomerang"), CVAR_ENHANCEMENT("BoomerangFirstPerson"),
++    CVAR_ENHANCEMENT("BoomerangReticle"), CVAR_ENHANCEMENT("BetterFarore"), CVAR_ENHANCEMENT("FastFarores"),
++    // Fixes review (owner)
++    CVAR_ENHANCEMENT("FixEyesOpenWhileSleeping"), CVAR_ENHANCEMENT("GSCutscene"),
++    // Difficulty review (owner)
++    CVAR_ENHANCEMENT("VoidDamageMult"), CVAR_ENHANCEMENT("EnableBombchuDrops"),
++    // Extra Modes review (owner)
++    CVAR_ENHANCEMENT("ExtraTraps.Enabled"), CVAR_ENHANCEMENT("ExtraTraps.Ice"), CVAR_ENHANCEMENT("ExtraTraps.Burn"),
++    CVAR_ENHANCEMENT("ExtraTraps.Shock"), CVAR_ENHANCEMENT("ExtraTraps.Knockback"), CVAR_ENHANCEMENT("ExtraTraps.Speed"),
++    CVAR_ENHANCEMENT("ExtraTraps.Bomb"), CVAR_ENHANCEMENT("ExtraTraps.Void"), CVAR_ENHANCEMENT("ExtraTraps.Ammo"),
++    CVAR_ENHANCEMENT("ExtraTraps.Kill"), CVAR_ENHANCEMENT("ExtraTraps.Teleport"),
++    // Cheats review (owner)
++    CVAR_CHEAT("InfiniteMagic"), CVAR_CHEAT("TimelessEquipment"), CVAR_CHEAT("BombTimerMultiplier"),
++    CVAR_CHEAT("GSTargetable"),
++    // Leevers (owner): ML has none
++    CVAR_ENHANCEMENT("LeeverSpawnRate"), CVAR_AUDIO("LeeverEnemyBGM"),
 +};
 +
++void MissingShip_ClearHiddenCosmetics(); // CosmeticsEditor.cpp
++
 +void MissingShip_ClearRetiredOptions() {
++    MissingShip_ClearHiddenCosmetics();
 +    for (size_t i = 0; i < sizeof(sMissingShipRetiredOptions) / sizeof(sMissingShipRetiredOptions[0]); i++) {
 +        CVarClear(sMissingShipRetiredOptions[i]);
++    }
++    // Skip Forced Dialog lost its Navi option: keep only the NPC bit (FORCED_DIALOG_SKIP_NPC = 2, ALL = 3)
++    int32_t forcedDialog = CVarGetInteger(CVAR_ENHANCEMENT("TimeSavers.SkipForcedDialog"), 0);
++    if (forcedDialog & 1) {
++        CVarSetInteger(CVAR_ENHANCEMENT("TimeSavers.SkipForcedDialog"), forcedDialog & 2);
++    }
++    // The audio editor's auto-randomize lost "On Rando Gen Only" (RANDOMIZE_ON_RANDO_GEN_ONLY = 2): back to Manual
++    if (CVarGetInteger(CVAR_AUDIO("RandomizeAudioGenModes"), 0) == 2) {
++        CVarClear(CVAR_AUDIO("RandomizeAudioGenModes"));
++    }
++    // Mirrored World lost its Vanilla/MQ dungeon modes (5 and 6; ML has no Master Quest): Vanilla is every dungeon
++    // (4), MQ never mirrored anything (off)
++    int32_t mirror = CVarGetInteger(CVAR_ENHANCEMENT("MirroredWorldMode"), 0);
++    if (mirror == 5) {
++        CVarSetInteger(CVAR_ENHANCEMENT("MirroredWorldMode"), 4);
++    } else if (mirror == 6) {
++        CVarClear(CVAR_ENHANCEMENT("MirroredWorldMode"));
 +    }
 +}
 diff --git a/soh/soh/Enhancements/bootcommands.h b/soh/soh/Enhancements/bootcommands.h
@@ -1262,6 +1424,275 @@ index 48b361b13e633a9036aa7a1c65a8266c7341f97d..047e325c47cee9bf8a6edb00c40ebaa9
  
  #endif
 \ No newline at end of file
+diff --git a/soh/soh/Enhancements/cosmetics/CosmeticsEditor.cpp b/soh/soh/Enhancements/cosmetics/CosmeticsEditor.cpp
+index a02a658877d9b3b215ee02d3eb37a5279bf0c7cb..8523308b990b653399c8300b6a337225889a90e8 100644
+--- a/soh/soh/Enhancements/cosmetics/CosmeticsEditor.cpp
++++ b/soh/soh/Enhancements/cosmetics/CosmeticsEditor.cpp
+@@ -4,6 +4,7 @@
+ #include "soh/Enhancements/game-interactor/GameInteractor.h"
+ 
+ #include <string>
++#include <set>
+ #include <libultraship/bridge.h>
+ #include <math.h>
+ #include <libultraship/libultraship.h>
+@@ -102,7 +103,7 @@ std::map<CosmeticGroup, const char*> groupLabels = {
+ static const std::map<int32_t, const char*> cosmeticsRandomizerModes = {
+     { RANDOMIZE_OFF, "Manual" },
+     { RANDOMIZE_ON_NEW_SCENE, "On New Scene" },
+-    { RANDOMIZE_ON_RANDO_GEN_ONLY, "On Rando Gen Only" },
++    // MissingShip: no "On Rando Gen Only" -- MissingShip has no randomizer
+     { RANDOMIZE_ON_FILE_LOAD, "On File Load" },
+     { RANDOMIZE_ON_FILE_LOAD_SEEDED, "On File Load (Seeded)" },
+ };
+@@ -527,6 +528,62 @@ void ResetPositionAll() {
+     }
+ }
+ 
++// MissingShip (owner's review): colours whose target ML doesn't have (adult Link, gear and magic ML lacks, Navi, NPCs
++// and objects ML never places, randomizer-only keys and items) or that would overwrite ML's own models (ML ships its
++// own Kokiri Sword, Bunny Hood and Boomerang/Magic Hourglass display lists, so vanilla's instruction indices land on
++// ML's draw calls). They stay in cosmeticOptions (the patch code looks them up by name) but are never drawn,
++// randomized or rainbowed, and their CVars are cleared at boot and after a preset (MissingShip_ClearHiddenCosmetics).
++static const std::set<CosmeticGroup> sMlHiddenGroups = {
++    COSMETICS_GROUP_GLOVES, COSMETICS_GROUP_MIRRORSHIELD, COSMETICS_GROUP_KEYRING, COSMETICS_GROUP_SMALL_KEYS,
++    COSMETICS_GROUP_BOSS_KEYS, COSMETICS_GROUP_MAGIC, COSMETICS_GROUP_ARROWS, COSMETICS_GROUP_NAVI,
++};
++static const std::set<std::string> sMlHiddenOptions = {
++    "Link.GoronTunic", "Link.ZoraTunic", "Link.Linen",
++    "Swords.KokiriBlade", "Swords.MasterBlade", "Swords.BiggoronBlade", "Swords.KokiriHilt", "Swords.MasterHilt",
++    "Swords.BiggoronHilt",
++    "Equipment.BoomerangBody", "Equipment.BoomerangGem", "Equipment.SlingshotBody", "Equipment.SlingshotString",
++    "Equipment.HammerHead", "Equipment.HammerHandle", "Equipment.HookshotChain", "Equipment.HookshotTip",
++    "HookshotReticle.Target", "HookshotReticle.NonTarget", "Equipment.BowTips", "Equipment.BowString",
++    "Equipment.BowBody", "Equipment.BowHandle", "Equipment.BunnyHood",
++    "Consumable.DDHearts", "Consumable.DDHeartBorder", "Consumable.Magic", "Consumable.MagicActive",
++    "Consumable_MagicInfinite", "Consumable.MagicBorder", "Consumable.MagicBorderActive", "Consumable.GoldRupee",
++    "Consumable.SilverRupee",
++    "Trails.Boomerang", "Trails.MasterSword", "Trails.BiggoronSword", "Trails.Hammer",
++    "World.BlockOfTime", "World.GossipStone", "World.MysteryItem",
++    "NPC.IceKeesePrimary", "NPC.IceKeeseSecondary", "NPC.Dog1", "NPC.Dog2", "NPC.GoldenSkulltula", "NPC.Gerudo",
++    "NPC.MetalTrap", "NPC.IronKnuckles",
++    "HUD.StoneOfAgony",
++    "Title.FirePrimary", "Title.FireSecondary", "Title.Copyright",
++};
++
++static bool MlCosmeticHidden(const std::string& id, const CosmeticOption& option) {
++    return sMlHiddenGroups.contains(option.group) || sMlHiddenOptions.contains(id);
++}
++
++extern "C" void MissingShip_ClearHiddenCosmetics() {
++    bool patched = false;
++    for (auto& [id, cosmeticOption] : cosmeticOptions) {
++        if (MlCosmeticHidden(id, cosmeticOption)) {
++            patched |= CVarGetInteger(cosmeticOption.changedCvar, 0) != 0;
++            for (const char* cvar : { cosmeticOption.valuesCvar, cosmeticOption.rainbowCvar, cosmeticOption.lockedCvar,
++                                      cosmeticOption.changedCvar }) {
++                CVarClear(cvar);
++            }
++        }
++    }
++    // Silly tab: "Unfix Goron Spin" (ML has no Gorons) and "Kak Windmill Speed" (ML places no windmill)
++    CVarClear(CVAR_COSMETIC("UnfixGoronSpin"));
++    CVarClear(CVAR_COSMETIC("Kak.Windmill_Speed.Value"));
++    CVarClear(CVAR_COSMETIC("Kak.Windmill_Speed.Changed"));
++    // "On Rando Gen Only" auto-randomizing: MissingShip has no randomizer
++    if (CVarGetInteger(CVAR_COSMETIC("RandomizeCosmeticsGenModes"), RANDOMIZE_OFF) == RANDOMIZE_ON_RANDO_GEN_ONLY) {
++        CVarClear(CVAR_COSMETIC("RandomizeCosmeticsGenModes"));
++    }
++    if (patched) { // the editor already applied them at start-up: take the patches back out
++        ApplyOrResetCustomGfxPatches();
++    }
++}
++
+ int hue = 0;
+ 
+ // Runs every frame to update rainbow hue, a potential future optimization is to only run this a once or twice a second
+@@ -1716,24 +1773,7 @@ void Draw_Placements() {
+             ImGui::EndTable();
+         }
+     }
+-    if (ImGui::CollapsingHeader("Magic Meter position")) {
+-        if (ImGui::BeginTable("tablemmpos", 1, FlagsTable)) {
+-            ImGui::TableSetupColumn("Magic meter settings", FlagsCell, TablesCellsWidth);
+-            Table_InitHeader(false);
+-            DrawUseMarginsSlider("Magic meter", CVAR_COSMETIC("HUD.MagicBar"));
+-            DrawPositionsRadioBoxes(CVAR_COSMETIC("HUD.MagicBar"));
+-            UIWidgets::CVarRadioButton(
+-                "Anchor to life bar", CVAR_COSMETIC("HUD.MagicBar.PosType"), 5,
+-                UIWidgets::RadioButtonsOptions()
+-                    .Color(THEME_COLOR)
+-                    .Tooltip("This will make your elements follow the bottom of the life meter"));
+-            DrawPositionSlider(CVAR_COSMETIC("HUD.MagicBar"), 0,
+-                               static_cast<s16>(ImGui::GetWindowViewport()->Size.y / 2), -5,
+-                               static_cast<s16>(ImGui::GetWindowViewport()->Size.x / 2));
+-            DrawScaleSlider(CVAR_COSMETIC("HUD.MagicBar"), 1.0f);
+-            ImGui::EndTable();
+-        }
+-    }
++    // MissingShip: no Magic Meter position -- ML never gives Link a magic meter
+     if (CVarGetInteger(CVAR_ENHANCEMENT("VisualAgony"), 0) &&
+         ImGui::CollapsingHeader("Visual stone of agony position")) {
+         if (ImGui::BeginTable("tabledvisualstoneofagony", 1, FlagsTable)) {
+@@ -1802,15 +1842,11 @@ void Draw_Placements() {
+     Draw_Table_Dropdown("Rupee counter position", "tablerupeecount", "Rupee counter settings", "Rupee counter",
+                         CVAR_COSMETIC("HUD.Rupees"), -2, static_cast<int>(ImGui::GetWindowViewport()->Size.y / 3), -3,
+                         static_cast<int>(ImGui::GetWindowViewport()->Size.x / 2), 1.0f);
+-    Draw_Table_Dropdown("Carrots position", "tableCarrots", "Carrots settings", "Carrots", CVAR_COSMETIC("HUD.Carrots"),
+-                        0, static_cast<int>(ImGui::GetWindowViewport()->Size.y / 2), -50,
+-                        static_cast<int>(ImGui::GetWindowViewport()->Size.x / 2) + 25, 1.0f);
++    // MissingShip: no Carrots position -- child Link never rides Epona in ML
+     Draw_Table_Dropdown("Timers position", "tabletimers", "Timers settings", "Timers", CVAR_COSMETIC("HUD.Timers"), 0,
+                         static_cast<int>(ImGui::GetWindowViewport()->Size.y / 2), -50,
+                         static_cast<int>(ImGui::GetWindowViewport()->Size.x / 2) - 50, 1.0f);
+-    Draw_Table_Dropdown("Archery Scores position", "tablearchery", "Archery Scores settings", "Archery scores",
+-                        CVAR_COSMETIC("HUD.ArcheryScore"), 0, static_cast<int>(ImGui::GetWindowViewport()->Size.y / 2),
+-                        -50, static_cast<int>(ImGui::GetWindowViewport()->Size.x / 2) - 50, 1.0f);
++    // MissingShip: no Archery Scores position -- ML has no horseback archery
+     Draw_Table_Dropdown("Title cards (Maps) position", "tabletcmaps", "Titlecard maps settings",
+                         "Title cards (overworld)", CVAR_COSMETIC("HUD.TitleCard.Map"), 0,
+                         static_cast<int>(ImGui::GetWindowViewport()->Size.y / 2), -50,
+@@ -1984,10 +2020,7 @@ void DrawSillyTab() {
+ 
+     UIWidgets::Separator(true, true, 2.0f, 2.0f);
+ 
+-    UIWidgets::CVarCheckbox("Unfix Goron Spin", CVAR_COSMETIC("UnfixGoronSpin"),
+-                            UIWidgets::CheckboxOptions().Color(THEME_COLOR));
+-
+-    UIWidgets::Separator(true, true, 2.0f, 2.0f);
++    // MissingShip: "Unfix Goron Spin" removed -- ML has no Gorons (cleared by MissingShip_ClearHiddenCosmetics)
+ 
+     UIWidgets::CVarSliderFloat("Fairies Size", CVAR_COSMETIC("Fairies.Size"),
+                                UIWidgets::FloatSliderOptions()
+@@ -2028,20 +2061,7 @@ void DrawSillyTab() {
+ 
+     UIWidgets::Separator(true, true, 2.0f, 2.0f);
+ 
+-    if (UIWidgets::CVarSliderFloat("Kak Windmill Speed", CVAR_COSMETIC("Kak.Windmill_Speed.Value"),
+-                                   UIWidgets::FloatSliderOptions()
+-                                       .Format("%.0f")
+-                                       .Min(100.0f)
+-                                       .Max(6000.0f)
+-                                       .DefaultValue(100.0f)
+-                                       .Step(10.0f)
+-                                       .Size(ImVec2(300.0f, 0.0f))
+-                                       .Color(THEME_COLOR))) {
+-        CVarSetInteger(CVAR_COSMETIC("Kak.Windmill_Speed.Changed"), 1);
+-    }
+-    Reset_Option_Double("Reset##Kak_Windmill_Speed", CVAR_COSMETIC("Kak.Windmill_Speed"));
+-
+-    UIWidgets::Separator(true, true, 2.0f, 2.0f);
++    // MissingShip: "Kak Windmill Speed" removed -- ML places no windmill (cleared by MissingShip_ClearHiddenCosmetics)
+ 
+     ImGui::EndDisabled();
+ }
+@@ -2262,7 +2282,7 @@ void DrawCosmeticGroup(CosmeticGroup cosmeticGroup) {
+             ("Random##" + label).c_str(),
+             UIWidgets::ButtonOptions().Size(ImVec2(80, 31)).Padding(ImVec2(2.0f, 0.0f)).Color(THEME_COLOR))) {
+         for (auto& [id, cosmeticOption] : cosmeticOptions) {
+-            if (cosmeticOption.group == cosmeticGroup &&
++            if (cosmeticOption.group == cosmeticGroup && !MlCosmeticHidden(id, cosmeticOption) &&
+                 (!cosmeticOption.advancedOption || CVarGetInteger(CVAR_COSMETIC("AdvancedMode"), 0)) &&
+                 !CVarGetInteger(cosmeticOption.lockedCvar, 0)) {
+                 RandomizeColor(cosmeticOption);
+@@ -2282,7 +2302,7 @@ void DrawCosmeticGroup(CosmeticGroup cosmeticGroup) {
+     }
+     UIWidgets::Spacer();
+     for (auto& [id, cosmeticOption] : cosmeticOptions) {
+-        if (cosmeticOption.group == cosmeticGroup &&
++        if (cosmeticOption.group == cosmeticGroup && !MlCosmeticHidden(id, cosmeticOption) &&
+             (!cosmeticOption.advancedOption || CVarGetInteger(CVAR_COSMETIC("AdvancedMode"), 0))) {
+             DrawCosmeticRow(cosmeticOption);
+         }
+@@ -2472,7 +2492,7 @@ void CosmeticsEditorWindow::DrawElement() {
+     ImGui::BeginDisabled(CVarGetInteger(CVAR_SETTING("DisableChanges"), 0));
+     if (UIWidgets::Button("Rainbow All", UIWidgets::ButtonOptions().Size(ImVec2(250.0f, 0.0f)).Color(THEME_COLOR))) {
+         for (auto& [id, cosmeticOption] : cosmeticOptions) {
+-            if (!CVarGetInteger(cosmeticOption.lockedCvar, 0) &&
++            if (!CVarGetInteger(cosmeticOption.lockedCvar, 0) && !MlCosmeticHidden(id, cosmeticOption) &&
+                 (!cosmeticOption.advancedOption || CVarGetInteger(CVAR_COSMETIC("AdvancedMode"), 0))) {
+                 CVarSetInteger(cosmeticOption.rainbowCvar, 1);
+                 CVarSetInteger(cosmeticOption.changedCvar, 1);
+@@ -2500,40 +2520,20 @@ void CosmeticsEditorWindow::DrawElement() {
+             UIWidgets::Separator(true, true, 2.0f, 2.0f);
+ 
+             DrawCosmeticGroup(COSMETICS_GROUP_LINK);
+-            DrawCosmeticGroup(COSMETICS_GROUP_GLOVES);
+-            DrawCosmeticGroup(COSMETICS_GROUP_MIRRORSHIELD);
++            // MissingShip: no Gloves or Mirror Shield groups (ML has neither)
+             DrawCosmeticGroup(COSMETICS_GROUP_EQUIPMENT);
+             DrawCosmeticGroup(COSMETICS_GROUP_SWORDS);
+             DrawCosmeticGroup(COSMETICS_GROUP_CONSUMABLE);
+             ImGui::EndTabItem();
+         }
+ 
+-        if (ImGui::BeginTabItem("Keys")) {
+-
+-            ImGui::BeginDisabled(CVarGetInteger(CVAR_SETTING("DisableChanges"), 0));
+-            UIWidgets::Separator(true, true, 2.0f, 2.0f);
+-
+-            if (UIWidgets::Button("Give all keys dungeon-specific colors",
+-                                  UIWidgets::ButtonOptions().Color(THEME_COLOR).Size(UIWidgets::Sizes::Inline))) {
+-                ApplyDungeonKeyColors();
+-            }
+-
+-            UIWidgets::Separator(true, true, 2.0f, 2.0f);
+-
+-            DrawCosmeticGroup(COSMETICS_GROUP_KEYRING);
+-            DrawCosmeticGroup(COSMETICS_GROUP_SMALL_KEYS);
+-            DrawCosmeticGroup(COSMETICS_GROUP_BOSS_KEYS);
+-
+-            ImGui::EndDisabled();
+-            ImGui::EndTabItem();
+-        }
++        // MissingShip: no Keys tab -- its colours only apply to randomizer key models
+ 
+         if (ImGui::BeginTabItem("Effects")) {
+ 
+             UIWidgets::Separator(true, true, 2.0f, 2.0f);
+ 
+-            DrawCosmeticGroup(COSMETICS_GROUP_MAGIC);
+-            DrawCosmeticGroup(COSMETICS_GROUP_ARROWS);
++            // MissingShip: no Magic Effects or Arrow Effects groups (ML has no magic or arrows)
+             DrawCosmeticGroup(COSMETICS_GROUP_SPIN_ATTACK);
+             DrawCosmeticGroup(COSMETICS_GROUP_TRAILS);
+             if (UIWidgets::CVarSliderInt("Trails Duration: %d", CVAR_COSMETIC("Trails.Duration.Value"),
+@@ -2562,7 +2562,7 @@ void CosmeticsEditorWindow::DrawElement() {
+             UIWidgets::Separator(true, true, 2.0f, 2.0f);
+ 
+             DrawCosmeticGroup(COSMETICS_GROUP_WORLD);
+-            DrawCosmeticGroup(COSMETICS_GROUP_NAVI);
++            // MissingShip: no Navi group (ML has no Navi)
+             DrawCosmeticGroup(COSMETICS_GROUP_IVAN);
+             DrawCosmeticGroup(COSMETICS_GROUP_NPC);
+             ImGui::EndTabItem();
+@@ -2628,7 +2628,7 @@ void CosmeticsEditorWindow::InitElement() {
+ 
+ void CosmeticsEditor_RandomizeAll() {
+     for (auto& [id, cosmeticOption] : cosmeticOptions) {
+-        if (!CVarGetInteger(cosmeticOption.lockedCvar, 0) &&
++        if (!CVarGetInteger(cosmeticOption.lockedCvar, 0) && !MlCosmeticHidden(id, cosmeticOption) &&
+             (!cosmeticOption.advancedOption || CVarGetInteger(CVAR_COSMETIC("AdvancedMode"), 0))) {
+             RandomizeColor(cosmeticOption);
+         }
+@@ -2640,7 +2640,7 @@ void CosmeticsEditor_RandomizeAll() {
+ 
+ void CosmeticsEditor_AutoRandomizeAll() {
+     for (auto& [id, cosmeticOption] : cosmeticOptions) {
+-        if (!CVarGetInteger(cosmeticOption.lockedCvar, 0) &&
++        if (!CVarGetInteger(cosmeticOption.lockedCvar, 0) && !MlCosmeticHidden(id, cosmeticOption) &&
+             (!cosmeticOption.advancedOption || CVarGetInteger(CVAR_COSMETIC("AdvancedMode"), 0))) {
+             RandomizeColor(cosmeticOption, false);
+         }
+@@ -2652,7 +2652,7 @@ void CosmeticsEditor_AutoRandomizeAll() {
+ 
+ void CosmeticsEditor_RandomizeGroup(CosmeticGroup group) {
+     for (auto& [id, cosmeticOption] : cosmeticOptions) {
+-        if (!CVarGetInteger(cosmeticOption.lockedCvar, 0) &&
++        if (!CVarGetInteger(cosmeticOption.lockedCvar, 0) && !MlCosmeticHidden(id, cosmeticOption) &&
+             (!cosmeticOption.advancedOption || CVarGetInteger(CVAR_COSMETIC("AdvancedMode"), 0)) &&
+             cosmeticOption.group == group) {
+             RandomizeColor(cosmeticOption);
 diff --git a/soh/soh/Enhancements/debugconsole.cpp b/soh/soh/Enhancements/debugconsole.cpp
 index 7fecad83ac29e55d056f5111a471a4dd55372fce..a0e8bceabc6ea1d4ced5e74570fd7886d2c9a1bf 100644
 --- a/soh/soh/Enhancements/debugconsole.cpp
@@ -1345,7 +1776,7 @@ index 3c99ea19ee08f8ff6aa9606a6e317725b3b6a482..ce52c61b861d4d5baa1986be1a118b86
                          Inventory_ChangeEquipment(EQUIP_TYPE_SHIELD, EQUIP_VALUE_SHIELD_HYLIAN);
                      }
 diff --git a/soh/soh/Enhancements/gameplaystats.cpp b/soh/soh/Enhancements/gameplaystats.cpp
-index 6b2e1c721403c768e65f8ebbeef8764d00806ee0..33eadd43d14c0e5c9a6a2fa555b656e2a1727cc7 100644
+index 6b2e1c721403c768e65f8ebbeef8764d00806ee0..9d11fd5fe589e47e0a1e460d9cd8703595592585 100644
 --- a/soh/soh/Enhancements/gameplaystats.cpp
 +++ b/soh/soh/Enhancements/gameplaystats.cpp
 @@ -1,3 +1,4 @@
@@ -1395,7 +1826,78 @@ index 6b2e1c721403c768e65f8ebbeef8764d00806ee0..33eadd43d14c0e5c9a6a2fa555b656e2
      if (sceneID == SCENE_GROTTOS) {
          switch (roomID) {
              case 0:
-@@ -747,17 +782,19 @@ void SetupDisplayNames() {
+@@ -506,6 +541,38 @@ void DrawGameplayStatsTimestampsTab() {
+     ImGui::PopStyleVar(1);
+ }
+ 
++// MissingShip (owner's review): count rows ML can never fill are hidden while they are zero -- enemies ML never places
++// or spawns, bomb/arrow/seed ammo (no bomb bag, bow or slingshot) and ice traps (randomizer only).
++static bool MlCountShown(int i) {
++    switch (i) {
++        case COUNT_ENEMIES_DEFEATED_BEAMOS:         // Ml_BossVa's heads
++        case COUNT_ENEMIES_DEFEATED_BUSINESS_SCRUB: // ML's shop scrubs
++        case COUNT_ENEMIES_DEFEATED_DEKU_BABA:
++        case COUNT_ENEMIES_DEFEATED_DEKU_BABA_BIG:
++        case COUNT_ENEMIES_DEFEATED_MAD_SCRUB:
++        case COUNT_ENEMIES_DEFEATED_DODONGO_BABY:
++        case COUNT_ENEMIES_DEFEATED_FLOORMASTER:
++        case COUNT_ENEMIES_DEFEATED_KEESE:
++        case COUNT_ENEMIES_DEFEATED_KEESE_FIRE: // a Keese lit by a torch
++        case COUNT_ENEMIES_DEFEATED_PEAHAT:
++        case COUNT_ENEMIES_DEFEATED_PEAHAT_LARVA:
++        case COUNT_ENEMIES_DEFEATED_REDEAD:
++        case COUNT_ENEMIES_DEFEATED_SKULLTULA:
++        case COUNT_ENEMIES_DEFEATED_SKULLTULA_BIG:
++        case COUNT_ENEMIES_DEFEATED_SKULLWALLTULA:
++        case COUNT_ENEMIES_DEFEATED_STALFOS:
++        case COUNT_ENEMIES_DEFEATED_TEKTITE_RED: // Ml_EventSpawner
++        case COUNT_ENEMIES_DEFEATED_WALLMASTER:  // Shadow Tag
++        case COUNT_AMMO_USED_STICK:
++        case COUNT_AMMO_USED_NUT:
++        case COUNT_AMMO_USED_BOMBCHU:
++        case COUNT_AMMO_USED_BEAN:
++            return true;
++        default:
++            return gSaveContext.ship.stats.count[i] != 0;
++    }
++}
++
+ void DrawGameplayStatsCountsTab() {
+     u32 enemiesDefeated = 0;
+     u32 ammoUsed = 0;
+@@ -538,6 +605,9 @@ void DrawGameplayStatsCountsTab() {
+         ImGui::TableNextColumn();
+         if (ImGui::TreeNodeEx("Enemy Details...", ImGuiTreeNodeFlags_NoTreePushOnOpen)) {
+             for (int i = COUNT_ENEMIES_DEFEATED_ANUBIS; i <= COUNT_ENEMIES_DEFEATED_WOLFOS; i++) {
++                if (!MlCountShown(i)) {
++                    continue;
++                }
+                 if (i == COUNT_ENEMIES_DEFEATED_FLOORMASTER) {
+                     GameplayStatsRow(countMappings[i], formatIntGameplayStat(gSaveContext.ship.stats.count[i] / 3));
+                 } else {
+@@ -556,7 +626,9 @@ void DrawGameplayStatsCountsTab() {
+         ImGui::TableNextColumn();
+         if (ImGui::TreeNodeEx("Ammo Details...", ImGuiTreeNodeFlags_NoTreePushOnOpen)) {
+             for (int i = COUNT_AMMO_USED_STICK; i <= COUNT_AMMO_USED_BEAN; i++) {
+-                GameplayStatsRow(countMappings[i], formatIntGameplayStat(gSaveContext.ship.stats.count[i]));
++                if (MlCountShown(i)) {
++                    GameplayStatsRow(countMappings[i], formatIntGameplayStat(gSaveContext.ship.stats.count[i]));
++                }
+             }
+         }
+     }
+@@ -573,7 +645,9 @@ void DrawGameplayStatsCountsTab() {
+     GameplayStatsRow("Bonks:", formatIntGameplayStat(gSaveContext.ship.stats.count[COUNT_BONKS]));
+     GameplayStatsRow("Sidehops:", formatIntGameplayStat(gSaveContext.ship.stats.count[COUNT_SIDEHOPS]));
+     GameplayStatsRow("Backflips:", formatIntGameplayStat(gSaveContext.ship.stats.count[COUNT_BACKFLIPS]));
+-    GameplayStatsRow("Ice Traps:", formatIntGameplayStat(gSaveContext.ship.stats.count[COUNT_ICE_TRAPS]));
++    if (MlCountShown(COUNT_ICE_TRAPS)) {
++        GameplayStatsRow("Ice Traps:", formatIntGameplayStat(gSaveContext.ship.stats.count[COUNT_ICE_TRAPS]));
++    }
+     GameplayStatsRow("Pauses:", formatIntGameplayStat(gSaveContext.ship.stats.count[COUNT_PAUSES]));
+     GameplayStatsRow("Pots Smashed:", formatIntGameplayStat(gSaveContext.ship.stats.count[COUNT_POTS_BROKEN]));
+     GameplayStatsRow("Bushes Cut:", formatIntGameplayStat(gSaveContext.ship.stats.count[COUNT_BUSHES_CUT]));
+@@ -747,17 +821,19 @@ void SetupDisplayNames() {
      strcpy(itemTimestampDisplayName[ITEM_LONGSHOT],         "Longshot:           ");
      strcpy(itemTimestampDisplayName[ITEM_ARROW_ICE],        "Ice Arrows:         ");
      strcpy(itemTimestampDisplayName[ITEM_FARORES_WIND],     "Farore's Wind:      ");
@@ -1417,7 +1919,7 @@ index 6b2e1c721403c768e65f8ebbeef8764d00806ee0..33eadd43d14c0e5c9a6a2fa555b656e2
      strcpy(itemTimestampDisplayName[ITEM_SHIELD_MIRROR],    "Mirror Shield:      ");
      strcpy(itemTimestampDisplayName[ITEM_TUNIC_GORON],      "Goron Tunic:        ");
      strcpy(itemTimestampDisplayName[ITEM_TUNIC_ZORA],       "Zora Tunic:         ");
-@@ -772,7 +809,9 @@ void SetupDisplayNames() {
+@@ -772,7 +848,9 @@ void SetupDisplayNames() {
      strcpy(itemTimestampDisplayName[ITEM_WALLET_ADULT],     "Adult's Wallet:     ");
      strcpy(itemTimestampDisplayName[ITEM_WALLET_GIANT],     "Giant's Wallet:     ");
      strcpy(itemTimestampDisplayName[ITEM_WEIRD_EGG],        "Weird Egg:          ");
@@ -1428,7 +1930,7 @@ index 6b2e1c721403c768e65f8ebbeef8764d00806ee0..33eadd43d14c0e5c9a6a2fa555b656e2
      strcpy(itemTimestampDisplayName[ITEM_COJIRO],           "Cojiro:             ");
      strcpy(itemTimestampDisplayName[ITEM_POCKET_EGG],       "Pocket Egg:         ");
      strcpy(itemTimestampDisplayName[ITEM_MASK_SKULL],       "Skull Mask:         ");
-@@ -815,14 +854,14 @@ void SetupDisplayNames() {
+@@ -815,14 +893,14 @@ void SetupDisplayNames() {
      // Other events
      strcpy(itemTimestampDisplayName[TIMESTAMP_DEFEAT_GOHMA],         "Gohma Defeated:     ");
      strcpy(itemTimestampDisplayName[TIMESTAMP_DEFEAT_KING_DODONGO],  "KD Defeated:        ");
@@ -1445,6 +1947,32 @@ index 6b2e1c721403c768e65f8ebbeef8764d00806ee0..33eadd43d14c0e5c9a6a2fa555b656e2
      strcpy(itemTimestampDisplayName[TIMESTAMP_BOSSRUSH_FINISH],      "Boss Rush Finished: ");
      strcpy(itemTimestampDisplayName[TIMESTAMP_FOUND_GREG],           "Greg Found:         ");
      strcpy(itemTimestampDisplayName[TIMESTAMP_TRIFORCE_COMPLETED],   "Triforce Completed: ");
+diff --git a/soh/soh/Enhancements/mods.cpp b/soh/soh/Enhancements/mods.cpp
+index 6d7ecf3b745a30275d72884fb5b83f4328f82481..7855ac5c1ff9f4e524d350fed741f2953615fa98 100644
+--- a/soh/soh/Enhancements/mods.cpp
++++ b/soh/soh/Enhancements/mods.cpp
+@@ -131,8 +131,9 @@ void UpdateHyperBossesState() {
+                 Player* player = GET_PLAYER(gPlayState);
+                 Actor* actor = static_cast<Actor*>(refActor);
+ 
++                // MissingShip: ML reuses the King Dodongo, Twinrova and Ganon slots for its torches, slide blocks and
++                // push blocks, which must not run twice as fast; ML's only boss sits in Barinade's slot.
+                 uint8_t isBossActor = actor->id == ACTOR_BOSS_GOMA ||      // Gohma
+-                                      actor->id == ACTOR_BOSS_DODONGO ||   // King Dodongo
+                                       actor->id == ACTOR_EN_BDFIRE ||      // King Dodongo Fire Breath
+                                       actor->id == ACTOR_BOSS_VA ||        // Barinade
+                                       actor->id == ACTOR_BOSS_GANONDROF || // Phantom Ganon
+@@ -143,9 +144,7 @@ void UpdateHyperBossesState() {
+                                       actor->id == ACTOR_EN_VB_BALL || // Volvagia Rocks
+                                       actor->id == ACTOR_BOSS_MO ||    // Morpha
+                                       actor->id == ACTOR_BOSS_SST ||   // Bongo Bongo
+-                                      actor->id == ACTOR_BOSS_TW ||    // Twinrova
+-                                      actor->id == ACTOR_BOSS_GANON || // Ganondorf
+-                                      actor->id == ACTOR_BOSS_GANON2;  // Ganon
++                                      actor->id == ACTOR_BOSS_GANON;   // Ganondorf
+ 
+                 // Don't apply during cutscenes because it causes weird behaviour and/or crashes on some bosses.
+                 if (IsHyperBossesActive() && isBossActor && !Player_InBlockingCsMode(gPlayState, player)) {
 diff --git a/soh/soh/Enhancements/timesaver_hook_handlers.cpp b/soh/soh/Enhancements/timesaver_hook_handlers.cpp
 index be043b6da3ac10220b741420859a484b27f5747c..b367a44e9c3da2d2b238b619388520fb497fb27d 100644
 --- a/soh/soh/Enhancements/timesaver_hook_handlers.cpp
@@ -1469,7 +1997,7 @@ index be043b6da3ac10220b741420859a484b27f5747c..b367a44e9c3da2d2b238b619388520fb
  
              if (CVarGetInteger(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.Story"), IS_RANDO)) {
 diff --git a/soh/soh/Enhancements/timesplits/TimeSplits.cpp b/soh/soh/Enhancements/timesplits/TimeSplits.cpp
-index e970b965cfe8b8227a17c15a88034111a21e14e3..327d9de32d6220eb592e53c622cf9935c8dcfe66 100644
+index e970b965cfe8b8227a17c15a88034111a21e14e3..1f23ef7c8bdbb4e047f224f5064128dd314fa350 100644
 --- a/soh/soh/Enhancements/timesplits/TimeSplits.cpp
 +++ b/soh/soh/Enhancements/timesplits/TimeSplits.cpp
 @@ -60,174 +60,47 @@ std::vector<SplitObject> emptyList;
@@ -1682,6 +2210,18 @@ index e970b965cfe8b8227a17c15a88034111a21e14e3..327d9de32d6220eb592e53c622cf9935
      { ITEM_SKULL_TOKEN,     { } }
  
      // clang-format on
+@@ -929,10 +802,7 @@ void TimeSplitsDrawManageList() {
+             TimeSplitsDrawItemList(SPLIT_TYPE_BOSS);
+             ImGui::EndTabItem();
+         }
+-        if (ImGui::BeginTabItem("Miscellaneous")) {
+-            TimeSplitsDrawItemList(SPLIT_TYPE_MISC);
+-            ImGui::EndTabItem();
+-        }
++        // MissingShip: no Miscellaneous tab -- ML's list has no misc splits (vanilla's were escape/death splits)
+ 
+         TimeSplitsPostDragAndDrop();
+ 
 diff --git a/soh/soh/OTRGlobals.cpp b/soh/soh/OTRGlobals.cpp
 index 39f04ddbbd3a3894ac268a4364b3b7b711b3edee..ed9201e52a84271f28ff10417db4cac3d26cbff7 100644
 --- a/soh/soh/OTRGlobals.cpp
@@ -1699,8 +2239,31 @@ index 39f04ddbbd3a3894ac268a4364b3b7b711b3edee..ed9201e52a84271f28ff10417db4cac3
      ShipInit::InitAll();
      Rando::StaticData::InitHashMaps();
      OTRGlobals::Instance->gRandoContext->AddExcludedOptions();
+diff --git a/soh/soh/SohGui/SohMenu.cpp b/soh/soh/SohGui/SohMenu.cpp
+index 0e8ea5cf8868ba431fc8fcc4850ca0c86ba8562e..6b9ef93d6039f2ccb166b3e5ea993ab60621dfb1 100644
+--- a/soh/soh/SohGui/SohMenu.cpp
++++ b/soh/soh/SohGui/SohMenu.cpp
+@@ -88,7 +88,18 @@ void SohMenu::AddMenuElements() {
+     AddMenuSettings();
+     AddMenuEnhancements();
+     AddMenuRandomizer();
++    // MissingShip: no Randomizer tab. It shuffles vanilla OoT's item and entrance logic, which doesn't describe
++    // The Missing Link. The menu is still built (trackers and options register into it); only its tab and search
++    // results are dropped, both of which walk menuOrder.
+     AddMenuNetwork();
++    // MissingShip: no Network tab either. This build has no network support, and Crowd Control's effects (vanilla
++    // enemies and items) collide with the actor and item slots ML repurposed.
++    for (const char* hidden : { "Randomizer", "Network" }) {
++        std::erase(menuOrder, std::string(hidden));
++        if (std::string(CVarGetString(CVAR_SETTING("Menu.ActiveHeader"), "Settings")) == hidden) {
++            CVarSetString(CVAR_SETTING("Menu.ActiveHeader"), "Settings");
++        }
++    }
+     AddMenuDevTools();
+ 
+     if (CVarGetInteger(CVAR_SETTING("Menu.SidebarSearch"), 0)) {
 diff --git a/soh/soh/SohGui/SohMenuEnhancements.cpp b/soh/soh/SohGui/SohMenuEnhancements.cpp
-index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7b3b41d7a 100644
+index 4cf7305373689a1e3d9a084f91a1a2693902dfde..0caa01bc58c511077e78e67653191e183b7ad13b 100644
 --- a/soh/soh/SohGui/SohMenuEnhancements.cpp
 +++ b/soh/soh/SohGui/SohMenuEnhancements.cpp
 @@ -9,6 +9,7 @@
@@ -1726,7 +2289,44 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
  static std::map<int32_t, const char*> bunnyHoodEffectMap = {
      { BUNNY_HOOD_VANILLA, "Vanilla" },
      { BUNNY_HOOD_FAST, "Faster Run" },
-@@ -140,6 +149,11 @@ void SohMenu::AddMenuEnhancements() {
+@@ -45,11 +54,10 @@ static const std::map<int32_t, const char*> dekuStickCheat = {
+     { DEKU_STICK_UNBREAKABLE_AND_ALWAYS_ON_FIRE, "Unbreakable + Always on Fire" },
+ };
+ 
++// MissingShip: no Navi option (ML has no Navi talk spots); a stored Navi bit is dropped at boot.
+ static const std::map<int32_t, const char*> skipForcedDialogOptions = {
+     { FORCED_DIALOG_SKIP_NONE, "None" },
+-    { FORCED_DIALOG_SKIP_NAVI, "Navi" },
+     { FORCED_DIALOG_SKIP_NPC, "NPCs" },
+-    { FORCED_DIALOG_SKIP_ALL, "All" },
+ };
+ 
+ static const std::map<int32_t, const char*> timeTravelOptions = {
+@@ -81,13 +89,6 @@ static const std::map<int32_t, const char*> subPowers = {
+     { DAMAGE_MERCILESS, "Merciless (64x)" }, { DAMAGE_TORTURE, "Pure Torture (128x)" },
+ };
+ 
+-static const std::map<int32_t, const char*> subSubPowers = {
+-    { DAMAGE_VANILLA, "Vanilla (1x)" },      { DAMAGE_DOUBLE, "Double (2x)" },
+-    { DAMAGE_QUADRUPLE, "Quadruple (4x)" },  { DAMAGE_OCTUPLE, "Octuple (8x)" },
+-    { DAMAGE_FOOLISH, "Foolish (16x)" },     { DAMAGE_RIDICULOUS, "Ridiculous (32x)" },
+-    { DAMAGE_MERCILESS, "Merciless (64x)" },
+-};
+-
+ static const std::map<int32_t, const char*> bonkDamageValues = {
+     { BONK_DAMAGE_NONE, "No Damage" },        { BONK_DAMAGE_QUARTER_HEART, "0.25 Hearts" },
+     { BONK_DAMAGE_HALF_HEART, "0.5 Hearts" }, { BONK_DAMAGE_1_HEART, "1 Heart" },
+@@ -129,8 +130,7 @@ static const std::map<int32_t, const char*> mirroredWorldModes = {
+     { MIRRORED_WORLD_RANDOM, "Random" },
+     { MIRRORED_WORLD_RANDOM_SEEDED, "Random (Seeded)" },
+     { MIRRORED_WORLD_DUNGEONS_ALL, "Dungeons" },
+-    { MIRRORED_WORLD_DUNGEONS_VANILLA, "Dungeons (Vanilla)" },
+-    { MIRRORED_WORLD_DUNGEONS_MQ, "Dungeons (MQ)" },
++    // MissingShip: no Vanilla/MQ dungeon split -- ML has no Master Quest (a stored choice is mapped at boot)
+     { MIRRORED_WORLD_DUNGEONS_RANDOM, "Dungeons Random" },
+     { MIRRORED_WORLD_DUNGEONS_RANDOM_SEEDED, "Dungeons Random (Seeded)" },
+ };
+@@ -140,6 +140,11 @@ void SohMenu::AddMenuEnhancements() {
      AddMenuEntry("Enhancements", CVAR_SETTING("Menu.EnhancementsSidebarSection"));
  
      // Quality of Life
@@ -1738,21 +2338,32 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
      WidgetPath path = { "Enhancements", "Quality of Life", SECTION_COLUMN_1 };
      AddSidebarEntry("Enhancements", path.sidebarName, 3);
      path.column = SECTION_COLUMN_1;
-@@ -176,39 +190,11 @@ void SohMenu::AddMenuEnhancements() {
-         .Options(CheckboxOptions().DefaultValue(false).Tooltip(
-             "Toggle to change container textures to match their contents in randomizer games.\n"
-             "Categories: Major items, Lesser items, Junk items, Small keys, Boss keys, Skulltula Tokens."));
+@@ -165,50 +170,8 @@ void SohMenu::AddMenuEnhancements() {
+             "When loading a save, places Link at the last entrance he went through.\n"
+             "This doesn't work if the save was made in grottos, fairy fountains, or dungeons."));
+ 
+-    AddWidget(path, "Containers Match Contents", WIDGET_SEPARATOR_TEXT);
+-    AddWidget(path, "Containers Match Contents", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("ChestSizeAndTextureMatchContents"))
+-        .Callback([](WidgetInfo& info) {
+-            if (!CVarGetInteger(CVAR_ENHANCEMENT("ChestSizeAndTextureMatchContents"), 0)) {
+-                CVarSetInteger(CVAR_ENHANCEMENT("ChestSizeDependsStoneOfAgony"), 0);
+-            }
+-        })
+-        .Options(CheckboxOptions().DefaultValue(false).Tooltip(
+-            "Toggle to change container textures to match their contents in randomizer games.\n"
+-            "Categories: Major items, Lesser items, Junk items, Small keys, Boss keys, Skulltula Tokens."));
 -    AddWidget(path, "Containers of Agony", WIDGET_CVAR_CHECKBOX)
 -        .CVar(CVAR_ENHANCEMENT("ChestSizeDependsStoneOfAgony"))
 -        .PreFunc([](WidgetInfo& info) {
 -            info.isHidden = !CVarGetInteger(CVAR_ENHANCEMENT("ChestSizeAndTextureMatchContents"), 0);
 -        })
 -        .Options(CheckboxOptions().Tooltip("Only change the texture of containers if you have the Stone of Agony."));
- 
-     AddWidget(path, "Time of Day", WIDGET_SEPARATOR_TEXT);
-     AddWidget(path, "Nighttime GS Always Spawn", WIDGET_CVAR_CHECKBOX)
-         .CVar(CVAR_ENHANCEMENT("NightGSAlwaysSpawn"))
-         .Options(CheckboxOptions().Tooltip("Nighttime Skulltulas will spawn during both day and night."));
+-
+-    AddWidget(path, "Time of Day", WIDGET_SEPARATOR_TEXT);
+-    AddWidget(path, "Nighttime GS Always Spawn", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("NightGSAlwaysSpawn"))
+-        .Options(CheckboxOptions().Tooltip("Nighttime Skulltulas will spawn during both day and night."));
 -    AddWidget(path, "Pull Grave During the Day", WIDGET_CVAR_CHECKBOX)
 -        .CVar(CVAR_ENHANCEMENT("DayGravePull"))
 -        .Options(CheckboxOptions().Tooltip("Allows graves to be pulled when child during the day."));
@@ -1775,10 +2386,12 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
 -            CheckboxOptions()
 -                .Tooltip("Shops and Minigames are open both day and night. Requires a scene reload to take effect.")
 -                .DisabledTooltip("This is not compatible with the Locked Overworld Doors Randomizer option."));
++    // MissingShip (owner's review): "Containers Match Contents" (a randomizer aid) and "Nighttime GS Always Spawn"
++    // are removed. Their CVars are cleared at boot (MissingShip_ClearRetiredOptions).
  
      AddWidget(path, "Pause Menu", WIDGET_SEPARATOR_TEXT);
      AddWidget(path, "Allow the Cursor to be on Any Slot", WIDGET_CVAR_COMBOBOX)
-@@ -226,10 +212,6 @@ void SohMenu::AddMenuEnhancements() {
+@@ -226,10 +189,6 @@ void SohMenu::AddMenuEnhancements() {
  
      path.column = SECTION_COLUMN_2;
      AddWidget(path, "Controls", WIDGET_SEPARATOR_TEXT);
@@ -1789,7 +2402,7 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
      AddWidget(path, "Don't Require Input for Credits Sequence", WIDGET_CVAR_CHECKBOX)
          .CVar(CVAR_ENHANCEMENT("NoInputForCredits"))
          .RaceDisable(false)
-@@ -290,56 +272,12 @@ void SohMenu::AddMenuEnhancements() {
+@@ -290,56 +249,12 @@ void SohMenu::AddMenuEnhancements() {
          .CVar(CVAR_ENHANCEMENT("DisableCritWiggle"))
          .RaceDisable(false)
          .Options(CheckboxOptions().Tooltip("Disable Random Camera Wiggle at Low Health."));
@@ -1847,10 +2460,11 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
  
      // Skips & Speed-ups
      path.sidebarName = "Skips & Speed-ups";
-@@ -354,10 +292,7 @@ void SohMenu::AddMenuEnhancements() {
+@@ -353,11 +268,7 @@ void SohMenu::AddMenuEnhancements() {
+             CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.Intro"), true);
              CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.Entrances"), true);
              CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.Story"), true);
-             CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.LearnSong"), true);
+-            CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.LearnSong"), true);
 -            CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.BossIntro"), true);
 -            CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.QuickBossDeaths"), true);
              CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.OnePoint"), true);
@@ -1858,10 +2472,11 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
              CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipMiscInteractions"), true);
              CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.DisableTitleCard"), true);
  
-@@ -371,10 +306,7 @@ void SohMenu::AddMenuEnhancements() {
+@@ -370,11 +281,7 @@ void SohMenu::AddMenuEnhancements() {
+             CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.Intro"), false);
              CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.Entrances"), false);
              CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.Story"), false);
-             CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.LearnSong"), false);
+-            CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.LearnSong"), false);
 -            CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.BossIntro"), false);
 -            CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.QuickBossDeaths"), false);
              CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.OnePoint"), false);
@@ -1869,10 +2484,13 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
              CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.SkipMiscInteractions"), false);
              CVAR_INT_SHIP_INIT(CVAR_ENHANCEMENT("TimeSavers.DisableTitleCard"), false);
  
-@@ -392,31 +324,15 @@ void SohMenu::AddMenuEnhancements() {
-     AddWidget(path, "Skip Song Cutscenes", WIDGET_CVAR_CHECKBOX)
-         .CVar(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.LearnSong"))
+@@ -389,34 +296,15 @@ void SohMenu::AddMenuEnhancements() {
+     AddWidget(path, "Skip Story Cutscenes", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.Story"))
          .Options(CheckboxOptions().DefaultValue(IS_RANDO));
+-    AddWidget(path, "Skip Song Cutscenes", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.LearnSong"))
+-        .Options(CheckboxOptions().DefaultValue(IS_RANDO));
 -    AddWidget(path, "Skip Boss Introductions", WIDGET_CVAR_CHECKBOX)
 -        .CVar(CVAR_ENHANCEMENT("TimeSavers.SkipCutscene.BossIntro"))
 -        .Options(CheckboxOptions().DefaultValue(IS_RANDO));
@@ -1901,7 +2519,14 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
  
      AddWidget(path, "Text", WIDGET_SEPARATOR_TEXT);
      AddWidget(path, "Skip Bottle Pickup Messages", WIDGET_CVAR_CHECKBOX)
-@@ -436,7 +352,7 @@ void SohMenu::AddMenuEnhancements() {
+@@ -430,13 +318,13 @@ void SohMenu::AddMenuEnhancements() {
+         .Options(ComboboxOptions()
+                      .ComboMap(skipForcedDialogOptions)
+                      .DefaultIndex(FORCED_DIALOG_SKIP_NONE)
+-                     .Tooltip("Prevent forced conversations with Navi and/or other NPCs."));
++                     .Tooltip("Prevent forced conversations with NPCs."));
+     AddWidget(path, "Skip Text", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("SkipText"))
          .Options(CheckboxOptions().Tooltip("Holding down B skips text."));
      AddWidget(path, "Text Speed: %dx", WIDGET_CVAR_SLIDER_INT)
          .CVar(CVAR_ENHANCEMENT("TextSpeed"))
@@ -1910,7 +2535,7 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
      AddWidget(path, "Slow Text Speed: %dx", WIDGET_CVAR_SLIDER_INT)
          .CVar(CVAR_ENHANCEMENT("SlowTextSpeed"))
          .Options(IntSliderOptions().Min(1).Max(5).DefaultValue(1).Format("%dx").Tooltip(
-@@ -444,12 +360,6 @@ void SohMenu::AddMenuEnhancements() {
+@@ -444,12 +332,6 @@ void SohMenu::AddMenuEnhancements() {
  
      path.column = SECTION_COLUMN_2;
      AddWidget(path, "Animations", WIDGET_SEPARATOR_TEXT);
@@ -1923,10 +2548,15 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
      AddWidget(path, "Fast Chests", WIDGET_CVAR_CHECKBOX)
          .CVar(CVAR_ENHANCEMENT("FastChests"))
          .Options(CheckboxOptions().Tooltip("Makes Link always kick the chest to open it, instead of doing the longer "
-@@ -475,34 +385,12 @@ void SohMenu::AddMenuEnhancements() {
-         .PreFunc([](WidgetInfo& info) { info.isHidden = CVarGetInteger(CVAR_ENHANCEMENT("CrawlSpeed"), 0) == 1; })
-         .Options(CheckboxOptions().Tooltip("Don't increase crawl speed when exiting glitch-useful crawlspaces."
-                                            "Currently it is only the BOTW crawlspace to locked door"));
+@@ -470,68 +352,24 @@ void SohMenu::AddMenuEnhancements() {
+     AddWidget(path, "Crawl Speed %dx", WIDGET_CVAR_SLIDER_INT)
+         .CVar(CVAR_ENHANCEMENT("CrawlSpeed"))
+         .Options(IntSliderOptions().Min(1).Max(5).DefaultValue(1).Format("%dx"));
+-    AddWidget(path, "Exclude Glitch-Aiding Crawlspaces", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("GlitchAidingCrawlspaces"))
+-        .PreFunc([](WidgetInfo& info) { info.isHidden = CVarGetInteger(CVAR_ENHANCEMENT("CrawlSpeed"), 0) == 1; })
+-        .Options(CheckboxOptions().Tooltip("Don't increase crawl speed when exiting glitch-useful crawlspaces."
+-                                           "Currently it is only the BOTW crawlspace to locked door"));
 -    AddWidget(path, "King Zora Speed: %.2fx", WIDGET_CVAR_SLIDER_FLOAT)
 -        .CVar(CVAR_ENHANCEMENT("MweepSpeed"))
 -        .Options(FloatSliderOptions().Min(0.1f).Max(5.0f).DefaultValue(1.0f).Format("%.2fx"));
@@ -1958,26 +2588,93 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
      AddWidget(path, "Faster Rupee Accumulator", WIDGET_CVAR_CHECKBOX)
          .CVar(CVAR_ENHANCEMENT("FasterRupeeAccumulator"))
          .Options(CheckboxOptions().Tooltip("Causes your Wallet to fill and empty faster when you gain or lose money."));
-@@ -527,11 +415,6 @@ void SohMenu::AddMenuEnhancements() {
-         .CVar(CVAR_ENHANCEMENT("FasterBeanSkull"))
-         .Options(CheckboxOptions().Tooltip(
-             "Makes Gold Skulltulas come out of bean patches faster after bugs dig into center."));
+-    AddWidget(path, "No Skulltula Freeze", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("SkulltulaFreeze"))
+-        .PreFunc([](WidgetInfo& info) {
+-            info.options->disabled = IS_RANDO && GameInteractor::IsSaveLoaded(true);
+-            info.options->disabledTooltip =
+-                "This setting is disabled because a randomizer savefile is loaded. Please use the "
+-                "\"Skip Get Item Animation\" option within the randomizer enhancements instead.";
+-        })
+-        .Options(CheckboxOptions().Tooltip(
+-            "Stops the game from freezing the player when picking up Gold Skulltula Tokens. Does not "
+-            "apply in randomizer savefiles."));
+     AddWidget(path, "Skip Save Confirmation", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("SkipSaveConfirmation"))
+         .Options(CheckboxOptions().Tooltip("Skip the \"Game Saved\" confirmation screen."));
+     AddWidget(path, "Link as Default File Name", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("LinkDefaultName"))
+         .Options(CheckboxOptions().Tooltip("Allows you to have \"Link\" as a premade file name."));
+-    AddWidget(path, "Spawn Bean Skulltula Faster", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("FasterBeanSkull"))
+-        .Options(CheckboxOptions().Tooltip(
+-            "Makes Gold Skulltulas come out of bean patches faster after bugs dig into center."));
 -    AddWidget(path, "Biggoron Forge Time: %d days", WIDGET_CVAR_SLIDER_INT)
 -        .CVar(CVAR_ENHANCEMENT("ForgeTime"))
 -        .Options(IntSliderOptions().Min(0).Max(3).DefaultValue(3).Format("%d days").Tooltip(
 -            "Allows you to change the number of days it takes for "
 -            "Biggoron to forge the Biggoron's Sword."));
++    // MissingShip (owner's review): "Skip Song Cutscenes", "Exclude Glitch-Aiding Crawlspaces", "No Skulltula
++    // Freeze" and "Spawn Bean Skulltula Faster" are removed -- vanilla songs, Bottom of the Well/Spirit crawlspaces,
++    // Gold Skulltula tokens and bean-patch Skulltulas aren't in ML. Their CVars are cleared at boot.
  
      // Graphics
      path.sidebarName = "Graphics";
-@@ -615,19 +498,9 @@ void SohMenu::AddMenuEnhancements() {
+@@ -556,27 +394,14 @@ void SohMenu::AddMenuEnhancements() {
+         .RaceDisable(false)
+         .Options(CheckboxOptions().Tooltip("Disables the sword trail effect when swinging Link's sword. Useful when "
+                                            "using mods that replace Link's sword model."));
+-    AddWidget(path, "Disable 2D Pre-Rendered Scenes", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("3DSceneRender"))
+-        .RaceDisable(false)
+-        .Options(CheckboxOptions().Tooltip("Disables 2D pre-rendered backgrounds. Enable this when using a mod that "
+-                                           "implements 3D backdrops for these areas.\n"
+-                                           "Requires Scene Change to alter."));
++    // MissingShip (owner's review): "Disable 2D Pre-Rendered Scenes" removed -- no ML room is pre-rendered. Disable
++    // Fixed Camera no longer waits for it: ML reuses several of its rooms (houses, stable, Link's house, Bmori1).
+     AddWidget(path, "Disable Fixed Camera", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("DisableFixedCamera"))
+         .RaceDisable(false)
+-        .PreFunc([](WidgetInfo& info) {
+-            if (CVarGetInteger(CVAR_ENHANCEMENT("3DSceneRender"), 0) == 0) {
+-                CVarSetInteger(CVAR_ENHANCEMENT("DisableFixedCamera"), 0);
+-                info.options->disabled = true;
+-            } else {
+-                info.options->disabled = false;
+-            }
+-            info.options->disabledTooltip = "Requires \"Disable 2D Pre-Rendered Scenes\" to be enabled.";
+-        })
          .Options(CheckboxOptions().Tooltip(
-             "Scales all of the Adult Equipment, as well as moving some a bit, to fit on Child Link better. May "
-             "not work properly with some mods."));
+-            "Disables the fixed camera in maps that use 2D pre-rendered backgrounds. Enable this when using a mod "
+-            "that implements 3D backdrops for these areas.\n"
++            "Disables the fixed camera in rooms that use one, so you can move the camera freely (in The Missing "
++            "Link: the Kokiri houses, Link's house, the ranch stable and Monktown Sanctuary).\n"
+             "Requires Scene Change to alter."));
+     AddWidget(path, "Ingame Text Spacing: %d", WIDGET_CVAR_SLIDER_INT)
+         .CVar(CVAR_ENHANCEMENT("TextSpacing"))
+@@ -602,32 +427,11 @@ void SohMenu::AddMenuEnhancements() {
+         .RaceDisable(false)
+         .Options(CheckboxOptions().Tooltip("Turns the Static Image of Link in the Pause Menu's Equipment Subscreen "
+                                            "into a model cycling through his idle animations."));
+-    AddWidget(path, "Show Age-Dependent Equipment", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("EquipmentAlwaysVisible"))
+-        .RaceDisable(false)
+-        .Options(CheckboxOptions().Tooltip("Makes all equipment visible, regardless of age."));
+-    AddWidget(path, "Scale Adult Equipment as Child", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("ScaleAdultEquipmentAsChild"))
+-        .RaceDisable(false)
+-        .PreFunc([](WidgetInfo& info) {
+-            info.isHidden = CVarGetInteger(CVAR_ENHANCEMENT("EquipmentAlwaysVisible"), 0) == 0;
+-        })
+-        .Options(CheckboxOptions().Tooltip(
+-            "Scales all of the Adult Equipment, as well as moving some a bit, to fit on Child Link better. May "
+-            "not work properly with some mods."));
 -    AddWidget(path, "Show Gauntlets in First-Person", WIDGET_CVAR_CHECKBOX)
 -        .CVar(CVAR_ENHANCEMENT("FirstPersonGauntlets"))
 -        .RaceDisable(false)
 -        .Options(CheckboxOptions().Tooltip("Renders Gauntlets when using the Bow and Hookshot like in OoT3D."));
++    // MissingShip (owner's review): "Show Age-Dependent Equipment" and "Scale Adult Equipment as Child" removed --
++    // ML is child-only with no adult equipment.
      AddWidget(path, "Show Chains on Both Sides of Locked Doors", WIDGET_CVAR_CHECKBOX)
          .CVar(CVAR_ENHANCEMENT("ShowDoorLocksOnBothSides"))
          .RaceDisable(false);
@@ -1990,7 +2687,18 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
  
      path.column = SECTION_COLUMN_2;
      AddWidget(path, "UI", WIDGET_SEPARATOR_TEXT);
-@@ -645,11 +518,6 @@ void SohMenu::AddMenuEnhancements() {
+@@ -635,21 +439,13 @@ void SohMenu::AddMenuEnhancements() {
+         .CVar(CVAR_ENHANCEMENT("MinimalUI"))
+         .Options(CheckboxOptions().Tooltip("Hides most of the UI when not needed.\n"
+                                            "NOTE: Doesn't activate until scene transition."));
+-    AddWidget(path, "Disable Hot/Underwater Warning Text", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("DisableTunicWarningText"))
+-        .Options(CheckboxOptions().Tooltip("Disables warning text when you don't have on the Goron/Zora Tunic "
+-                                           "in Hot/Underwater conditions."));
++    // MissingShip (owner's review): "Disable Hot/Underwater Warning Text" removed -- ML has no hot rooms or Iron Boots.
+     AddWidget(path, "Remember Minimap State Between Areas", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("RememberMapToggleState"))
+         .RaceDisable(false)
          .Options(CheckboxOptions().Tooltip(
              "Preserve the minimap visibility state when going between areas rather than default it to \"on\" "
              "when going through loading zones."));
@@ -2002,7 +2710,7 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
      AddWidget(path, "Disable HUD Heart Animations", WIDGET_CVAR_CHECKBOX)
          .CVar(CVAR_ENHANCEMENT("NoHUDHeartAnimation"))
          .RaceDisable(false)
-@@ -701,10 +569,6 @@ void SohMenu::AddMenuEnhancements() {
+@@ -701,10 +497,6 @@ void SohMenu::AddMenuEnhancements() {
          .CVar(CVAR_ENHANCEMENT("RemoveSpinAttackDarkness"))
          .RaceDisable(false)
          .Options(CheckboxOptions().Tooltip("Remove the Darkness that appears when charging a Spin Attack."));
@@ -2013,8 +2721,80 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
      AddWidget(path, "Draw Distance", WIDGET_SEPARATOR_TEXT).RaceDisable(false);
      AddWidget(path, "Increase Actor Draw Distance: %dx", WIDGET_CVAR_SLIDER_INT)
          .CVar(CVAR_ENHANCEMENT("DisableDrawDistance"))
-@@ -824,14 +688,7 @@ void SohMenu::AddMenuEnhancements() {
-                               " - Not within range of Ocarina Playing spots"));
+@@ -728,27 +520,13 @@ void SohMenu::AddMenuEnhancements() {
+         .CVar(CVAR_ENHANCEMENT("WidescreenActorCulling"))
+         .Options(
+             CheckboxOptions().Tooltip("Adjusts the Horizontal Culling Plane to account for Widescreen Resolutions."));
+-    AddWidget(path, "Cull Glitch Useful Actors", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("ExtendedCullingExcludeGlitchActors"))
+-        .PreFunc([](WidgetInfo& info) {
+-            info.options->disabled = !CVarGetInteger(CVAR_ENHANCEMENT("WidescreenActorCulling"), 0) &&
+-                                     CVarGetInteger(CVAR_ENHANCEMENT("DisableDrawDistance"), 1) <= 1;
+-            info.options->disabledTooltip =
+-                "Requires Actor Draw Distance to be increased or Widscreen Actor Culling to be enabled.";
+-        })
+-        .Options(CheckboxOptions().Tooltip(
+-            "Exclude Actors that are useful for Glitches from the extended culling ranges. Some actors may still draw "
+-            "in the extended ranges, but will not \"update\" so that certain glitches that leverage the original "
+-            "culling requirements will still work.\n\nThe following actors are excluded:\n"
+-            " - White Clothed Gerudos\n"
+-            " - King Zora\n"
+-            " - Gossip Stones\n"
+-            " - Boulders\n"
+-            " - Blue Warps\n"
+-            " - Darunia\n"
+-            " - Gold Skulltulas"));
++    // MissingShip (owner's review): "Cull Glitch Useful Actors" removed -- its list is vanilla's glitch actors, several
++    // of whose slots ML reuses.
+ 
+     path.sidebarName = "Items";
++    // MissingShip (owner's review): Items options that don't apply to ML are removed -- no bow, slingshot, hookshot,
++    // Farore's Wind, strength upgrade, adult masks or other masks; the Boomerang slot is ML's Magic Hourglass; Time
++    // Travel would make Link an adult; Better Bombchu Shopping overrides ML's Bombchu prices. CVars cleared at boot.
+     AddSidebarEntry("Enhancements", path.sidebarName, 3);
+     path.column = SECTION_COLUMN_1;
+ 
+@@ -765,23 +543,10 @@ void SohMenu::AddMenuEnhancements() {
+     AddWidget(path, "Assignable Shields, Tunics and Boots", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("AssignableTunicsAndBoots"))
+         .Options(CheckboxOptions().Tooltip("Allows equipping Shields, Tunics and Boots to C-Buttons/D-pad."));
+-    // TODO: Revist strength toggle, it's currently separate but should probably be locked behind the
+-    // Equipment toggle settings or be absorbed by it completely.
+     AddWidget(path, "Equipment Toggle", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("EquipmentCanBeRemoved"))
+         .Options(CheckboxOptions().Tooltip(
+             "Allows equipment to be removed by toggling it on/off\n the equipment subscreen."));
+-    AddWidget(path, "Allow Strength Equipment to be Toggled", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("ToggleStrength"))
+-        .Callback([](WidgetInfo& info) {
+-            if (!CVarGetInteger(CVAR_ENHANCEMENT("ToggleStrength"), 0)) {
+-                CVarSetInteger(CVAR_ENHANCEMENT("StrengthDisabled"), 0);
+-            }
+-        })
+-        .Options(CheckboxOptions().Tooltip(
+-            "Allows Strength to be toggled on and off by pressing A on the Strength Upgrade "
+-            "in the Equipment Subscreen of the Pause Menu. This allows performing some glitches "
+-            "that require the player to not have Strength."));
+     AddWidget(path, "Unsheathe Sword Without Slashing", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("UnsheatheWithoutSlashing"))
+         .Options(CheckboxOptions().Tooltip("Allows Link to unsheathe sword without slashing automatically."));
+@@ -809,32 +574,9 @@ void SohMenu::AddMenuEnhancements() {
+     AddWidget(path, "Fast Ocarina Playback", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("FastOcarinaPlayback"))
+         .Options(CheckboxOptions().Tooltip("Skip the part where the Ocarina Playback is called when you play a song."));
+-    AddWidget(path, "Time Travel with Song of Time", WIDGET_CVAR_COMBOBOX)
+-        .CVar(CVAR_ENHANCEMENT("TimeTravel"))
+-        .Options(ComboboxOptions()
+-                     .ComboMap(timeTravelOptions)
+-                     .DefaultIndex(0)
+-                     .Tooltip("Allows Link to freely change age by playing the Song of Time.\n"
+-                              "Time Blocks can still be used properly.\n\n"
+-                              "Requirements:\n"
+-                              " - Obtained the Song of Time\n"
+-                              " - Obtained the Ocarina of Time (depends on selection)\n"
+-                              " - Obtained the Master Sword (depends on selection)\n"
+-                              " - Not within range of a Time Block\n"
+-                              " - Not within range of Ocarina Playing spots"));
  
      AddWidget(path, "Masks", WIDGET_SEPARATOR_TEXT);
 -    AddWidget(path, "Bunny Hood Effect", WIDGET_CVAR_COMBOBOX)
@@ -2025,11 +2805,131 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
 -                              "Can also be limited to only the speed boost.\n"
 -                              "The effects of either option are not accounted for in Randomizer logic.\n"
 -                              "Also disables NPC's reactions to wearing the Bunny Hood."));
+-    AddWidget(path, "Masks Equippable as Adult", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("AdultMasks"))
+-        .Options(CheckboxOptions().Tooltip("Allows masks to be equipped normally from the pause menu as adult."));
 +    // MissingShip (MS-145): "Bunny Hood Effect" removed -- ML's Bunny Hood speed boost is its own design.
-     AddWidget(path, "Masks Equippable as Adult", WIDGET_CVAR_CHECKBOX)
-         .CVar(CVAR_ENHANCEMENT("AdultMasks"))
-         .Options(CheckboxOptions().Tooltip("Allows masks to be equipped normally from the pause menu as adult."));
-@@ -980,36 +837,14 @@ void SohMenu::AddMenuEnhancements() {
+     AddWidget(path, "Persistent Masks", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("PersistentMasks"))
+         .Options(
+@@ -847,17 +589,6 @@ void SohMenu::AddMenuEnhancements() {
+     AddWidget(path, "Invisible Bunny Hood", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("HideBunnyHood"))
+         .Options(CheckboxOptions().Tooltip("Turns Bunny Hood Invisible while still maintaining its effects."));
+-    AddWidget(path, "Mask Select in Inventory", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("MaskSelect"))
+-        .PreFunc([](WidgetInfo& info) {
+-            info.options->disabled =
+-                OTRGlobals::Instance->gRandoContext->GetOption(RSK_MASK_QUEST).IsNot(RO_MASK_QUEST_VANILLA);
+-            info.options->disabledTooltip =
+-                "This setting is forcefully enabled when Mask Quest is Completed from the start or Shuffled";
+-        })
+-        .Options(CheckboxOptions().Tooltip(
+-            "After completing the mask trading sub-quest, press A and any direction on the mask "
+-            "slot to change masks."));
+ 
+     path.column = SECTION_COLUMN_2;
+     AddWidget(path, "Explosives", WIDGET_SEPARATOR_TEXT);
+@@ -883,96 +614,11 @@ void SohMenu::AddMenuEnhancements() {
+         .CVar(CVAR_ENHANCEMENT("DisableFirstPersonChus"))
+         .Options(CheckboxOptions().Tooltip(
+             "Prevent Bombchus from forcing the camera into first-person mode when released."));
+-    AddWidget(path, "Better Bombchu Shopping", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("BetterBombchuShopping"))
+-        .PreFunc([](WidgetInfo& info) {
+-            info.options->disabled = IS_RANDO && GameInteractor::IsSaveLoaded(true);
+-            info.options->disabledTooltip = "This setting is forcefully enabled when you are playing a randomizer.";
+-        })
+-        .Options(
+-            CheckboxOptions().Tooltip("Bombchus do not sell out when bought, and a 10 pack of Bombchus costs 99 rupees "
+-                                      "instead of 100."));
+ 
+-    AddWidget(path, "Bow / Slingshot", WIDGET_SEPARATOR_TEXT);
+-    AddWidget(path, "Equip Multiple Arrows at Once", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("SeparateArrows"))
+-        .Options(CheckboxOptions().Tooltip(
+-            "Allow the Bow and Magic Arrows to be equipped at the same time on different slots. "
+-            "NOTE: This will disable the behavior of the 'Equip Dupe' glitch."));
+-    AddWidget(path, "Skip Magic Arrow Equip Animation", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("SkipArrowAnimation"));
+-    // TODO: See if a Callback could be registered to avoid the need to reload scenes for the next two options.
+-    AddWidget(path, "Blue Fire Arrows", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("BlueFireArrows"))
+-        .PreFunc([](WidgetInfo& info) {
+-            info.options->disabled =
+-                OTRGlobals::Instance->gRandoContext->GetOption(RSK_BLUE_FIRE_ARROWS).Is(RO_GENERIC_ON);
+-            info.options->disabledTooltip = "This setting is forcefully enabled because a randomized savefile with "
+-                                            "\"Blue Fire Arrows\" is currently loaded.";
+-        })
+-        .Options(CheckboxOptions().Tooltip(
+-            "Allows Ice Arrows to melt Red Ice. May require a room reload if toggled during gameplay."));
+-    AddWidget(path, "Sunlight Arrows", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("SunlightArrows"))
+-        .PreFunc([](WidgetInfo& info) {
+-            info.options->disabled =
+-                OTRGlobals::Instance->gRandoContext->GetOption(RSK_SUNLIGHT_ARROWS).Is(RO_GENERIC_ON);
+-            info.options->disabledTooltip = "This setting is forcefully enabled because a randomized savefile with "
+-                                            "\"Sunlight Arrows\" enabled is currently loaded.";
+-        })
+-        .Options(CheckboxOptions().Tooltip(
+-            "Allows Light Arrows to activate Sun Switches. May require a room reload if toggled during gameplay."));
+-    AddWidget(path, "Bow as Child/Slingshot as Adult", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("BowSlingshotAmmoFix"))
+-        .Options(CheckboxOptions().Tooltip("Allows Child Link to use a Bow with Arrows.\n"
+-                                           "Allows Adult Link to use a Slingshot with Seeds.\n\n"
+-                                           "Requires glitches or the 'Timeless Equipment' cheat to equip."));
+-    AddWidget(path, "Aiming Reticle for the Bow/Slingshot", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("BowReticle"))
+-        .Options(CheckboxOptions().Tooltip("Aiming with a Bow or Slingshot will display a reticle as with the Hookshot "
+-                                           "when the projectile is ready to fire."));
+-    AddWidget(path, "Arrow Cycle", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("BowArrowCycle"))
+-        .Options(CheckboxOptions().Tooltip(
+-            "Allows cycling between different arrow types (Normal, Fire, Ice, Light) while aiming the bow. "
+-            "Press the R button to cycle to the next available arrow type. "
+-            "Only works when aiming and only cycles to arrow types you own with sufficient magic."));
+ 
+     path.column = SECTION_COLUMN_3;
+-    AddWidget(path, "Hookshot", WIDGET_SEPARATOR_TEXT);
+-    AddWidget(path, "Targetable Hookshot Reticle", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("HookshotableReticle"))
+-        .Options(CheckboxOptions().Tooltip(
+-            "Makes the Hookshot Reticle use a different color when aiming at hookshotable collision."));
+-
+-    AddWidget(path, "Boomerang", WIDGET_SEPARATOR_TEXT);
+-    AddWidget(path, "Instant Boomerang Recall", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("FastBoomerang"))
+-        .Options(CheckboxOptions().Tooltip("Instantly return the Boomerang to Link by pressing its item button while "
+-                                           "it's in the air."));
+-    AddWidget(path, "Aim Boomerang in First-Person Mode", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("BoomerangFirstPerson"))
+-        .Callback([](WidgetInfo& info) {
+-            if (!CVarGetInteger(CVAR_ENHANCEMENT("BoomerangFirstPerson"), 0)) {
+-                CVarSetInteger(CVAR_ENHANCEMENT("BoomerangReticle"), 0);
+-            }
+-        })
+-        .Options(CheckboxOptions().Tooltip(
+-            "Change aiming for the Boomerang from Third-Person to First-Person to see past Link's head."));
+-    AddWidget(path, "Aiming Reticle for Boomerang", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("BoomerangReticle"))
+-        .PreFunc([](WidgetInfo& info) { info.isHidden = !CVarGetInteger(CVAR_ENHANCEMENT("BoomerangFirstPerson"), 0); })
+-        .Options(CheckboxOptions().Tooltip("Aiming with the Boomerang will display a reticle as with the Hookshot."));
+-
+-    AddWidget(path, "Magic Spells", WIDGET_SEPARATOR_TEXT);
+-    AddWidget(path, "Better Farore's Wind", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("BetterFarore"))
+-        .Options(CheckboxOptions().Tooltip(
+-            "Helps FW persist between ages, gives Child and Adult separate FW points, and can "
+-            "be used in more places."));
+-    AddWidget(path, "Faster Farore's Wind", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("FastFarores"))
+-        .Options(CheckboxOptions().Tooltip("Greatly decreases cast time of Farore's Wind magic spell."));
++
++
+ 
+     AddWidget(path, "Bottles", WIDGET_SEPARATOR_TEXT);
+     AddWidget(path, "Rebottle Blue Fire", WIDGET_CVAR_CHECKBOX)
+@@ -980,36 +626,14 @@ void SohMenu::AddMenuEnhancements() {
          .Options(CheckboxOptions().Tooltip("Blue Fire dropped from bottle can be bottled."));
  
      // Fixes
@@ -2070,7 +2970,7 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
      AddWidget(path, "Fix Falling from Vine Edges", WIDGET_CVAR_CHECKBOX)
          .CVar(CVAR_ENHANCEMENT("FixVineFall"))
          .Options(
-@@ -1023,60 +858,6 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1023,60 +647,6 @@ void SohMenu::AddMenuEnhancements() {
          .Options(CheckboxOptions().Tooltip(
              "Causes respawning enemies, like Stalchildren, to appear on land near bodies of water. "
              "Fixes an incorrect calculation that acted like water underneath ground was above it."));
@@ -2131,7 +3031,7 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
  
      AddWidget(path, "Camera Fixes", WIDGET_SEPARATOR_TEXT);
      AddWidget(path, "Fix Camera Drift", WIDGET_CVAR_CHECKBOX)
-@@ -1105,22 +886,6 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1105,37 +675,11 @@ void SohMenu::AddMenuEnhancements() {
          .Options(CheckboxOptions().Tooltip(
              "Removes the Dungeon Entrance icon on the top-left corner of the screen when no dungeon is present on the "
              "current map."));
@@ -2154,10 +3054,13 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
      AddWidget(path, "Fix Out of Bounds Textures", WIDGET_CVAR_CHECKBOX)
          .CVar(CVAR_ENHANCEMENT("FixTexturesOOB"))
          .Callback([](WidgetInfo& info) { ApplyAuthenticGfxPatches(); })
-@@ -1131,11 +896,6 @@ void SohMenu::AddMenuEnhancements() {
-         .RaceDisable(false)
          .Options(CheckboxOptions().Tooltip(
-             "Fixes Link's eyes being open in the opening cutscene when he is supposed to be sleeping."));
+             "Fixes authentic out of bounds texture reads, instead loading textures with the correct size."));
+-    AddWidget(path, "Fix Link's Eyes Open while Sleeping", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("FixEyesOpenWhileSleeping"))
+-        .RaceDisable(false)
+-        .Options(CheckboxOptions().Tooltip(
+-            "Fixes Link's eyes being open in the opening cutscene when he is supposed to be sleeping."));
 -    AddWidget(path, "Fix Hand Holding Hammer", WIDGET_CVAR_CHECKBOX)
 -        .CVar(CVAR_ENHANCEMENT("FixHammerHand"))
 -        .RaceDisable(false)
@@ -2166,7 +3069,7 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
      AddWidget(path, "Fix Vanishing Paths", WIDGET_CVAR_COMBOBOX)
          .CVar(CVAR_ENHANCEMENT("SceneSpecificDirtPathFix"))
          .RaceDisable(false)
-@@ -1148,33 +908,8 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1148,37 +692,10 @@ void SohMenu::AddMenuEnhancements() {
                           "No Vanish: Paths do not vanish, Link seems to sink in to some paths.\n"
                           "This might affect other decal effects."));
  
@@ -2197,10 +3100,16 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
 -        .RaceDisable(false)
 -        .Options(
 -            CheckboxOptions().Tooltip("Restore the original red blood from NTSC 1.0/1.1. Disable for Green blood."));
-     AddWidget(path, "Restore Old Gold Skulltula Cutscene", WIDGET_CVAR_CHECKBOX)
-         .CVar(CVAR_ENHANCEMENT("GSCutscene"))
-         .Options(CheckboxOptions().Tooltip(
-@@ -1186,10 +921,6 @@ void SohMenu::AddMenuEnhancements() {
+-    AddWidget(path, "Restore Old Gold Skulltula Cutscene", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("GSCutscene"))
+-        .Options(CheckboxOptions().Tooltip(
+-            "Restore pre-release behavior where defeating a Gold Skulltula will play a cutscene showing it die."));
++    // MissingShip (owner's review): "Fix Link's Eyes Open while Sleeping" and "Restore Old Gold Skulltula Cutscene"
++    // removed (no sleeping-Link cutscene confirmed in ML; no Gold Skulltulas placed). Cleared at boot.
+     AddWidget(path, "Pulsate Boss Icon", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("PulsateBossIcon"))
+         .RaceDisable(false)
+@@ -1186,10 +703,6 @@ void SohMenu::AddMenuEnhancements() {
              "Restores an unfinished feature to pulsate the boss room icon when you are in the boss room."));
  
      AddWidget(path, "Glitch Restorations", WIDGET_SEPARATOR_TEXT);
@@ -2211,7 +3120,7 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
      AddWidget(path, "N64 Weird Frames", WIDGET_CVAR_CHECKBOX)
          .CVar(CVAR_ENHANCEMENT("N64WeirdFrames"))
          .Options(CheckboxOptions().Tooltip(
-@@ -1203,15 +934,6 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1203,15 +716,6 @@ void SohMenu::AddMenuEnhancements() {
          .Options(CheckboxOptions().Tooltip(
              "Restore a bug from NTSC 1.0 that allows putting away an item without an animation and performing "
              "Putaway Ocarina Items."));
@@ -2227,14 +3136,16 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
  
      AddWidget(path, "Misc Restorations", WIDGET_SEPARATOR_TEXT);
      AddWidget(path, "Fix L&Z Page Switch in Pause Menu", WIDGET_CVAR_CHECKBOX)
-@@ -1222,12 +944,13 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1221,13 +725,14 @@ void SohMenu::AddMenuEnhancements() {
+     AddWidget(path, "Wide Door Ranges", WIDGET_CVAR_CHECKBOX)
          .CVar(CVAR_ENHANCEMENT("WideShutterDoorRange"))
          .Options(CheckboxOptions().Tooltip("Restores the wider range of certain shutter doors from NTSC 1.0.\n"
-                                            "Notably affects Jabu-Jabu and boss doors."));
+-                                           "Notably affects Jabu-Jabu and boss doors."));
 -    AddWidget(path, "Grave Hole Jumps", WIDGET_CVAR_CHECKBOX)
 -        .CVar(CVAR_ENHANCEMENT("GraveHoles"))
 -        .Options(CheckboxOptions().Tooltip(
 -            "Restores NTSC 1.0 behavior where Link jumps over grave holes and grabs the ledges."));
++                                           "Notably affects boss doors.")); // MissingShip: ML has no Jabu-Jabu
  
      // Difficulty Options
 +    // MissingShip (MS-145): Difficulty, Extra Modes, Cheats and Graphics options whose target ML doesn't have are
@@ -2245,7 +3156,43 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
      path.sidebarName = "Difficulty";
      AddSidebarEntry("Enhancements", path.sidebarName, 3);
      path.column = SECTION_COLUMN_1;
-@@ -1307,12 +1030,6 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1261,18 +766,9 @@ void SohMenu::AddMenuEnhancements() {
+             "32x: Can survive all fall damage with max health and double defense.\n"
+             "64x: Can survive short fall damage with double defense.\n"
+             "128x: Cannot survive fall damage."));
+-    AddWidget(path, "Void Damage Multiplier", WIDGET_CVAR_COMBOBOX)
+-        .CVar(CVAR_ENHANCEMENT("VoidDamageMult"))
+-        .Options(ComboboxOptions()
+-                     .ComboMap(subSubPowers)
+-                     .DefaultIndex(0)
+-                     .Tooltip("Modifies damage taken after falling into a void:\n"
+-                              "2x: Can survive void damage from the start of the game.\n"
+-                              "4x: Cannot survive void damage from the start of the game.\n"
+-                              "8x: Can survive void damage twice with max health without double defense.\n"
+-                              "16x: Can survive void damage with max health without double defense.\n"
+-                              "32x: Can survive void damage with max health and double defense.\n"
+-                              "64x: Cannot survive void damage."));
++    // MissingShip (owner's review): "Void Damage Multiplier" removed -- ML takes no void damage (z_player.c scales
++    // a 0). "Enable Bombchu Drops" (under Drops) removed too: it only replaces bomb drops, and without ML's missing bomb
++    // bag no bomb drops. Their CVars are cleared at boot (MissingShip_ClearRetiredOptions).
+     AddWidget(path, "Bonk Damage Multiplier", WIDGET_CVAR_COMBOBOX)
+         .CVar(CVAR_ENHANCEMENT("BonkDamageMult"))
+         .Options(ComboboxOptions()
+@@ -1293,26 +789,10 @@ void SohMenu::AddMenuEnhancements() {
+     AddWidget(path, "No Random Drops", WIDGET_CVAR_CHECKBOX)
+         .CVar(CVAR_ENHANCEMENT("NoRandomDrops"))
+         .Options(CheckboxOptions().Tooltip("Disables Random Drops, except from the Goron Pot, Dampe, and Bosses."));
+-    AddWidget(path, "Enable Bombchu Drops", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("EnableBombchuDrops"))
+-        .PreFunc([](WidgetInfo& info) {
+-            info.options->disabled =
+-                IS_RANDO && GameInteractor::IsSaveLoaded(true) &&
+-                OTRGlobals::Instance->gRandoContext->GetOption(RSK_ENABLE_BOMBCHU_DROPS).Is(RO_GENERIC_ON);
+-            info.options->disabledTooltip = "This setting is forcefully enabled because a randomized savefile with "
+-                                            "\"Enable Bombchu Drops\" is loaded.";
+-        })
+-        .Options(CheckboxOptions().Tooltip("Bombchus will sometimes drop in place of Bombs."));
+     AddWidget(path, "Trees Drop Sticks", WIDGET_CVAR_CHECKBOX)
          .CVar(CVAR_ENHANCEMENT("TreesDropSticks"))
          .Options(CheckboxOptions().Tooltip(
              "Bonking into Trees will have a chance to drop up to 3 Sticks. Must have obtained sticks previously."));
@@ -2258,7 +3205,7 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
  
      AddWidget(path, "Miscellaneous", WIDGET_SEPARATOR_TEXT);
      AddWidget(path, "Delete File on Death", WIDGET_CVAR_CHECKBOX)
-@@ -1325,25 +1042,10 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1325,25 +805,10 @@ void SohMenu::AddMenuEnhancements() {
          .Options(IntSliderOptions().Min(-5).Max(5).DefaultValue(0).Format("%+d").Tooltip(
              "-5 will be half as much time, +5 will be 6x as much time. Affects timed switches, torches, GTG statue "
              "eyes, & doors in race with Dampe."));
@@ -2284,17 +3231,21 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
  
      path.column = SECTION_COLUMN_3;
      AddWidget(path, "Enemies", WIDGET_SEPARATOR_TEXT);
-@@ -1354,7 +1056,6 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1354,220 +819,11 @@ void SohMenu::AddMenuEnhancements() {
      AddWidget(path, "Hyper Enemies", WIDGET_CVAR_CHECKBOX)
          .CVar(CVAR_ENHANCEMENT("HyperEnemies"))
          .Options(CheckboxOptions().Tooltip("All Regular Enemies and Mini-Bosses move and act twice as fast."));
 -    AddWidget(path, "Enable Visual Guard Vision", WIDGET_CVAR_CHECKBOX).CVar(CVAR_ENHANCEMENT("GuardVision"));
-     AddWidget(path, "Leever Spawn Rate: %d seconds", WIDGET_CVAR_SLIDER_INT)
-         .CVar(CVAR_ENHANCEMENT("LeeverSpawnRate"))
-         .Options(IntSliderOptions()
-@@ -1364,210 +1065,8 @@ void SohMenu::AddMenuEnhancements() {
-                      .Format("%d seconds")
-                      .Tooltip("The time between groups of Leevers spawning."));
+-    AddWidget(path, "Leever Spawn Rate: %d seconds", WIDGET_CVAR_SLIDER_INT)
+-        .CVar(CVAR_ENHANCEMENT("LeeverSpawnRate"))
+-        .Options(IntSliderOptions()
+-                     .Min(0)
+-                     .Max(10)
+-                     .DefaultValue(0)
+-                     .Format("%d seconds")
+-                     .Tooltip("The time between groups of Leevers spawning."));
++    // MissingShip (owner's review): "Leever Spawn Rate" removed -- ML has no Leevers (its Leever slot is Ml_BeamHeart and
++    // nothing places En_Encount1). The CVar is cleared at boot (MissingShip_ClearRetiredOptions).
  
 -    // Minigames
 -    path.sidebarName = "Minigames";
@@ -2505,7 +3456,16 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
  
      // Extra Modes
      path.sidebarName = "Extra Modes";
-@@ -1600,9 +1099,6 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1591,8 +847,6 @@ void SohMenu::AddMenuEnhancements() {
+                     " - Random: Randomly decide to mirror the world on each scene change.\n"
+                     " - Random (Seeded): Scenes are mirrored based on the current randomizer seed/file.\n"
+                     " - Dungeons: Mirror the world in Dungeons.\n"
+-                    " - Dungeons (Vanilla): Mirror the world in Vanilla Dungeons.\n"
+-                    " - Dungeons (MQ): Mirror the world in MQ Dungeons.\n"
+                     " - Dungeons Random: Randomly decide to mirror the world in Dungeons.\n"
+                     " - Dungeons Random (Seeded): Dungeons are mirrored based on the current randomizer seed/file."));
+     AddWidget(path, "Ivan the Fairy (Coop Mode)", WIDGET_CVAR_CHECKBOX)
+@@ -1600,9 +854,6 @@ void SohMenu::AddMenuEnhancements() {
          .Options(CheckboxOptions().Tooltip(
              "Enables Ivan the Fairy upon the next map change. Player 2 can control Ivan and press the C-Buttons to "
              "use items and mess with Player 1!"));
@@ -2515,16 +3475,87 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
      AddWidget(path, "Rupee Dash Mode", WIDGET_CVAR_CHECKBOX)
          .CVar(CVAR_ENHANCEMENT("RupeeDash"))
          .Options(CheckboxOptions().Tooltip("Rupees reduce over time, Link suffers damage when the count hits 0."));
-@@ -1689,8 +1185,6 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1623,61 +874,9 @@ void SohMenu::AddMenuEnhancements() {
+         .Options(CheckboxOptions().Tooltip("Changes Heart Piece and Heart Container functionality.\n\n"
+                                            " - Each Heart Container or full Heart Piece reduces Link's Hearts by 1.\n"
+                                            " - Can be enabled retroactively after a File has already started."));
+-    AddWidget(path, "Additional Traps", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("ExtraTraps.Enabled"))
+-        .Options(CheckboxOptions().Tooltip("Enables additional Trap variants."));
+-    AddWidget(path, "Trap Options", WIDGET_SEPARATOR_TEXT).PreFunc([](WidgetInfo& info) {
+-        info.isHidden = CVarGetInteger(CVAR_ENHANCEMENT("ExtraTraps.Enabled"), 0) == 0;
+-    });
+-    AddWidget(path, "Tier 1 Traps:", WIDGET_TEXT).PreFunc([](WidgetInfo& info) {
+-        info.isHidden = CVarGetInteger(CVAR_ENHANCEMENT("ExtraTraps.Enabled"), 0) == 0;
+-    });
+-    AddWidget(path, "Freeze Traps", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("ExtraTraps.Ice"))
+-        .PreFunc(
+-            [](WidgetInfo& info) { info.isHidden = CVarGetInteger(CVAR_ENHANCEMENT("ExtraTraps.Enabled"), 0) == 0; });
+-    AddWidget(path, "Burn Traps", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("ExtraTraps.Burn"))
+-        .PreFunc(
+-            [](WidgetInfo& info) { info.isHidden = CVarGetInteger(CVAR_ENHANCEMENT("ExtraTraps.Enabled"), 0) == 0; });
+-    AddWidget(path, "Shock Traps", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("ExtraTraps.Shock"))
+-        .PreFunc(
+-            [](WidgetInfo& info) { info.isHidden = CVarGetInteger(CVAR_ENHANCEMENT("ExtraTraps.Enabled"), 0) == 0; });
+-    AddWidget(path, "Tier 2 Traps:", WIDGET_TEXT).PreFunc([](WidgetInfo& info) {
+-        info.isHidden = CVarGetInteger(CVAR_ENHANCEMENT("ExtraTraps.Enabled"), 0) == 0;
+-    });
+-    AddWidget(path, "Knockback Traps", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("ExtraTraps.Knockback"))
+-        .PreFunc(
+-            [](WidgetInfo& info) { info.isHidden = CVarGetInteger(CVAR_ENHANCEMENT("ExtraTraps.Enabled"), 0) == 0; });
+-    AddWidget(path, "Speed Traps", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("ExtraTraps.Speed"))
+-        .PreFunc(
+-            [](WidgetInfo& info) { info.isHidden = CVarGetInteger(CVAR_ENHANCEMENT("ExtraTraps.Enabled"), 0) == 0; });
+-    AddWidget(path, "Bomb Traps", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("ExtraTraps.Bomb"))
+-        .PreFunc(
+-            [](WidgetInfo& info) { info.isHidden = CVarGetInteger(CVAR_ENHANCEMENT("ExtraTraps.Enabled"), 0) == 0; });
+-    AddWidget(path, "Tier 3 Traps:", WIDGET_TEXT).PreFunc([](WidgetInfo& info) {
+-        info.isHidden = CVarGetInteger(CVAR_ENHANCEMENT("ExtraTraps.Enabled"), 0) == 0;
+-    });
+-    AddWidget(path, "Void Traps", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("ExtraTraps.Void"))
+-        .PreFunc(
+-            [](WidgetInfo& info) { info.isHidden = CVarGetInteger(CVAR_ENHANCEMENT("ExtraTraps.Enabled"), 0) == 0; });
+-    AddWidget(path, "Ammo Traps", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("ExtraTraps.Ammo"))
+-        .PreFunc(
+-            [](WidgetInfo& info) { info.isHidden = CVarGetInteger(CVAR_ENHANCEMENT("ExtraTraps.Enabled"), 0) == 0; });
+-    AddWidget(path, "Death Traps", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("ExtraTraps.Kill"))
+-        .PreFunc(
+-            [](WidgetInfo& info) { info.isHidden = CVarGetInteger(CVAR_ENHANCEMENT("ExtraTraps.Enabled"), 0) == 0; });
+-    AddWidget(path, "Teleport Traps", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_ENHANCEMENT("ExtraTraps.Teleport"))
+-        .PreFunc(
+-            [](WidgetInfo& info) { info.isHidden = CVarGetInteger(CVAR_ENHANCEMENT("ExtraTraps.Enabled"), 0) == 0; });
++    // MissingShip (owner's review): "Additional Traps" and its trap types removed -- they only replace a received
++    // ice trap, which SoH queues only for randomizer items or the network (MissingShip has neither). Their CVars are
++    // cleared at boot (MissingShip_ClearRetiredOptions).
+ 
+     // Cheats
+     path.sidebarName = "Cheats";
+@@ -1688,40 +887,22 @@ void SohMenu::AddMenuEnhancements() {
+     AddWidget(path, "Money", WIDGET_CVAR_CHECKBOX).CVar(CVAR_CHEAT("InfiniteMoney"));
      AddWidget(path, "Health", WIDGET_CVAR_CHECKBOX).CVar(CVAR_CHEAT("InfiniteHealth"));
      AddWidget(path, "Ammo", WIDGET_CVAR_CHECKBOX).CVar(CVAR_CHEAT("InfiniteAmmo"));
-     AddWidget(path, "Magic", WIDGET_CVAR_CHECKBOX).CVar(CVAR_CHEAT("InfiniteMagic"));
+-    AddWidget(path, "Magic", WIDGET_CVAR_CHECKBOX).CVar(CVAR_CHEAT("InfiniteMagic"));
 -    AddWidget(path, "Nayru's Love", WIDGET_CVAR_CHECKBOX).CVar(CVAR_CHEAT("InfiniteNayru"));
 -    AddWidget(path, "Epona Boost", WIDGET_CVAR_CHECKBOX).CVar(CVAR_CHEAT("InfiniteEponaBoost"));
++    // MissingShip (owner's review): "Magic" removed -- ML never gives Link a magic meter.
  
      AddWidget(path, "Items", WIDGET_SEPARATOR_TEXT);
-     AddWidget(path, "Timeless Equipment", WIDGET_CVAR_CHECKBOX)
-@@ -1700,28 +1194,15 @@ void SohMenu::AddMenuEnhancements() {
+-    AddWidget(path, "Timeless Equipment", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_CHEAT("TimelessEquipment"))
+-        .Options(CheckboxOptions().Tooltip("Allows any item to be equipped, regardless of age.\n"
+-                                           "Also allows child to use adult strength upgrades."));
++    // MissingShip (owner's review): "Timeless Equipment" removed -- Link stays a child in ML and every ML item is
++    // usable as a child.
      AddWidget(path, "Unrestricted Items", WIDGET_CVAR_CHECKBOX)
          .CVar(CVAR_CHEAT("NoRestrictItems"))
          .Options(CheckboxOptions().Tooltip("Allows you to use any item at any location"));
@@ -2541,29 +3572,48 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
      AddWidget(path, "Deku Sticks:", WIDGET_CVAR_COMBOBOX)
          .CVar(CVAR_CHEAT("DekuStick"))
          .Options(ComboboxOptions().ComboMap(dekuStickCheat).DefaultIndex(DEKU_STICK_NORMAL));
-     AddWidget(path, "Bomb Timer Multiplier: %.2fx", WIDGET_CVAR_SLIDER_FLOAT)
-         .CVar(CVAR_CHEAT("BombTimerMultiplier"))
-         .Options(FloatSliderOptions().Format("%.2f").Min(0.1f).Max(5.0f).DefaultValue(1.0f));
+-    AddWidget(path, "Bomb Timer Multiplier: %.2fx", WIDGET_CVAR_SLIDER_FLOAT)
+-        .CVar(CVAR_CHEAT("BombTimerMultiplier"))
+-        .Options(FloatSliderOptions().Format("%.2f").Min(0.1f).Max(5.0f).DefaultValue(1.0f));
 -    AddWidget(path, "Hookshot Everything", WIDGET_CVAR_CHECKBOX)
 -        .CVar(CVAR_CHEAT("HookshotEverything"))
 -        .Options(CheckboxOptions().Tooltip("Makes every surface in the game hookshotable."));
 -    AddWidget(path, "Hookshot Reach Multiplier: %.2fx", WIDGET_CVAR_SLIDER_FLOAT)
 -        .CVar(CVAR_CHEAT("HookshotReachMultiplier"))
 -        .Options(FloatSliderOptions().Format("%.2f").Min(1.0f).Max(5.0f));
++    // MissingShip (owner's review): "Bomb Timer Multiplier" removed -- only placed bombs have a fuse, and ML has no
++    // bomb bag (a bombchu's bomb goes off at once).
  
      path.column = SECTION_COLUMN_2;
      AddWidget(path, "Misc", WIDGET_SEPARATOR_TEXT);
-@@ -1743,9 +1224,6 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1743,12 +924,7 @@ void SohMenu::AddMenuEnhancements() {
          .Options(CheckboxOptions().Tooltip(
              "Keese and Guay no longer target you and simply ignore you as if you were wearing the "
              "Skull Mask."));
 -    AddWidget(path, "Disable Haunted Wasteland Sandstorm", WIDGET_CVAR_CHECKBOX)
 -        .CVar(CVAR_CHEAT("DisableSandstorm"))
 -        .Options(CheckboxOptions().Tooltip("Disables sandstorm effect in Haunted Wasteland."));
-     AddWidget(path, "Targetable Gold Skulltula", WIDGET_CVAR_CHECKBOX)
-         .CVar(CVAR_CHEAT("GSTargetable"))
-         .Options(CheckboxOptions().Tooltip("Allows Z-Targeting Gold Skulltulas."));
-@@ -1831,36 +1309,6 @@ void SohMenu::AddMenuEnhancements() {
+-    AddWidget(path, "Targetable Gold Skulltula", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_CHEAT("GSTargetable"))
+-        .Options(CheckboxOptions().Tooltip("Allows Z-Targeting Gold Skulltulas."));
++    // MissingShip (owner's review): "Targetable Gold Skulltula" removed -- ML places no Gold Skulltulas.
+ 
+     AddWidget(path, "Glitch Aids", WIDGET_SEPARATOR_TEXT);
+     AddWidget(path, "Easy Frame Advancing with Pause", WIDGET_CVAR_CHECKBOX)
+@@ -1788,10 +964,8 @@ void SohMenu::AddMenuEnhancements() {
+         .CVar(CVAR_CHEAT("TimeSync"))
+         .Options(CheckboxOptions().Tooltip("Syncs the in-game time with the real world time."));
+ 
+-    AddWidget(path, "Instant Age Change", WIDGET_SEPARATOR_TEXT);
+-    AddWidget(path, "Change Age", WIDGET_BUTTON)
+-        .Options(ButtonOptions().Tooltip("Switches Link's age and reloads the area.").Size(UIWidgets::Sizes::Inline))
+-        .Callback([](WidgetInfo& info) { SwitchAge(); });
++    // MissingShip (owner's review): "Instant Age Change" removed -- ML is played as a child throughout, in scenes
++    // with no adult gear. The CVars above are cleared at boot (MissingShip_ClearRetiredOptions).
+ 
+     path.column = SECTION_COLUMN_3;
+     AddWidget(path, "Speed Modifier", WIDGET_SEPARATOR_TEXT);
+@@ -1831,36 +1005,6 @@ void SohMenu::AddMenuEnhancements() {
          .CVar(CVAR_CHEAT("SaveStatesEnabled"))
          .Options(CheckboxOptions().Tooltip("F5 to save, F6 to change slots, F7 to load"));
  
@@ -2600,13 +3650,13 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
  
      // Cosmetics Editor
      path.sidebarName = "Cosmetics Editor";
-@@ -1926,6 +1374,56 @@ void SohMenu::AddMenuEnhancements() {
+@@ -1926,6 +1070,37 @@ void SohMenu::AddMenuEnhancements() {
              .CVar(timer.timeEnable)
              .Callback([](WidgetInfo& info) { TimeDisplayUpdateDisplayOptions(); });
      }
 +
 +    // MissingShip: every MissingShip-specific option lives on this page, so players can tailor the port the way
-+    // they tailor SoH. Stock SoH options that matter most for ML are repeated here (same CVars, same values).
++    // they tailor SoH. Stock SoH options are never repeated here: each setting has one place.
 +    path.sidebarName = "MissingShip";
 +    AddSidebarEntry("Enhancements", path.sidebarName, 2);
 +    path.column = SECTION_COLUMN_1;
@@ -2617,10 +3667,12 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
 +                     .ComboMap(msStartOcarinaButtonMap)
 +                     .DefaultIndex(MS_START_OCARINA_DDOWN)
 +                     .Tooltip("Where a new game's Ocarina of Time is equipped. Existing saves are not changed.\n\n"
-+                              "D-Down: keeps the C buttons free. Needs \"Equip Items on Dpad\"; without it the "
-+                              "Ocarina goes on C-Left instead.\n\n"
++                              "D-Down: keeps the C buttons free. Needs \"Equip Items on Dpad\" (Enhancements > "
++                              "Items); without it the Ocarina goes on C-Left instead.\n\n"
 +                              "C-Left: The Missing Link's own new-game setup."));
-+    AddWidget(path, "Dialogue", WIDGET_SEPARATOR_TEXT);
++    // MissingShip (MS-145): the port's own quality-of-life options.
++    path.column = SECTION_COLUMN_2;
++    AddWidget(path, "Quality of Life", WIDGET_SEPARATOR_TEXT);
 +    AddWidget(path, "B Cancels Choices", WIDGET_CVAR_CHECKBOX)
 +        .CVar(CVAR_ENHANCEMENT("MissingShip.BCancelsChoice"))
 +        .Options(CheckboxOptions()
@@ -2628,27 +3680,6 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
 +                     .Tooltip("On a Yes/No prompt, B picks the \"no\" / cancel answer instead of whatever is "
 +                              "highlighted, and holding B to skip text never answers a prompt. Where a prompt has no "
 +                              "cancel answer (e.g. \"Use it now / Get rid of it\"), B does nothing: press A."));
-+
-+    path.column = SECTION_COLUMN_2;
-+    AddWidget(path, "Controls", WIDGET_SEPARATOR_TEXT);
-+    AddWidget(path, "Equip Items on Dpad", WIDGET_CVAR_CHECKBOX)
-+        .CVar(CVAR_ENHANCEMENT("DpadEquips"))
-+        .Options(CheckboxOptions().Tooltip("Equip items and equipment on the D-pad. Same setting as Enhancements > "
-+                                           "Items; needed for the D-Down Ocarina."));
-+    AddWidget(path, "Dpad Ocarina Playback", WIDGET_CVAR_CHECKBOX)
-+        .CVar(CVAR_SETTING("CustomOcarina.Dpad"))
-+        .Options(CheckboxOptions().Tooltip("While playing the Ocarina, the D-pad plays the four C-button notes "
-+                                           "(the D-pad still uses items otherwise). Same setting as Settings > "
-+                                           "Controls > Ocarina Controls."));
-+    AddWidget(path, "Items", WIDGET_SEPARATOR_TEXT);
-+    AddWidget(path, "Keep Bunny Hood", WIDGET_CVAR_CHECKBOX)
-+        .CVar(CVAR_ENHANCEMENT("MissingShip.KeepBunnyHood"))
-+        .Options(CheckboxOptions()
-+                     .DefaultValue(true)
-+                     .Tooltip("If you're wearing the Bunny Hood when you void out or die, you still have it on "
-+                              "after respawning or continuing. Other masks, and ordinary scene changes, work as "
-+                              "usual (SoH's \"Persistent Masks\" keeps every mask through everything)."));
-+    AddWidget(path, "Characters", WIDGET_SEPARATOR_TEXT);
 +    AddWidget(path, "No Bean Seller Flashing", WIDGET_CVAR_CHECKBOX)
 +        .CVar(CVAR_ENHANCEMENT("MissingShip.NoBeanSellerFlash"))
 +        .Options(CheckboxOptions().Tooltip("In Missing Link, the bean seller (the Bunny Hood trader in the Deep Woods) "
@@ -2657,6 +3688,48 @@ index 4cf7305373689a1e3d9a084f91a1a2693902dfde..1356422ac8c11ebe97fea99fc427c2f7
  }
  
  } // namespace SohGui
+diff --git a/soh/soh/SohGui/SohMenuSettings.cpp b/soh/soh/SohGui/SohMenuSettings.cpp
+index b806da560c79974f9e4a6bf172cffe18d945cb55..c7af1adde3a692c2340796c082461a2b394d4e26 100644
+--- a/soh/soh/SohGui/SohMenuSettings.cpp
++++ b/soh/soh/SohGui/SohMenuSettings.cpp
+@@ -216,22 +216,9 @@ void SohMenu::AddMenuSettings() {
+                               "Debug Warp Screen: Skip to the debug warp screen\n"
+                               "Warp Point: Skip to active warp point (if set), see Dev Tools -> General"));
+ 
+-    AddWidget(path, "Languages", WIDGET_SEPARATOR_TEXT);
+-    AddWidget(path, "Translate Title Screen", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_SETTING("TitleScreenTranslation"))
+-        .RaceDisable(false);
+-    AddWidget(path, "Language", WIDGET_CVAR_COMBOBOX)
+-        .CVar(CVAR_SETTING("Languages"))
+-        .RaceDisable(false)
+-        .PreFunc([](WidgetInfo& info) {
+-            auto options = std::static_pointer_cast<UIWidgets::ComboboxOptions>(info.options);
+-            SohMenu::UpdateLanguageMap(options->comboMap);
+-        })
+-        .Options(ComboboxOptions()
+-                     .LabelPosition(LabelPositions::Far)
+-                     .ComponentAlignment(ComponentAlignments::Right)
+-                     .ComboMap(languages)
+-                     .DefaultIndex(LANGUAGE_ENG));
++    // MissingShip: no "Languages" section. The Missing Link is English only: the mod replaces just the English
++    // message table, so German, French and Japanese would show vanilla OoT's dialogue, and ML's title screen has no
++    // translated logo. Both settings are cleared at boot (MissingShip_ClearRetiredOptions).
+     AddWidget(path, "Accessibility", WIDGET_SEPARATOR_TEXT);
+ #if defined(_WIN32) || defined(__APPLE__) || defined(ESPEAK)
+     AddWidget(path, "Text to Speech", WIDGET_CVAR_CHECKBOX)
+@@ -247,10 +234,7 @@ void SohMenu::AddMenuSettings() {
+         .CVar(CVAR_SETTING("A11yNoScreenFlashForFinishingBlow"))
+         .RaceDisable(false)
+         .Options(CheckboxOptions().Tooltip("Disables the white screen flash on enemy kill."));
+-    AddWidget(path, "Disable Jabu Wobble", WIDGET_CVAR_CHECKBOX)
+-        .CVar(CVAR_SETTING("A11yNoJabuWobble"))
+-        .RaceDisable(false)
+-        .Options(CheckboxOptions().Tooltip("Disable the geometry wobble and camera distortion inside Jabu."));
++    // MissingShip: "Disable Jabu Wobble" removed -- ML has no Jabu-Jabu's Belly. Cleared at boot.
+     AddWidget(path, "EXPERIMENTAL", WIDGET_SEPARATOR_TEXT).Options(TextOptions().Color(Colors::Orange));
+     AddWidget(path, "ImGui Menu Scaling", WIDGET_CVAR_COMBOBOX)
+         .CVar(CVAR_SETTING("ImGuiScale"))
 diff --git a/soh/soh/util.cpp b/soh/soh/util.cpp
 index b3bc053f107700fc8df4635a50a4c47d1fd9f7c0..7d851af9de6ecbc8cb83cd957f7bb6d7e8a6fbfb 100644
 --- a/soh/soh/util.cpp
@@ -3440,10 +4513,10 @@ index 0000000000000000000000000000000000000000..b3e5a87f7eed1795dea7fb1abc931997
 +#endif
 diff --git a/soh/src/code/ml_state.c b/soh/src/code/ml_state.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..ba48dcd37b77caa07b679f1072572a29c38f1624
+index 0000000000000000000000000000000000000000..60679e3d5b298ace47c7b93bc1a44cabb455e696
 --- /dev/null
 +++ b/soh/src/code/ml_state.c
-@@ -0,0 +1,329 @@
+@@ -0,0 +1,308 @@
 +#include "ml_state.h"
 +#include "ml_entrance_map.h"
 +#include "objects/gameplay_keep/gameplay_keep.h"
@@ -3752,33 +4825,12 @@ index 0000000000000000000000000000000000000000..ba48dcd37b77caa07b679f1072572a29
 +    MlSoulSword_SetBladeColor(sMlSoulGlow[0], sMlSoulGlow[1], sMlSoulGlow[2]);
 +}
 +
-+// MissingShip QoL, not ML: keep the Bunny Hood on through a void-out, a respawn or a game-over continue (option
-+// "Keep Bunny Hood" on the MissingShip page, default on). Vanilla takes masks off on every scene load; SoH's
-+// Persistent Masks keeps every mask through everything. This records the mask when the respawn is triggered and puts
-+// it back on in the next Player_Init, so a mask taken off by an ordinary scene change stays off.
-+static u8 sMlKeptMask = PLAYER_MASK_NONE;
-+
-+void MlState_RememberMask(PlayState* play) {
-+    Player* player = GET_PLAYER(play);
-+
-+    sMlKeptMask = (CVarGetInteger(CVAR_ENHANCEMENT("MissingShip.KeepBunnyHood"), 1) && (player != NULL) &&
-+                   (player->currentMask == PLAYER_MASK_BUNNY))
-+                      ? PLAYER_MASK_BUNNY
-+                      : PLAYER_MASK_NONE;
-+}
-+
-+void MlState_RestoreMask(Player* player) {
-+    if (sMlKeptMask != PLAYER_MASK_NONE) {
-+        player->currentMask = sMlKeptMask;
-+    }
-+    sMlKeptMask = PLAYER_MASK_NONE;
-+}
 diff --git a/soh/src/code/ml_state.h b/soh/src/code/ml_state.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..bbd7651ec5e3de97e7e182214a83734cfba38e3c
+index 0000000000000000000000000000000000000000..147e94717cd310830aa37c7fde6ef25a81f22294
 --- /dev/null
 +++ b/soh/src/code/ml_state.h
-@@ -0,0 +1,22 @@
+@@ -0,0 +1,20 @@
 +#ifndef ML_STATE_H
 +#define ML_STATE_H
 +
@@ -3797,8 +4849,6 @@ index 0000000000000000000000000000000000000000..bbd7651ec5e3de97e7e182214a83734c
 +void MlState_LinkAnimation(LinkAnimationHeader** animation, f32* endFrame);
 +void MlState_JumpUpdate(Player* player);
 +s32 MlState_SkipWallPush(PlayState* play);
-+void MlState_RememberMask(PlayState* play);
-+void MlState_RestoreMask(Player* player);
 +
 +#endif
 diff --git a/soh/src/code/z_actor.c b/soh/src/code/z_actor.c
@@ -4739,7 +5789,7 @@ index 48507ce0efe8247493720303ecf59a5318a956f1..df24849cda9eb8190a99628ac8739d62
      {    0,    0,    0,    0,    0,    0,    0, F_1F },
  }; /* clang-format on */
 diff --git a/soh/src/code/z_map_exp.c b/soh/src/code/z_map_exp.c
-index 44b5b43b5d6d26a2bdb559e8fe80be90cf9f9757..42addd61c9a72746db840b1ca6235bea14a89cb4 100644
+index 44b5b43b5d6d26a2bdb559e8fe80be90cf9f9757..6520f225687d326b6d01a7f60126bb91fdf77383 100644
 --- a/soh/src/code/z_map_exp.c
 +++ b/soh/src/code/z_map_exp.c
 @@ -451,10 +451,16 @@ void Map_InitData(PlayState* play, s16 room) {
@@ -4763,16 +5813,19 @@ index 44b5b43b5d6d26a2bdb559e8fe80be90cf9f9757..42addd61c9a72746db840b1ca6235bea
              R_COMPASS_OFFSET_X = gMapData->roomCompassOffsetX[mapIndex][room];
              R_COMPASS_OFFSET_Y = gMapData->roomCompassOffsetY[mapIndex][room];
              Map_SetFloorPalettesData(play, VREG(30));
-@@ -804,7 +810,7 @@ void Minimap_Draw(PlayState* play) {
+@@ -804,7 +810,10 @@ void Minimap_Draw(PlayState* play) {
              case SCENE_SHADOW_TEMPLE:
              case SCENE_BOTTOM_OF_THE_WELL:
              case SCENE_ICE_CAVERN:
 -                if (!R_MINIMAP_DISABLED && CVarGetInteger(CVAR_COSMETIC("HUD.Minimap.PosType"), 0) != HIDDEN) {
-+                if (!R_MINIMAP_DISABLED && CVarGetInteger(CVAR_COSMETIC("HUD.Minimap.PosType"), HIDDEN) != HIDDEN) { // MissingShip: hidden by default
++                // MissingShip: ML keeps the dungeon minimap (only its overworld one is never drawn), so here it shows
++                // unless the player hides the minimap
++                if (!R_MINIMAP_DISABLED &&
++                    CVarGetInteger(CVAR_COSMETIC("HUD.Minimap.PosType"), ORIGINAL_LOCATION) != HIDDEN) {
                      Gfx_SetupDL_39Overlay(play->state.gfxCtx);
                      gDPSetCombineLERP(OVERLAY_DISP++, 1, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, 1, 0, PRIMITIVE, 0,
                                        TEXEL0, 0, PRIMITIVE, 0);
-@@ -894,7 +900,7 @@ void Minimap_Draw(PlayState* play) {
+@@ -894,7 +903,7 @@ void Minimap_Draw(PlayState* play) {
              case SCENE_GORON_CITY:
              case SCENE_LON_LON_RANCH:
              case SCENE_OUTSIDE_GANONS_CASTLE:
@@ -4781,7 +5834,7 @@ index 44b5b43b5d6d26a2bdb559e8fe80be90cf9f9757..42addd61c9a72746db840b1ca6235bea
                      Gfx_SetupDL_39Overlay(play->state.gfxCtx);
  
                      gDPSetCombineMode(OVERLAY_DISP++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
-@@ -1054,8 +1060,10 @@ void Minimap_Draw(PlayState* play) {
+@@ -1054,8 +1063,10 @@ void Minimap_Draw(PlayState* play) {
                      Minimap_DrawCompassIcons(play); // Draw icons for the player spawn and current position
                  }
  
@@ -5263,7 +6316,7 @@ index 4b782d9540cfa2f235048c04c7811502db9225bd..b7d194857e49d5ecbd174446630b5b4a
  
                  if ((player->stateFlags1 & PLAYER_STATE1_ON_HORSE) || (play->shootingGalleryStatus > 1) ||
 diff --git a/soh/src/code/z_play.c b/soh/src/code/z_play.c
-index f73d076de42c85067bb5f8d6fc0b4be7cf1e4ca8..bd81b26d7fb397e8d2aa191e3a737ccbe85320ee 100644
+index f73d076de42c85067bb5f8d6fc0b4be7cf1e4ca8..899346c57ab45404cd9ca9361657fc92c97f4dbc 100644
 --- a/soh/src/code/z_play.c
 +++ b/soh/src/code/z_play.c
 @@ -1,4 +1,7 @@
@@ -5314,22 +6367,6 @@ index f73d076de42c85067bb5f8d6fc0b4be7cf1e4ca8..bd81b26d7fb397e8d2aa191e3a737ccb
 +            LUSLOG_INFO("MissingShip-TRACE transition start next=%#x trigger=%d", play->nextEntranceIndex, play->transitionTrigger);
              play->transitionMode = TRANS_MODE_SETUP;
          }
- 
-@@ -2130,6 +2153,7 @@ void Play_SetupRespawnPoint(PlayState* play, s32 respawnMode, s32 playerParams)
- }
- 
- void Play_TriggerVoidOut(PlayState* play) {
-+    MlState_RememberMask(play); // MissingShip: keep the Bunny Hood on (QoL)
-     gSaveContext.respawn[RESPAWN_MODE_DOWN].tempSwchFlags = play->actorCtx.flags.tempSwch;
-     gSaveContext.respawn[RESPAWN_MODE_DOWN].tempCollectFlags = play->actorCtx.flags.tempCollect;
-     gSaveContext.respawnFlag = 1;
-@@ -2139,6 +2163,7 @@ void Play_TriggerVoidOut(PlayState* play) {
- }
- 
- void Play_LoadToLastEntrance(PlayState* play) {
-+    MlState_RememberMask(play); // MissingShip: keep the Bunny Hood on (QoL; respawns and game-over continue)
-     gSaveContext.respawnFlag = -1;
-     play->transitionTrigger = TRANS_TRIGGER_START;
  
 diff --git a/soh/src/code/z_player_lib.c b/soh/src/code/z_player_lib.c
 index 34750ed2cc7fc7cfc66f9999de6581ea2fc091b4..f284c4820e8ac2279131de089e907af4c89c8417 100644
@@ -14495,7 +15532,7 @@ index f0cf6dad0bee6c91a54576f87a18a1cbc02c741f..749055c3a78e1b2b72acfd278839a00a
  
      gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 diff --git a/soh/src/overlays/actors/ovl_player_actor/z_player.c b/soh/src/overlays/actors/ovl_player_actor/z_player.c
-index 5aa9d947048cdc4670e6c76ac55913860b7c4535..4cd7a934b80a4352863785fa1de66e464b4f4a72 100644
+index 5aa9d947048cdc4670e6c76ac55913860b7c4535..d6ffea40ca3a146fe2bb57589dbd6874f69cbf1d 100644
 --- a/soh/src/overlays/actors/ovl_player_actor/z_player.c
 +++ b/soh/src/overlays/actors/ovl_player_actor/z_player.c
 @@ -6,6 +6,7 @@
@@ -14636,15 +15673,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..4cd7a934b80a4352863785fa1de66e46
      Math_AsymStepToF(&this->linearVelocity, arg1, REG(19) / 100.0f, 1.5f);
      Math_ScaledStepToS(&this->yaw, arg2, REG(27));
  }
-@@ -10839,6 +10875,7 @@ void Player_Init(Actor* thisx, PlayState* play2) {
-         }
-         this->currentMask = gSaveContext.ship.maskMemory;
-     }
-+    MlState_RestoreMask(this); // MissingShip: the Bunny Hood worn at a void-out or death (QoL)
-     Player_InitCommon(this, play, gPlayerSkelHeaders[((void)0, gSaveContext.linkAge)]);
-     // `giObjectSegment` is used for both "get item" objects and title cards. The maximum size for
-     // get item objects is 0x2000 (see the assert in func_8083AE40), and the maximum size for
-@@ -10882,7 +10919,8 @@ void Player_Init(Actor* thisx, PlayState* play2) {
+@@ -10882,7 +10918,8 @@ void Player_Init(Actor* thisx, PlayState* play2) {
                   (Flags_GetEventChkInf(EVENTCHKINF_ENTERED_DODONGOS_CAVERN))) &&
                  ((play->sceneNum != SCENE_BOMBCHU_SHOP) ||
                   (Flags_GetEventChkInf(EVENTCHKINF_USED_DODONGOS_CAVERN_BLUE_WARP)))) {
@@ -14654,7 +15683,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..4cd7a934b80a4352863785fa1de66e46
              }
          }
          gSaveContext.showTitleCard = true;
-@@ -11616,7 +11654,8 @@ void Player_UpdateCamAndSeqModes(PlayState* play, Player* this) {
+@@ -11616,7 +11653,8 @@ void Player_UpdateCamAndSeqModes(PlayState* play, Player* this) {
          }
  
          if (play->sceneNum != SCENE_FISHING_POND) {
@@ -14664,7 +15693,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..4cd7a934b80a4352863785fa1de66e46
          }
      }
  }
-@@ -12147,7 +12186,8 @@ void Player_UpdateCommon(Player* this, PlayState* play, Input* input) {
+@@ -12147,7 +12185,8 @@ void Player_UpdateCommon(Player* this, PlayState* play, Input* input) {
          if (this->stateFlags1 & PLAYER_STATE1_IN_WATER) {
              sWaterSpeedFactor = 0.5f;
          } else {
@@ -14674,7 +15703,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..4cd7a934b80a4352863785fa1de66e46
          }
  
          sInvWaterSpeedFactor = 1.0f / sWaterSpeedFactor;
-@@ -12319,9 +12359,23 @@ void Player_Update(Actor* thisx, PlayState* play) {
+@@ -12319,9 +12358,23 @@ void Player_Update(Actor* thisx, PlayState* play) {
              }
          }
  
@@ -14699,7 +15728,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..4cd7a934b80a4352863785fa1de66e46
      MREG(52) = this->actor.world.pos.x;
      MREG(53) = this->actor.world.pos.y;
      MREG(54) = this->actor.world.pos.z;
-@@ -12541,6 +12595,7 @@ void Player_Draw(Actor* thisx, PlayState* play2) {
+@@ -12541,6 +12594,7 @@ void Player_Draw(Actor* thisx, PlayState* play2) {
          if (CVarGetInteger(CVAR_ENHANCEMENT("DisableLOD"), 0)) {
              lod = 0;
          }
@@ -14707,7 +15736,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..4cd7a934b80a4352863785fa1de66e46
  
          func_80093C80(play);
          Gfx_SetupDL_25Xlu(play->state.gfxCtx);
-@@ -13002,7 +13057,9 @@ void Player_Action_Talk(Player* this, PlayState* play) {
+@@ -13002,7 +13056,9 @@ void Player_Action_Talk(Player* this, PlayState* play) {
      if (Message_GetState(&play->msgCtx) == TEXT_STATE_CLOSING) {
          this->actor.flags &= ~ACTOR_FLAG_TALK;
  
@@ -14718,7 +15747,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..4cd7a934b80a4352863785fa1de66e46
              this->stateFlags2 &= ~PLAYER_STATE2_LOCK_ON_WITH_SWITCH;
          }
  
-@@ -14316,12 +14373,16 @@ void Player_Action_8084E3C4(Player* this, PlayState* play) {
+@@ -14316,12 +14372,16 @@ void Player_Action_8084E3C4(Player* this, PlayState* play) {
      if (play->msgCtx.ocarinaMode == OCARINA_MODE_04) {
          func_8005B1A4(Play_GetCamera(play, 0));
  
@@ -14737,7 +15766,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..4cd7a934b80a4352863785fa1de66e46
          } else if (!Player_ActionHandler_13(this, play)) {
              func_8083A098(this, &gPlayerAnim_link_normal_okarina_end, play);
          }
-@@ -14392,7 +14453,11 @@ void Player_Action_8084E6D4(Player* this, PlayState* play) {
+@@ -14392,7 +14452,11 @@ void Player_Action_8084E6D4(Player* this, PlayState* play) {
                          this->exchangeItemId = EXCH_ITEM_NONE;
  
                          if (func_8084B4D4(play, this) == 0) {
@@ -14750,7 +15779,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..4cd7a934b80a4352863785fa1de66e46
                          }
                      } else {
                          func_8084DFAC(play, this);
-@@ -14715,7 +14780,12 @@ void Player_Action_ExchangeItem(Player* this, PlayState* play) {
+@@ -14715,7 +14779,12 @@ void Player_Action_ExchangeItem(Player* this, PlayState* play) {
                  this->actor.flags |= ACTOR_FLAG_TALK;
              }
  
@@ -14764,7 +15793,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..4cd7a934b80a4352863785fa1de66e46
          } else {
              GetItemEntry giEntry = ItemTable_Retrieve(D_80854528[this->exchangeItemId - 1]);
  
-@@ -14900,6 +14970,7 @@ void Player_Action_8084F88C(Player* this, PlayState* play) {
+@@ -14900,6 +14969,7 @@ void Player_Action_8084F88C(Player* this, PlayState* play) {
                      Grotto_ForceRegularVoidOut();
                  }
              } else if (GameInteractor_Should(VB_TRIGGER_VOIDOUT, true, this)) {
@@ -14772,7 +15801,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..4cd7a934b80a4352863785fa1de66e46
                  Play_TriggerVoidOut(play);
              }
  
-@@ -14908,7 +14979,7 @@ void Player_Action_8084F88C(Player* this, PlayState* play) {
+@@ -14908,7 +14978,7 @@ void Player_Action_8084F88C(Player* this, PlayState* play) {
          } else {
              play->transitionType = TRANS_TYPE_FADE_BLACK;
              gSaveContext.nextTransitionType = TRANS_TYPE_FADE_WHITE;
@@ -14781,7 +15810,7 @@ index 5aa9d947048cdc4670e6c76ac55913860b7c4535..4cd7a934b80a4352863785fa1de66e46
              gSaveContext.natureAmbienceId = 0xFF;
          }
  
-@@ -16642,12 +16713,17 @@ void Player_StartTalking(PlayState* play, Actor* actor) {
+@@ -16642,12 +16712,17 @@ void Player_StartTalking(PlayState* play, Actor* actor) {
      Player* this = GET_PLAYER(play);
      s32 pad;
  
