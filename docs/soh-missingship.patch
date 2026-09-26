@@ -5895,7 +5895,7 @@ index 067fd9ae9c1dd26014f0abd8ea7011fa9914c03a..b606fbcb2afea7f2de3d9d8e05690b37
          Flags_SetSwitch(play, this->switchFlag);
          Flags_SetEventChkInf(EVENTCHKINF_BOMBED_DODONGOS_CAVERN_ENTRANCE);
 diff --git a/soh/src/overlays/actors/ovl_Bg_Treemouth/z_bg_treemouth.c b/soh/src/overlays/actors/ovl_Bg_Treemouth/z_bg_treemouth.c
-index 9c7bbb4e0c240418d1c08ac306c94170c55ad493..af47561820a051e28624ea677f4b0ad7b3986b1f 100644
+index 9c7bbb4e0c240418d1c08ac306c94170c55ad493..068ce5789e60f831289598b11a983e4924735b53 100644
 --- a/soh/src/overlays/actors/ovl_Bg_Treemouth/z_bg_treemouth.c
 +++ b/soh/src/overlays/actors/ovl_Bg_Treemouth/z_bg_treemouth.c
 @@ -61,6 +61,15 @@ void BgTreemouth_SetupAction(BgTreemouth* this, BgTreemouthActionFunc actionFunc
@@ -5914,6 +5914,17 @@ index 9c7bbb4e0c240418d1c08ac306c94170c55ad493..af47561820a051e28624ea677f4b0ad7
      s32 pad;
      BgTreemouth* this = (BgTreemouth*)thisx;
      CollisionHeader* colHeader = NULL;
+@@ -86,6 +95,10 @@ void BgTreemouth_Init(Actor* thisx, PlayState* play) {
+ }
+ 
+ void BgTreemouth_Destroy(Actor* thisx, PlayState* play) {
++    // MissingShip (MS-116): ML's destroy is empty too. Init never registered collision, so bgId is still the 0 from
++    // Actor_Spawn's memset, and vanilla's delete removed bg actor 0 -- the first gate in Deep Woods lost its collision.
++    return;
++
+     BgTreemouth* this = (BgTreemouth*)thisx;
+ 
+     DynaPoly_DeleteBgActor(play, &play->colCtx.dyna, this->dyna.bgId);
 diff --git a/soh/src/overlays/actors/ovl_Door_Ana/z_door_ana.c b/soh/src/overlays/actors/ovl_Door_Ana/z_door_ana.c
 index 7dde93e1cd96061fc8c6d0d5d75a081962082230..f29f1d27d344b619c1e0ef68272d61a2327138c2 100644
 --- a/soh/src/overlays/actors/ovl_Door_Ana/z_door_ana.c
