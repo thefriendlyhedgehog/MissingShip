@@ -108,6 +108,9 @@ for name, (dma, xml_name) in SAME_LAYOUT.items():
         if v[0x50:] != ml[o:o + n]:
             same[path] = v[:0x50] + ml[o:o + n]
 added.update(same)
+# Owner's request: ML's skies without the face seams (pipeline/sky_seams.py).
+from sky_seams import fix_skyboxes
+print('seamless skyboxes:', fix_skyboxes(added))
 
 shutil.copy(MOD, MOD + '.tmp')
 with zipfile.ZipFile(MOD + '.tmp', 'a', zipfile.ZIP_DEFLATED) as z:
