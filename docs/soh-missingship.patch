@@ -896,6 +896,39 @@ index 12354dce415ff53f9f9f4493ffa2ac92162204bd..2eb752c01849455fe165beb30e8ecb1b
      ShipInit::InitAll();
      OTRGlobals::Instance->ScaleImGui();
  }
+diff --git a/soh/soh/Enhancements/RemoteBombchu.cpp b/soh/soh/Enhancements/RemoteBombchu.cpp
+index 1813db23d533f0673c4f7d76929da2531ed015c6..9082f0494378f917cf9220a958cc8df93ad83ed0 100644
+--- a/soh/soh/Enhancements/RemoteBombchu.cpp
++++ b/soh/soh/Enhancements/RemoteBombchu.cpp
+@@ -171,6 +171,15 @@ static void OnActorDestroy(void* refActor) {
+     }
+ }
+ 
++// MissingShip (MS-139): the Hollow Root Keep's Bombchu rail (see EnBomChu_MlRail) runs along the walkways on the
++// elevator room's back wall. Steering fights it there, so a Bombchu on those walkways or in the gap is left alone.
++static bool InMlRailArea(EnBomChu* chu) {
++    Vec3f* pos = &chu->actor.world.pos;
++
++    return (gPlayState->sceneNum == SCENE_SHADOW_TEMPLE) && (pos->z >= 1920.0f) && (pos->z < 2192.0f) &&
++           (pos->y >= 680.0f) && (pos->x >= -900.0f) && (pos->x < -60.0f);
++}
++
+ // Main update logic
+ static void OnActorUpdate(void* refActor) {
+     if (refActor != sState.activeChu)
+@@ -179,6 +188,12 @@ static void OnActorUpdate(void* refActor) {
+     if (sState.activeChu->actionFunc != EnBomChu_Move)
+         return;
+ 
++    if (InMlRailArea(sState.activeChu)) {
++        StopControl(gPlayState);
++        sState.activeChu = nullptr;
++        return;
++    }
++
+     // Start control when bombchu begins moving
+     if (!sState.isActive) {
+         StartControl(gPlayState);
 diff --git a/soh/soh/Enhancements/RemoveSpinAttackDarkness.cpp b/soh/soh/Enhancements/RemoveSpinAttackDarkness.cpp
 index 96581703010c097c8dc647f7035abbe334eda9ce..5922381972ce8419855aede989ea4a894cf83c8c 100644
 --- a/soh/soh/Enhancements/RemoveSpinAttackDarkness.cpp
@@ -6866,7 +6899,7 @@ index 2f062223628c8ea2df7b0ea81e686855c5ac992b..5dce431da43c5241525944af3e390f73
          yOffset = (this->actor.params < 0) ? 1 : 40;
          Lights_PointNoGlowSetInfo(&this->lightInfo, this->actor.world.pos.x, yOffset + (s16)this->actor.world.pos.y,
 diff --git a/soh/src/overlays/actors/ovl_En_Mag/z_en_mag.c b/soh/src/overlays/actors/ovl_En_Mag/z_en_mag.c
-index 6290d65bee7b04e7ffb45f8316724809e716633b..bfaab23775e9d63b973b5b8e366c7972e912aea3 100644
+index 6290d65bee7b04e7ffb45f8316724809e716633b..939b2ebac00ea9bea856c90b8cc8cc6ad46b4f00 100644
 --- a/soh/src/overlays/actors/ovl_En_Mag/z_en_mag.c
 +++ b/soh/src/overlays/actors/ovl_En_Mag/z_en_mag.c
 @@ -2,6 +2,12 @@
@@ -6913,7 +6946,7 @@ index 6290d65bee7b04e7ffb45f8316724809e716633b..bfaab23775e9d63b973b5b8e366c7972
      if (gSaveContext.fileNum != 0xFEDC) {
          if (this->globalState < MAG_STATE_DISPLAY) {
              if (CHECK_BTN_ALL(play->state.input[0].press.button, BTN_START) ||
-@@ -754,6 +768,113 @@ void EnMag_DrawInner(Actor* thisx, PlayState* play, Gfx** gfxP) {
+@@ -754,6 +768,104 @@ void EnMag_DrawInner(Actor* thisx, PlayState* play, Gfx** gfxP) {
      *gfxP = gfx;
  }
  
@@ -6971,19 +7004,10 @@ index 6290d65bee7b04e7ffb45f8316724809e716633b..bfaab23775e9d63b973b5b8e366c7972
 +    if (subAlpha != 0) {
 +        copyrightAlpha = (s16)this->copyrightAlpha;
 +
-+        // Dark bars: one under the credits, one behind PRESS START. The bar texture is a single row, stretched.
++        // MissingShip: ML draws a dark brown bar (gMlTitleBarTex, tinted 30,20,0) under the credits and another behind
++        // PRESS START. They are left out at the owner's request: the text keeps its own drop shadow over the scene.
 +        gDPSetAlphaCompare(gfx++, G_AC_NONE);
 +        gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
-+        gDPPipeSync(gfx++);
-+        gDPSetEnvColor(gfx++, 0, 0, 0, 255);
-+        gDPLoadTextureBlock(gfx++, gMlTitleBarTex, G_IM_FMT_IA, G_IM_SIZ_16b, 232, 1, 0, G_TX_NOMIRROR | G_TX_CLAMP,
-+                            G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-+        gDPSetPrimColor(gfx++, 0, 0, 30, 20, 0, subAlpha);
-+        gSPTextureRectangle(gfx++, 88 << 2, 179 << 2, 320 << 2, 205 << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 0x27);
-+        if (copyrightAlpha != 0) {
-+            gDPSetPrimColor(gfx++, 0, 0, 30, 20, 0, copyrightAlpha);
-+            gSPTextureRectangle(gfx++, 181 << 2, 160 << 2, 320 << 2, 174 << 2, G_TX_RENDERTILE, 0, 0, 0x6AD, 0x49);
-+        }
 +
 +        // The two credit lines.
 +        gDPPipeSync(gfx++);
@@ -7027,7 +7051,7 @@ index 6290d65bee7b04e7ffb45f8316724809e716633b..bfaab23775e9d63b973b5b8e366c7972
  void EnMag_Draw(Actor* thisx, PlayState* play) {
      s32 pad;
      Gfx* gfx;
-@@ -765,7 +886,7 @@ void EnMag_Draw(Actor* thisx, PlayState* play) {
+@@ -765,7 +877,7 @@ void EnMag_Draw(Actor* thisx, PlayState* play) {
      gfx = Graph_GfxPlusOne(gfxRef);
      gSPDisplayList(OVERLAY_DISP++, gfx);
  
