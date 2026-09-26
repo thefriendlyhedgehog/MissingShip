@@ -6704,7 +6704,7 @@ index 0b1e6de23ed171723f4db915c3d99d142ffded54..0e834cdffdbeba4f2a1df3775efd3062
  void EnKarebaba_Init(Actor* thisx, PlayState* play);
  void EnKarebaba_Destroy(Actor* thisx, PlayState* play);
 diff --git a/soh/src/overlays/actors/ovl_En_Ko/z_en_ko.c b/soh/src/overlays/actors/ovl_En_Ko/z_en_ko.c
-index 4b2280d7edae762faee252338785a24cab9bacee..d70f805ad724085337ad934fa56be26efc6da002 100644
+index 4b2280d7edae762faee252338785a24cab9bacee..cf83f15b439cd8145257d2875faf278c4210229e 100644
 --- a/soh/src/overlays/actors/ovl_En_Ko/z_en_ko.c
 +++ b/soh/src/overlays/actors/ovl_En_Ko/z_en_ko.c
 @@ -10,9 +10,12 @@
@@ -6749,7 +6749,7 @@ index 4b2280d7edae762faee252338785a24cab9bacee..d70f805ad724085337ad934fa56be26e
      if ((play->csCtx.state != CS_STATE_IDLE) || gDbgCamEnabled) {
          dist = Math_Vec3f_DistXYZ(&this->actor.world.pos, &play->view.eye) * 0.25f;
      } else {
-@@ -1273,6 +1281,47 @@ void func_80A995CC(EnKo* this, PlayState* play) {
+@@ -1273,6 +1281,61 @@ void func_80A995CC(EnKo* this, PlayState* play) {
      }
  }
  
@@ -6765,17 +6765,34 @@ index 4b2280d7edae762faee252338785a24cab9bacee..d70f805ad724085337ad934fa56be26e
 +
 +// The same hook then patches rows 12-18 of object_kw1's mouth texture in object memory, turning the Kokiri smile into
 +// a frown, when this Kokiri's legs come from object_kw1. The pipeline ships the frown as its own texture
-+// (inject_obj_patches.py), swapped in here with a blended texture: it stays until a save without the sword is played.
-+static u8 sMlFrownMask[32 * 32];
++// (inject_obj_patches.py); like ML, it is copied over the mouth texture's pixels (the smile is kept to put back once a
++// save without the sword is played). A blended-texture swap drew garbage on this CI8 texture (MS-032).
++static u8 sMlSmile[32 * 32];
 +static s32 sMlFrown = false;
++
++static void EnKo_MlSetFrown(s32 frown) {
++    u8* mouth = (u8*)ResourceMgr_LoadTexOrDListByName(gKw1MouthTex);
++
++    if (mouth == NULL) {
++        return;
++    }
++    if (frown) {
++        memcpy(sMlSmile, mouth, sizeof(sMlSmile));
++        memcpy(mouth, ResourceMgr_LoadTexOrDListByName("__OTR__objects/object_kw1/gMlKw1MouthFrownTex"),
++               sizeof(sMlSmile));
++    } else {
++        memcpy(mouth, sMlSmile, sizeof(sMlSmile));
++    }
++    Gfx_TextureCacheDelete(mouth);
++    sMlFrown = frown;
++}
 +
 +void EnKo_MlAfterSword(EnKo* this) {
 +    s32 i;
 +
 +    if (gSaveContext.inventory.ammo[SLOT_SLINGSHOT] == 0) {
 +        if (sMlFrown) {
-+            Gfx_UnregisterBlendedTexture(gKw1MouthTex);
-+            sMlFrown = false;
++            EnKo_MlSetFrown(false);
 +        }
 +        return;
 +    }
@@ -6787,17 +6804,14 @@ index 4b2280d7edae762faee252338785a24cab9bacee..d70f805ad724085337ad934fa56be26e
 +    }
 +    if (!sMlFrown && sSkeleton[sModelInfo[ENKO_TYPE].legsId].objectId == OBJECT_KW1 &&
 +        ResourceMgr_FileExists("objects/object_kw1/gMlKw1MouthFrownTex")) {
-+        memset(sMlFrownMask, 1, sizeof(sMlFrownMask));
-+        Gfx_RegisterBlendedTexture(gKw1MouthTex, sMlFrownMask, (u8*)"__OTR__objects/object_kw1/gMlKw1MouthFrownTex");
-+        Gfx_TextureCacheDelete(sMlFrownMask);
-+        sMlFrown = true;
++        EnKo_MlSetFrown(true);
 +    }
 +}
 +
  void EnKo_Update(Actor* thisx, PlayState* play) {
      ColliderCylinder* collider;
      EnKo* this = (EnKo*)thisx;
-@@ -1304,6 +1353,7 @@ void EnKo_Update(Actor* thisx, PlayState* play) {
+@@ -1304,6 +1367,7 @@ void EnKo_Update(Actor* thisx, PlayState* play) {
      collider = &this->collider;
      Collider_UpdateCylinder(&this->actor, collider);
      CollisionCheck_SetOC(play, &play->colChkCtx, &collider->base);
