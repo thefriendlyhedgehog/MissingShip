@@ -16,8 +16,8 @@ Audiobank/Audioseq/Audiotable names.
 Needs the ZAudio zero-size-soundfont guard (see docs/zapd-missingship.patch): ML zeroes out unused
 soundfonts while leaving their instrument counts, which crashed the stock extractor.
 """
-from mspaths import PIPE, ZAPD, ZAPD_CWD, zapd_config
-import subprocess, zipfile, shutil, os, sys
+from mspaths import OOT_O2R, PIPE, ZAPD, ZAPD_CWD, zapd_config
+import subprocess, zipfile, shutil, os, struct, sys
 
 CWD  = ZAPD_CWD
 OUT  = PIPE + '/ml_audio.otr'
@@ -53,6 +53,43 @@ def normalise_sample(name, data):
     return data, False
 
 
+SAMPLE_DATA_OFFSET = 0x48     # after codec, medium, two flag bytes and the u32 data size
+MAX_BOOK_BYTES = 0x100        # SoH's mixer copies 16 * order * npredictors bytes into its int16_t[8][2][8] adpcm_table
+
+
+def sample_tail(data):
+    """Offset of a sample's loop + codebook (everything after the sample data), and whether that codebook is sane."""
+    size, = struct.unpack_from('<I', data, SAMPLE_DATA_OFFSET - 4)
+    o = SAMPLE_DATA_OFFSET + size
+    nstates, = struct.unpack_from('<I', data, o + 12)
+    order, npredictors, nbooks = struct.unpack_from('<iiI', data, o + 16 + 2 * nstates)
+    sane = 0 < order and 0 < npredictors and 16 * order * npredictors <= MAX_BOOK_BYTES and nbooks == 8 * order * npredictors
+    return o, sane
+
+
+def repair_book(name, data, vanilla):
+    """Give back the loop and codebook ML's ROM lost on four vanilla samples.
+
+    ML rebuilt soundfont 0 with null loop/book pointers on the headers of Adult Link - Falling 1 (sfx 15), Child Link -
+    Sneeze (sfx 69), People Chattering and Shattered Glass (instrument 79), while keeping their sample data byte for
+    byte. ZAudio resolves a null pointer to the font's start and reads its pointer table as the book: order 0x180,
+    npredictors 0x190, so it copies 1.2M entries, running ~2.3 MB past the end of Audiobank into whatever the heap
+    holds. That made these four resources change on every build, and playing one would have SoH's mixer memcpy
+    16 * order * npredictors bytes into its 256-byte ADPCM table. The data is vanilla's, so vanilla's loop and book are
+    the ones that decode it; take them from oot.o2r, and fail the build for any bad book that has no vanilla twin.
+    """
+    if not (name.startswith('audio/samples/') and name.endswith('_META') and data[4:8] == b'PMSO'):
+        return data, False
+    tail, sane = sample_tail(data)
+    if sane:
+        return data, False
+    ref = vanilla.read(name) if name in vanilla.namelist() else None
+    if ref is None or ref[SAMPLE_DATA_OFFSET - 4:sample_tail(ref)[0]] != data[SAMPLE_DATA_OFFSET - 4:tail]:
+        print(f"audio: {name} has an unusable codebook and no identical vanilla sample to take one from"); sys.exit(1)
+    return data[:tail] + ref[sample_tail(ref)[0]:], True
+
+
+vanilla = zipfile.ZipFile(OOT_O2R)
 src = zipfile.ZipFile(OUT)
 audio = [n for n in src.namelist() if n.startswith('audio/')]
 # REPLACE, don't append: every audio resource is regenerated here, so drop any already in the archive
@@ -63,13 +100,18 @@ with zipfile.ZipFile(MOD) as old, zipfile.ZipFile(MOD + '.tmp', 'w', zipfile.ZIP
             z.writestr(info, old.read(info.filename))
     added = 0
     normalised = []
+    repaired = []
     for n in audio:
         data, changed = normalise_sample(n, src.read(n))
         if changed:
             normalised.append(n.split('/')[-1])
+        data, changed = repair_book(n, data, vanilla)
+        if changed:
+            repaired.append(n.split('/')[-1])
         z.writestr(n, data); added += 1
 os.replace(MOD + '.tmp', MOD)
 print(f"normalised {len(normalised)} MEDIUM_CART samples to MEDIUM_RAM: {', '.join(normalised)}")
+print(f"restored vanilla loop and codebook on {len(repaired)} samples: {', '.join(repaired)}")
 print(f"injected {added} audio resources "
       f"({sum(1 for n in audio if '/sequences/' in n)} sequences, "
       f"{sum(1 for n in audio if '/fonts/' in n)} fonts, "
