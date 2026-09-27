@@ -2383,7 +2383,7 @@ index e970b965cfe8b8227a17c15a88034111a21e14e3..1f23ef7c8bdbb4e047f224f5064128dd
          TimeSplitsPostDragAndDrop();
  
 diff --git a/soh/soh/OTRGlobals.cpp b/soh/soh/OTRGlobals.cpp
-index 39f04ddbbd3a3894ac268a4364b3b7b711b3edee..a28d1d173704cf8d49d5373c455334d8e4b64330 100644
+index 39f04ddbbd3a3894ac268a4364b3b7b711b3edee..e0e585c2ba4028aa660cd1d376f301afd627017d 100644
 --- a/soh/soh/OTRGlobals.cpp
 +++ b/soh/soh/OTRGlobals.cpp
 @@ -1,3 +1,4 @@
@@ -2391,17 +2391,48 @@ index 39f04ddbbd3a3894ac268a4364b3b7b711b3edee..a28d1d173704cf8d49d5373c455334d8
  #include "OTRGlobals.h"
  #include "OTRAudio.h"
  #include <algorithm>
-@@ -268,7 +269,8 @@ std::string portArchivePath = "";
+@@ -267,8 +268,39 @@ static bool VerifyArchiveVersion(OTRVersion version);
+ std::string portArchivePath = "";
  static bool sohArchiveVersionMatch = false;
  
++// MissingShip: the macOS player package keeps the default settings and the ML mod inside the app bundle
++// (Contents/Resources) and its SHIP_HOME under Application Support. A new player's settings start from the bundled
++// defaults, and the bundled mod is copied into SHIP_HOME/mods whenever it is missing or differs, so updating the app
++// updates the mod. Builds without these files in their bundle (Windows, Linux, the development app) are unaffected.
++static void MissingShip_SeedAppDirectory() {
++    namespace fs = std::filesystem;
++    auto same = [](const fs::path& a, const fs::path& b) { return fs::weakly_canonical(a) == fs::weakly_canonical(b); };
++    try {
++        fs::path home = Ship::Context::GetAppDirectoryPath(appShortName);
++        fs::path config = home / "shipofharkinian.json";
++        fs::path seedConfig = Ship::Context::GetPathRelativeToAppBundle("shipofharkinian.json");
++        fs::path seedMod = Ship::Context::GetPathRelativeToAppBundle("mods/MissingLink_Scenes.o2r");
++        if (fs::exists(seedConfig) && !fs::exists(config) && !same(seedConfig.parent_path(), home)) {
++            fs::create_directories(home);
++            fs::copy_file(seedConfig, config);
++        }
++        if (fs::exists(seedMod) && !same(seedMod.parent_path().parent_path(), home)) {
++            fs::path mod = home / "mods" / "MissingLink_Scenes.o2r";
++            if (!fs::exists(mod) || fs::file_size(mod) != fs::file_size(seedMod) ||
++                fs::last_write_time(mod) < fs::last_write_time(seedMod)) {
++                fs::create_directories(mod.parent_path());
++                fs::copy_file(seedMod, mod, fs::copy_options::overwrite_existing);
++            }
++        }
++    } catch (const fs::filesystem_error&) {
++        // Missing or unwritable folders: start without the seed, as stock SoH would.
++    }
++}
++
  OTRGlobals::OTRGlobals() {
 -    context = Ship::Context::CreateUninitializedInstance("Ship of Harkinian", appShortName, "shipofharkinian.json");
++    MissingShip_SeedAppDirectory();
 +    // MissingShip: the app name is the window title (plus the renderer), the log file name and the crash box title.
 +    context = Ship::Context::CreateUninitializedInstance("MissingShip", appShortName, "shipofharkinian.json");
  
      portArchivePath = Ship::Context::LocateFileAcrossAppDirs("soh.o2r");
      OTRVersion portArchiveVersion = DetectOTRVersion("soh.o2r", false);
-@@ -1529,6 +1531,7 @@ extern "C" void InitOTR(int argc, char* argv[]) {
+@@ -1529,6 +1561,7 @@ extern "C" void InitOTR(int argc, char* argv[]) {
      if (CVarGetInteger(CVAR_REMOTE_ANCHOR("Enabled"), 0)) {
          Anchor::Instance->Enable();
      }

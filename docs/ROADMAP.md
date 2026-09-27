@@ -1,52 +1,280 @@
 # MissingShip roadmap
 
-The team plan: what is still left to port, in what order, and the issues to work through.
-Last full review: **2026-09-25**, with every ML file compared against PAL MQ Debug.
+Status, how we work, what is left, and the history of every issue.
+Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-nnn`); the history below is generated from them.
 
 - **Detail lives elsewhere:**
+  - `ENGINE_CHANGES.md`: every engine change and its drop-in path (the ledger).
   - `ML_ACTOR_INVENTORY.md`: per-actor status.
-  - `ENGINE_CHANGES.md`: every engine change and its drop-in path.
-  - `WORKING_NOTES.md`: handoff notes and key addresses.
+  - `DROPIN_PROPOSALS.md`: what each engine change needs to move upstream or into data.
   - `PORTING_ACTORS.md`: how to port an actor.
-- **Updating this file:**
-  - Update this file when an issue closes or a new gap is found.
-  - Issues are tracked on **GitHub Issues** (title prefix `MS-nnn`, one milestone each). The tables below are the review snapshot; new issues get the next free ID in both places.
-  - Close an issue on GitHub from the fixing commit (`Fixes #N`) and move its row to *Done*.
-  - Never reuse an ID.
+  - `WORKING_NOTES.md`: handoff notes and key addresses.
+
+## Status
+
+**Beta: feature-complete and played start to finish, still in testing.**
+- Every milestone from M0 to M5 is done, and so are the Windows and Linux packages.
+- The full playtest (MS-010) closed on 2026-09-26 with every checklist item verified.
+- The owner is now comparing the port against a reference playthrough of ML on N64. Any difference becomes a new issue with the next free ID (the last used is MS-156).
+- **Next: Prod, no game data.** Owner decision, 2026-09-27: public builds carry no Nintendo data. Players build the ML mod from their own ROM on first launch, as SoH does for `oot.o2r`. Kaze Emanuar has given permission for the port, which covers ML's own work; Nintendo's assets are still never distributed. The beta test builds still ship the finished mod, privately.
+
+## Open work
+
+| ID | Issue | Notes |
+|---|---|---|
+| [MS-153](https://github.com/thefriendlyhedgehog/MissingShip/issues/117) | Find out what players start from: Kaze's ML v2.0 patch, its base ROM, and whether one ROM can cover SoH's base too | Prod. ML v2.0 ships as a patch for a ROM; with Kaze's permission we may be able to bundle it. |
+| [MS-154](https://github.com/thefriendlyhedgehog/MissingShip/issues/118) | Standalone mod builder for Windows, Linux and macOS | Prod. The pipeline as a per-OS program; continues MS-082. |
+| [MS-155](https://github.com/thefriendlyhedgehog/MissingShip/issues/119) | First launch builds the ML mod: ask for the ML ROM, verify it, run the builder | Prod. |
+| [MS-156](https://github.com/thefriendlyhedgehog/MissingShip/issues/120) | Release packages carry no game data | Prod. Also audits the engine fork for compiled-in asset data. |
+| [MS-070](https://github.com/thefriendlyhedgehog/MissingShip/issues/42) | Drop-in path: upstream bugfixes and data-driven proposals | Proposals written in [DROPIN_PROPOSALS.md](DROPIN_PROPOSALS.md) for ledger rows 1–101; rows 102–140 still to review. No upstream PRs until the project is done (owner decision, 2026-09-25). |
+| [MS-091](https://github.com/thefriendlyhedgehog/MissingShip/issues/48) | Porting-kit knowledge base | Deferred until ML is finished; done in a separate effort. |
+| [MS-092](https://github.com/thefriendlyhedgehog/MissingShip/issues/49) | Per-hack workspace layout | Deferred, as above. |
+| [MS-093](https://github.com/thefriendlyhedgehog/MissingShip/issues/50) | One-command romhack survey script | Deferred, as above. |
+
+
+## Known differences from ML, and ML quirks we keep
+
+- **Boot:** SoH's boot logo replaces ML's two boot checks, the Expansion Pak and emulator-accuracy error screens (MS-061). ML's title screen itself is ported (MS-039).
+- **Entrance fades:** four entrance day-fade colours differ slightly (MS-027).
+- **Audio:** one sample reference in ML's own soundfonts points past the end of its Audiotable (an ML bug), so that sound is silent. In the Bombchu Shop, ML's `Ml_BgmTrigger` silences the area music until switch flag 7 is set. That is ML's design.
+- **Closed as authentic ML behaviour:**
+  - the Hollow Root Keep Stalfos that walks on air (MS-128);
+  - the fast Hollow Root Keep elevator (MS-142);
+  - the stable Gold Skulltula that can't be killed with restricted items (MS-146).
+- **Settings menu:** SoH's options that do nothing in ML are removed or hidden (MS-145, ledger rows 106–138); the port's own options are on Enhancements → MissingShip. Stock SoH extras that change ML's gameplay stay off by default.
 
 ## How we work
 
 - **Checks before pushing.** `python3 tools/check.py` must pass. The `.githooks/pre-push` hook runs it once enabled with `git config core.hooksPath .githooks`.
-- **No upstream PRs until the whole project is done** (owner decision, 2026-09-25). Collect candidates on MS-070.
-- **One issue per change.** Put the issue ID in the commit subject, e.g. `MS-014: port En_Nutsball`.
+- **One issue per change.** Put the issue ID in the commit subject, e.g. `MS-014: port En_Nutsball`, and `Refs #N` / `Fixes #N` in the body.
 - **The ledger rule.** Any engine change updates `ENGINE_CHANGES.md` in the same commit. An actor change also updates `ML_ACTOR_INVENTORY.md`.
 - **Engine work is commits.** Commit it on `missingship` in the engine fork (same `MS-nnn` subject), push, then run `tools/genpatch.py` so `docs/*.patch` match (`PORTING_ACTORS.md` step 6).
-- **Tested vs. built.** "Ported" means built and deployed. "Verified" means played in-game. Record which one applies in the inventory.
+- **Tested vs. built.** "Ported" means built and deployed. "Verified" means played in-game.
 - **Port ML's actual code.** A port must follow ML's code, recovered by diff or disassembly. Guessed behaviour must be marked as a guess.
 - **Order of preference for a fix:**
   1. data;
   2. a generic SoH feature;
   3. an upstreamable bugfix;
   4. ML-specific C, as a last resort.
-- **Keep ML as its author intended** (owner decision, 2026-09-25). If a report turns out to match ML's own code, close it as authentic. QoL is limited to what stock SoH already has, plus options the owner asks for.
+- **Keep ML as its author intended** (owner decision, 2026-09-25).
+  - If a report turns out to match ML's own code, close it as authentic.
+  - QoL is limited to what stock SoH already has, plus options the owner asks for.
+  - Presentation (how it looks) is the owner's call.
+- **One place per setting.** The MissingShip settings page holds only the port's own options; stock SoH settings are never mirrored there.
+- **Public defaults.** `profile/shipofharkinian.json` is every new player's starting point: chosen defaults, never a tester's settings.
 - **Use ML's area names** in docs, issues, the checklist and tool output, with the slot name after them where it helps, e.g. "Hollow Root Keep (HAKAdan)". Code identifiers keep the slot names. The map lives in `hacks/ml/hack.json` (`areas`); tools print it through `hack.area()`.
 
 | Slot | Area | | Slot | Area |
 |---|---|---|---|---|
-| `spot04` | Kokiri Forest (title card) | | `HAKAdan` | Hollow Root Keep (title card) |
-| `spot10` | Deep Woods (title card) | | `HAKAdan_bs` | Hollow Root Keep boss room |
-| `spot09` | Deku Road (title card) | | `Bmori1` | Monktown Sanctuary (title card) |
-| `spot12` | Deku Grove (title card) | | `kakariko3` | Library (title card) |
-| `spot20` | Cluck Cluck Ranch (title card) | | `night_shop` | Bombchu Shop (title card) |
-| `malon_stable` | Cluck Cluck Ranch stable | | `kakariko` | Monktown Valley house |
-| `spot01` | Monktown Valley (title card) | | `kokiri_home`, `kokiri_home3`, `kokiri_home4` | Kokiri Forest houses |
-| `turibori` | Fishing Pond | | `spot00` | title screen |
+| `Bmori1` | Monktown Sanctuary (title card) | | `kakariko` | Monktown Valley house |
+| `HAKAdan` | Hollow Root Keep (title card) | | `malon_stable` | Cluck Cluck Ranch stable |
+| `kakariko3` | Library (title card) | | `turibori` | Fishing Pond |
+| `night_shop` | Bombchu Shop (title card) | | `spot00` | title screen |
+| `spot01` | Monktown Valley (title card) | | `ydan` | Deep Woods grotto |
+| `spot04` | Kokiri Forest (title card) | | `testroom` | Deku Road grotto |
+| `spot09` | Deku Road (title card) | | `spot11` | Deku Grove grotto |
+| `spot10` | Deep Woods (title card) | | `spot05` | Kokiri Forest side area |
+| `spot12` | Deku Grove (title card) | | `tokinoma` | Kokiri Forest interior |
+| `spot20` | Cluck Cluck Ranch (title card) | | `hairal_niwa2` | Monktown Valley side area |
+| `HAKAdan_bs` | Hollow Root Keep boss room | | `link_home` | Link's house |
+| `kokiri_home`, `kokiri_home3`, `kokiri_home4` | Kokiri Forest houses | |  |  |
 
-Not named yet, because they have no title card and no clear parent area: `ydan`, `spot05`, `spot11`, `tokinoma`, `hairal_niwa2`, `link_home`, `testroom`.
+All 25 ML scenes are named.
+
+## Milestones
+
+| Milestone | Issues | Result |
+|---|---|---|
+| M0: Team footing | MS-001 … MS-009, MS-014 | Done 2026-09-25: configurable paths, one build script, the engine fork as a submodule, `tools/check.py` and the pre-push hook. |
+| M1: Verify | MS-010 … MS-013, MS-017 … MS-019, MS-094, MS-105, MS-106 | Done 2026-09-26: the full playtest checklist verified. |
+| M2: Data-only quick wins | MS-015, MS-020 … MS-027, MS-095 | Done 2026-09-26: textures, dungeon maps and markers, credits, skyboxes, sword-turn animations, entrance flags. |
+| M3: Actors by scene | MS-030 … MS-040, MS-096 … MS-139 | Done 2026-09-26: every changed or custom actor, scene by scene, including both dungeons and the boss. |
+| M4: Link | MS-050 … MS-055 | Done 2026-09-26: ML's model, triple jump, player edits, Magic Hourglass, Soul-Charged sword. |
+| M5: Front end and polish | MS-060 … MS-063 | Done 2026-09-26: HUD restyle, title screen, opening; the pause cursor rechecked. |
+| M6: Drop-in | MS-016, MS-070 | MS-016 fixed; MS-070 open (proposals written, PRs held). |
+| Platforms | MS-080 … MS-083 | Done 2026-09-27: Windows and Linux packages (engine from GitHub Actions, `tools/package.py`), tested on both. A macOS (Apple Silicon) package from the local build followed. |
+| Prod: no game data | MS-153 … MS-156 | Open: players build the mod from their own ROM; packages and repo carry no game data. Before the repo goes public, its history (which still holds the ROMs and archives committed before 2026-09-27) is cleaned, by a fresh repo or a rewrite; the owner decides which at that point. |
+| Porting kit | MS-090 … MS-093 | MS-090 done (per-hack tool config); the rest deferred until ML is finished. |
 
 ---
 
-## Review: what is still unported (2026-09-25)
+## Issue history
+
+Every issue, from GitHub. Details, test notes and commits are on each issue.
+
+### M0: Team footing
+
+| ID | Issue | Result |
+|---|---|---|
+| [MS-001](https://github.com/thefriendlyhedgehog/MissingShip/issues/1) | Make script paths configurable (no hardcoded /Volumes paths) | done 2026-09-25 |
+| [MS-002](https://github.com/thefriendlyhedgehog/MissingShip/issues/2) | Merge cycle.sh and ms_cycle.sh | done 2026-09-25 |
+| [MS-003](https://github.com/thefriendlyhedgehog/MissingShip/issues/3) | Bring ENGINE_CHANGES.md up to date with this week's actor ports | done 2026-09-25 |
+| [MS-004](https://github.com/thefriendlyhedgehog/MissingShip/issues/4) | Correct the stale README | done 2026-09-25 |
+| [MS-005](https://github.com/thefriendlyhedgehog/MissingShip/issues/5) | Regenerate the actor inventory from the full scan, add a Verified column | done 2026-09-25 |
+| [MS-006](https://github.com/thefriendlyhedgehog/MissingShip/issues/6) | Re-derive ML custom-code hooks across all overlay tables and address ranges | done 2026-09-25 |
+| [MS-007](https://github.com/thefriendlyhedgehog/MissingShip/issues/7) | Decide: private Shipwright fork branch vs patch-only workflow | done 2026-09-25 |
+| [MS-008](https://github.com/thefriendlyhedgehog/MissingShip/issues/8) | Add a pre-push check script (exits, hashes, patch applies, build) | done 2026-09-25 |
+| [MS-009](https://github.com/thefriendlyhedgehog/MissingShip/issues/51) | One ZAPD build and one scene table for the whole pipeline | done 2026-09-25 |
+| [MS-014](https://github.com/thefriendlyhedgehog/MissingShip/issues/52) | Make the engine fork a submodule of MissingShip | done 2026-09-25 |
+
+### M1: Verify
+
+| ID | Issue | Result |
+|---|---|---|
+| [MS-010](https://github.com/thefriendlyhedgehog/MissingShip/issues/9) | Playtest everything built but unverified | done 2026-09-26 |
+| [MS-011](https://github.com/thefriendlyhedgehog/MissingShip/issues/10) | Hard freeze pulling a crate in Cluck Cluck Ranch stable (malon_stable) room 3 | not reproduced in playtest (2026-09-25) |
+| [MS-012](https://github.com/thefriendlyhedgehog/MissingShip/issues/11) | Deep Woods sometimes does not load the next zone | done 2026-09-26 |
+| [MS-013](https://github.com/thefriendlyhedgehog/MissingShip/issues/12) | Locate and play through Malon's race | done 2026-09-25 |
+| [MS-017](https://github.com/thefriendlyhedgehog/MissingShip/issues/55) | Saria's Song at the song-block door asks "talk to Saria?" before opening it | done 2026-09-25 |
+| [MS-018](https://github.com/thefriendlyhedgehog/MissingShip/issues/56) | B answers "No" / closes yes-no prompts (QoL) | done 2026-09-25 |
+| [MS-019](https://github.com/thefriendlyhedgehog/MissingShip/issues/57) | MissingShip settings page; Ocarina on D-Down only; D-pad ocarina playback on | done 2026-09-25 |
+| [MS-094](https://github.com/thefriendlyhedgehog/MissingShip/issues/58) | Area title text sits 4 px low on ML's ribbon | done 2026-09-25 |
+| [MS-105](https://github.com/thefriendlyhedgehog/MissingShip/issues/69) | Blank green title card entering untitled scenes (Deep Woods grotto) | done 2026-09-26 |
+| [MS-106](https://github.com/thefriendlyhedgehog/MissingShip/issues/70) | Rain in Kokiri Forest (Song of Storms rain ML removed) | done 2026-09-26 |
+
+### M2: Data-only quick wins
+
+| ID | Issue | Result |
+|---|---|---|
+| [MS-015](https://github.com/thefriendlyhedgehog/MissingShip/issues/53) | Retry the skipped IA4 scene textures now that the Metal guard exists | done 2026-09-26 |
+| [MS-020](https://github.com/thefriendlyhedgehog/MissingShip/issues/13) | Texture aliases: push blocks, chests, bomb flowers, boss/haka doors, jya lift | done 2026-09-26 |
+| [MS-021](https://github.com/thefriendlyhedgehog/MissingShip/issues/14) | Beamos and Saria DL aliases | done 2026-09-26 |
+| [MS-022](https://github.com/thefriendlyhedgehog/MissingShip/issues/15) | Dungeon minimaps and pause dungeon maps (map_i_static, map_48x85_static) | done 2026-09-25 |
+| [MS-023](https://github.com/thefriendlyhedgehog/MissingShip/issues/16) | Dungeon map chest/boss markers (map_mark_data) | done 2026-09-26 |
+| [MS-024](https://github.com/thefriendlyhedgehog/MissingShip/issues/17) | Credits text (staff_message_data_static) | done 2026-09-26 |
+| [MS-025](https://github.com/thefriendlyhedgehog/MissingShip/issues/18) | Skyboxes vr_fine1 and vr_cloud2 | done 2026-09-26 |
+| [MS-026](https://github.com/thefriendlyhedgehog/MissingShip/issues/19) | gameplay_keep sword-turn (kiru) animations | done 2026-09-26 |
+| [MS-027](https://github.com/thefriendlyhedgehog/MissingShip/issues/20) | Entrance music-continuity and transition flags | done 2026-09-26 |
+| [MS-095](https://github.com/thefriendlyhedgehog/MissingShip/issues/59) | Entrance collision review and mapping | done 2026-09-25 |
+
+### M3: Actors by scene
+
+| ID | Issue | Result |
+|---|---|---|
+| [MS-030](https://github.com/thefriendlyhedgehog/MissingShip/issues/21) | Port Navi (En_Elf) behaviour + hook 0x80602000 | done 2026-09-25 |
+| [MS-031](https://github.com/thefriendlyhedgehog/MissingShip/issues/22) | Port En_Nutsball (Deku nut projectile) | done 2026-09-26 |
+| [MS-032](https://github.com/thefriendlyhedgehog/MissingShip/issues/23) | Port En_Ko (Kokiri text swaps, hook 0x80602200) | done 2026-09-26 |
+| [MS-033](https://github.com/thefriendlyhedgehog/MissingShip/issues/24) | Finish partial actors: En_Fz modes, En_Niw_Lady, En_Hy | done 2026-09-26 |
+| [MS-034](https://github.com/thefriendlyhedgehog/MissingShip/issues/25) | Monktown Valley (spot01) actors (9) | done 2026-09-26 |
+| [MS-035](https://github.com/thefriendlyhedgehog/MissingShip/issues/26) | Bombchu Shop (night_shop): En_Ossan + En_GirlA shop items | done 2026-09-26 |
+| [MS-036](https://github.com/thefriendlyhedgehog/MissingShip/issues/27) | Hollow Root Keep (HAKAdan) dungeon actors | done 2026-09-26 |
+| [MS-037](https://github.com/thefriendlyhedgehog/MissingShip/issues/28) | Boss fight: Boss_Va + custom actors 0x01/0x17/0x22 + En_Vm + Door_Warp1 | done 2026-09-26 |
+| [MS-038](https://github.com/thefriendlyhedgehog/MissingShip/issues/29) | Monktown Sanctuary (Bmori1) dungeon actors | done 2026-09-26 |
+| [MS-039](https://github.com/thefriendlyhedgehog/MissingShip/issues/30) | Boss_Ganon2 (kakariko3) and En_Mag (spot00) | done 2026-09-25 |
+| [MS-040](https://github.com/thefriendlyhedgehog/MissingShip/issues/31) | Find spawners of the remaining changed unplaced actors | done 2026-09-25 |
+| [MS-096](https://github.com/thefriendlyhedgehog/MissingShip/issues/60) | Port Bg_Spot16_Bombstone (spot01) | done 2026-09-26 |
+| [MS-097](https://github.com/thefriendlyhedgehog/MissingShip/issues/61) | Port En_Dodojr (spot01) | done 2026-09-26 |
+| [MS-098](https://github.com/thefriendlyhedgehog/MissingShip/issues/62) | Port En_Hs (spot01) | done 2026-09-26 |
+| [MS-099](https://github.com/thefriendlyhedgehog/MissingShip/issues/63) | Port En_Rd (spot01, night_shop) | done 2026-09-26 |
+| [MS-100](https://github.com/thefriendlyhedgehog/MissingShip/issues/64) | Port En_Daiku (spot01) | done 2026-09-26 |
+| [MS-101](https://github.com/thefriendlyhedgehog/MissingShip/issues/65) | Port Bg_Spot02_Objects + ML's object 0xA1 (spot01) | done 2026-09-26 |
+| [MS-102](https://github.com/thefriendlyhedgehog/MissingShip/issues/66) | Port Obj_Makekinsuta (spot01) | done 2026-09-26 |
+| [MS-103](https://github.com/thefriendlyhedgehog/MissingShip/issues/67) | Port Bg_Toki_Hikari as Ml_TalkSpot (spot01) | done 2026-09-26 |
+| [MS-104](https://github.com/thefriendlyhedgehog/MissingShip/issues/68) | Port Bg_Po_Event as Ml_BgmTrigger (spot01, hairal_niwa2, night_shop) | done 2026-09-26 |
+
+### M4: Link
+
+| ID | Issue | Result |
+|---|---|---|
+| [MS-050](https://github.com/thefriendlyhedgehog/MissingShip/issues/32) | Port object_link_child and link_animetion | done 2026-09-26 |
+| [MS-051](https://github.com/thefriendlyhedgehog/MissingShip/issues/33) | Port the Link animation override 0x806023E0 | done 2026-09-25 |
+| [MS-052](https://github.com/thefriendlyhedgehog/MissingShip/issues/34) | Port the remaining player-overlay edits | done 2026-09-26 |
+| [MS-053](https://github.com/thefriendlyhedgehog/MissingShip/issues/35) | Magic Hourglass rewind | done 2026-09-26 |
+| [MS-054](https://github.com/thefriendlyhedgehog/MissingShip/issues/36) | Soul-Charged sword model and glow | done 2026-09-26 |
+| [MS-055](https://github.com/thefriendlyhedgehog/MissingShip/issues/37) | Locate ML code past 0x80608000 | done 2026-09-25 |
+
+### M5: Front end and polish
+
+| ID | Issue | Result |
+|---|---|---|
+| [MS-060](https://github.com/thefriendlyhedgehog/MissingShip/issues/38) | HUD restyle (B/C buttons, key counter, colour) | done 2026-09-26 |
+| [MS-061](https://github.com/thefriendlyhedgehog/MissingShip/issues/39) | ML title screen: decide scope and port | decided: out of scope; ML's title screen ported in MS-039 |
+| [MS-062](https://github.com/thefriendlyhedgehog/MissingShip/issues/40) | File select and opening edits | done 2026-09-25 |
+| [MS-063](https://github.com/thefriendlyhedgehog/MissingShip/issues/41) | Re-verify pause quest-status cursor | done 2026-09-26 |
+
+### M6: Drop-in
+
+| ID | Issue | Result |
+|---|---|---|
+| [MS-016](https://github.com/thefriendlyhedgehog/MissingShip/issues/54) | libultraship GfxDpLoadBlock mis-sizes 4-bit block loads (unsigned -1 shift) | done 2026-09-25 |
+| [MS-070](https://github.com/thefriendlyhedgehog/MissingShip/issues/42) | Drop-in path: upstream bugfixes and data-driven proposals | **open** |
+
+### Platforms
+
+| ID | Issue | Result |
+|---|---|---|
+| [MS-080](https://github.com/thefriendlyhedgehog/MissingShip/issues/43) | Windows build and package | done 2026-09-26 |
+| [MS-081](https://github.com/thefriendlyhedgehog/MissingShip/issues/44) | Linux build and package | done 2026-09-27 |
+| [MS-082](https://github.com/thefriendlyhedgehog/MissingShip/issues/45) | Cross-platform pipeline scripts | not needed: the packages ship the finished mod (2026-09-27) |
+| [MS-083](https://github.com/thefriendlyhedgehog/MissingShip/issues/46) | Check non-Metal backends for the zero-size texture guard | done 2026-09-25 |
+
+### Porting kit
+
+| ID | Issue | Result |
+|---|---|---|
+| [MS-090](https://github.com/thefriendlyhedgehog/MissingShip/issues/47) | Generalise tools with a per-hack config | done 2026-09-25 |
+| [MS-091](https://github.com/thefriendlyhedgehog/MissingShip/issues/48) | Porting-kit knowledge base | **open** |
+| [MS-092](https://github.com/thefriendlyhedgehog/MissingShip/issues/49) | Per-hack workspace layout | **open** |
+| [MS-093](https://github.com/thefriendlyhedgehog/MissingShip/issues/50) | One-command romhack survey script | **open** |
+
+### Found in porting and playtesting (no milestone)
+
+| ID | Issue | Result |
+|---|---|---|
+| [MS-107](https://github.com/thefriendlyhedgehog/MissingShip/issues/71) | Port Boss_Tw slot as Ml_SlideBlock (HAKAdan ×26) | done 2026-09-25 |
+| [MS-108](https://github.com/thefriendlyhedgehog/MissingShip/issues/72) | Port ML custom actor 0x1A as Ml_RoomClearSwitch (HAKAdan room 20) | done 2026-09-26 |
+| [MS-109](https://github.com/thefriendlyhedgehog/MissingShip/issues/73) | Port Bg_Hidan_Dalm slot as Ml_ElevatorSpawner (HAKAdan room 19) | done 2026-09-26 |
+| [MS-110](https://github.com/thefriendlyhedgehog/MissingShip/issues/74) | Port En_Kakasi slot as Ml_Elevator (HAKAdan) | done 2026-09-25 |
+| [MS-111](https://github.com/thefriendlyhedgehog/MissingShip/issues/75) | Port Bg_Mori_Elevator slot as Ml_HakaLift (HAKAdan room 2) | done 2026-09-25 |
+| [MS-112](https://github.com/thefriendlyhedgehog/MissingShip/issues/76) | Port En_Floormas giant variant (HAKAdan room 20) | done 2026-09-26 |
+| [MS-113](https://github.com/thefriendlyhedgehog/MissingShip/issues/77) | Port En_Ssh changes (HAKAdan cursed men give small keys) | done 2026-09-25 |
+| [MS-114](https://github.com/thefriendlyhedgehog/MissingShip/issues/78) | Port Bg_Mizu_Shutter changes (HAKAdan) | done 2026-09-25 |
+| [MS-115](https://github.com/thefriendlyhedgehog/MissingShip/issues/79) | Child Link's Hylian Shield is invisible in his hand | done 2026-09-26 |
+| [MS-116](https://github.com/thefriendlyhedgehog/MissingShip/issues/80) | Deep Woods gate next to the two scrubs has no collision | done 2026-09-26 |
+| [MS-117](https://github.com/thefriendlyhedgehog/MissingShip/issues/81) | Monkey Town maze grotto hole (room 3) is invisible | done 2026-09-26 |
+| [MS-118](https://github.com/thefriendlyhedgehog/MissingShip/issues/82) | Option to stop the magic bean salesman flashing | done 2026-09-26 |
+| [MS-119](https://github.com/thefriendlyhedgehog/MissingShip/issues/83) | Bunny Hood appears to do nothing | done 2026-09-25 |
+| [MS-120](https://github.com/thefriendlyhedgehog/MissingShip/issues/84) | Grotto on the upper Deku trading area soft-locks on entry | done 2026-09-26 |
+| [MS-121](https://github.com/thefriendlyhedgehog/MissingShip/issues/85) | Port ML's Shadow Temple boss (Boss_Va rewrite, slot 0xBA) as Ml_BossVa | done 2026-09-25 |
+| [MS-122](https://github.com/thefriendlyhedgehog/MissingShip/issues/86) | Port ML custom actor 0x17 as Ml_BossVaShot | done 2026-09-25 |
+| [MS-123](https://github.com/thefriendlyhedgehog/MissingShip/issues/87) | Port ML actor 0x01 (En_Elf copy) as Ml_Elf | done 2026-09-26 |
+| [MS-124](https://github.com/thefriendlyhedgehog/MissingShip/issues/88) | Port ML actor 0x22 (En_Light copy) as Ml_Light | done 2026-09-25 |
+| [MS-125](https://github.com/thefriendlyhedgehog/MissingShip/issues/89) | Port En_Vm change (Beamos not Z-targetable) | done 2026-09-26 |
+| [MS-126](https://github.com/thefriendlyhedgehog/MissingShip/issues/90) | Blue warps lead to the Fishing Pond (Door_Warp1, cutscene destination 56, entrance 0x420) | done 2026-09-26 |
+| [MS-127](https://github.com/thefriendlyhedgehog/MissingShip/issues/91) | Controllable Bombchus as an option | already in stock SoH: Enhancements > Remote Bombchu |
+| [MS-128](https://github.com/thefriendlyhedgehog/MissingShip/issues/92) | Hollow Root Keep mini-boss skeleton walks on air and hops into the fire-chest area | authentic to ML, kept (2026-09-25) |
+| [MS-129](https://github.com/thefriendlyhedgehog/MissingShip/issues/93) | Magic Hourglass get-item model is broken (only half drawn, stays on screen) | done 2026-09-26 |
+| [MS-130](https://github.com/thefriendlyhedgehog/MissingShip/issues/94) | Use Missing Link's own names for areas and scenes in docs and tools | done 2026-09-25 |
+| [MS-131](https://github.com/thefriendlyhedgehog/MissingShip/issues/95) | Port ML's Monktown Sanctuary (Bmori1) torch (Boss_Dodongo slot 0x27) as Ml_Torch | done 2026-09-26 |
+| [MS-132](https://github.com/thefriendlyhedgehog/MissingShip/issues/96) | Port ML's Monktown Sanctuary (Bmori1) switch pillars (En_Du slot 0x98) as Ml_Pillar | done 2026-09-26 |
+| [MS-133](https://github.com/thefriendlyhedgehog/MissingShip/issues/97) | Port ML's Monktown Sanctuary (Bmori1) thieves (En_Nb slot 0xC3) as Ml_Thief | done 2026-09-26 |
+| [MS-134](https://github.com/thefriendlyhedgehog/MissingShip/issues/98) | Port ML's Monktown Sanctuary (Bmori1) sliding platform (Bg_Jya_1flift) | done 2026-09-26 |
+| [MS-135](https://github.com/thefriendlyhedgehog/MissingShip/issues/99) | Monktown Sanctuary (Bmori1) Peahat plays mini-boss music | done 2026-09-26 |
+| [MS-136](https://github.com/thefriendlyhedgehog/MissingShip/issues/100) | Port ML's title screen (En_Mag rewrite, object_mag) | done 2026-09-26 |
+| [MS-137](https://github.com/thefriendlyhedgehog/MissingShip/issues/101) | Port ML's Library (kakariko3) push block (Boss_Ganon2 slot 0x17A) as Ml_PushBlock | done 2026-09-26 |
+| [MS-138](https://github.com/thefriendlyhedgehog/MissingShip/issues/102) | Port ML's ending card (En_Dodongo slot 0x12) as Ml_Ending | done 2026-09-26 |
+| [MS-139](https://github.com/thefriendlyhedgehog/MissingShip/issues/103) | Hollow Root Keep (HAKAdan) Bombchu rail (En_Bom_Chu hook 0x80607A00) | done 2026-09-26 |
+| [MS-140](https://github.com/thefriendlyhedgehog/MissingShip/issues/104) | Cosmetics editor colours for child Link's items patch ML's display lists at vanilla indices | done 2026-09-26 |
+| [MS-141](https://github.com/thefriendlyhedgehog/MissingShip/issues/105) | Keep the Bunny Hood on through void-outs and deaths (QoL) | done 2026-09-25 |
+| [MS-142](https://github.com/thefriendlyhedgehog/MissingShip/issues/106) | Hollow Root Keep B1 <> 1F elevator moves very fast | authentic to ML, kept (2026-09-25) |
+| [MS-143](https://github.com/thefriendlyhedgehog/MissingShip/issues/107) | QoL adjustable climbing speed | already in stock SoH |
+| [MS-144](https://github.com/thefriendlyhedgehog/MissingShip/issues/108) | Crash when the Gerudo Valley horse race starts | done 2026-09-26 |
+| [MS-145](https://github.com/thefriendlyhedgehog/MissingShip/issues/109) | Settings cleanup: MissingShip QoL section and recommended stock SoH settings | done 2026-09-26 |
+| [MS-146](https://github.com/thefriendlyhedgehog/MissingShip/issues/110) | Cluck Cluck Ranch stable Gold Skulltula can't be killed (items restricted) | authentic to ML, kept (2026-09-25) |
+| [MS-147](https://github.com/thefriendlyhedgehog/MissingShip/issues/111) | Deep Woods maze goes black after entering (fog wall loads rooms 2/1 and unloads room 5) | done 2026-09-25 |
+| [MS-148](https://github.com/thefriendlyhedgehog/MissingShip/issues/112) | Visiting Cluck Cluck Ranch takes away the Soul-Charged Kokiri Sword (no Blade Beam, no charge glow) | done 2026-09-26 |
+| [MS-149](https://github.com/thefriendlyhedgehog/MissingShip/issues/113) | Monktown Valley boulder switch changes the scenery live, not only after re-entering | done 2026-09-26 |
+| [MS-150](https://github.com/thefriendlyhedgehog/MissingShip/issues/114) | Magic Hourglass rewind just after a door puts Link in the unloaded old room (black screen) | done 2026-09-26 |
+| [MS-151](https://github.com/thefriendlyhedgehog/MissingShip/issues/115) | After the Hollow Root Keep boss, ML's credits tour (pond to the ending card) was cut short | done 2026-09-25 |
+| [MS-152](https://github.com/thefriendlyhedgehog/MissingShip/issues/116) | Monktown Maze (Deep Woods) doesn't show up on the pause world map | done 2026-09-26 |
+
+---
+
+## Appendix: the 2026-09-25 review
+
+The review that set the plan: every ML dma file was compared against PAL MQ Debug. It is kept as a record of what ML
+changed and as a worked example for the porting kit. Everything it lists as built or awaiting playtest has since been
+verified (MS-010).
 
 **Method:** every ML dma file was hashed against the debug ROM.
 - **257** ML files have no identical debug file:
@@ -133,169 +361,3 @@ All eight are ported: 3, 5, 6 and 0x1F earlier, 0x1A in MS-036, and the boss fig
 
 - None left: every hook in ENGINE_CHANGES' hook table is ported or recorded (Navi MS-030, Bombchu MS-139, player hooks MS-017 / MS-052 / MS-053, sword MS-054, HUD MS-060).
 - There is no ML code past 0x80608000 (MS-006): the old 0x8064xxxx / 0x807Cxxxx targets were data. The custom code jumps into the player overlay, which always loads at RAM 0x804D23B0.
-
----
-
-## Gameplan
-
-Milestones, in order. Each milestone lists its issue IDs.
-
-1. **M0: Team footing** (MS-001 … MS-008)
-   - Anyone can check out, build and run.
-   - The docs tell the truth.
-   - No hardcoded paths.
-2. **M1: Playtest what is built** (MS-010)
-   - Turn the untested batches into "verified" or into bugs, before building more on top of them.
-3. **M2: Data-only quick wins** (MS-020 … MS-027)
-   - Textures, maps, credits and skyboxes, all through the pipeline with no engine code.
-   - Also moves the drop-in goal forward.
-4. **M3: Main path, scene by scene** (MS-030 … MS-049)
-   - Finish every actor in a scene before moving on, so each scene can be fully verified.
-   - Order: the areas already started (`spot04`, `spot09`, `spot10`, `spot12`, `ydan`), then `spot01` + `night_shop` + `hairal_niwa2`, then `HAKAdan` + its boss, then `Bmori1`, then `kakariko3` / `spot00`.
-5. **M4: Link** (MS-050 … MS-055)
-   - object_link_child, link_animetion, the kiru animations, the player overlay edits, the Soul-Charged sword visuals and the Magic Hourglass.
-   - These are tangled together, so they are done as one project.
-6. **M5: Front end and polish** (MS-060 … MS-063)
-   - Title screen, file select, opening, HUD restyle, entrance music / transition flags.
-7. **M6: Drop-in path** (MS-070)
-   - Move every ledger row that can be moved to data or to a generic upstream feature.
-8. **Platforms** (MS-080 … MS-083)
-   - Windows and Linux builds, like upstream SoH.
-   - Long-term; macOS is the test platform until then.
-9. **Porting kit** (MS-090 … MS-093)
-   - **Deferred (owner, 2026-09-25):** MS-091 … MS-093 are done in a separate chat once Missing Link is finished (MS-090 is done). The Windows / Linux builds (MS-080 / MS-081, and MS-082's check on those OSes) also wait for the end.
-   - Turn this repo's method and tools into a reusable way to port other OoT romhacks to the SoH engine, until there is a ready-made porting option or the hacks are all done.
-
----
-
-## Issues
-
-Type: **bug** = something wrong in what we ship; **port** = ML content not yet in; **infra** = tooling / docs / process; **platform** = Windows / Linux support; **enhancement** = QoL.
-
-### M0: Team footing
-
-| ID | Type | Issue | Done when |
-|---|---|---|---|
-| [MS-001](https://github.com/thefriendlyhedgehog/MissingShip/issues/1) | infra | 28 scripts in `tools/` and `pipeline/` hardcode `/Volumes/MacMiniExternal/...` (ROM paths, SoH checkout, ZAPD binary, output paths). | One config (env vars or a `paths.py` / `paths.sh` resolved from the repo root), with the defaults documented; the tools run from a fresh clone. |
-| [MS-002](https://github.com/thefriendlyhedgehog/MissingShip/issues/2) | infra | `cycle.sh` and `ms_cycle.sh` are near-duplicates. Every ML_OBJECTS edit has to be made twice, and they will drift. | One script (or a shared `ml_objects` table both read). |
-| [MS-003](https://github.com/thefriendlyhedgehog/MissingShip/issues/3) | infra | The ledger is behind the code. There are no `ENGINE_CHANGES.md` rows for Ml_BeamHeart, Ml_SkullKid, Ml_DnsShop, Ml_HoleScrub, En_Weather_Tag, En_Wonder_Talk, Obj_Oshihiki, En_Cow, En_St / En_Sw, Obj_Bombiwa, Bg_Hidan_Kowarerukabe. Ml_Malon and Ml_Cucco were filed under "ML `code` patches" instead of the numbered actor table. Ml_DnsShop is missing from the inventory. | Every repointed slot and every edited vanilla actor has a numbered row. |
-| [MS-004](https://github.com/thefriendlyhedgehog/MissingShip/issues/4) | infra | `README.md` is stale. It says audio is vanilla (it's ported), that "36 custom actor overlays and 18 custom objects" are unported (wrong numbers), and that cutscenes don't work (entrance intros are ported; overall status unverified). Its "engine change" section describes only the Metal fix. | The README matches this review and points here. |
-| [MS-005](https://github.com/thefriendlyhedgehog/MissingShip/issues/5) | infra | `ML_ACTOR_INVENTORY.md` only surveys *placed* actors. | Regenerated from the full scan: B and C added, and a *Verified* column added. |
-| [MS-006](https://github.com/thefriendlyhedgehog/MissingShip/issues/6) | infra | `modcheck.py` only reports hooks below 0x80608000, and several of the "17 hooked overlays" in the ledger (0x09E, 0x0F4, 0x11B, 0x12E, 0x141, 0x173, 0x18A, 0x18B, 0x198, 0x199) are not actor slots with hooks in the current scan. | The hook list is re-derived across all overlay tables (actor, effect, gamestate) and all target ranges, and the ledger is corrected. |
-| [MS-007](https://github.com/thefriendlyhedgehog/MissingShip/issues/7) | infra | Engine changes live only as a 350 KB patch; code review and merges are painful. | Decide: a private Shipwright fork with a `missingship` branch (patch generated from it) vs. the patch-only workflow. **Done: fork.** |
-| [MS-008](https://github.com/thefriendlyhedgehog/MissingShip/issues/8) | infra | No automated checks. | A script that runs `checkexits.py`, `checkhashes.py`, the patch-applies check and a build; run it before every push (or in CI where ROMs are available). |
-| [MS-009](https://github.com/thefriendlyhedgehog/MissingShip/issues/51) | infra | The pipeline mixes two ZAPD builds (SOHCombo's for scenes/objects/UI, Shipwright's patched one for audio), and `inject_titles.py` reads SOHCombo's unpatched `scene_table.h`. The app's `Info.plist` has an absolute `SHIP_HOME` (double-click only). | One patched ZAPD + one table source; archive still identical; `MS_SOHCOMBO` removed. |
-| [MS-014](https://github.com/thefriendlyhedgehog/MissingShip/issues/52) | infra | The engine fork is cloned next to this repo and nothing pins which engine commit a MissingShip commit expects. | The engine is a submodule (e.g. `engine/`): one `git clone --recursive` builds and runs everything; `mspaths` defaults to it. |
-
-### M1: Verify
-
-| ID | Type | Issue | Done when |
-|---|---|---|---|
-| [MS-010](https://github.com/thefriendlyhedgehog/MissingShip/issues/9) | bug? | Playtest everything built but not yet verified: title cards, Navi muted, text speed, save resume location, pause item page + old-save migration, bean seller (Bunny Hood), Deku Road Skull Kid + Blade Beam heart, grotto scrub shop, hole-hopping scrub (ydan room 2), readable notes (Kokiri house, kakariko3), Deep Woods wall-skip, Malon's race + ML cucco. | Each item marked verified in the inventory or filed as its own bug. |
-| [MS-011](https://github.com/thefriendlyhedgehog/MissingShip/issues/10) | bug | Hard freeze pulling a crate in `malon_stable` room 3 (Bg_Spot15_Rrbox ×4, params 0). Suspected out-of-bounds read of `D_808B45C4` when switch 0 is set. Possibly a place the player isn't meant to reach yet. | **Not reproduced; needs a repro** (on #9). Bg_Spot15_Rrbox is vanilla code in ML, and nothing in it can hang. The `D_808B45C4` over-read needs switch 0 already set at load, which nothing in the scene does, and would only misplace crates. No crash report exists for the freeze. The two crashes fixed since (bgcheck NULL camera data, the Metal zero-size texture) could have looked like one. If it freezes again, leave it running and use `sample MissingShip`. |
-| [MS-012](https://github.com/thefriendlyhedgehog/MissingShip/issues/11) | bug? | "Deep Woods sometimes doesn't load the next zone." Probably fixed by the wall-skip port (ML's 0x80602C80). | Confirmed fixed in play, or reopened with a repro. |
-| [MS-013](https://github.com/thefriendlyhedgehog/MissingShip/issues/12) | port | Where is Malon's race? The finish-line Malon (params 0xFFFF) and ML entrances 0x138 / 0x13C aren't placed on the scene map yet. | **Located, needs playtest:** the race *is* the Gerudo Valley-slot horse chase. Malon at the ranch warps to ML 0x138 (`spot09` spawn 4); Ml_EventSpawner runs the 40 s timer and spawns the fences, enemies and the finish-line Malon. A win sets switch 0x11 of scene 0x5A and warps back via 0x13C. One #9 item covers both. |
-| [MS-094](https://github.com/thefriendlyhedgehog/MissingShip/issues/58) | bug | Area title text sat 4 px low on ML's ribbon (texture padded 4 rows down, drawn at ML's y 68). | **Fixed** (drawn at y 64). Verified in play. |
-| [MS-095](https://github.com/thefriendlyhedgehog/MissingShip/issues/59) | bug | Entrance collisions: ML entrance groups that collapse onto one SoH entrance (e.g. fishing pond 0x41C/0x420 → 0x45F) can't be told apart by ML code that compares `entranceIndex`. | A pre-push checker lists every collision; each one is mapped apart or documented as harmless. |
-| [MS-105](https://github.com/thefriendlyhedgehog/MissingShip/issues/69) | bug | Blank green title card entering scenes ML doesn't title (Deep Woods grotto). | **Built:** card gated to ML's titled slots; needs playtest. |
-| [MS-106](https://github.com/thefriendlyhedgehog/MissingShip/issues/70) | bug | Rain in Kokiri Forest: the Song of Storms still spawned the rain actor ML deleted. | **Built:** spawn removed; needs playtest (unconfirmed if this was the source). |
-| [MS-017](https://github.com/thefriendlyhedgehog/MissingShip/issues/55) | bug | Saria's Song at the song-block door shows vanilla's "talk to Saria?" prompt (Navi text 0xE0) before the door cutscene; ML skips it in its player hook 0x80600D90 (player +0x20F38). | No prompt at the door; the hook is ported and logged. Verified in play. |
-| [MS-018](https://github.com/thefriendlyhedgehog/MissingShip/issues/56) | enhancement | B should answer No / close yes-no prompts (at least the Saria prompt), not need another A. | B cancels safely on choice prompts; logged. |
-| [MS-019](https://github.com/thefriendlyhedgehog/MissingShip/issues/57) | enhancement | New games put the Ocarina on D-Down *and* C-Left; D-pad ocarina playback was off; MissingShip options weren't in the SoH menu. | **Done:** Enhancements > MissingShip page, Starting Ocarina Button (D-Down default), Dpad Ocarina Playback on. Verified in play. |
-
-### M2: Data-only quick wins (pipeline, no engine code)
-
-| ID | Type | Issue | Done when |
-|---|---|---|---|
-| [MS-020](https://github.com/thefriendlyhedgehog/MissingShip/issues/13) | port | Texture aliases (like `inject_objects.py` ALIASES): push blocks (gameplay_dangeon_keep), chests (object_box, plus the curve skeleton), bomb-flower leaves, boss door, haka door, `g1f1fiftTopTex`. | ML textures shown under the vanilla paths. |
-| [MS-021](https://github.com/thefriendlyhedgehog/MissingShip/issues/14) | port | Beamos (object_vm) body and eyelid DLs, Saria right-hand limb (object_sa). | DL aliases shipped. |
-| [MS-022](https://github.com/thefriendlyhedgehog/MissingShip/issues/15) | port | Dungeon minimaps and pause dungeon maps (map_i_static dma 113, map_48x85_static dma 112), plus ML's minimap index (room + 190, 0x80080D20). | ML's maps show in ydan / HAKAdan / Bmori1. **Done:** 25 minimaps + 7 pause maps shipped, index and ML's map tables in the engine (ledger 48). In-game check pending. |
-| [MS-023](https://github.com/thefriendlyhedgehog/MissingShip/issues/16) | port | map_mark_data (dma 103, 58 data words): dungeon-map chest / boss markers. | Markers match ML. **Done:** ML's markers in SoH's MQ tables, MQ tables always used (ledger 49). In-game check pending. |
-| [MS-024](https://github.com/thefriendlyhedgehog/MissingShip/issues/17) | port | Credits text (staff_message_data_static, dma 110). | Injected as a resource. **Done:** the 11 credits ML rewrote ship in the mod's staff message resource. In-game check pending. |
-| [MS-025](https://github.com/thefriendlyhedgehog/MissingShip/issues/18) | port | Skyboxes `vr_fine1` and `vr_cloud2` (+ palettes; ML dma 128/129, 138/139). | Injected. **Done:** day and overcast-sunset skies plus palettes ship under vanilla paths. In-game check pending. |
-| [MS-026](https://github.com/thefriendlyhedgehog/MissingShip/issues/19) | port | gameplay_keep sword-turn animations (`kiruL_end`, `kiruR`, `kiruR_end`). | Injected under the vanilla names (check how they interact with Link's animations, MS-051). **Done:** the two changed headers (`kiruL_end` 16 → 13 frames, `kiruR_end` 16 → 14) and the frames ML re-animated, patched into stock (inject_obj_patches.py). In-game check pending. |
-| [MS-027](https://github.com/thefriendlyhedgehog/MissingShip/issues/20) | port | Entrance flags: 39 entrances with ML's music-continuity / transition-style flags. | A data override, or a small engine table plus a ledger row. **Done:** generated engine table (ledger 50), 184 slots. In-game check pending. |
-| [MS-015](https://github.com/thefriendlyhedgehog/MissingShip/issues/53) | port | 9 **I4** scene texture references (spot01 ×7, spot04, tokinoma) were skipped (`ML_SKIP_FMT=4:0`). **Built:** skip removed; they are 4 real textures in the standard 16b block-load form that SoH sizes correctly; 0 unresolved. Awaiting an in-game look (MS-010 checklist). | The three rooms draw their I4 textures; `unresolved.json` empty. |
-
-### M3: Actors, by scene
-
-| ID | Type | Issue | Done when |
-|---|---|---|---|
-| [MS-030](https://github.com/thefriendlyhedgehog/MissingShip/issues/21) | port | **En_Elf (Navi)**: 4018 words + custom hook 0x80602000. She's in every scene, so this comes first. | Behaviour diffed and ported. **Done:** two real edits found and ported (ledger 51). In-game check pending. |
-| [MS-031](https://github.com/thefriendlyhedgehog/MissingShip/issues/22) | port | En_Nutsball: **built** (Hylian-Shield-only reflect; nuts break during swim_15step_up); needs playtest. | Ported, and the scrubs verified with it. |
-| [MS-032](https://github.com/thefriendlyhedgehog/MissingShip/issues/23) | port | En_Ko: **built** (11 after-the-sword text swaps, the Kokiri frown, two branch edits); needs playtest. | Ported. |
-| [MS-033](https://github.com/thefriendlyhedgehog/MissingShip/issues/24) | port | Finish the partial actors. **Built:** Ml_EventSpawner complete (young Epona standing, the horse chase, riding; mode 3 waits on MS-037). En_Hy and En_Niw_Lady were already complete (the certificate parts are ML\'s only edits). Needs playtest. | Full behaviour. |
-| [MS-034](https://github.com/thefriendlyhedgehog/MissingShip/issues/25) | port | `spot01`: En_Dodojr, Bg_Toki_Hikari, En_Rd, Bg_Po_Event, Bg_Spot02_Objects (+ object_spot02_objects), Bg_Spot16_Bombstone, En_Daiku, En_Hs, Obj_Makekinsuta. | **Built:** all nine ported as MS-096..104 (#60-#68); needs playtest. |
-| [MS-035](https://github.com/thefriendlyhedgehog/MissingShip/issues/26) | port | `night_shop`: En_Ossan + En_GirlA shop items (8 data words: prices?). | **Built:** En_Ossan (Init gate, shop music, bombchu shop always open, Link drawn, steady cursor) and En_GirlA bombchu prices 40/80; needs playtest. |
-| [MS-036](https://github.com/thefriendlyhedgehog/MissingShip/issues/27) | port | `HAKAdan`: Boss_Tw slot ×26 (small ML rewrite + object_tw), ACTOR_UNSET_1A (custom), Bg_Hidan_Dalm, Bg_Mori_Elevator (+ object_mori_objects), En_Floormas, En_Kakasi (+ object_ka), En_Ssh, Bg_Mizu_Shutter. | **Built:** all eight ported as MS-107..114 (#71-#78): sliding blocks, room-clear switch, two elevators + spawner, room 2 lift, giant Floormaster, key-giving cursed men, shutters; needs playtest. |
-| [MS-037](https://github.com/thefriendlyhedgehog/MissingShip/issues/28) | port | **Boss fight** (`HAKAdan_bs`): Boss_Va + object_bv + custom actors 0x01, 0x17, 0x22 + En_Vm + Door_Warp1. | **Built:** ported as MS-121..126 (#85-#90): ML's two-phase Shadow boss and its projectile, the Ml_Elf/Ml_Light copies, untargetable Beamos, and blue warps to the Fishing Pond (with ML's patched pond cutscene destination and a new 8-entry pond entrance group); needs playtest. |
-| [MS-038](https://github.com/thefriendlyhedgehog/MissingShip/issues/29) | port | `Bmori1`: En_Peehat, Boss_Dodongo, En_Du (+ object_du), En_Nb (+ object_nb), Bg_Jya_1flift. | **Built:** ported as MS-131..135 (#95-#99): ML's torch copy (Ml_Torch), the switch pillars (Ml_Pillar) and thieves (Ml_Thief) on ML's own objects with the thieves' leaving cutscene, the sliding platform, and the Peahat's mini-boss music; needs playtest. |
-| [MS-039](https://github.com/thefriendlyhedgehog/MissingShip/issues/30) | port | `kakariko3`: Boss_Ganon2 (+ object_ganon2). `spot00`: En_Mag (+ object_mag). | **Built:** ported as MS-136..137 (#100-#101): ML's title screen (verified by screenshot) and the kakariko3 push block that carries its note (ML's "Boss_Ganon2" is an Obj_Oshihiki copy); needs playtest. |
-| [MS-040](https://github.com/thefriendlyhedgehog/MissingShip/issues/31) | port | Port En_Dodongo (0x12; rewritten, placed in `spot10`). Find the spawners of Bg_Dy_Yoseizo, Bg_Haka_Huta, En_Ishi, En_Karebaba, Obj_Ice_Poly, Item_Shield, En_Bom_Chu (hook 0x80607A00). | **Built:** En_Dodongo is ML's ending card (Ml_Ending, MS-138 #102) and En_Bom_Chu's hook a HAKAdan Bombchu rail (MS-139 #103), both needing playtest. En_Karebaba (not hostile) and Obj_Ice_Poly (no AT) ported but unreachable; Bg_Dy_Yoseizo unreachable (an unplaced prop); Bg_Haka_Huta and Item_Shield effectively vanilla; En_Ishi's changed data is dead ML code. |
-
-### M4: Link
-
-| ID | Type | Issue | Done when |
-|---|---|---|---|
-| [MS-050](https://github.com/thefriendlyhedgehog/MissingShip/issues/32) | port | object_link_child (35,836 words changed) and link_animetion (dma 146). | **Built** (needs playtest): ML's child Link ships under the vanilla names; body, sword and Hylian Shield checked in game. link_animetion needed nothing beyond MS-026. Cosmetics editor item colours: MS-140 #104. |
-| [MS-051](https://github.com/thefriendlyhedgehog/MissingShip/issues/33) | port | Link animation override 0x806023E0 (30 call sites in the player overlay, 5 in `code`). | **Built** (needs playtest): ML's triple jump, Majora's Mask's, commonly ported into OoT hacks (a running jump plays run_jump, kiruL_end, kiruR_end in turn while each comes within 16 frames of landing) and the horse idle at the Fishing Pond cutscene entrance. |
-| [MS-052](https://github.com/thefriendlyhedgehog/MissingShip/issues/34) | port | The other player-overlay edits (see E): fairy-release flag, removed spawn, scene-gated audio block, custom hooks 0x80606BA0 / 0x80606BC8 / 0x80600480 / 0x80600D90, forced branches, constants. | **Built** (needs playtest): row 97. The Bunny Hood speed boost (MS-119), no void-out damage, music kept through hole falls and exits, and the smaller edits. The boomerang edits and the cucco check are the Hourglass (MS-053). |
-| [MS-053](https://github.com/thefriendlyhedgehog/MissingShip/issues/35) | port | Magic Hourglass: ring-buffer rewind (0x80600E00 / 0x80601000 / 0x80601680) + actor 0x18A. Right now the item throws a vanilla boomerang. | **Built** (needs playtest): row 98. The item fires at once; after 17 frames in a room it rewinds Link about 3–8 seconds with the Song of Time wipe. Also ML's cucco keeper (0x80601000). |
-| [MS-054](https://github.com/thefriendlyhedgehog/MissingShip/issues/36) | port | Soul-Charged sword model and glow (actor 0x57 params 0xBEEF). Needs MS-050. | **Built** (needs playtest): row 99. Model swap, pulsing green glow and the B icon. |
-| [MS-055](https://github.com/thefriendlyhedgehog/MissingShip/issues/37) | infra | Locate ML code past 0x80608000 (0x8064xxxx, 0x807Cxxxx). | Mapped, and its features added to this list. |
-
-### M5: Front end and polish
-
-| ID | Type | Issue | Done when |
-|---|---|---|---|
-| [MS-060](https://github.com/thefriendlyhedgehog/MissingShip/issues/38) | port | HUD restyle: B/C button backs (0x80604E30, alpha cap 125), key counter (0x806053E0), colour 0x80089180. | **Built** (needs playtest): row 100. ML's "restyle" is drop shadows under the buttons and counters plus a new Start colour. |
-| [MS-061](https://github.com/thefriendlyhedgehog/MissingShip/issues/39) | port | Title screen (dma 97, ML's own). Decide whether it's in scope next to SoH's boot flow. | **Decided: out of scope.** dma 97 is only ML's Expansion Pak and bad-emulator error screens around the vanilla N64 logo; SoH needs neither. ML's title screen itself is ported (En_Mag, MS-039). |
-| [MS-062](https://github.com/thefriendlyhedgehog/MissingShip/issues/40) | port | File select (1 edit) and opening (3 words: new-game entrance / cutscene index). | **Done:** opening ported (row 101), title checked; file select needs nothing in SoH. |
-| [MS-063](https://github.com/thefriendlyhedgehog/MissingShip/issues/41) | port | Recheck the pause-menu quest-status cursor (a misalignment was reported before row 24). | **Verified by code:** ML's 9-entry redirect table (0x806001C0) and its helper (0x80600690) match `sMlQuestCursorRedirects` and its logic in z_kaleido_collect.c, and both sides call it from the same 4 places. No change; in-game look on #9. |
-
-### M6: Drop-in
-
-| ID | Type | Issue | Done when |
-|---|---|---|---|
-| [MS-070](https://github.com/thefriendlyhedgehog/MissingShip/issues/42) | infra | Go through `ENGINE_CHANGES.md` and turn each row that can move into a data-side or upstream proposal: Metal texture guard, bgcheck NULL guard, Oceff widescreen fix (bugfixes); entrance table, cutscene / grotto / new-save tables, draw configs (data-driven features). | **Proposals written:** [DROPIN_PROPOSALS.md](DROPIN_PROPOSALS.md) (4 bugfixes still needed upstream, the Metal guard already upstream; 11 data-driven features; 3 data-side retries; 67 mod-code rows). Upstream PRs held until the project is done, so the issue stays open. |
-| [MS-016](https://github.com/thefriendlyhedgehog/MissingShip/issues/54) | bug | libultraship `GfxDpLoadBlock`: `uint32_t word_size_shift = -1` for 4-bit loads makes the size `(lrs+1) << 0xFFFFFFFF`. ML and vanilla don't hit it; any mod that block-loads with SETTIMG siz=4b would. | Fixed on `missingship`, logged, proposed upstream with MS-070. |
-
-### Platforms (long-term; macOS is the test platform for now)
-
-| ID | Type | Issue | Done when |
-|---|---|---|---|
-| [MS-080](https://github.com/thefriendlyhedgehog/MissingShip/issues/43) | platform | Windows build of the patched engine (MSVC / SoH's Windows CMake presets) and a portable package (exe + `soh.o2r` + mod `.o2r`). | Boots to ML's start area on Windows. |
-| [MS-081](https://github.com/thefriendlyhedgehog/MissingShip/issues/44) | platform | Linux build (SoH's Linux CMake / AppImage route) and package. | Boots to ML's start area on Linux. |
-| [MS-082](https://github.com/thefriendlyhedgehog/MissingShip/issues/45) | platform | Cross-platform pipeline: shell scripts (`cycle.sh`, `ms_cycle.sh`, `MissingShip.sh`) into Python or add per-OS equivalents; ZAPD binary per platform; no macOS-only commands (`sed -i ''`, `pkill`, `open`). Depends on MS-001. | **Done on macOS** (the other two OSes are checked with MS-080 / MS-081): `pipeline/ms_cycle.py` replaces the bash driver and produces an identical archive (5262 resources, per-entry md5). `mspaths.py` finds `ZAPD.out` or `ZAPD.exe`, and the steps run in Python's UTF-8 mode. `mspaths.sh` is gone; `ms_cycle.sh` is a wrapper. `MissingShip.sh` stays the macOS launcher (per-OS launchers come with the packages). |
-| [MS-083](https://github.com/thefriendlyhedgehog/MissingShip/issues/46) | platform | Check the engine patches for Mac-only paths: the libultraship fix is in `gfx_metal.cpp` only — confirm whether the DX11/OpenGL backends need the same zero-size texture guard. | **Done:** OpenGL and DX11 had no guard (they'd pass a 0×0 texture to the GPU API); both now have upstream's exact early return (libultraship 9202b873, ledger row 11), so it disappears on rebase. Our other patches have no macOS-only code: new sources come in through CMake's recursive globs, and there are no build-file edits or GNU-only C constructs. DX11 is compiled only on Windows (MS-080). |
-
-### Porting kit (long-term)
-
-| ID | Type | Issue | Done when |
-|---|---|---|---|
-| [MS-090](https://github.com/thefriendlyhedgehog/MissingShip/issues/47) | infra | Generalise the tools: baseline ROM, hack ROM, code dma index, VRAM base and table offsets come from a per-hack config instead of ML constants. | **Done:** `hacks/<name>/hack.json` plus `tools/hack.py`. The 17 ROM tools read the ROMs, dma indices, VRAM, actor table, spawn addresses and custom code from it. ML's output is unchanged apart from three fixes: `mlcustom` prints the delay slot, `modcheck` labels empty slots, and `semdiff`'s order is stable. `hacks/selftest` (MQ Debug against itself) runs every tool with 0 differences. ML's scene map and the project checks (`checkexits`, `survey_actors`' placements) stay ML-specific for MS-092 / MS-093. |
-| [MS-091](https://github.com/thefriendlyhedgehog/MissingShip/issues/48) | infra | Knowledge base: document the method (dma/object/actor hash survey → per-instruction diff → "recompiled vanilla with edits" ports → custom-code-region hunting → ZAPD object XMLs) and the reusable facts about OoT romhack layouts. | A `docs/porting-kit/` guide a new contributor can follow for a new hack. |
-| [MS-092](https://github.com/thefriendlyhedgehog/MissingShip/issues/49) | infra | Per-hack workspace layout (`hacks/<name>/` with its config, XMLs, maps, ledger, inventory) so several hacks can share the pipeline and tools. | ML moved into the layout without breakage. |
-| [MS-093](https://github.com/thefriendlyhedgehog/MissingShip/issues/50) | infra | Survey script: one command that produces the ROADMAP-style review (changed actors placed/spawned, custom slots, objects, system files, custom code hooks) for any hack. | The ML review regenerates from it. |
-
-### Done
-
-- MS-021: `pipeline/inject_obj_patches.py` patches stock resources the way ML edited them, after checking the ML ROM for each edit. Beamos `gBeamosBodyDL` and `gBeamosTopEyelidDL` end at their first command (ML's PIPESYNC → ENDDL: no body or eyelid drawn; seen in the MS-037 boss fight); Saria's right-hand limb points at `gSariaRightHandAndOcarinaDL`. Pure data.
-- MS-020: `pipeline/inject_obj_textures.py` ships the 11 textures ML redrew in gameplay_dangeon_keep, object_box, object_bombf, object_bdoor and object_haka_door, plus object_box's collision (surface material wood → stone), under vanilla paths. The baseline is the MQ debug ROM: comparing with stock alone would have shipped 3 debug-vs-retail textures ML never touched. object_jya_obj's redrawn lift top already equals retail stock. Decoded and checked; in-game look pending (MS-010).
-- MS-018: "B Cancels Choices" (MissingShip page, default on). B picks no/cancel on choice prompts, and holding B never answers one. `tools/audit_choices.py` audits all 142 choice messages (128 end in a refusal; 14 in an exception table, some ignore B), and `check.py` runs it. Engine commit on `missingship`, ledger row 47. In-game check pending (MS-010).
-- MS-017: ML never offers "talk to Saria?" (text 0xE0): ported its player hook 0x80600D90 (`Player_StartTalking` early-out with each call site's exact fall-through, read from ML's player code) and its removal of the post-song Navi `StartTalking` (+0x1C2B0). Engine 91a364e, ledger row 46. In-game check at the door pending (MS-010).
-- MS-019: Enhancements > MissingShip settings page (future MissingShip options go here); Starting Ocarina Button (D-Down default, C-Left fallback without Dpad equips); Dpad Ocarina Playback on in the seed and local profiles (engine a4d8237; ledger rows 15, 45). In-game check pending (MS-010).
-- MS-016: `GfxDpLoadBlock`'s `word_size_shift` is now signed (MissingShip-libultraship b0ea7db, engine 160ad6e, ledger row 44). A test of the exact expression gave 0 bytes for a 1024-texel 4b load before and 512 after (clang -O0 and -O2). Engine rebuilt and boots. Upstream PR deferred: none until the whole project is done (owner decision); tracked on MS-070.
-- MS-014: the engine fork is the `engine/` submodule (branch `missingship`); one `git clone --recursive` gets everything at matching versions. `mspaths` defaults to `engine/`; `tools/check.py` fails if `engine/` is not at the pinned commit. Locally the checkout was moved in (history kept) and `../Shipwright` is a compatibility symlink; the engine was reconfigured and rebuilt at the new path.
-- MS-009: every pipeline step uses the engine fork's ZAPD (`build-ml/ZAPD/ZAPD.out`, patched ZAPDTR) and its scene table; SOHCombo and `MS_SOHCOMBO`/`MS_ZAPD_AUDIO` removed. Archive verified byte-identical (4636 resources) both with the switch and on the new defaults; the two scene tables' title-card mapping is identical for all 110 slots. `MissingShip.sh` keeps `Info.plist`'s `SHIP_HOME` pointing at the checkout's `home/` so double-click works anywhere (plist not in the signature; committed in plutil's canonical format).
-- MS-008: `tools/check.py` runs every automated check in about 3 s: compile, engine fork clean and pushed, patches current, ledger, exits, resource hashes (the 9 deliberate IA4 skips allowed exactly, MS-015 filed), inventory vs ROMs; `--build` builds the engine. Committed `.githooks/pre-push` hook. Verified that injected faults fail it. Also: `survey_actors.py --check`, `checkexits.py` now exits 1 on problems; filed MS-014 (engine as submodule) and MS-015.
-- MS-007: engine moved to private repos with full upstream history: MissingShip-Shipwright, MissingShip-libultraship, MissingShip-ZAPDTR (branch `missingship`; not GitHub forks, which are always public). Baseline commit 993e7fb on tag 9.2.3; submodules repointed. `tools/genpatch.py` regenerates docs/*.patch (content identical to the old patches; full blob hashes for stable output); `--check` for MS-008. A fresh recursive clone was verified.
-- MS-006: `tools/hookscan.py` re-derives every hook from every overlay's relocation table (plus `code` words that differ from MQ Debug). There are 20 live hook sites outside the player/pause menu, not the claimed 17 overlays (ten of those were vanilla). There is no code past 0x80608000. The player overlay's fixed RAM address is 0x804D23B0. Ledger section rewritten with a per-target status table.
-- MS-055: resolved by MS-006. There is no ML code past 0x80608000; the reported targets were data decoded as jumps.
-- MS-005: `tools/survey_actors.py --write` regenerates the inventory from the ROMs (placements from every scene/room header, spawners from a text-section spawn scan, changes from modcheck); Status and Verified columns are carried over by slot, and regeneration is lossless. 62 placed + 11 spawned + 7 unreached actors; every todo links its issue. New find: En_Dodongo placed in `spot10`.
-- MS-003: ledger rows 30–43 (six repointed slots, eight in-place actor edits, the asset header); Malon/cucco moved out of the code-patch table; `tools/checkledger.py` fails when a patched file is missing from the ledger (87/87 covered).
-- MS-001: all scripts resolve paths via `pipeline/mspaths.py` / `mspaths.sh` (env `MS_*` overrides); ZAPD config templated; archive verified identical (4636 resources).
-- MS-002: obsolete `cycle.sh` removed (it installed into the old `SOH/ml_profile` setup and skipped every injector); `ms_cycle.sh` is the only build script.
-- MS-004 — README corrected (this commit) — rewritten with the current status, platforms and goals.
-
-(Move closed issues here: `MS-nnn — commit — one line`.)

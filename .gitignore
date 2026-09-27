@@ -1,4 +1,4 @@
-# Regenerated on every run -- never useful in history. (ROMs and built archives ARE committed on purpose; this repo is private.)
+# Regenerated on every run -- never useful in history.
 __pycache__/
 *.pyc
 *.log
@@ -7,3 +7,16 @@ pipeline/out/
 
 # Packaged builds (tools/package.py) and downloaded CI artifacts
 dist/
+
+# Copyrighted game data never goes in git: ROMs, and every archive or dump built from them. Each developer supplies
+# their own ROMs (see README) and the pipeline rebuilds the rest locally.
+*.z64
+*.n64
+*.v64
+*.o2r
+*.otr
+!MissingShip.app/Contents/Resources/soh.o2r
+pipeline/ml_code.bin
+
+# The local development SHIP_HOME: saves, settings, logs, oot.o2r and the installed mod
+home/

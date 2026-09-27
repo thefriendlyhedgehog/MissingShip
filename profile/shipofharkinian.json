@@ -26,7 +26,6 @@
             "Notifications": 1
         },
         "gSettings": {
-            "BootSequence": 2,
             "Controllers": {
                 "AxisDirectionMappings": {
                     "P0-S0-D0-KB30": {
