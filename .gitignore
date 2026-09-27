@@ -4,3 +4,6 @@ __pycache__/
 *.log
 pipeline/out/
 .DS_Store
+
+# Packaged builds (tools/package.py) and downloaded CI artifacts
+dist/

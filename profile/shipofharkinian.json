@@ -15,9 +15,6 @@
                     "Story": 0
                 }
             },
-            "RememberSaveLocation": 1,
-            "TextSpeed": 5,
-            "SkipText": 1,
             "DpadEquips": 1
         },
         "gGeneral": {
@@ -308,10 +305,6 @@
                 }
             },
             "EnabledMods": "MissingLink_Scenes",
-            "Menu": {
-                "ActiveHeader": "Dev Tools",
-                "DevToolsSidebarSection": "Value Viewer"
-            },
             "OverlayFont": "Press Start 2P",
             "TextureFilter": 0,
             "CustomOcarina": {
@@ -327,19 +320,6 @@
         }
     },
     "ConfigVersion": 6,
-    "WarpPoints": {
-        "MissingLink": {
-            "bootToPoint": true,
-            "entranceId": 205,
-            "pos": {
-                "x": -748.0,
-                "y": 200.0,
-                "z": -410.0
-            },
-            "roomNum": 0,
-            "rotY": 0
-        }
-    },
     "Window": {
         "AudioBackend": "sdl",
         "Backend": {
@@ -348,10 +328,6 @@
         },
         "Fullscreen": {
             "Enabled": false
-        },
-        "Height": 1022,
-        "PositionX": 2560,
-        "PositionY": 195,
-        "Width": 960
+        }
     }
 }

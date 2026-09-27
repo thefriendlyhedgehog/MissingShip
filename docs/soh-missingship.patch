@@ -1,3 +1,163 @@
+diff --git a/.github/workflows/generate-builds.yml b/.github/workflows/generate-builds.yml
+index 19f25345bc8651763c47f7ef8b35ebcef562dc9f..d22e6e9f73ce9576927c57fd38a31f030d51890b 100644
+--- a/.github/workflows/generate-builds.yml
++++ b/.github/workflows/generate-builds.yml
+@@ -1,7 +1,10 @@
+ name: generate-builds
++# MissingShip: Windows and Linux builds of the MissingShip engine, run by hand (Actions > generate-builds > Run
++# workflow) so pushes don't spend Actions minutes; macOS is built locally. The libultraship and ZAPDTR submodules are
++# private forks, so checkout needs SUBMODULES_TOKEN: a fine-grained token with read-only Contents on
++# MissingShip-Shipwright, MissingShip-libultraship and MissingShip-ZAPDTR.
+ on:
+-  push:
+-  pull_request:
++  workflow_dispatch:
+ concurrency:
+   group: ${{ github.workflow }}-${{ github.ref }}
+   cancel-in-progress: true
+@@ -14,6 +17,7 @@ jobs:
+       uses: actions/checkout@v6
+       with:
+         submodules: true
++        token: ${{ secrets.SUBMODULES_TOKEN }}
+     - name: Configure ccache
+       uses: hendrikmuhs/ccache-action@v1.2
+       with:
+@@ -74,82 +78,6 @@ jobs:
+         path: soh.o2r
+         retention-days: 3
+ 
+-  build-macos:
+-    needs: generate-soh-otr
+-    runs-on: macos-14
+-    steps:
+-    - name: Git Checkout
+-      uses: actions/checkout@v6
+-      with:
+-        submodules: true
+-    - name: Configure ccache
+-      uses: hendrikmuhs/ccache-action@v1.2
+-      with:
+-        create-symlink: true
+-        save: ${{ github.ref_name == github.event.repository.default_branch }}
+-        key: ${{ runner.os }}-14-ccache-${{ github.ref }}-${{ github.sha }}
+-        restore-keys: |
+-          ${{ runner.os }}-14-ccache-${{ github.ref }}
+-          ${{ runner.os }}-14-ccache
+-    # Needed to apply sudo for macports cache restore
+-    - name: Install gtar wrapper
+-      run: |
+-        sudo mv /opt/homebrew/bin/gtar /opt/homebrew/bin/gtar.orig
+-        sudo cp .github/workflows/gtar /opt/homebrew/bin/gtar
+-        sudo chmod +x /opt/homebrew/bin/gtar
+-    - name: Restore Cached MacPorts
+-      id: restore-cache-macports
+-      uses: actions/cache/restore@v5
+-      with:
+-        key: ${{ runner.os }}-14-macports-${{ hashFiles('.github/workflows/macports-deps.txt') }}-${{ github.sha }}
+-        restore-keys: |
+-          ${{ runner.os }}-14-macports-${{ hashFiles('.github/workflows/macports-deps.txt') }}-
+-          ${{ runner.os }}-14-macports-
+-        path: /opt/local/
+-    # Updated PATH applies to the next step and onwards
+-    - name: Install MacPorts (if necessary)
+-      run: |
+-        if command -v /opt/local/bin/port 2>&1 >/dev/null; then
+-          echo "MacPorts already installed"
+-        else
+-          echo "Installing MacPorts"
+-          wget https://github.com/macports/macports-base/releases/download/v2.11.5/MacPorts-2.11.5-14-Sonoma.pkg
+-          sudo installer -pkg ./MacPorts-2.11.5-14-Sonoma.pkg -target /
+-        fi
+-        echo "/opt/local/bin:/opt/local/sbin" >> "$GITHUB_PATH"
+-    - name: Install dependencies
+-      run: |
+-        brew uninstall --ignore-dependencies libpng
+-        sudo port install $(cat .github/workflows/macports-deps.txt)
+-        brew install ninja
+-    - name: Download soh.o2r
+-      uses: actions/download-artifact@v7
+-      with:
+-        name: soh.o2r
+-        path: build-cmake/soh
+-    - name: Build SoH
+-      run: |
+-        export PATH="/usr/lib/ccache:/opt/homebrew/opt/ccache/libexec:/usr/local/opt/ccache/libexec:$PATH"
+-        cmake --no-warn-unused-cli -H. -Bbuild-cmake -GNinja -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DBUILD_REMOTE_CONTROL=1
+-        cmake --build build-cmake --config Release --parallel 10
+-        (cd build-cmake && cpack)
+-
+-        mv _packages/*.dmg SoH.dmg
+-        mv README.md readme.txt
+-    - name: Upload build
+-      uses: actions/upload-artifact@v7
+-      with:
+-        name: soh-mac
+-        path: |
+-          SoH.dmg
+-          readme.txt
+-    - name: Save Cache MacPorts
+-      if: ${{ github.ref_name == github.event.repository.default_branch }}
+-      uses: actions/cache/save@v5
+-      with:
+-        key: ${{ steps.restore-cache-macports.outputs.cache-primary-key }}
+-        path: /opt/local/
+-
+   build-linux:
+     needs: generate-soh-otr
+     runs-on: ubuntu-22.04
+@@ -158,6 +86,7 @@ jobs:
+       uses: actions/checkout@v6
+       with:
+         submodules: true
++        token: ${{ secrets.SUBMODULES_TOKEN }}
+     - name: Install dependencies
+       run: |
+         sudo apt-get update
+@@ -241,7 +170,7 @@ jobs:
+     - name: Build SoH
+       run: |
+         export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
+-        cmake --no-warn-unused-cli -H. -Bbuild-cmake -GNinja -DCMAKE_BUILD_TYPE:STRING=Release -DBUILD_REMOTE_CONTROL=1
++        cmake --no-warn-unused-cli -H. -Bbuild-cmake -GNinja -DCMAKE_BUILD_TYPE:STRING=Release
+         cmake --build build-cmake --config Release -j3
+         (cd build-cmake && cpack -G External)
+ 
+@@ -253,7 +182,7 @@ jobs:
+     - name: Upload build
+       uses: actions/upload-artifact@v7
+       with:
+-        name: soh-linux
++        name: missingship-linux
+         path: |
+           soh.appimage
+           readme.txt
+@@ -276,6 +205,7 @@ jobs:
+       uses: actions/checkout@v6
+       with:
+         submodules: true
++        token: ${{ secrets.SUBMODULES_TOKEN }}
+     - name: Configure sccache
+       uses: hendrikmuhs/ccache-action@v1.2
+       with:
+@@ -308,7 +238,7 @@ jobs:
+         VCPKG_ROOT: ${{github.workspace}}/vcpkg
+       run: |
+         set $env:PATH="$env:USERPROFILE/.cargo/bin;$env:PATH"
+-        cmake -S . -B build-windows -G Ninja -DCMAKE_MAKE_PROGRAM=ninja -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -DBUILD_REMOTE_CONTROL=1
++        cmake -S . -B build-windows -G Ninja -DCMAKE_MAKE_PROGRAM=ninja -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
+         cmake --build build-windows --config Release --parallel 10
+ 
+         (cd build-windows && cpack)
+@@ -319,7 +249,7 @@ jobs:
+     - name: Upload build
+       uses: actions/upload-artifact@v7
+       with:
+-        name: soh-windows
++        name: missingship-windows
+         path: soh-windows
+     - name: Save Cache VCPKG folder
+       if: ${{ github.ref_name == github.event.repository.default_branch }}
 diff --git a/soh/assets/ml_assets.h b/soh/assets/ml_assets.h
 new file mode 100644
 index 0000000000000000000000000000000000000000..320d2595f2d0e7d46226ca44c9fc8438a1604b51
@@ -2223,7 +2383,7 @@ index e970b965cfe8b8227a17c15a88034111a21e14e3..1f23ef7c8bdbb4e047f224f5064128dd
          TimeSplitsPostDragAndDrop();
  
 diff --git a/soh/soh/OTRGlobals.cpp b/soh/soh/OTRGlobals.cpp
-index 39f04ddbbd3a3894ac268a4364b3b7b711b3edee..ed9201e52a84271f28ff10417db4cac3d26cbff7 100644
+index 39f04ddbbd3a3894ac268a4364b3b7b711b3edee..a28d1d173704cf8d49d5373c455334d8e4b64330 100644
 --- a/soh/soh/OTRGlobals.cpp
 +++ b/soh/soh/OTRGlobals.cpp
 @@ -1,3 +1,4 @@
@@ -2231,7 +2391,17 @@ index 39f04ddbbd3a3894ac268a4364b3b7b711b3edee..ed9201e52a84271f28ff10417db4cac3
  #include "OTRGlobals.h"
  #include "OTRAudio.h"
  #include <algorithm>
-@@ -1529,6 +1530,7 @@ extern "C" void InitOTR(int argc, char* argv[]) {
+@@ -268,7 +269,8 @@ std::string portArchivePath = "";
+ static bool sohArchiveVersionMatch = false;
+ 
+ OTRGlobals::OTRGlobals() {
+-    context = Ship::Context::CreateUninitializedInstance("Ship of Harkinian", appShortName, "shipofharkinian.json");
++    // MissingShip: the app name is the window title (plus the renderer), the log file name and the crash box title.
++    context = Ship::Context::CreateUninitializedInstance("MissingShip", appShortName, "shipofharkinian.json");
+ 
+     portArchivePath = Ship::Context::LocateFileAcrossAppDirs("soh.o2r");
+     OTRVersion portArchiveVersion = DetectOTRVersion("soh.o2r", false);
+@@ -1529,6 +1531,7 @@ extern "C" void InitOTR(int argc, char* argv[]) {
      if (CVarGetInteger(CVAR_REMOTE_ANCHOR("Enabled"), 0)) {
          Anchor::Instance->Enable();
      }
