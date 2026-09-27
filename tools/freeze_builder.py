@@ -80,6 +80,11 @@ def main():
             sdl3 = os.path.join(stage, 'libSDL3.dylib')
             shutil.copy2(os.path.realpath('/opt/homebrew/opt/sdl3/lib/libSDL3.0.dylib'), sdl3)
             cmd += ['--add-binary', f'{sdl3}{sep}.']
+    # Windows: vcpkg copies ZAPD's DLLs next to ZAPD.exe; ship them all rather than rely on PyInstaller finding them.
+    if os.name == 'nt':
+        zdir = os.path.dirname(os.path.abspath(args.zapd))
+        for dll in sorted(f for f in os.listdir(zdir) if f.lower().endswith('.dll')):
+            cmd += ['--add-binary', f'{os.path.join(zdir, dll)}{sep}.']
     for m in stdlib_imports(files):
         cmd += ['--hidden-import', m]
     cmd.append(os.path.join(PIPE, 'build_mod.py'))
