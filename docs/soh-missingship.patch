@@ -1,13 +1,14 @@
 diff --git a/.github/workflows/generate-builds.yml b/.github/workflows/generate-builds.yml
-index 19f25345bc8651763c47f7ef8b35ebcef562dc9f..d22e6e9f73ce9576927c57fd38a31f030d51890b 100644
+index 19f25345bc8651763c47f7ef8b35ebcef562dc9f..586a7913255b91292cfcb343aeaa8aa8a8e198eb 100644
 --- a/.github/workflows/generate-builds.yml
 +++ b/.github/workflows/generate-builds.yml
-@@ -1,7 +1,10 @@
+@@ -1,7 +1,11 @@
  name: generate-builds
 +# MissingShip: Windows and Linux builds of the MissingShip engine, run by hand (Actions > generate-builds > Run
 +# workflow) so pushes don't spend Actions minutes; macOS is built locally. The libultraship and ZAPDTR submodules are
 +# private forks, so checkout needs SUBMODULES_TOKEN: a fine-grained token with read-only Contents on
-+# MissingShip-Shipwright, MissingShip-libultraship and MissingShip-ZAPDTR.
++# MissingShip-Shipwright, MissingShip-libultraship, MissingShip-ZAPDTR and MissingShip (whose pipeline is frozen here
++# into the mod builder, with this job's ZAPD: MS-154).
  on:
 -  push:
 -  pull_request:
@@ -15,7 +16,7 @@ index 19f25345bc8651763c47f7ef8b35ebcef562dc9f..d22e6e9f73ce9576927c57fd38a31f03
  concurrency:
    group: ${{ github.workflow }}-${{ github.ref }}
    cancel-in-progress: true
-@@ -14,6 +17,7 @@ jobs:
+@@ -14,6 +18,7 @@ jobs:
        uses: actions/checkout@v6
        with:
          submodules: true
@@ -23,7 +24,7 @@ index 19f25345bc8651763c47f7ef8b35ebcef562dc9f..d22e6e9f73ce9576927c57fd38a31f03
      - name: Configure ccache
        uses: hendrikmuhs/ccache-action@v1.2
        with:
-@@ -74,82 +78,6 @@ jobs:
+@@ -74,82 +79,6 @@ jobs:
          path: soh.o2r
          retention-days: 3
  
@@ -106,7 +107,7 @@ index 19f25345bc8651763c47f7ef8b35ebcef562dc9f..d22e6e9f73ce9576927c57fd38a31f03
    build-linux:
      needs: generate-soh-otr
      runs-on: ubuntu-22.04
-@@ -158,6 +86,7 @@ jobs:
+@@ -158,6 +87,7 @@ jobs:
        uses: actions/checkout@v6
        with:
          submodules: true
@@ -114,7 +115,7 @@ index 19f25345bc8651763c47f7ef8b35ebcef562dc9f..d22e6e9f73ce9576927c57fd38a31f03
      - name: Install dependencies
        run: |
          sudo apt-get update
-@@ -241,7 +170,7 @@ jobs:
+@@ -241,7 +171,7 @@ jobs:
      - name: Build SoH
        run: |
          export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
@@ -123,7 +124,30 @@ index 19f25345bc8651763c47f7ef8b35ebcef562dc9f..d22e6e9f73ce9576927c57fd38a31f03
          cmake --build build-cmake --config Release -j3
          (cd build-cmake && cpack -G External)
  
-@@ -253,7 +182,7 @@ jobs:
+@@ -250,10 +180,30 @@ jobs:
+       env:
+         CC: gcc-12
+         CXX: g++-12
++    - name: Check out MissingShip (the mod builder's pipeline)
++      uses: actions/checkout@v6
++      with:
++        repository: thefriendlyhedgehog/MissingShip
++        path: missingship
++        token: ${{ secrets.SUBMODULES_TOKEN }}
++    - name: Set up Python
++      uses: actions/setup-python@v6
++      with:
++        python-version: '3.13'
++    - name: Freeze the mod builder
++      run: |
++        python -m pip install pyinstaller
++        python missingship/tools/freeze_builder.py --zapd build-cmake/ZAPD/ZAPD.out --soh soh --out builder
++        builder/MissingShipBuilder/MissingShipBuilder --help
++    - name: Upload mod builder
++      uses: actions/upload-artifact@v7
++      with:
++        name: missingship-builder-linux
++        path: builder/MissingShipBuilder
      - name: Upload build
        uses: actions/upload-artifact@v7
        with:
@@ -132,7 +156,7 @@ index 19f25345bc8651763c47f7ef8b35ebcef562dc9f..d22e6e9f73ce9576927c57fd38a31f03
          path: |
            soh.appimage
            readme.txt
-@@ -276,6 +205,7 @@ jobs:
+@@ -276,6 +226,7 @@ jobs:
        uses: actions/checkout@v6
        with:
          submodules: true
@@ -140,7 +164,7 @@ index 19f25345bc8651763c47f7ef8b35ebcef562dc9f..d22e6e9f73ce9576927c57fd38a31f03
      - name: Configure sccache
        uses: hendrikmuhs/ccache-action@v1.2
        with:
-@@ -308,7 +238,7 @@ jobs:
+@@ -308,7 +259,7 @@ jobs:
          VCPKG_ROOT: ${{github.workspace}}/vcpkg
        run: |
          set $env:PATH="$env:USERPROFILE/.cargo/bin;$env:PATH"
@@ -149,7 +173,30 @@ index 19f25345bc8651763c47f7ef8b35ebcef562dc9f..d22e6e9f73ce9576927c57fd38a31f03
          cmake --build build-windows --config Release --parallel 10
  
          (cd build-windows && cpack)
-@@ -319,7 +249,7 @@ jobs:
+@@ -316,10 +267,30 @@ jobs:
+         mv _packages/*.zip _packages/soh-windows.zip
+     - name: Unzip package
+       run: Expand-Archive -Path _packages/soh-windows.zip -DestinationPath soh-windows
++    - name: Check out MissingShip (the mod builder's pipeline)
++      uses: actions/checkout@v6
++      with:
++        repository: thefriendlyhedgehog/MissingShip
++        path: missingship
++        token: ${{ secrets.SUBMODULES_TOKEN }}
++    - name: Set up Python
++      uses: actions/setup-python@v6
++      with:
++        python-version: '3.13'
++    - name: Freeze the mod builder
++      run: |
++        python -m pip install pyinstaller
++        python missingship/tools/freeze_builder.py --zapd build-windows/ZAPD/ZAPD.exe --soh soh --out builder
++        builder/MissingShipBuilder/MissingShipBuilder.exe --help
++    - name: Upload mod builder
++      uses: actions/upload-artifact@v7
++      with:
++        name: missingship-builder-windows
++        path: builder/MissingShipBuilder
      - name: Upload build
        uses: actions/upload-artifact@v7
        with:
