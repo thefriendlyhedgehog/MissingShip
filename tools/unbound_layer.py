@@ -11,7 +11,9 @@ vanilla-format scene overrides are not read there. This converts them with Unbou
   - text/<lang>/messages.json keeps only the ids ML changes or adds (a keyed list merges per id);
   - every other changed or added file is copied whole;
   - ML's changes to a vanilla actor that need no code become actor types that extend it (`base`, Unbound
-    SPEC §7.3, ML_TYPES below), and ML's placements of that actor are renamed to the type.
+    SPEC §7.3, ML_TYPES below), and ML's placements of that actor are renamed to the type;
+  - ML's changes to a vanilla actor's InitVars, which reach every copy of it, become overrides of that actor
+    (Unbound SPEC §7.4, ML_OVERRIDES below).
 The result goes in Unbound's mods/ folder beside an ordinary oot.o2r. It carries ML's scenes, text and assets, not
 the behaviour our SoH fork adds in C.
 """
@@ -37,6 +39,18 @@ ML_TYPES = {
                       for w in ('CrackedStoneFloor', 'BombableWall', 'LargeBombableWall')}}}},
 }
 RENAMES = {t['replaces']: name for name, t in ML_TYPES.items()}
+
+# ML's changes to vanilla actors' InitVars (docs/UNBOUND_MAP.md, U9). They apply to every copy, including the Skulltulas
+# ML's crates and soil patch spawn, so they are overrides of the actor itself rather than types.
+HOSTILE, ATTENTION, UPDATE_CULLING_DISABLED = 1 << 2, 1 << 0, 1 << 4    # ACTOR_FLAG_*
+ML_OVERRIDES = {
+    'En_St': {'flags': {'clear': HOSTILE}},             # row 41: Skulltulas are not enemies (0x35 -> 0x31)
+    'En_Sw': {'flags': {'clear': HOSTILE}},             # row 41: nor Skullwalltulas (0x15 -> 0x11)
+    'Obj_Bombiwa': {'flags': {'set': UPDATE_CULLING_DISABLED}},   # row 42 (0 -> 0x10)
+    'En_Vm': {'flags': {'clear': ATTENTION}},           # row 82: Beamos are never Z-targetable (0x11 -> 0x10)
+    'En_Karebaba': {'flags': {'clear': HOSTILE}},       # row 94 (5 -> 1); ML never places it
+    'Bg_Treemouth': {'spawn': False},                   # rows 8 and 122: ML guts the Deku Tree's mouth
+}
 
 
 def merged_archive(oot, mod, out):
@@ -99,7 +113,8 @@ def layer(vanilla, ml, out):
                 stats['changed' if n in base else 'added'] += 1
             z.writestr(n, data)
         z.writestr('unbound.json', json.dumps(MANIFEST, indent=1))
-        z.writestr('unbound/actors.json', json.dumps({k: t['type'] for k, t in ML_TYPES.items()}, indent=1))
+        z.writestr('unbound/actors.json',
+                   json.dumps({**ML_OVERRIDES, **{k: t['type'] for k, t in ML_TYPES.items()}}, indent=1))
     return stats
 
 
