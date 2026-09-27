@@ -13,11 +13,17 @@ vanilla-format scene overrides are not read there. This converts them with Unbou
   - ML's changes to a vanilla actor that need no code become actor types that extend it (`base`, Unbound
     SPEC §7.3, ML_TYPES below), and ML's placements of that actor are renamed to the type;
   - ML's changes to a vanilla actor's InitVars, which reach every copy of it, become overrides of that actor
-    (Unbound SPEC §7.4, ML_OVERRIDES below).
+    (Unbound SPEC §7.4, ML_OVERRIDES below);
+  - ML's story wiring (entrances, intro cutscenes, cutscene destinations, the new save) becomes unbound/scenes.json,
+    unbound/cutscenes.json and unbound/save.json (Unbound SPEC §7.1, §7.5, §7.6; tools/unbound_ml_world.py), and exits
+    to the entrances our fork adds use their names.
 The result goes in Unbound's mods/ folder beside an ordinary oot.o2r. It carries ML's scenes, text and assets, not
 the behaviour our SoH fork adds in C.
 """
 import argparse, json, os, shutil, subprocess, sys, tempfile, zipfile
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from unbound_ml_world import MlWorld
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SKIP = ('version', 'portVersion', 'unbound.json')     # archive metadata: the base provides it
@@ -76,6 +82,31 @@ def export(unbound, soh_o2r, oot, out, work):
         sys.exit(f'Unbound export failed ({r.returncode}); see {home}/logs')
 
 
+def _is_entrance(value):
+    """A number Unbound takes as an exit: a vanilla entrance, or a dynamic return entrance (SPEC.md §4.2)."""
+    return value < 0x614 or 0x7FF9 <= value <= 0x7FFF
+
+
+def rename_exits(doc, world, stats):
+    """Exits to an entrance our fork adds, by the name it has in Unbound (only a group's first entry is named).
+    An exit list has no length, so the converter reads it up to the next data it knows of; from the first entry
+    that is no entrance on, it is that data, not exits (checkexits.py's padding rule). ML's pond is the one case:
+    its list is 0x2E00, then texture data, and 0x2E00 is no entrance in ML either."""
+    for setup in (doc.get('setups') or {}).values():
+        exits = setup.get('exits') or {}
+        for key in sorted(exits, key=int):
+            value = exits[key]
+            if isinstance(value, int) and value in world.fork_names:
+                exits[key] = world.fork_names[value]
+                stats['exits named'] += 1
+            elif isinstance(value, int) and not _is_entrance(value):
+                cut = [k for k in exits if int(k) >= int(key)]
+                for k in cut:
+                    del exits[k]
+                stats['exit padding dropped'] += len(cut)
+                break
+
+
 def rename_actors(doc, stats):
     """ML's placements of a vanilla actor ML_TYPES extends, placed as the type instead."""
     for setup in (doc.get('setups') or {}).values():
@@ -85,8 +116,9 @@ def rename_actors(doc, stats):
                 stats['actor types placed'] += 1
 
 
-def layer(vanilla, ml, out):
-    stats = dict.fromkeys(('added', 'changed', 'scene documents', 'messages', 'actor types placed'), 0)
+def layer(vanilla, ml, out, world):
+    stats = dict.fromkeys(('added', 'changed', 'scene documents', 'messages', 'actor types placed', 'exits named',
+                           'exit padding dropped'), 0)
     with zipfile.ZipFile(vanilla) as v, zipfile.ZipFile(ml) as m, zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED) as z:
         base = {i.filename: i.CRC for i in v.infolist()}
         for info in m.infolist():
@@ -103,6 +135,7 @@ def layer(vanilla, ml, out):
             elif n.startswith('scenes/') and n.endswith('.json'):
                 doc = json.loads(data)
                 rename_actors(doc, stats)
+                rename_exits(doc, world, stats)
                 if n in base:
                     doc = {'$replace': True, **doc}
                     stats['scene documents'] += 1
@@ -115,6 +148,13 @@ def layer(vanilla, ml, out):
         z.writestr('unbound.json', json.dumps(MANIFEST, indent=1))
         z.writestr('unbound/actors.json',
                    json.dumps({**ML_OVERRIDES, **{k: t['type'] for k, t in ML_TYPES.items()}}, indent=1))
+        world.intros(m.namelist())
+        destinations = world.destinations(m)
+        z.writestr('unbound/scenes.json', json.dumps(world.scenes, indent=1))
+        z.writestr('unbound/cutscenes.json', json.dumps(destinations, indent=1))
+        z.writestr('unbound/save.json', json.dumps(world.new_save(), indent=1))
+        stats['vanilla scenes wired'] = len(world.scenes)
+        stats['cutscene destinations'] = len(destinations)
     return stats
 
 
@@ -122,6 +162,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     ap.add_argument('--unbound', required=True, help="Unbound's soh binary (build-*/soh/soh-macos, soh.elf, soh.exe)")
     ap.add_argument('--soh-o2r', help="Unbound's soh.o2r (default: next to the binary)")
+    ap.add_argument('--unbound-src', help="Unbound's source tree (default: the tree the binary was built in, "
+                                          "build-*/soh/<binary>)")
     ap.add_argument('--oot-o2r', required=True, help='the oot.o2r ML was built against')
     ap.add_argument('--mod', default=os.path.join(ROOT, 'mod', 'MissingLink_Scenes.o2r'))
     ap.add_argument('--out', default=os.path.join(ROOT, 'mod', 'MissingLink_Unbound.o2r'))
@@ -130,13 +172,14 @@ def main():
     args.unbound, args.oot_o2r, args.mod, args.out = map(os.path.abspath, (args.unbound, args.oot_o2r, args.mod,
                                                                            args.out))
     soh_o2r = args.soh_o2r or os.path.join(os.path.dirname(os.path.abspath(args.unbound)), 'soh.o2r')
+    world = MlWorld(args.unbound_src or os.path.dirname(os.path.dirname(os.path.dirname(args.unbound))))
     work = tempfile.mkdtemp(prefix='missingship-unbound-')
     try:
         merged = os.path.join(work, 'oot-ml.o2r')
         merged_archive(args.oot_o2r, args.mod, merged)
         export(args.unbound, soh_o2r, args.oot_o2r, os.path.join(work, 'vanilla.o2r'), work)
         export(args.unbound, soh_o2r, merged, os.path.join(work, 'ml.o2r'), work)
-        stats = layer(os.path.join(work, 'vanilla.o2r'), os.path.join(work, 'ml.o2r'), args.out)
+        stats = layer(os.path.join(work, 'vanilla.o2r'), os.path.join(work, 'ml.o2r'), args.out, world)
     finally:
         shutil.rmtree(work, ignore_errors=True)
     print(f'{args.out}: ' + ', '.join(f'{v} {k}' for k, v in stats.items()))
