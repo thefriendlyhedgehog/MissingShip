@@ -18,12 +18,22 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
 - The owner is now comparing the port against a reference playthrough of ML on N64. Any difference becomes a new issue with the next free ID (the last used is MS-156).
 - **Next: Prod, no game data.** Owner decision, 2026-09-27: public builds carry no Nintendo data. Players build the ML mod from their own ROM on first launch, as SoH does for `oot.o2r`. Kaze Emanuar has given permission for the port, which covers ML's own work; Nintendo's assets are still never distributed. Since 2026-09-27 the packages carry the builder instead of the mod, and the game builds the mod on first launch (MS-155, MS-156).
 
+- **Next after that: ML on SoH: Unbound.** Owner decision, 2026-09-27: The Missing Link becomes a mod for
+  [SoH: Unbound](https://github.com/roborich/Shipwright/tree/unbound) (roborich's fork, on the same SoH 9.2.3 base). What
+  Unbound lacks, we build ourselves in its style, so it can be offered to its author. The work lives in the private repo
+  `thefriendlyhedgehog/MissingShip-Unbound` (branch `missinglink`; `unbound` tracks roborich's). Our SoH fork gets no new
+  features; it keeps the current beta running. Players still bring the OoT ROM and Kaze's patch or ML ROM. Order:
+  1. ML's world as an Unbound mod: scenes, text and entrances, without ML's custom behaviour.
+  2. Map every engine-ledger row to Unbound: covered, a data feature to add, or behaviour (`base`, later `script`).
+  3. Build the features one at a time, starting with `base` (a vanilla actor's code under a new type, with asset
+     swaps and text remaps). Prelude of Light may be used for manual scene fixes.
+
 ## Open work
 
 | ID | Issue | Notes |
 |---|---|---|
 | [MS-153](https://github.com/thefriendlyhedgehog/MissingShip/issues/117) | Find out what players start from: Kaze's ML v2.0 patch, its base ROM, and whether one ROM can cover SoH's base too | Prod. ML v2.0 ships as a patch for a ROM; with Kaze's permission we may be able to bundle it. |
-| [MS-154](https://github.com/thefriendlyhedgehog/MissingShip/issues/118) | Standalone mod builder for Windows, Linux and macOS | Prod. The pipeline as a per-OS program; continues MS-082. |
+| [MS-154](https://github.com/thefriendlyhedgehog/MissingShip/issues/118) | Standalone mod builder for Windows, Linux and macOS | Prod. The pipeline as a per-OS program; continues MS-082. Built and run on all three. Output is byte-identical only on the same OS: upstream ZAPD leaves two bytes per skeleton limb and one per soundfont drum entry uninitialized, so `oot.o2r` and the mod differ in those bytes between macOS and Linux (found 2026-09-27; 2,759 and 116 entries). To fix on the Unbound side. |
 | [MS-155](https://github.com/thefriendlyhedgehog/MissingShip/issues/119) | First launch builds the ML mod: ask for the ML ROM, verify it, run the builder | Prod. |
 | [MS-156](https://github.com/thefriendlyhedgehog/MissingShip/issues/120) | Release packages carry no game data | Prod. Also audits the engine fork for compiled-in asset data. |
 | [MS-070](https://github.com/thefriendlyhedgehog/MissingShip/issues/42) | Drop-in path: upstream bugfixes and data-driven proposals | Proposals written in [DROPIN_PROPOSALS.md](DROPIN_PROPOSALS.md) for ledger rows 1–101; rows 102–140 still to review. No upstream PRs until the project is done (owner decision, 2026-09-25). |
@@ -94,6 +104,7 @@ All 25 ML scenes are named.
 | M6: Drop-in | MS-016, MS-070 | MS-016 fixed; MS-070 open (proposals written, PRs held). |
 | Platforms | MS-080 … MS-083 | Done 2026-09-27: Windows and Linux packages (engine from GitHub Actions, `tools/package.py`), tested on both. A macOS (Apple Silicon) package from the local build followed. |
 | Prod: no game data | MS-153 … MS-156 | Open: players build the mod from their own ROM; packages and repo carry no game data. Before the repo goes public, its history (which still holds the ROMs and archives committed before 2026-09-27) is cleaned, by a fresh repo or a rewrite; the owner decides which at that point. |
+| ML on Unbound | — | Open, started 2026-09-27: see Status. |
 | Porting kit | MS-090 … MS-093 | MS-090 done (per-hack tool config); the rest deferred until ML is finished. |
 
 ---
