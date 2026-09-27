@@ -2429,6 +2429,32 @@ index e970b965cfe8b8227a17c15a88034111a21e14e3..1f23ef7c8bdbb4e047f224f5064128dd
  
          TimeSplitsPostDragAndDrop();
  
+diff --git a/soh/soh/Extractor/Extract.cpp b/soh/soh/Extractor/Extract.cpp
+index 7819df6b1af93118d22b046afef9ad0cbf743789..30b7a330d1fe7c8ecf0a54b898697068d19ac14c 100644
+--- a/soh/soh/Extractor/Extract.cpp
++++ b/soh/soh/Extractor/Extract.cpp
+@@ -6,6 +6,7 @@
+ #endif
+ #include "Extract.h"
+ #include "portable-file-dialogs.h"
++#include "MissingShipBuilder.h"
+ #include <ship/utils/binarytools/BitConverter.h>
+ #include "soh/ShipUtils.h"
+ #include "variables.h"
+@@ -404,6 +405,13 @@ bool Extractor::ManuallySearchForRom() {
+     if (!GetRomPathFromBox()) {
+         return false;
+     }
++    // MissingShip: The Missing Link ROM is kept for the mod build; the base assets still need an OoT ROM.
++    while (MissingShipBuilder::IsMissingLinkRom(mCurrentRomPath)) {
++        MissingShipBuilder::KeepMissingLinkRom(mCurrentRomPath);
++        if (!GetRomPathFromBox()) {
++            return false;
++        }
++    }
+ 
+     inFile.open(mCurrentRomPath, std::ios::in | std::ios::binary);
+ 
 diff --git a/soh/soh/Extractor/Extract.h b/soh/soh/Extractor/Extract.h
 index 552d5bf4eb1c8564d300c2baf10edfe95a264dd1..aed21e089377faa8dd5af86c135934649c29a472 100644
 --- a/soh/soh/Extractor/Extract.h
@@ -2446,13 +2472,14 @@ index 552d5bf4eb1c8564d300c2baf10edfe95a264dd1..aed21e089377faa8dd5af86c13593464
      void SetSearchPath(const std::string& path);
 diff --git a/soh/soh/Extractor/MissingShipBuilder.cpp b/soh/soh/Extractor/MissingShipBuilder.cpp
 new file mode 100644
-index 0000000000000000000000000000000000000000..3e540628d4e061a6a732c383701eb25d04c9a7f5
+index 0000000000000000000000000000000000000000..401c0daa86e7080a92e7dd9ca1925553a587faf3
 --- /dev/null
 +++ b/soh/soh/Extractor/MissingShipBuilder.cpp
-@@ -0,0 +1,250 @@
+@@ -0,0 +1,290 @@
 +#include "MissingShipBuilder.h"
 +#include "portable-file-dialogs.h"
 +#include <ship/Context.h>
++#include <ship/utils/binarytools/BitConverter.h>
 +
 +#include <cerrno>
 +#include <filesystem>
@@ -2464,6 +2491,7 @@ index 0000000000000000000000000000000000000000..3e540628d4e061a6a732c383701eb25d
 +#ifdef _WIN32
 +#include <Windows.h>
 +#else
++#include <SDL2/SDL_messagebox.h>
 +#include <fcntl.h>
 +#include <spawn.h>
 +#include <sys/wait.h>
@@ -2471,11 +2499,18 @@ index 0000000000000000000000000000000000000000..3e540628d4e061a6a732c383701eb25d
 +extern char** environ;
 +#endif
 +
++extern "C" uint32_t CRC32C(unsigned char* data, size_t dataSize);
++
 +namespace fs = std::filesystem;
 +
 +namespace MissingShipBuilder {
 +
 +static const std::string kAppShortName = "soh"; // OTRGlobals.h's appShortName
++// The Missing Link v2.0 in .z64 byte order: its size and CRC32C (the checksum SoH's extractor uses).
++static constexpr uintmax_t kMissingLinkSize = 16 * 1024 * 1024;
++static constexpr uint32_t kMissingLinkCrc32c = 0xAACAC427;
++
++static std::string sPickedMissingLinkRom;
 +
 +#ifdef _WIN32
 +static const char* kBuilderExe = "MissingShipBuilder.exe";
@@ -2525,6 +2560,37 @@ index 0000000000000000000000000000000000000000..3e540628d4e061a6a732c383701eb25d
 +    stamp += "oot.o2r " + std::to_string(sizeError ? 0 : size) + " " +
 +             std::to_string(timeError ? 0 : (long long)time.time_since_epoch().count()) + "\n";
 +    return stamp;
++}
++
++bool IsMissingLinkRom(const std::string& path) {
++    std::error_code ec;
++    if (fs::file_size(path, ec) != kMissingLinkSize || ec) {
++        return false;
++    }
++    std::vector<uint8_t> rom(kMissingLinkSize);
++    std::ifstream in(path, std::ios::binary);
++    if (!in.read((char*)rom.data(), rom.size())) {
++        return false;
++    }
++    BitConverter::RomToBigEndian(rom.data(), rom.size());
++    return CRC32C(rom.data(), rom.size()) == kMissingLinkCrc32c;
++}
++
++void KeepMissingLinkRom(const std::string& path) {
++    sPickedMissingLinkRom = path;
++    const char* title = "The Missing Link ROM";
++    const char* text = "Got The Missing Link v2.0 ROM: MissingShip will build the mod from it.\n\n"
++                       "Now select your Ocarina of Time ROM. Ship of Harkinian's base assets come from an unmodified "
++                       "OoT ROM (USA 1.0 recommended).";
++#ifdef _WIN32
++    MessageBoxA(nullptr, text, title, MB_OK | MB_ICONINFORMATION);
++#else
++    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, title, text, nullptr);
++#endif
++}
++
++std::string PickedMissingLinkRom() {
++    return sPickedMissingLinkRom;
 +}
 +
 +bool Needed() {
@@ -2702,10 +2768,10 @@ index 0000000000000000000000000000000000000000..3e540628d4e061a6a732c383701eb25d
 +} // namespace MissingShipBuilder
 diff --git a/soh/soh/Extractor/MissingShipBuilder.h b/soh/soh/Extractor/MissingShipBuilder.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..e596f948d68f5249bde69ba32ad978ec60629171
+index 0000000000000000000000000000000000000000..b47f4818d43b9b5cad26476e054714fef92e7f1c
 --- /dev/null
 +++ b/soh/soh/Extractor/MissingShipBuilder.h
-@@ -0,0 +1,30 @@
+@@ -0,0 +1,40 @@
 +#ifndef MISSINGSHIP_BUILDER_H
 +#define MISSINGSHIP_BUILDER_H
 +
@@ -2719,6 +2785,16 @@ index 0000000000000000000000000000000000000000..e596f948d68f5249bde69ba32ad978ec
 +// which builder and oot.o2r made the mod, so an update that changes either rebuilds it without asking again.
 +// Builds without a bundled builder (the development app) skip all of this.
 +namespace MissingShipBuilder {
++
++// Whether `path` is The Missing Link v2.0 ROM, in any byte order. SoH's ROM check would reject it (16 MB, unknown
++// CRC), so its ROM prompt asks this first and keeps an ML ROM for the build instead.
++bool IsMissingLinkRom(const std::string& path);
++
++// Keeps an ML ROM the player picked at SoH's ROM prompt, and says so; the build then needs nothing more from them.
++void KeepMissingLinkRom(const std::string& path);
++
++// The ML ROM picked this session ("" if none).
++std::string PickedMissingLinkRom();
 +
 +// Whether the mod has to be (re)built: a builder is bundled, and the mod is missing or was made by another builder
 +// or from another oot.o2r.
@@ -2737,7 +2813,7 @@ index 0000000000000000000000000000000000000000..e596f948d68f5249bde69ba32ad978ec
 +
 +#endif
 diff --git a/soh/soh/OTRGlobals.cpp b/soh/soh/OTRGlobals.cpp
-index 39f04ddbbd3a3894ac268a4364b3b7b711b3edee..8ecd61a88a7cbd67a46c9208684dedcf9147e066 100644
+index 39f04ddbbd3a3894ac268a4364b3b7b711b3edee..f762515367a5b4213ee20a385adca169bd14d1bd 100644
 --- a/soh/soh/OTRGlobals.cpp
 +++ b/soh/soh/OTRGlobals.cpp
 @@ -1,3 +1,4 @@
@@ -2815,7 +2891,34 @@ index 39f04ddbbd3a3894ac268a4364b3b7b711b3edee..8ecd61a88a7cbd67a46c9208684dedcf
  
  #if not defined(__SWITCH__) && not defined(__WIIU__)
      CheckAndCreateModFolder();
-@@ -691,9 +729,77 @@ void OTRGlobals::RunExtract(int argc, char* argv[]) {
+@@ -577,6 +615,11 @@ void OTRGlobals::RunExtract(int argc, char* argv[]) {
+                 }
+                 file = args.at(0);
+                 args.erase(args.begin());
++                // MissingShip: an ML ROM found here is kept for the mod build, not extracted.
++                if (MissingShipBuilder::IsMissingLinkRom(file)) {
++                    MissingShipBuilder::KeepMissingLinkRom(file);
++                    break;
++                }
+                 extract = Extractor();
+                 if (extract.RunFileStandalone(file)) {
+                     bool doExtract = true;
+@@ -616,8 +659,13 @@ void OTRGlobals::RunExtract(int argc, char* argv[]) {
+                             std::filesystem::exists(Ship::Context::LocateFileAcrossAppDirs("oot.o2r", appShortName));
+ 
+                         if (!ootO2RExists) {
++                            // MissingShip: say what the ROM is for, and that an ML ROM is welcome too.
+                             SohGui::RegisterPopup(
+-                                "No O2R Files", "No O2R files found. Generate one now?", "Yes", "No",
++                                "No O2R Files",
++                                "MissingShip needs Ship of Harkinian's base assets, made once from your Ocarina of "
++                                "Time ROM (USA 1.0 recommended). Make them now?\n\nHave The Missing Link v2.0 ROM? "
++                                "You can select it first: the game keeps it for the mod, then asks for your OoT ROM.",
++                                "Yes", "No",
+                                 [&]() { promptStep = PS_LOCAL; }, [&]() { exit(0); });
+                         } else {
+                             extractStep = ES_VERIFY;
+@@ -691,9 +739,80 @@ void OTRGlobals::RunExtract(int argc, char* argv[]) {
                                            "No ROM O2R files detected. Please generate a ROM O2R and relaunch.", "OK",
                                            "", [&]() { exit(0); });
                  }
@@ -2834,9 +2937,12 @@ index 39f04ddbbd3a3894ac268a4364b3b7b711b3edee..8ecd61a88a7cbd67a46c9208684dedcf
 +                            extractDone = true;
 +                            continue;
 +                        }
-+                        std::string saved = MissingShipBuilder::SavedRom();
-+                        if (!saved.empty()) { // an update: rebuild from the ROM kept last time, unasked
-+                            msFiles = { saved };
++                        std::string ml = MissingShipBuilder::PickedMissingLinkRom();
++                        if (ml.empty()) { // an update: rebuild from the ROM kept last time, unasked
++                            ml = MissingShipBuilder::SavedRom();
++                        }
++                        if (!ml.empty()) {
++                            msFiles = { ml };
 +                            msStep = MSS_BUILD;
 +                            continue;
 +                        }
@@ -2893,7 +2999,7 @@ index 39f04ddbbd3a3894ac268a4364b3b7b711b3edee..8ecd61a88a7cbd67a46c9208684dedcf
              default:
                  break;
          }
-@@ -735,10 +841,22 @@ void OTRGlobals::RunExtract(int argc, char* argv[]) {
+@@ -735,10 +854,22 @@ void OTRGlobals::RunExtract(int argc, char* argv[]) {
                  ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(color.x, color.y, color.z, 0.6f));
                  ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(color.x, color.y, color.z, 1.0f));
                  ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.0f, 0.0f, 0.0f, 0.3f));
@@ -2917,7 +3023,7 @@ index 39f04ddbbd3a3894ac268a4364b3b7b711b3edee..8ecd61a88a7cbd67a46c9208684dedcf
                      float progress = (totalExtract > 0.0f ? (float)extractCount / (float)totalExtract : 0) * 100.0f;
                      auto filename = std::filesystem::path(file).filename().string();
                      ImGui::Text("Extracting %s...%s", filename.c_str(),
-@@ -1529,6 +1647,7 @@ extern "C" void InitOTR(int argc, char* argv[]) {
+@@ -1529,6 +1660,7 @@ extern "C" void InitOTR(int argc, char* argv[]) {
      if (CVarGetInteger(CVAR_REMOTE_ANCHOR("Enabled"), 0)) {
          Anchor::Instance->Enable();
      }

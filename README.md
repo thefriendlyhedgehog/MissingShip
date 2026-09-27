@@ -46,6 +46,10 @@ The open issues are long-term only: the drop-in path (#42) and the porting kit (
 3. On first launch, pick your OoT ROM. The game turns it into `oot.o2r` in the same folder (a minute or two, once only).
 4. It then asks for Kaze's patch and builds The Missing Link from it (about a minute, once only), then boots to ML's title screen. No terminal, nothing to copy by hand.
 
+Have The Missing Link v2.0 ROM already patched? Pick it at the first prompt: the game keeps it for the mod and then
+asks for your OoT ROM, which it still needs for the base game's assets (ML's ROM leaves out about a thousand of the
+files the engine uses).
+
 ### Linux
 
 1. Download `MissingShip-linux.tar.gz` from [Releases](https://github.com/thefriendlyhedgehog/MissingShip/releases) and extract it.
