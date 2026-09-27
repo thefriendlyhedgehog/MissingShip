@@ -33,7 +33,7 @@ own features do.
 | U6 | **GetItem draw table** | 16 (F7) | Gap |
 | U7 | **Pause-menu and minimap tables** (slot positions, cursor redirects, colours, map tables, markers, the dungeon-minimap default) | 24, 48, 49, 138 (F8) | Gap; Unbound notes its own "no minimap for custom scenes" limit, the same table |
 | U8 | **Shop tables** | 32, 67 (F9) | Gap |
-| U9 | **Actor overrides**: InitVars flags, "don't spawn this actor", fixed params | 41, 42, 82, 94 (F10) | Part of Unbound's planned `base` (actors.md, later phase 4) |
+| U9 | **Vanilla actor overrides**: InitVars flags, "don't spawn this actor" | 41, 42, 82, 94 (F10) | Gap. `base` (built, below) is per placement, and ML changed these actors everywhere: ML's crates and soil patches spawn Skulltulas (`En_Sw`) at run time, which no placement reaches, and SoH finds some of them by id (GS stats, the GS Targetable cheat). An override of the vanilla actor itself is the faithful form |
 | U10 | **Game labels**: item and quest-item names, area names for stats and splits | 108, 111, 121, 137 | Gap; small, but touches SoH's UI tables |
 | — | Push-block colours | 39 (F11) | Low value; fold into U9 if needed |
 
@@ -46,7 +46,7 @@ with asset swaps and text remaps) and then `script`.
 
 | Kind | Rows (examples) | Route |
 |---|---|---|
-| Asset or text swap on a vanilla actor | 123 (Kokiri frown texture), 127 (scrub's sales line), part of the pickup ALIASES | `base` asset swaps and text remaps: build `base` first |
+| Asset or text swap on a vanilla actor | 38 (breakable wall), 123 (Kokiri frown texture), 127 (scrub's sales line), part of the pickup ALIASES | **38 done** with `base` (`ml/crack_wall` in `tools/unbound_layer.py`, 2026-09-27): ML's two Deku Tree walls spawn from object 0xA3 with ML's model and collision, verified by log. 123 and 127 depend on save state (sword, a sale), so `base`'s fixed swaps don't express them |
 | Small rule change in a vanilla actor | 105 (fog wall), 122 (tree mouth), 125 (title bars), 103 (bean seller flash) | `base` with a named hook per actor, or `script` |
 | ML's new actors and Link's changes (triple jump, Magic Hourglass, Soul-Charged sword, Arborachnid, ...) | 51–63, 68–81, 107, ... | `script`, or C actors registered by name (SPEC §4.3 lets a mod place "actors a build adds in code") |
 
@@ -80,7 +80,7 @@ and need nothing from Unbound.
 
 ## Order of work (step 3)
 
-1. `base` (U9 and the asset and text swaps in C): the most ML actors per unit of work, and Unbound's own next phase.
+1. `base`: **built** on our Unbound branch (SPEC §7.3, `unbound-docs/based-actors.md`), tested on macOS and Linux; applied to row 38. Next, U9 as a vanilla actor override for the flag rows.
 2. U1–U4 (entrances, cutscene destinations, intro cutscenes, new save): ML's story flow depends on them.
 3. U7 and U10 (pause menu, minimap, labels), U5, U6, U8.
 4. Behaviour beyond `base`: the owner's decision above.

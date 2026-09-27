@@ -9,7 +9,9 @@ vanilla-format scene overrides are not read there. This converts them with Unbou
   - scene documents ML changes carry `"$replace": true` (SPEC §3.4), so ML's scene replaces vanilla's instead of
     merging key by key;
   - text/<lang>/messages.json keeps only the ids ML changes or adds (a keyed list merges per id);
-  - every other changed or added file is copied whole.
+  - every other changed or added file is copied whole;
+  - ML's changes to a vanilla actor that need no code become actor types that extend it (`base`, Unbound
+    SPEC §7.3, ML_TYPES below), and ML's placements of that actor are renamed to the type.
 The result goes in Unbound's mods/ folder beside an ordinary oot.o2r. It carries ML's scenes, text and assets, not
 the behaviour our SoH fork adds in C.
 """
@@ -17,6 +19,24 @@ import argparse, json, os, shutil, subprocess, sys, tempfile, zipfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SKIP = ('version', 'portVersion', 'unbound.json')     # archive metadata: the base provides it
+MANIFEST = {'format': 'unbound', 'formatVersion': 2, 'requires': {'formatVersion': 2}}   # `base` is format 2
+
+# ML's changes to vanilla actors, as types that extend them (docs/UNBOUND_MAP.md, C). Each is placed wherever ML's
+# own scenes place the vanilla actor `replaces` (by its vanilla number); vanilla scenes keep the vanilla actor.
+HIDAN = 'objects/object_hidan_objects/gFireTemple'
+ML_TYPES = {
+    # Ledger row 38: ML's breakable wall draws one model and collision of its own for all three wall types, from
+    # object 0xA3 (object_ml_crackwall), which ML's rooms load instead of the Fire Temple's objects.
+    'ml/crack_wall': {'replaces': 0xCF, 'type': {
+        'name': 'Missing Link: breakable wall',
+        'base': 'Bg_Hidan_Kowarerukabe',
+        'object': 0xA3,
+        'assets': {**{f'{HIDAN}{w}DL': 'objects/object_ml_crackwall/gMlCrackWallDL'
+                      for w in ('CrackedStoneFloor', 'BombableWall', 'LargeBombableWall')},
+                   **{f'{HIDAN}{w}Col': 'objects/object_ml_crackwall/gMlCrackWallCol'
+                      for w in ('CrackedStoneFloor', 'BombableWall', 'LargeBombableWall')}}}},
+}
+RENAMES = {t['replaces']: name for name, t in ML_TYPES.items()}
 
 
 def merged_archive(oot, mod, out):
@@ -42,8 +62,17 @@ def export(unbound, soh_o2r, oot, out, work):
         sys.exit(f'Unbound export failed ({r.returncode}); see {home}/logs')
 
 
+def rename_actors(doc, stats):
+    """ML's placements of a vanilla actor ML_TYPES extends, placed as the type instead."""
+    for setup in (doc.get('setups') or {}).values():
+        for actor in (setup.get('actors') or {}).values():
+            if actor.get('id') in RENAMES:
+                actor['id'] = RENAMES[actor['id']]
+                stats['actor types placed'] += 1
+
+
 def layer(vanilla, ml, out):
-    stats = dict.fromkeys(('added', 'changed', 'scene documents', 'messages'), 0)
+    stats = dict.fromkeys(('added', 'changed', 'scene documents', 'messages', 'actor types placed'), 0)
     with zipfile.ZipFile(vanilla) as v, zipfile.ZipFile(ml) as m, zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED) as z:
         base = {i.filename: i.CRC for i in v.infolist()}
         for info in m.infolist():
@@ -57,12 +86,20 @@ def layer(vanilla, ml, out):
                 doc['messages'] = {k: val for k, val in doc['messages'].items() if old.get(k) != val}
                 stats['messages'] += len(doc['messages'])
                 data = json.dumps(doc, indent=1)
-            elif n in base and n.startswith('scenes/') and n.endswith('.json'):
-                data = json.dumps({'$replace': True, **json.loads(data)}, indent=1)
-                stats['scene documents'] += 1
+            elif n.startswith('scenes/') and n.endswith('.json'):
+                doc = json.loads(data)
+                rename_actors(doc, stats)
+                if n in base:
+                    doc = {'$replace': True, **doc}
+                    stats['scene documents'] += 1
+                else:
+                    stats['added'] += 1
+                data = json.dumps(doc, indent=1)
             else:
                 stats['changed' if n in base else 'added'] += 1
             z.writestr(n, data)
+        z.writestr('unbound.json', json.dumps(MANIFEST, indent=1))
+        z.writestr('unbound/actors.json', json.dumps({k: t['type'] for k, t in ML_TYPES.items()}, indent=1))
     return stats
 
 
