@@ -20,3 +20,6 @@ pipeline/ml_code.bin
 
 # The local development SHIP_HOME: saves, settings, logs, oot.o2r and the installed mod
 home/
+
+# The macOS engine binary: every developer builds it (README > Engine); players get it from releases
+MissingShip.app/Contents/MacOS/MissingShip
