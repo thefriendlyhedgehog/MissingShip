@@ -172,11 +172,15 @@ tester's own settings.
 Players will build the mod themselves from their own files, so no download carries game data (milestone *Prod: no game data*).
 
 ```bash
-python3 pipeline/build_mod.py --rom <OoT USA 1.0> --patch tml_z64_2_0_big_endian.bps --oot-o2r <oot.o2r> --out <MissingLink_Scenes.o2r>
-python3 pipeline/build_mod.py --ml-rom <ML v2.0 ROM> --oot-o2r <oot.o2r> --out <MissingLink_Scenes.o2r>
+python3 pipeline/build_mod.py <files...> --oot-o2r <oot.o2r> --out <MissingLink_Scenes.o2r>
 ```
 
-- It checks each ROM by CRC (any byte order), applies Kaze's patch and runs the same pipeline in a temporary folder. It uses `pipeline/baseline.json` in place of the debug ROM. Its output is byte-identical to `ms_cycle.py`'s for the same `oot.o2r`, in about 7 s.
+- `<files>` are whatever the player has, in any order, told apart by their contents. It accepts:
+  - **The Missing Link v2.0 ROM**; or
+  - **an OoT USA 1.0 ROM plus Kaze's patch**: either of his `.bps` files, or the `.zip` from his page as downloaded.
+
+  ROMs can be `.z64`, `.n64` or `.v64`, loose or zipped. Every ROM and result is checked by CRC, and a wrong ROM, a missing patch or an older ML patch each get a plain message.
+- It then applies the patch in whichever byte order it was made for, and runs the same pipeline in a temporary folder. It uses `pipeline/baseline.json` in place of the debug ROM. Its output is byte-identical to `ms_cycle.py`'s for the same `oot.o2r`, in about 7 s.
 - Players get Kaze's patch from [his release](https://www.romhacking.net/hacks/5334/). It is made for OoT **USA 1.0**, and SoH accepts that ROM for `oot.o2r` too, so one ROM covers both.
 - `tools/freeze_builder.py` freezes it with PyInstaller into `dist/builder/MissingShipBuilder/`: no Python needed, with ZAPD and the SoH files the pipeline reads (tables and object XMLs, 2.8 MB) bundled. Run it on each OS. On macOS it also bundles SDL3, which Homebrew's sdl2-compat (linked by ZAPD) loads at start-up.
 

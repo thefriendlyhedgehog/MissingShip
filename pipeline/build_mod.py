@@ -1,17 +1,19 @@
 """MissingShip's mod builder (MS-154): The Missing Link's mod archive, built from the player's own files.
 
-    build_mod.py --rom <OoT USA 1.0 ROM> --patch <Kaze's ML v2.0 .bps> --oot-o2r <oot.o2r> --out <MissingLink_Scenes.o2r>
-    build_mod.py --ml-rom <The Missing Link v2.0 ROM>              --oot-o2r <oot.o2r> --out <MissingLink_Scenes.o2r>
+    build_mod.py <files...> --oot-o2r <oot.o2r> --out <MissingLink_Scenes.o2r>
 
-Players download Kaze's patch from his page (romhacking.net hack 5334, `tml_z64_2_0_big_endian.bps`) and apply it to
-their OoT USA 1.0 ROM; or they bring a ROM already patched. ROMs in .z64, .n64 or .v64 byte order are all accepted.
-`oot.o2r` is the archive Ship of Harkinian made from the player's OoT ROM.
+<files> are whatever the player has, in any order. The builder tells them apart by their contents:
+  - The Missing Link v2.0 ROM, already patched; or
+  - an Ocarina of Time USA 1.0 ROM plus Kaze's patch: either of his .bps files (big- or little-endian), or the .zip
+    from his page as downloaded (romhacking.net hack 5334).
+ROMs may be in .z64, .n64 or .v64 byte order, loose or inside a .zip. `oot.o2r` is the archive Ship of Harkinian made
+from the player's OoT ROM. (--rom, --patch and --ml-rom still work, as names for the same inputs.)
 
 It runs the same pipeline as ms_cycle.py, in a temporary work folder, replaying pipeline/baseline.json instead of
 reading the debug ROM, with SoH's files and ZAPD from the builder's own folder. The packages ship it frozen per OS,
 so players need no Python. A frozen builder also runs each pipeline step: `<builder> --run-script <step.py>`.
 """
-import argparse, os, runpy, shutil, subprocess, sys, tempfile, zlib
+import argparse, os, runpy, shutil, subprocess, sys, tempfile, zipfile, zlib
 
 ML_CRC = 0x59CD42A3        # The Missing Link v2.0, .z64 byte order
 OOT10_CRC = 0xCD16C529     # OoT NTSC-U 1.0, .z64 byte order: the ROM Kaze's patch is made for
@@ -21,6 +23,11 @@ HERE = sys._MEIPASS if FROZEN else os.path.dirname(os.path.dirname(os.path.abspa
 PIPE_SRC = os.path.join(HERE, 'pipeline')
 SKIP = shutil.ignore_patterns('*.z64', '*.n64', '*.v64', '*.otr', '*.o2r', '*.log', 'out', '__pycache__',
                               'ml_code.bin')
+Z64, V64, N64 = b'\x80\x37\x12\x40', b'\x37\x80\x40\x12', b'\x40\x12\x37\x80'   # first word of each byte order
+
+
+class BuildError(Exception):
+    pass
 
 
 def fail(msg):
@@ -28,41 +35,79 @@ def fail(msg):
     sys.exit(1)
 
 
-def to_z64(data):
-    """A ROM in big-endian (.z64) order, from .z64, .n64 (32-bit little-endian) or .v64 (16-bit byte-swapped)."""
-    magic = data[:4]
-    if magic == b'\x80\x37\x12\x40':
-        return data
+def swap16(data):
     b = bytearray(data)
-    if magic == b'\x37\x80\x40\x12':
-        b[0::2], b[1::2] = data[1::2], data[0::2]
-    elif magic == b'\x40\x12\x37\x80':
-        b[0::4], b[1::4], b[2::4], b[3::4] = data[3::4], data[2::4], data[1::4], data[0::4]
-    else:
-        fail('that file is not an N64 ROM')
+    b[0::2], b[1::2] = data[1::2], data[0::2]
     return bytes(b)
 
 
-def ml_rom(args):
-    """The ML v2.0 ROM, from --ml-rom or from --rom + --patch, checked by CRC."""
-    if args.ml_rom:
-        rom = to_z64(open(args.ml_rom, 'rb').read())
-        if zlib.crc32(rom) != ML_CRC:
-            fail(f'{args.ml_rom} is not The Missing Link v2.0 (CRC32 {zlib.crc32(rom):08X}, want {ML_CRC:08X})')
-        return rom
-    rom = to_z64(open(args.rom, 'rb').read())
-    if zlib.crc32(rom) != OOT10_CRC:
-        fail(f'{args.rom} is not Ocarina of Time USA 1.0 (CRC32 {zlib.crc32(rom):08X}, want {OOT10_CRC:08X}); '
-             'Kaze\'s patch needs that exact ROM')
+def swap32(data):
+    b = bytearray(data)
+    b[0::4], b[1::4], b[2::4], b[3::4] = data[3::4], data[2::4], data[1::4], data[0::4]
+    return bytes(b)
+
+
+def to_z64(data):
+    """A ROM in big-endian (.z64) order, from .z64, .n64 (32-bit little-endian) or .v64 (16-bit byte-swapped)."""
+    return {Z64: lambda d: d, V64: swap16, N64: swap32}[data[:4]](data)
+
+
+def gather(paths):
+    """(roms, patches) from the given files: each file, or each member of a .zip, is a ROM (by its first word), a
+    BPS patch (by its magic) or ignored (readmes)."""
+    roms, patches = [], []
+    for path in paths:
+        if not os.path.isfile(path):
+            raise BuildError(f'{path} not found')
+        if zipfile.is_zipfile(path):
+            with zipfile.ZipFile(path) as z:
+                items = [(f'{os.path.basename(path)}:{n}', z.read(n)) for n in z.namelist() if not n.endswith('/')]
+        else:
+            items = [(os.path.basename(path), open(path, 'rb').read())]
+        found = False
+        for name, data in items:
+            if data[:4] in (Z64, V64, N64):
+                roms.append((name, data)); found = True
+            elif data[:4] == b'BPS1':
+                patches.append((name, data)); found = True
+        if not found:
+            raise BuildError(f'{os.path.basename(path)} is not an N64 ROM, a BPS patch or a zip holding one')
+    return roms, patches
+
+
+def ml_rom(paths):
+    """The ML v2.0 ROM in .z64 order: a given ML ROM, or an OoT USA 1.0 ROM with one of the given patches applied
+    (in whichever byte order that patch was made for). Every result is checked by CRC."""
+    roms, patches = gather(paths)
+    if not roms:
+        raise BuildError('no ROM given: add The Missing Link v2.0 ROM, or your Ocarina of Time USA 1.0 ROM '
+                         'and Kaze\'s patch')
+    oot10 = None
+    for name, data in roms:
+        z64 = to_z64(data)
+        crc = zlib.crc32(z64)
+        if crc == ML_CRC:
+            return z64
+        if crc == OOT10_CRC:
+            oot10 = z64
+    if oot10 is None:
+        names = ', '.join(n for n, _ in roms)
+        raise BuildError(f'{names}: not The Missing Link v2.0 or Ocarina of Time USA 1.0. Kaze\'s patch needs '
+                         'exactly OoT USA 1.0 (NTSC 1.0)')
+    if not patches:
+        raise BuildError('found Ocarina of Time USA 1.0 but no patch: add Kaze\'s .bps, or the zip from his page')
     sys.path.insert(0, PIPE_SRC)
     from bps_apply import apply_bps
-    patch = open(args.patch, 'rb').read()
-    if patch[:4] != b'BPS1':
-        fail(f'{args.patch} is not a BPS patch')
-    rom = apply_bps(rom, patch)
-    if zlib.crc32(rom) != ML_CRC:
-        fail(f'{args.patch} does not make The Missing Link v2.0: use tml_z64_2_0_big_endian.bps from Kaze\'s page')
-    return rom
+    forms = {zlib.crc32(f): f for f in (oot10, swap16(oot10), swap32(oot10))}
+    for name, patch in patches:
+        source_crc = int.from_bytes(patch[-12:-8], 'little')      # BPS footer: source, target, patch CRC32s
+        if source_crc not in forms:
+            continue
+        out = to_z64(apply_bps(forms[source_crc], patch))
+        if zlib.crc32(out) == ML_CRC:
+            return out
+    raise BuildError('none of the patches makes The Missing Link v2.0 from OoT USA 1.0: use the v2.0 patch from '
+                     'Kaze\'s page (tml_z64_2_0_big_endian.bps or tml_n64_2_0_little_endian.bps)')
 
 
 def zapd():
@@ -88,8 +133,12 @@ def build(args):
         shutil.copytree(PIPE_SRC, os.path.join(work, 'pipeline'), ignore=SKIP)
         os.makedirs(os.path.join(work, 'mod'))
         rom_path = os.path.join(work, 'tml_2_0.z64')
+        try:
+            rom = ml_rom(args.files)
+        except BuildError as e:
+            fail(str(e))
         with open(rom_path, 'wb') as f:
-            f.write(ml_rom(args))
+            f.write(rom)
         # the folder holding soh/, the SoH files the steps read: the builder's own, or a checkout's engine/
         soh = os.environ.get('MS_SHIPWRIGHT') or (HERE if FROZEN else os.path.join(HERE, 'engine'))
         env = dict(os.environ, PYTHONUTF8='1', MS_ML_ROM=rom_path, MS_OOT_O2R=oot, MS_SHIPWRIGHT=soh,
@@ -126,17 +175,17 @@ def main():
         runpy.run_path(script, run_name='__main__')
         return
     p = argparse.ArgumentParser(description='Build The Missing Link mod archive for MissingShip.')
-    src = p.add_mutually_exclusive_group(required=True)
-    src.add_argument('--rom', help='your Ocarina of Time USA 1.0 ROM (with --patch)')
-    src.add_argument('--ml-rom', help='your The Missing Link v2.0 ROM (already patched)')
-    p.add_argument('--patch', help="Kaze's tml_z64_2_0_big_endian.bps")
+    p.add_argument('files', nargs='*', help='The Missing Link v2.0 ROM, or an OoT USA 1.0 ROM and Kaze\'s patch '
+                                            '(.bps or the .zip from his page), in any order')
+    p.add_argument('--rom', '--ml-rom', '--patch', dest='more', action='append', default=[], help=argparse.SUPPRESS)
     p.add_argument('--oot-o2r', required=True, help='the oot.o2r Ship of Harkinian made from your ROM')
     p.add_argument('--out', required=True, help='where to write MissingLink_Scenes.o2r')
     p.add_argument('--verbose', action='store_true', help='show every pipeline step')
     p.add_argument('--keep', action='store_true', help='keep the temporary work folder')
     args = p.parse_args()
-    if args.rom and not args.patch:
-        p.error('--rom needs --patch')
+    args.files += args.more
+    if not args.files:
+        p.error('give The Missing Link v2.0 ROM, or an OoT USA 1.0 ROM and Kaze\'s patch')
     build(args)
 
 
