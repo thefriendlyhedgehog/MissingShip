@@ -18,7 +18,7 @@ XMLs give every texture's offset and size, and stock stores the raw N64 bytes be
 bytes differ from the debug ROM's (ML redrew it) and from stock's, the same baseline rule as inject_obj_textures.py.
 The engine side (minimap index room + 190, ML's map tables) is in z_map_exp.c / z_map_data.c.
 """
-from mspaths import DEBUG_ROM, ML_ROM, OOT_O2R, PIPE, SOH
+from mspaths import ML_ROM, OOT_O2R, PIPE, SOH
 import re
 import struct, sys, zipfile, shutil, os
 sys.path.insert(0, PIPE)
@@ -82,17 +82,16 @@ SAME_LAYOUT = {'map_i_static': (113, 'map_i_static.xml'), 'map_48x85_static': (1
                'vr_fine1_static': (128, 'skyboxes.xml'), 'vr_fine1_pal_static': (129, 'skyboxes.xml'),
                'vr_cloud2_static': (138, 'skyboxes.xml'), 'vr_cloud2_pal_static': (139, 'skyboxes.xml')}
 BPP = {'i4': 0.5, 'ci4': 0.5, 'ci8': 1, 'rgba16': 2}
-dbg_rom = open(DEBUG_ROM, 'rb').read()
-dbg_names = open(os.path.join(SOH, 'assets', 'extractor', 'filelists', 'dbg.txt')).read().split('\n')
-def dbg_file(name):
-    i = dbg_names.index(name)
-    return get_file(dbg_rom, *struct.unpack('>IIII', dbg_rom[0x12f70 + 16 * i:0x12f70 + 16 * i + 16]))
+import baseline                                   # ML-vs-debug answers, recorded for players' builds (MS-154)
+baseline.begin('inject_minimaps')
 stock = set(oot.namelist())
 same = {}
 for name, (dma, xml_name) in SAME_LAYOUT.items():
-    ml, dbg = get_file(rom, *E[dma]), dbg_file(name)
-    if len(ml) != len(dbg):
-        sys.exit(f'{name}: ML dma {dma} is {len(ml)} bytes, debug is {len(dbg)}: layout assumption broken')
+    ml = get_file(rom, *E[dma])
+    if baseline.RECORD:
+        dbg = baseline.debug_file(name)
+        if len(ml) != len(dbg):
+            sys.exit(f'{name}: ML dma {dma} is {len(ml)} bytes, debug is {len(dbg)}: layout assumption broken')
     xml = open(os.path.join(SOH, 'assets', 'xml', 'GC_MQ_PAL_F', 'textures', xml_name)).read()
     xml = re.search(rf'<File Name="{name}"[^>]*>(.*?)</File>', xml, re.S).group(1)
     for m in re.finditer(r'<Texture Name="(\w+)"[^>]*Format="(\w+)"[^>]*Width="(\d+)"[^>]*Height="(\d+)"'
@@ -100,13 +99,14 @@ for name, (dma, xml_name) in SAME_LAYOUT.items():
         tn, fmt, w, h, o = m.group(1), m.group(2), int(m.group(3)), int(m.group(4)), int(m.group(5), 16)
         n = int(w * h * BPP[fmt])
         path = f'textures/{name}/{tn}'
-        if ml[o:o + n] == dbg[o:o + n] or path not in stock:
+        if not baseline.value(path, lambda: ml[o:o + n] != dbg[o:o + n]) or path not in stock:
             continue                              # ML didn't redraw it
         v = oot.read(path)
         if struct.unpack('<I', v[0x4C:0x50])[0] != n:
             sys.exit(f'{path}: stock holds {struct.unpack("<I", v[0x4C:0x50])[0]} bytes, expected {n}')
         if v[0x50:] != ml[o:o + n]:
             same[path] = v[:0x50] + ml[o:o + n]
+baseline.save()
 added.update(same)
 # Owner's request: ML's skies without the face seams (pipeline/sky_seams.py).
 from sky_seams import fix_skyboxes

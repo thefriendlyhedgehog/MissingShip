@@ -14,14 +14,14 @@ loudly if an assumption stops holding. Pure data: drop-in compatible.
               0xE0 bytes over rows 12-18 of gKw1MouthTex once Link has the sword, turning the smile into a frown (MS-032).
               Object memory is ML's to patch but not ours, so the frown ships as its own texture and En_Ko swaps it in
 """
-from mspaths import DEBUG_ROM, ML_ROM, OOT_O2R, PIPE, SOH
+from mspaths import ML_ROM, OOT_O2R, PIPE, SOH
+import baseline   # the debug-ROM checks below run only where it exists (record mode, MS-154)
 import os, re, struct, sys, zipfile
 from yaz0 import get_file
 
 MOD = os.path.join(PIPE, 'ml.otr')
 XML = os.path.join(SOH, 'assets', 'xml', 'GC_MQ_PAL_F', 'objects')
 ML_DMA = {'object_vm': 25, 'object_sa': 43, 'gameplay_keep': 349, 'link_animetion': 146, 'object_kw1': 62}
-DBG_NAMES = open(os.path.join(SOH, 'assets', 'extractor', 'filelists', 'dbg.txt')).read().split('\n')
 
 def rom_file(path, index):
     rom = open(path, 'rb').read()
@@ -37,13 +37,13 @@ def fail(msg):
 
 oot = zipfile.ZipFile(OOT_O2R)
 ml = {obj: rom_file(ML_ROM, i) for obj, i in ML_DMA.items()}
-dbg = {obj: rom_file(DEBUG_ROM, DBG_NAMES.index(obj)) for obj in ML_DMA}
+dbg = {obj: baseline.debug_file(obj) for obj in ML_DMA} if baseline.RECORD else None
 out = {}
 
 # Beamos: ML makes both display lists end at their first command.
 for name in ('gBeamosBodyDL', 'gBeamosTopEyelidDL'):
     off = offset_of('object_vm', name)
-    if dbg['object_vm'][off:off + 8] != bytes.fromhex('e700000000000000') or \
+    if (dbg and dbg['object_vm'][off:off + 8] != bytes.fromhex('e700000000000000')) or \
        ml['object_vm'][off:off + 8] != bytes.fromhex('df00000000000000'):
         fail(f'{name}: expected PIPESYNC in debug, ENDDL in ML')
     path = f'objects/object_vm/{name}'
@@ -55,7 +55,7 @@ for name in ('gBeamosBodyDL', 'gBeamosTopEyelidDL'):
 # Saria: ML points her right-hand limb at the hand holding the ocarina.
 limb = offset_of('object_sa', 'gSariaRightHandLimb')
 old_dl, new_dl = offset_of('object_sa', 'gSariaRightHandDL'), offset_of('object_sa', 'gSariaRightHandAndOcarinaDL')
-if struct.unpack('>I', dbg['object_sa'][limb + 8:limb + 12])[0] != 0x06000000 | old_dl or \
+if (dbg and struct.unpack('>I', dbg['object_sa'][limb + 8:limb + 12])[0] != 0x06000000 | old_dl) or \
    struct.unpack('>I', ml['object_sa'][limb + 8:limb + 12])[0] != 0x06000000 | new_dl:
     fail('gSariaRightHandLimb: expected its DL to move from gSariaRightHandDL to gSariaRightHandAndOcarinaDL')
 path = 'objects/object_sa/gSariaRightHandLimb'
@@ -72,9 +72,13 @@ out[path] = res.replace(old_ref, new_ref)
 for name, frames in (('gPlayerAnim_link_fighter_turn_kiruL_end', 13), ('gPlayerAnim_link_fighter_turn_kiruR_end', 14)):
     off = int(re.search(rf'Name="{name}" Offset="(0x[0-9A-Fa-f]+)"',
                         open(os.path.join(XML, 'gameplay_keep.xml')).read()).group(1), 16)
-    d, m = dbg['gameplay_keep'][off:off + 8], ml['gameplay_keep'][off:off + 8]
-    if struct.unpack('>h', d[:2])[0] != 16 or struct.unpack('>h', m[:2])[0] != frames or d[4:] != m[4:]:
-        fail(f'{name}: expected frame count 16 -> {frames} with the same animation data')
+    m = ml['gameplay_keep'][off:off + 8]
+    if struct.unpack('>h', m[:2])[0] != frames:
+        fail(f'{name}: expected ML\'s frame count {frames}')
+    if dbg:
+        d = dbg['gameplay_keep'][off:off + 8]
+        if struct.unpack('>h', d[:2])[0] != 16 or d[4:] != m[4:]:
+            fail(f'{name}: expected frame count 16 -> {frames} with the same animation data')
     path = f'objects/gameplay_keep/{name}'
     res = oot.read(path)
     if res[4:8] != b'MNAO' or struct.unpack('<Ih', res[0x40:0x46]) != (1, 16):
@@ -85,11 +89,15 @@ for name, frames in (('gPlayerAnim_link_fighter_turn_kiruL_end', 13), ('gPlayerA
     dpath = f'misc/link_animetion/gPlayerAnimData_{seg:06X}'
     data = oot.read(dpath)
     n = struct.unpack('<I', data[0x40:0x44])[0]
-    dd, md = dbg['link_animetion'][seg:seg + 2 * n], ml['link_animetion'][seg:seg + 2 * n]
-    if data[4:8] != b'MAPO' or struct.unpack(f'<{n}h', data[0x44:]) != struct.unpack(f'>{n}h', dd):
-        fail(f'{dpath}: stock is not the debug ROM\'s data')
-    if md[frames * 0x86:] != dd[frames * 0x86:]:
-        fail(f'{dpath}: ML changed frames past its new count of {frames}')
+    md = ml['link_animetion'][seg:seg + 2 * n]
+    if data[4:8] != b'MAPO':
+        fail(f'{dpath}: unexpected layout (want Link animation data)')
+    if dbg:
+        dd = dbg['link_animetion'][seg:seg + 2 * n]
+        if struct.unpack(f'<{n}h', data[0x44:]) != struct.unpack(f'>{n}h', dd):
+            fail(f'{dpath}: stock is not the debug ROM\'s data')
+        if md[frames * 0x86:] != dd[frames * 0x86:]:
+            fail(f'{dpath}: ML changed frames past its new count of {frames}')
     out[dpath] = data[:0x44] + struct.pack(f'<{n}h', *struct.unpack(f'>{n}h', md))
 
 # Kokiri frown (MS-032): the hook tests the word at row 12 of the mouth (0x102, vanilla's), then copies 0xE0 bytes
@@ -100,12 +108,13 @@ hook = struct.unpack('>9I', custom[0x2270:0x2294])
 if mouth != 0x160C or hook[1] != 0x2508160C or hook[3] != 0x34010102 or hook[7] != 0x252A00E0 or \
    custom[0x2290:0x2298] != bytes.fromhex('3c0b8060356b2b00'):
     fail('hook 0x80602200: expected it to copy 0xE0 bytes from 0x80602B00 to gKw1MouthTex + 0x180, guarded by 0x102')
-if ml['object_kw1'] != dbg['object_kw1'] or ml['object_kw1'][mouth + 0x180:mouth + 0x184] != bytes.fromhex('00000102'):
+if (dbg and ml['object_kw1'] != dbg['object_kw1']) or \
+   ml['object_kw1'][mouth + 0x180:mouth + 0x184] != bytes.fromhex('00000102'):
     fail('object_kw1: expected ML\'s copy to be the debug ROM\'s, with the guard word in place')
 path = 'objects/object_kw1/gKw1MouthTex'
 res = oot.read(path)
-if res[4:8] != b'XETO' or len(res) != 0x50 + 0x400 or res[0x50:] != dbg['object_kw1'][mouth:mouth + 0x400]:
-    fail(f'{path}: expected the debug ROM\'s 32x32 ci8 mouth, raw, behind a 0x50-byte header')
+if res[4:8] != b'XETO' or len(res) != 0x50 + 0x400 or res[0x50:] != ml['object_kw1'][mouth:mouth + 0x400]:
+    fail(f'{path}: expected the unchanged 32x32 ci8 mouth (ML\'s is the debug ROM\'s), raw, behind a 0x50-byte header')
 tex = bytearray(res)
 tex[0x50 + 0x180:0x50 + 0x260] = custom[0x2B00:0x2BE0]
 out['objects/object_kw1/gMlKw1MouthFrownTex'] = bytes(tex)

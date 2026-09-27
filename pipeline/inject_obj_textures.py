@@ -11,7 +11,8 @@ ships only if ML's bytes differ from the debug ROM's (ML redrew it) AND from sto
 Comparing with stock alone would ship debug-vs-retail version differences ML never made (3 in
 gameplay_dangeon_keep did).
 """
-from mspaths import DEBUG_ROM, ML_ROM, OOT_O2R, PIPE, SOH, ZAPD, ZAPD_CWD, zapd_config
+from mspaths import ML_ROM, OOT_O2R, PIPE, SOH, ZAPD, ZAPD_CWD, zapd_config
+import baseline
 import os, re, struct, subprocess, sys, zipfile
 from yaz0 import get_file
 
@@ -27,8 +28,7 @@ def rom_file(path, index):
 
 def ml_changed(obj):
     """Names of the textures in <obj> whose bytes differ between ML and the MQ debug ROM."""
-    names = open(os.path.join(SOH, 'assets', 'extractor', 'filelists', 'dbg.txt')).read().split('\n')
-    ml, dbg = rom_file(ML_ROM, ML_DMA[obj]), rom_file(DEBUG_ROM, names.index(obj))
+    ml, dbg = rom_file(ML_ROM, ML_DMA[obj]), baseline.debug_file(obj)
     xml = open(os.path.join(XML_SRC, obj + '.xml')).read()
     out = set()
     for m in re.finditer(r'<Texture Name="(\w+)"[^>]*Format="(\w+)"[^>]*Width="(\d+)"[^>]*Height="(\d+)"'
@@ -80,7 +80,9 @@ if r.returncode != 0 or not os.path.exists(OUT):
     print(r.stdout[-2000:], r.stderr[-2000:])
     sys.exit(1)
 
-changed = {(obj, name) for obj in OBJECTS for name in ml_changed(obj)}
+baseline.begin('inject_obj_textures')             # ML-vs-debug answers, recorded for players' builds (MS-154)
+changed = {(obj, name) for obj in OBJECTS for name in baseline.value(obj, lambda: sorted(ml_changed(obj)))}
+baseline.save()
 
 src, oot = zipfile.ZipFile(OUT), zipfile.ZipFile(OOT_O2R)
 stock = set(oot.namelist())

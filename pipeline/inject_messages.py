@@ -20,7 +20,7 @@ Credits (MS-024): `text/staff_message_data_static/staff_message_data_static`, sa
 (code 0x136908, 48 entries) is byte-identical to the MQ debug ROM's; its text blob is dma 110. A credit ships only if
 ML's text differs from the debug ROM's (the baseline ML was built from): 11 do, ML's own staff and thanks.
 """
-from mspaths import DEBUG_ROM, ML_ROM, OOT_O2R, PIPE, SOH
+from mspaths import ML_ROM, OOT_O2R, PIPE, SOH
 import zipfile, struct, sys, shutil, os
 sys.path.insert(0, PIPE)
 from yaz0 import get_file
@@ -88,21 +88,22 @@ res = d[:0x40] + bytes(body)
 # ---- credits (MS-024) ----
 STAFF_RES = 'text/staff_message_data_static/staff_message_data_static'
 STAFF_TABLE, STAFF_NENT, STAFF_DMA = 0x136908, 48, 110
-dbg_rom = open(DEBUG_ROM, 'rb').read()
-dbg_names = open(os.path.join(SOH, 'assets', 'extractor', 'filelists', 'dbg.txt')).read().split('\n')
-def dbg_file(i):
-    return get_file(dbg_rom, *struct.unpack('>IIII', dbg_rom[0x12f70 + 16 * i:0x12f70 + 16 * i + 16]))
-dbg_code = dbg_file(dbg_names.index('code'))
-if code[STAFF_TABLE:STAFF_TABLE + 8 * STAFF_NENT] != dbg_code[STAFF_TABLE:STAFF_TABLE + 8 * STAFF_NENT]:
-    sys.exit('staff message table differs from the debug ROM: offsets would not line up')
-ml_staff, dbg_staff = get_file(rom, *E[STAFF_DMA]), dbg_file(dbg_names.index('staff_message_data_static'))
+import baseline                                   # ML-vs-debug answers, recorded for players' builds (MS-154)
+baseline.begin('inject_messages')
+if baseline.RECORD:
+    dbg_code = baseline.debug_file('code')
+    if code[STAFF_TABLE:STAFF_TABLE + 8 * STAFF_NENT] != dbg_code[STAFF_TABLE:STAFF_TABLE + 8 * STAFF_NENT]:
+        sys.exit('staff message table differs from the debug ROM: offsets would not line up')
+    dbg_staff = baseline.debug_file('staff_message_data_static')
+ml_staff = get_file(rom, *E[STAFF_DMA])
 stbl = [(struct.unpack('>H', code[STAFF_TABLE + 8 * k:STAFF_TABLE + 8 * k + 2])[0],
          struct.unpack('>I', code[STAFF_TABLE + 8 * k + 4:STAFF_TABLE + 8 * k + 8])[0] & 0xFFFFFF) for k in range(STAFF_NENT)]
 staff_new = {}
 for i, (tid, seg) in enumerate(stbl):
     end = stbl[i + 1][1] if i + 1 < len(stbl) else len(ml_staff)
-    if trim(ml_staff[seg:end]) != trim(dbg_staff[seg:end]):
+    if baseline.value(f'credit 0x{tid:04X}', lambda: trim(ml_staff[seg:end]) != trim(dbg_staff[seg:end])):
         staff_new[tid] = trim(ml_staff[seg:end])
+baseline.save()
 sd = z.read(STAFF_RES)
 scount = struct.unpack('<I', sd[0x40:0x44])[0]
 sbody, off = bytearray(struct.pack('<I', scount)), 0x44

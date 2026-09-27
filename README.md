@@ -144,7 +144,8 @@ python3 pipeline/ms_cycle.py --no-launch  # build and install only
 - **Inputs (not in git; bring your own):** `pipeline/tml_2_0.z64` (the ML v2.0 ROM), `home/oot.o2r` (made by SoH from an NTSC-U 1.2 ROM), and the engine checkout. Every step uses the engine's own ZAPD (`build-ml/ZAPD/ZAPD.out`, from our patched ZAPDTR) and its tables; nothing else is needed.
 - **Output:** `mod/MissingLink_Scenes.o2r`, byte-identical between builds of the same inputs. It is game data, so it is never committed; releases carry it.
 - The pipeline is plain Python 3 plus ZAPD. It is only exercised on macOS; players don't need it, since the packages ship the finished archive.
-- **Analysis tools:** `tools/*.py` also need the OoT **PAL MQ Debug** ROM at `roms/oot-mq-debug-pal.z64` (not in git).
+- **The debug ROM is optional for the build.** Four steps ship a texture or credit only if ML changed it against the OoT **PAL MQ Debug** ROM it was built from. With that ROM at `roms/oot-mq-debug-pal.z64` (not in git), they compute those answers and record them in `pipeline/baseline.json` (true/false answers and names only, committed). Without it, they replay the recorded answers (`pipeline/baseline.py`, MS-154), with byte-identical output. Commit `baseline.json` whenever a build changes it.
+- **Analysis tools:** `tools/*.py` do need the debug ROM.
 - **Knobs:** set these env vars to restore old workarounds; the defaults are correct: `ML_STRIP_ACTORS`, `ML_REMAP_OBJECTS`, `ML_FIX_SETTIMG_FMT`, `ML_SCRUB`, `ML_STRIP_CS`, `ML_SKIP_FMT`, `ML_SKIP_SLOTS`, `ML_NO_START_FIX`.
 
 ### Releases
