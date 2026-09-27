@@ -18,13 +18,16 @@ vanilla-format scene overrides are not read there. This converts them with Unbou
     unbound/cutscenes.json and unbound/save.json (Unbound SPEC §7.1, §7.5, §7.6; tools/unbound_ml_world.py), and exits
     to the entrances our fork adds use their names;
   - what SoH's UI calls ML's items, areas and events, and ML's Time Splits list, become unbound/labels.json and the
-    vanilla scenes' `name` (Unbound SPEC §7.7, §7.1; tools/unbound_ml_ui.py).
+    vanilla scenes' `name` (Unbound SPEC §7.7, §7.1; tools/unbound_ml_ui.py);
+  - ML's dungeon minimaps and pause maps (room textures, compass offsets, floors, palettes, chest and boss marks) and
+    its missing overworld minimap become unbound/maps.json (Unbound SPEC §7.8; tools/unbound_ml_maps.py).
 The result goes in Unbound's mods/ folder beside an ordinary oot.o2r. It carries ML's scenes, text and assets, not
 the behaviour our SoH fork adds in C.
 """
 import argparse, json, os, shutil, subprocess, sys, tempfile, zipfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from unbound_ml_maps import MlMaps
 from unbound_ml_ui import MlUi
 from unbound_ml_world import MlWorld
 
@@ -119,7 +122,7 @@ def rename_actors(doc, stats):
                 stats['actor types placed'] += 1
 
 
-def layer(vanilla, ml, out, world, ui):
+def layer(vanilla, ml, out, world, ui, maps):
     stats = dict.fromkeys(('added', 'changed', 'scene documents', 'messages', 'actor types placed', 'exits named',
                            'exit padding dropped'), 0)
     with zipfile.ZipFile(vanilla) as v, zipfile.ZipFile(ml) as m, zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED) as z:
@@ -164,6 +167,9 @@ def layer(vanilla, ml, out, world, ui):
         stats['cutscene destinations'] = len(destinations)
         stats['item labels'] = len(labels['items'])
         stats['time splits'] = len(labels['timeSplits']['splits'])
+        doc = maps.maps()
+        z.writestr('unbound/maps.json', json.dumps(doc, indent=1))
+        stats['dungeon maps'] = sum(1 for v in doc.values() if v != {'minimap': False})
     return stats
 
 
@@ -182,14 +188,14 @@ def main():
                                                                            args.out))
     soh_o2r = args.soh_o2r or os.path.join(os.path.dirname(os.path.abspath(args.unbound)), 'soh.o2r')
     unbound_src = args.unbound_src or os.path.dirname(os.path.dirname(os.path.dirname(args.unbound)))
-    world, ui = MlWorld(unbound_src), MlUi(unbound_src)
+    world, ui, maps = MlWorld(unbound_src), MlUi(unbound_src), MlMaps(unbound_src)
     work = tempfile.mkdtemp(prefix='missingship-unbound-')
     try:
         merged = os.path.join(work, 'oot-ml.o2r')
         merged_archive(args.oot_o2r, args.mod, merged)
         export(args.unbound, soh_o2r, args.oot_o2r, os.path.join(work, 'vanilla.o2r'), work)
         export(args.unbound, soh_o2r, merged, os.path.join(work, 'ml.o2r'), work)
-        stats = layer(os.path.join(work, 'vanilla.o2r'), os.path.join(work, 'ml.o2r'), args.out, world, ui)
+        stats = layer(os.path.join(work, 'vanilla.o2r'), os.path.join(work, 'ml.o2r'), args.out, world, ui, maps)
     finally:
         shutil.rmtree(work, ignore_errors=True)
     print(f'{args.out}: ' + ', '.join(f'{v} {k}' for k, v in stats.items()))
