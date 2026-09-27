@@ -197,6 +197,20 @@ python3 pipeline/build_mod.py <files...> --oot-o2r <oot.o2r> --out <MissingLink_
 - Players get Kaze's patch from [his release](https://www.romhacking.net/hacks/5334/). It is made for OoT **USA 1.0**, and SoH accepts that ROM for `oot.o2r` too, so one ROM covers both.
 - `tools/freeze_builder.py` freezes it with PyInstaller into `dist/builder/MissingShipBuilder/`: no Python needed, with ZAPD and the SoH files the pipeline reads (tables and object XMLs, 2.8 MB) bundled. Run it on each OS. On macOS it also bundles SDL3, which Homebrew's sdl2-compat (linked by ZAPD) loads at start-up.
 
+### ML on SoH: Unbound (in progress)
+
+The next home for ML is [SoH: Unbound](https://github.com/roborich/Shipwright/tree/unbound); our copy is the private
+`thefriendlyhedgehog/MissingShip-Unbound` (branch `missinglink`). Unbound reads vanilla scenes and text only in its own
+JSON form, so `tools/unbound_layer.py` converts ML's with Unbound's own converter and keeps what ML changes:
+
+```bash
+python3 tools/unbound_layer.py --unbound <Unbound build>/soh/soh-macos --oot-o2r <oot.o2r> --mod mod/MissingLink_Scenes.o2r
+```
+
+It writes `mod/MissingLink_Unbound.o2r` (10 MB: 25 scenes, 304 messages, ML's objects, textures and audio) for
+Unbound's `mods/` folder, beside an ordinary `oot.o2r`. It carries ML's world, not the behaviour our SoH fork adds in C;
+that is the rest of the plan in `docs/ROADMAP.md`.
+
 ### Checks
 
 ```bash
