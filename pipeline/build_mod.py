@@ -96,10 +96,16 @@ def build(args):
                    MS_ZAPD=zapd(), MS_ZAPD_CWD=os.path.join(soh, 'soh'), MS_BASELINE='replay',
                    MS_DEBUG_ROM=os.path.join(work, 'no-debug-rom.z64'))
         step = [sys.executable, '--run-script'] if FROZEN else [sys.executable]
-        r = subprocess.run(step + [os.path.join(work, 'pipeline', 'ms_cycle.py'), '--no-launch'], env=env,
-                           stdout=None if args.verbose else subprocess.DEVNULL)
+        log_path = os.path.join(work, 'build.log')
+        with open(log_path, 'w', encoding='utf-8') as log:
+            r = subprocess.run(step + [os.path.join(work, 'pipeline', 'ms_cycle.py'), '--no-launch'], env=env,
+                               stdout=None if args.verbose else log,
+                               stderr=None if args.verbose else subprocess.STDOUT)
         if r.returncode != 0:
-            fail('building the mod failed' + ('' if args.verbose else '; run again with --verbose for details'))
+            if not args.verbose:
+                tail = open(log_path, encoding='utf-8', errors='replace').read().splitlines()[-25:]
+                print('\n'.join(tail), file=sys.stderr)
+            fail('building the mod failed')
         built = os.path.join(work, 'mod', 'MissingLink_Scenes.o2r')
         os.makedirs(os.path.dirname(out), exist_ok=True)
         shutil.copyfile(built, out + '.tmp')

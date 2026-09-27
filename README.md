@@ -167,6 +167,19 @@ python3 pipeline/ms_cycle.py --no-launch  # build and install only
 `profile/shipofharkinian.json` is what every new player starts with, so it holds chosen defaults, never a
 tester's own settings.
 
+### Mod builder (MS-154)
+
+Players will build the mod themselves from their own files, so no download carries game data (milestone *Prod: no game data*).
+
+```bash
+python3 pipeline/build_mod.py --rom <OoT USA 1.0> --patch tml_z64_2_0_big_endian.bps --oot-o2r <oot.o2r> --out <MissingLink_Scenes.o2r>
+python3 pipeline/build_mod.py --ml-rom <ML v2.0 ROM> --oot-o2r <oot.o2r> --out <MissingLink_Scenes.o2r>
+```
+
+- It checks each ROM by CRC (any byte order), applies Kaze's patch and runs the same pipeline in a temporary folder. It uses `pipeline/baseline.json` in place of the debug ROM. Its output is byte-identical to `ms_cycle.py`'s for the same `oot.o2r`, in about 7 s.
+- Players get Kaze's patch from [his release](https://www.romhacking.net/hacks/5334/). It is made for OoT **USA 1.0**, and SoH accepts that ROM for `oot.o2r` too, so one ROM covers both.
+- `tools/freeze_builder.py` freezes it with PyInstaller into `dist/builder/MissingShipBuilder/`: no Python needed, with ZAPD and the SoH files the pipeline reads (tables and object XMLs, 2.8 MB) bundled. Run it on each OS. On macOS it also bundles SDL3, which Homebrew's sdl2-compat (linked by ZAPD) loads at start-up.
+
 ### Checks
 
 ```bash
