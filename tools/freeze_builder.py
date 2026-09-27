@@ -50,6 +50,10 @@ def main():
     ap.add_argument('--out', default=os.path.join(ROOT, 'dist', 'builder'))
     ap.add_argument('--soh', default=mspaths.SOH, help='engine/soh, for the SoH files')
     args = ap.parse_args()
+    # PyInstaller resolves relative paths against its spec folder (--out), not the working directory.
+    args.zapd, args.out, args.soh = (os.path.abspath(a) for a in (args.zapd, args.out, args.soh))
+    if not os.path.isfile(args.zapd):
+        sys.exit(f'ZAPD not found: {args.zapd}')
 
     stage = os.path.join(args.out, 'stage')
     shutil.rmtree(args.out, ignore_errors=True)
