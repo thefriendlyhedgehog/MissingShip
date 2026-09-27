@@ -16,7 +16,7 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
 - Every milestone from M0 to M5 is done, and so are the Windows and Linux packages.
 - The full playtest (MS-010) closed on 2026-09-26 with every checklist item verified.
 - The owner is now comparing the port against a reference playthrough of ML on N64. Any difference becomes a new issue with the next free ID (the last used is MS-156).
-- **Next: Prod, no game data.** Owner decision, 2026-09-27: public builds carry no Nintendo data. Players build the ML mod from their own ROM on first launch, as SoH does for `oot.o2r`. Kaze Emanuar has given permission for the port, which covers ML's own work; Nintendo's assets are still never distributed. The beta test builds still ship the finished mod, privately.
+- **Next: Prod, no game data.** Owner decision, 2026-09-27: public builds carry no Nintendo data. Players build the ML mod from their own ROM on first launch, as SoH does for `oot.o2r`. Kaze Emanuar has given permission for the port, which covers ML's own work; Nintendo's assets are still never distributed. Since 2026-09-27 the packages carry the builder instead of the mod, and the game builds the mod on first launch (MS-155, MS-156).
 
 ## Open work
 

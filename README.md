@@ -34,22 +34,23 @@ The open issues are long-term only: the drop-in path (#42) and the porting kit (
 
 ### What you need
 
-- **Your own Ocarina of Time ROM.** None is included. The builds are tested with **NTSC-U 1.2**. Other
-  non-Master-Quest ROMs that Ship of Harkinian accepts should work but are untested; Master Quest ROMs won't
-  work, because ML is built on the original dungeons.
+- **Your own Ocarina of Time USA 1.0 ROM** (NTSC 1.0, not Master Quest). None is included.
+- **Kaze's The Missing Link v2.0 patch**, from [his release](https://www.romhacking.net/hacks/5334/): the `.zip` as
+  downloaded is fine. (A Missing Link v2.0 ROM you already patched works instead of the ROM and patch.)
 - A controller, or the keyboard (SoH's default layout).
 
 ### Windows
 
 1. Download `MissingShip-windows.zip` from the [Releases](https://github.com/thefriendlyhedgehog/MissingShip/releases) page and unzip it anywhere.
 2. Run `MissingShip\MissingShip.exe`.
-3. On first launch, pick your OoT ROM. The game turns it into `oot.o2r` in the same folder (a minute or two, once only), then boots to ML's title screen.
+3. On first launch, pick your OoT ROM. The game turns it into `oot.o2r` in the same folder (a minute or two, once only).
+4. It then asks for Kaze's patch and builds The Missing Link from it (about a minute, once only), then boots to ML's title screen. No terminal, nothing to copy by hand.
 
 ### Linux
 
 1. Download `MissingShip-linux.tar.gz` from [Releases](https://github.com/thefriendlyhedgehog/MissingShip/releases) and extract it.
 2. Run `./MissingShip.sh`, not the AppImage directly: the script keeps settings and saves in that folder.
-3. Pick your ROM on first launch, as on Windows.
+3. Pick your ROM and then Kaze's patch on first launch, as on Windows.
 
 **Steam Controller:** outside Steam it acts as a mouse and keyboard. Add `MissingShip.sh` to Steam
 (*Games → Add a Non-Steam Game*) and launch it from there.
@@ -58,7 +59,7 @@ The open issues are long-term only: the drop-in path (#42) and the porting kit (
 
 1. Download `MissingShip-macos.zip` from [Releases](https://github.com/thefriendlyhedgehog/MissingShip/releases), unzip it and move `MissingShip.app` to Applications.
 2. Open it once. macOS blocks apps from unidentified developers the first time: go to *System Settings → Privacy & Security* and click **Open Anyway** next to MissingShip.
-3. Pick your ROM on first launch, as on Windows.
+3. Pick your ROM and then Kaze's patch on first launch, as on Windows.
 
 Needs an M1 or later Mac with macOS 11 or later. Settings, saves, logs and `oot.o2r` live in
 `~/Library/Application Support/MissingShip` (*Settings → Open App Files Folder* in the menu opens it).
@@ -68,7 +69,8 @@ Needs an M1 or later Mac with macOS 11 or later. Settings, saves, logs and `oot.
 On Windows and Linux, settings (`shipofharkinian.json`), saves (`Save/`), logs and `oot.o2r` all live next to the
 game, so the folder is portable. On macOS they are in `~/Library/Application Support/MissingShip`. Either way
 MissingShip never touches a normal Ship of Harkinian install. `mods/MissingLink_Scenes.o2r` is The Missing Link
-itself: keep it in `mods/`.
+itself, built on first launch. `MissingLink/` keeps your patched ROM, so when an update changes the mod the game
+rebuilds it without asking again. Delete `mods/MissingLink_Scenes.o2r` to make the game build it again.
 
 ### Settings
 
@@ -152,24 +154,31 @@ python3 pipeline/ms_cycle.py --no-launch  # build and install only
 
 1. Run **generate-builds** on the engine fork (*Actions → generate-builds → Run workflow*, branch `missingship`, or
    `gh workflow run generate-builds.yml --repo thefriendlyhedgehog/MissingShip-Shipwright --ref missingship`).
-   It builds `soh.o2r`, the Windows exe and the Linux AppImage. It is manual only; the repo secret
-   `SUBMODULES_TOKEN` (a read-only token for the three private repos) lets it check out the submodules.
+   It builds `soh.o2r`, the Windows exe and the Linux AppImage, and freezes the mod builder for each from this
+   repo's `main`. It is manual only; the repo secret `SUBMODULES_TOKEN` (a read-only token for the private repos)
+   lets it check out the submodules and this repo.
 2. `python3 tools/package.py <run id>` downloads the run and writes `dist/MissingShip-windows.zip` and
-   `dist/MissingShip-linux.tar.gz`: the engine, `soh.o2r`, the mod archive, a settings profile from `profile/`
-   (minus the Mac-only window block) and a README. Neither contains a ROM or `oot.o2r`.
-3. On this Mac, build the engine at the same commit and run `python3 tools/package.py macos`. It writes
-   `dist/MissingShip-macos.zip`: the app with its Homebrew libraries copied into `Contents/Frameworks` (SDL3
-   included, which sdl2-compat loads at run time), ad-hoc signed, with the mod and the default settings in
-   `Contents/Resources`. On first launch the engine copies them into `~/Library/Application Support/MissingShip`,
-   and it refreshes the mod there whenever the app's copy changes (ledger row 142). Apple Silicon only.
+   `dist/MissingShip-linux.tar.gz`: the engine, `soh.o2r`, the mod builder in `builder/`, a settings profile from
+   `profile/` (minus the Mac-only window block) and a README. No game data: no ROM, `oot.o2r` or mod.
+3. On this Mac, build the engine at the same commit, freeze the builder (`tools/freeze_builder.py`, with PyInstaller)
+   and run `python3 tools/package.py macos`. It writes `dist/MissingShip-macos.zip`: the app with its Homebrew
+   libraries copied into `Contents/Frameworks` (SDL3 included, which sdl2-compat loads at run time), the builder and
+   the default settings in `Contents/Resources`, ad-hoc signed. On first launch the engine copies the settings into
+   `~/Library/Application Support/MissingShip` (ledger row 142). Apple Silicon only.
 4. Attach the three files to a GitHub release on this repo.
 
 `profile/shipofharkinian.json` is what every new player starts with, so it holds chosen defaults, never a
 tester's own settings.
 
-### Mod builder (MS-154)
+### Mod builder (MS-154, MS-155)
 
-Players will build the mod themselves from their own files, so no download carries game data (milestone *Prod: no game data*).
+Players build the mod themselves from their own files, so no download carries game data (milestone *Prod: no game data*).
+The game runs the builder itself on first launch (`soh/Extractor/MissingShipBuilder.cpp` in the engine, ledger row
+143): after SoH makes `oot.o2r`, it asks for Kaze's patch (adding the OoT ROM just extracted), runs the bundled
+builder with a progress window, and shows the builder's message if it fails. The builder keeps the ML ROM in
+`MissingLink/tml_2_0.z64` (`--save-rom`), and the game records which builder (`version.txt`) and `oot.o2r` made the
+mod in `MissingLink/built.txt`; when either changes, it rebuilds from the kept ROM without asking. A build with no
+bundled builder (the development app) skips all of this. By hand:
 
 ```bash
 python3 pipeline/build_mod.py <files...> --oot-o2r <oot.o2r> --out <MissingLink_Scenes.o2r>

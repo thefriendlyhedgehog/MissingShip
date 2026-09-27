@@ -3,8 +3,9 @@
     python3 tools/freeze_builder.py [--zapd <ZAPD binary>] [--out <folder>]
 
 Needs PyInstaller (pip install pyinstaller). Writes <out>/MissingShipBuilder/ (default dist/builder/): the program,
-plus the pipeline's scripts and data, the SoH files the pipeline reads, and ZAPD. No ROM or game data goes in: the
-builder makes everything from the player's own files. Run it on each OS; PyInstaller can't cross-compile.
+plus the pipeline's scripts and data, the SoH files the pipeline reads, ZAPD, and version.txt (the commit it was frozen
+from; the game rebuilds the mod when it changes). No ROM or game data goes in: the builder makes everything from the
+player's own files. Run it on each OS; PyInstaller can't cross-compile.
 """
 import argparse, ast, os, shutil, subprocess, sys
 
@@ -95,6 +96,12 @@ def main():
     subprocess.run(cmd, check=True)
     shutil.rmtree(stage)
     shutil.rmtree(os.path.join(args.out, 'work'))
+    # The game rebuilds the mod when this changes (a new builder can make a different mod): the commit it came from.
+    head = subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=ROOT, check=True, capture_output=True, text=True)
+    dirty = subprocess.run(['git', 'status', '--porcelain', '--', 'pipeline'], cwd=ROOT, check=True,
+                           capture_output=True, text=True).stdout.strip()
+    with open(os.path.join(args.out, 'MissingShipBuilder', 'version.txt'), 'w') as f:
+        f.write(head.stdout.strip() + ('-dirty' if dirty else '') + '\n')
     print('builder:', os.path.join(args.out, 'MissingShipBuilder'))
 
 

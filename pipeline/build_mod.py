@@ -7,7 +7,8 @@
   - an Ocarina of Time USA 1.0 ROM plus Kaze's patch: either of his .bps files (big- or little-endian), or the .zip
     from his page as downloaded (romhacking.net hack 5334).
 ROMs may be in .z64, .n64 or .v64 byte order, loose or inside a .zip. `oot.o2r` is the archive Ship of Harkinian made
-from the player's OoT ROM. (--rom, --patch and --ml-rom still work, as names for the same inputs.)
+from the player's OoT ROM. (--rom, --patch and --ml-rom still work, as names for the same inputs.) --save-rom keeps the
+ML ROM it used, so MissingShip can rebuild the mod after an update without asking again.
 
 It runs the same pipeline as ms_cycle.py, in a temporary work folder, replaying pipeline/baseline.json instead of
 reading the debug ROM, with SoH's files and ZAPD from the builder's own folder. The packages ship it frozen per OS,
@@ -139,6 +140,12 @@ def build(args):
             fail(str(e))
         with open(rom_path, 'wb') as f:
             f.write(rom)
+        if args.save_rom:                               # the game keeps it, to rebuild after an update unasked
+            save = os.path.abspath(args.save_rom)
+            os.makedirs(os.path.dirname(save), exist_ok=True)
+            with open(save + '.tmp', 'wb') as f:
+                f.write(rom)
+            os.replace(save + '.tmp', save)
         # the folder holding soh/, the SoH files the steps read: the builder's own, or a checkout's engine/
         soh = os.environ.get('MS_SHIPWRIGHT') or (HERE if FROZEN else os.path.join(HERE, 'engine'))
         env = dict(os.environ, PYTHONUTF8='1', MS_ML_ROM=rom_path, MS_OOT_O2R=oot, MS_SHIPWRIGHT=soh,
@@ -180,6 +187,7 @@ def main():
     p.add_argument('--rom', '--ml-rom', '--patch', dest='more', action='append', default=[], help=argparse.SUPPRESS)
     p.add_argument('--oot-o2r', required=True, help='the oot.o2r Ship of Harkinian made from your ROM')
     p.add_argument('--out', required=True, help='where to write MissingLink_Scenes.o2r')
+    p.add_argument('--save-rom', help='also write The Missing Link v2.0 ROM (.z64) here')
     p.add_argument('--verbose', action='store_true', help='show every pipeline step')
     p.add_argument('--keep', action='store_true', help='keep the temporary work folder')
     args = p.parse_args()

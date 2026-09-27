@@ -6,9 +6,12 @@
 
 For macOS, build the engine first (cmake --build engine/build-ml --target soh) at the commit being released.
 
-CI builds the engine (soh.o2r, the Windows exe, the Linux AppImage). This adds what only this repo has -- the ML mod
-archive and a portable settings profile -- and writes dist/MissingShip-windows.zip and dist/MissingShip-linux.tar.gz.
-Neither package holds oot.o2r: SoH makes it from the player's own OoT ROM on first launch (or copy one in).
+CI builds the engine (soh.o2r, the Windows exe, the Linux AppImage) and freezes the mod builder for each OS. This adds
+a portable settings profile and writes dist/MissingShip-windows.zip and dist/MissingShip-linux.tar.gz. For macOS, freeze
+the builder first (tools/freeze_builder.py, into dist/builder).
+
+No package holds game data (MS-156): on first launch SoH makes oot.o2r from the player's own OoT ROM, then the game runs
+the bundled builder (builder/) on Kaze's patch to make mods/MissingLink_Scenes.o2r.
 
 Where the game looks for its files: on Windows, the folder it is started from; on Linux, SHIP_HOME, which the
 MissingShip.sh launcher points at its own folder.
@@ -18,7 +21,7 @@ import io, json, os, plistlib, shutil, subprocess, sys, tarfile, zipfile
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DIST = os.path.join(ROOT, 'dist')
 FORK = 'thefriendlyhedgehog/MissingShip-Shipwright'
-MOD = os.path.join(ROOT, 'mod', 'MissingLink_Scenes.o2r')
+MAC_BUILDER = os.path.join(DIST, 'builder', 'MissingShipBuilder')
 DEV_APP = os.path.join(ROOT, 'MissingShip.app')
 MAC_BINARY = os.path.join(ROOT, 'engine', 'build-ml', 'soh', 'soh-macos')
 MAC_HOME = '~/Library/Application Support/MissingShip'
@@ -28,15 +31,23 @@ README = """MissingShip -- The Missing Link on the Ship of Harkinian engine ({os
 
 First launch
   {launch}
-  SoH asks for your own Ocarina of Time ROM and builds oot.o2r from it (once). You can instead copy an oot.o2r
-  made by Ship of Harkinian into this folder.
-
+{first_launch}
 Files
-  mods/MissingLink_Scenes.o2r   The Missing Link (keep it in mods/)
   soh.o2r                       Ship of Harkinian's own assets
+  builder/                      Builds The Missing Link from your files (the game runs it)
+  oot.o2r                       Made from your OoT ROM on first launch
+  mods/MissingLink_Scenes.o2r   The Missing Link, built on first launch
+  MissingLink/                  Your Missing Link ROM, kept so updates can rebuild the mod without asking
   shipofharkinian.json          Settings (created or updated by the game)
   Save/                         Save files (created by the game)
 {extra}"""
+
+FIRST_LAUNCH = """  You need your own Ocarina of Time USA 1.0 ROM (NTSC 1.0) and Kaze's The Missing Link v2.0 patch, from
+  https://www.romhacking.net/hacks/5334/ (the .zip as downloaded is fine). A Missing Link v2.0 ROM you already
+  patched works instead of the two.
+  1. The game asks for your OoT ROM and makes oot.o2r from it (once).
+  2. It then asks for Kaze's patch and builds The Missing Link (about a minute). Nothing to install by hand.
+"""
 
 LINUX_EXTRA = """
 Steam Controller
@@ -79,7 +90,7 @@ def files_under(top):
             yield path, os.path.relpath(path, top)
 
 
-def windows(src, soh_o2r, profile):
+def windows(src, builder, soh_o2r, profile):
     out = os.path.join(DIST, 'MissingShip-windows.zip')
     with zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED) as z:
         for path, rel in files_under(src):
@@ -89,13 +100,15 @@ def windows(src, soh_o2r, profile):
             z.write(path, f'MissingShip/{name}')
         if not any(n.endswith('/soh.o2r') for n in z.namelist()):
             z.write(soh_o2r, 'MissingShip/soh.o2r')
-        z.write(MOD, 'MissingShip/mods/MissingLink_Scenes.o2r')
+        for path, rel in files_under(builder):
+            z.write(path, f'MissingShip/builder/{rel}')
         z.writestr('MissingShip/shipofharkinian.json', profile)
-        z.writestr('MissingShip/README.txt', README.format(os='Windows', launch='Run MissingShip.exe.', extra=''))
+        z.writestr('MissingShip/README.txt', README.format(os='Windows', launch='Run MissingShip.exe.',
+                                                           first_launch=FIRST_LAUNCH, extra=''))
     return out
 
 
-def linux(src, soh_o2r, profile):
+def linux(src, builder, soh_o2r, profile):
     out = os.path.join(DIST, 'MissingShip-linux.tar.gz')
 
     def add(t, name, data=None, path=None, mode=0o644):
@@ -108,9 +121,12 @@ def linux(src, soh_o2r, profile):
         add(t, 'MissingShip.AppImage', path=os.path.join(src, 'soh.appimage'), mode=0o755)
         add(t, 'MissingShip.sh', LINUX_LAUNCHER.encode(), mode=0o755)
         add(t, 'soh.o2r', path=soh_o2r)
-        add(t, 'mods/MissingLink_Scenes.o2r', path=MOD)
+        for path, rel in files_under(builder):       # keeps the builder's executable bits
+            mode = 0o755 if os.access(path, os.X_OK) or rel in ('MissingShipBuilder', '_internal/ZAPD.out') else 0o644
+            add(t, f'builder/{rel}', path=path, mode=mode)
         add(t, 'shipofharkinian.json', profile)
-        add(t, 'README.txt', README.format(os='Linux', launch='Run ./MissingShip.sh (not the AppImage directly).', extra=LINUX_EXTRA).encode())
+        add(t, 'README.txt', README.format(os='Linux', launch='Run ./MissingShip.sh (not the AppImage directly).',
+                                           first_launch=FIRST_LAUNCH, extra=LINUX_EXTRA).encode())
     return out
 
 
@@ -120,10 +136,13 @@ First launch
   1. Move MissingShip.app to Applications (or anywhere you like).
   2. macOS blocks apps from unidentified developers the first time: open MissingShip once, then go to
      System Settings > Privacy & Security and click "Open Anyway" next to MissingShip.
-  3. MissingShip asks for your own Ocarina of Time ROM and builds oot.o2r from it (once).
+  3. MissingShip asks for your own Ocarina of Time USA 1.0 ROM (NTSC 1.0) and makes oot.o2r from it (once).
+  4. It then asks for Kaze's The Missing Link v2.0 patch, from https://www.romhacking.net/hacks/5334/ (the .zip as
+     downloaded is fine), and builds The Missing Link (about a minute). A Missing Link v2.0 ROM you already patched
+     works instead of the two.
 
 Where your files are
-  ~/Library/Application Support/MissingShip   settings, saves, logs, oot.o2r and the installed mod
+  ~/Library/Application Support/MissingShip   settings, saves, logs, oot.o2r and the built mod
   (Settings > "Open App Files Folder" in the game's menu opens it.)
 
 Needs an Apple Silicon Mac (M1 or later) and macOS 11 or later.
@@ -203,8 +222,8 @@ def macos():
     libs = _bundle_dylibs(binary, os.path.join(contents, 'Frameworks'))
 
     res = os.path.join(contents, 'Resources')
-    os.makedirs(os.path.join(res, 'mods'), exist_ok=True)
-    shutil.copy2(MOD, os.path.join(res, 'mods', 'MissingLink_Scenes.o2r'))
+    shutil.rmtree(os.path.join(res, 'mods'), ignore_errors=True)
+    shutil.copytree(MAC_BUILDER, os.path.join(res, 'builder'), symlinks=True)
     with open(os.path.join(ROOT, 'profile', 'shipofharkinian.json')) as f:
         profile = json.load(f)
     profile.pop('WarpPoints', None)  # keeps the Mac window block (Metal renderer)
@@ -220,6 +239,10 @@ def macos():
         plistlib.dump(plist, f)
 
     subprocess.run(['xattr', '-cr', app], check=True)
+    # The builder's programs and libraries sit in Resources, where codesign --deep doesn't look: sign each first.
+    for path, _ in files_under(os.path.join(res, 'builder')):
+        if not os.path.islink(path) and open(path, 'rb').read(4) in (b'\xcf\xfa\xed\xfe', b'\xca\xfe\xba\xbe'):
+            subprocess.run(['codesign', '--force', '--sign', '-', path], check=True, capture_output=True)
     subprocess.run(['codesign', '--force', '--deep', '--sign', '-', app], check=True, capture_output=True)
     subprocess.run(['codesign', '--verify', '--deep', '--strict', app], check=True)
     with open(os.path.join(stage, 'README.txt'), 'w') as f:
@@ -232,11 +255,24 @@ def macos():
     return out
 
 
+def check_builder(path):
+    """The frozen mod builder for a package: present, and made from this checkout's commit."""
+    version = os.path.join(path, 'version.txt')
+    if not os.path.isfile(version):
+        sys.exit(f'no mod builder at {path} (macOS: python3 tools/freeze_builder.py; others: the CI run\'s '
+                 'missingship-builder-<os> artifact)')
+    head = subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=ROOT, check=True, capture_output=True, text=True)
+    made = open(version).read().strip()
+    if made.removesuffix('-dirty') != head.stdout.strip():
+        print(f'warning: the builder in {path} was frozen from {made}, not HEAD')
+
+
 def main():
     if len(sys.argv) != 2:
         sys.exit(__doc__)
     os.makedirs(DIST, exist_ok=True)
     if sys.argv[1] == 'macos':
+        check_builder(MAC_BUILDER)
         path = macos()
         print(f'{os.path.relpath(path, ROOT)}  {os.path.getsize(path) / 1e6:.1f} MB')
         return
@@ -244,10 +280,11 @@ def main():
     soh_o2r = os.path.join(art, 'soh.o2r', 'soh.o2r')
     profile = portable_profile()
     made = []
-    if os.path.isdir(os.path.join(art, 'missingship-windows')):
-        made.append(windows(os.path.join(art, 'missingship-windows'), soh_o2r, profile))
-    if os.path.isdir(os.path.join(art, 'missingship-linux')):
-        made.append(linux(os.path.join(art, 'missingship-linux'), soh_o2r, profile))
+    for osname, package in (('windows', windows), ('linux', linux)):
+        if os.path.isdir(os.path.join(art, f'missingship-{osname}')):
+            builder = os.path.join(art, f'missingship-builder-{osname}')
+            check_builder(builder)
+            made.append(package(os.path.join(art, f'missingship-{osname}'), builder, soh_o2r, profile))
     if not made:
         sys.exit(f'no missingship-windows or missingship-linux artifact in {art}')
     for path in made:

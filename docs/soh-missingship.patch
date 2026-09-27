@@ -2429,8 +2429,315 @@ index e970b965cfe8b8227a17c15a88034111a21e14e3..1f23ef7c8bdbb4e047f224f5064128dd
  
          TimeSplitsPostDragAndDrop();
  
+diff --git a/soh/soh/Extractor/Extract.h b/soh/soh/Extractor/Extract.h
+index 552d5bf4eb1c8564d300c2baf10edfe95a264dd1..aed21e089377faa8dd5af86c135934649c29a472 100644
+--- a/soh/soh/Extractor/Extract.h
++++ b/soh/soh/Extractor/Extract.h
+@@ -57,6 +57,10 @@ class Extractor {
+     static int ShowYesNoBox(const char* title, const char* text);
+     static void ShowErrorBox(const char* title, const char* text);
+     bool IsMasterQuest() const;
++    // MissingShip: the ROM just extracted, which the ML mod builder can reuse (OTRGlobals.cpp).
++    const std::string& GetRomPath() const {
++        return mCurrentRomPath;
++    }
+     bool ManuallySearchForRomMatchingType(RomSearchMode searchMode);
+ 
+     void SetSearchPath(const std::string& path);
+diff --git a/soh/soh/Extractor/MissingShipBuilder.cpp b/soh/soh/Extractor/MissingShipBuilder.cpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..3e540628d4e061a6a732c383701eb25d04c9a7f5
+--- /dev/null
++++ b/soh/soh/Extractor/MissingShipBuilder.cpp
+@@ -0,0 +1,250 @@
++#include "MissingShipBuilder.h"
++#include "portable-file-dialogs.h"
++#include <ship/Context.h>
++
++#include <cerrno>
++#include <filesystem>
++#include <fstream>
++#include <sstream>
++#include <string>
++#include <vector>
++
++#ifdef _WIN32
++#include <Windows.h>
++#else
++#include <fcntl.h>
++#include <spawn.h>
++#include <sys/wait.h>
++#include <unistd.h>
++extern char** environ;
++#endif
++
++namespace fs = std::filesystem;
++
++namespace MissingShipBuilder {
++
++static const std::string kAppShortName = "soh"; // OTRGlobals.h's appShortName
++
++#ifdef _WIN32
++static const char* kBuilderExe = "MissingShipBuilder.exe";
++#else
++static const char* kBuilderExe = "MissingShipBuilder";
++#endif
++
++static fs::path AppDir() {
++    return fs::path(Ship::Context::GetAppDirectoryPath(kAppShortName));
++}
++
++static fs::path ModPath() {
++    return AppDir() / "mods" / "MissingLink_Scenes.o2r";
++}
++
++static fs::path StatePath(const char* name) {
++    return AppDir() / "MissingLink" / name;
++}
++
++// The bundled builder: in the app bundle (macOS: Contents/Resources/builder), or next to the game (the Windows and
++// Linux packages). "" when there is none.
++static fs::path BuilderDir() {
++    for (const std::string& dir : { Ship::Context::GetPathRelativeToAppBundle("builder"),
++                                    Ship::Context::GetPathRelativeToAppDirectory("builder", kAppShortName) }) {
++        std::error_code ec;
++        if (fs::exists(fs::path(dir) / kBuilderExe, ec)) {
++            return fs::path(dir);
++        }
++    }
++    return {};
++}
++
++static std::string ReadText(const fs::path& path) {
++    std::ifstream in(path, std::ios::binary);
++    std::stringstream ss;
++    ss << in.rdbuf();
++    return ss.str();
++}
++
++// What made the current mod: the builder's version and the oot.o2r it read (a re-extracted oot.o2r can differ).
++static std::string Stamp(const fs::path& builderDir) {
++    std::string stamp = ReadText(builderDir / "version.txt");
++    std::error_code sizeError, timeError;
++    fs::path oot = Ship::Context::LocateFileAcrossAppDirs("oot.o2r", kAppShortName);
++    auto size = fs::file_size(oot, sizeError);
++    auto time = fs::last_write_time(oot, timeError);
++    stamp += "oot.o2r " + std::to_string(sizeError ? 0 : size) + " " +
++             std::to_string(timeError ? 0 : (long long)time.time_since_epoch().count()) + "\n";
++    return stamp;
++}
++
++bool Needed() {
++    fs::path builder = BuilderDir();
++    if (builder.empty()) {
++        return false;
++    }
++    std::error_code ec;
++    if (!fs::exists(ModPath(), ec)) {
++        return true;
++    }
++    return ReadText(StatePath("built.txt")) != Stamp(builder);
++}
++
++std::string SavedRom() {
++    std::error_code ec;
++    fs::path rom = StatePath("tml_2_0.z64");
++    return fs::exists(rom, ec) ? rom.string() : "";
++}
++
++std::vector<std::string> AskForFiles() {
++    return pfd::open_file("Select Kaze's patch and your OoT USA 1.0 ROM, or The Missing Link ROM", "",
++                          { "ROMs, patches and zips", "*.z64 *.n64 *.v64 *.bps *.zip", "All files", "*" },
++                          pfd::opt::multiselect)
++        .result();
++}
++
++#ifdef _WIN32
++static std::wstring Wide(const std::string& s) {
++    int n = MultiByteToWideChar(CP_UTF8, 0, s.c_str(), -1, nullptr, 0);
++    std::wstring w(n > 0 ? n - 1 : 0, L'\0');
++    if (n > 1) {
++        MultiByteToWideChar(CP_UTF8, 0, s.c_str(), -1, w.data(), n);
++    }
++    return w;
++}
++
++// One argument, quoted the way CommandLineToArgvW (and so Python) reads it back.
++static std::wstring Quote(const std::wstring& arg) {
++    std::wstring out = L"\"";
++    size_t slashes = 0;
++    for (wchar_t c : arg) {
++        if (c == L'\\') {
++            slashes++;
++        } else if (c == L'"') {
++            out.append(slashes * 2 + 1, L'\\');
++            slashes = 0;
++        } else {
++            slashes = 0;
++        }
++        out += c;
++    }
++    out.append(slashes, L'\\');
++    return out + L"\"";
++}
++
++static int Run(const fs::path& exe, const std::vector<std::string>& args, const fs::path& log) {
++    std::wstring cmd = Quote(exe.wstring());
++    for (const auto& a : args) {
++        cmd += L" " + Quote(Wide(a));
++    }
++    SECURITY_ATTRIBUTES sa = { sizeof(sa), nullptr, TRUE };
++    HANDLE out = CreateFileW(log.wstring().c_str(), GENERIC_WRITE, FILE_SHARE_READ, &sa, CREATE_ALWAYS,
++                             FILE_ATTRIBUTE_NORMAL, nullptr);
++    HANDLE in = CreateFileW(L"NUL", GENERIC_READ, 0, &sa, OPEN_EXISTING, 0, nullptr);
++    STARTUPINFOW si = { sizeof(si) };
++    si.dwFlags = STARTF_USESTDHANDLES;
++    si.hStdInput = in;
++    si.hStdOutput = si.hStdError = out;
++    PROCESS_INFORMATION pi = {};
++    // No console window: the builder and every step it runs share one hidden console.
++    BOOL ok = CreateProcessW(exe.wstring().c_str(), cmd.data(), nullptr, nullptr, TRUE, CREATE_NO_WINDOW, nullptr,
++                             exe.parent_path().wstring().c_str(), &si, &pi);
++    DWORD code = (DWORD)-1;
++    if (ok) {
++        WaitForSingleObject(pi.hProcess, INFINITE);
++        GetExitCodeProcess(pi.hProcess, &code);
++        CloseHandle(pi.hThread);
++        CloseHandle(pi.hProcess);
++    }
++    if (out != INVALID_HANDLE_VALUE) {
++        CloseHandle(out);
++    }
++    if (in != INVALID_HANDLE_VALUE) {
++        CloseHandle(in);
++    }
++    return ok ? (int)code : -1;
++}
++#else
++static int Run(const fs::path& exe, const std::vector<std::string>& args, const fs::path& log) {
++    std::vector<std::string> argStrings = { exe.string() };
++    argStrings.insert(argStrings.end(), args.begin(), args.end());
++    std::vector<char*> argv;
++    for (auto& a : argStrings) {
++        argv.push_back(a.data());
++    }
++    argv.push_back(nullptr);
++    // The AppImage's library and Python settings are for the game, not for the builder's own bundled runtime.
++    std::vector<std::string> envStrings;
++    for (char** e = environ; *e != nullptr; e++) {
++        std::string var = *e;
++        if (var.rfind("LD_LIBRARY_PATH=", 0) != 0 && var.rfind("LD_PRELOAD=", 0) != 0 &&
++            var.rfind("PYTHONHOME=", 0) != 0 && var.rfind("PYTHONPATH=", 0) != 0) {
++            envStrings.push_back(var);
++        }
++    }
++    std::vector<char*> envp;
++    for (auto& e : envStrings) {
++        envp.push_back(e.data());
++    }
++    envp.push_back(nullptr);
++
++    int fd = open(log.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
++    posix_spawn_file_actions_t actions;
++    posix_spawn_file_actions_init(&actions);
++    posix_spawn_file_actions_addopen(&actions, 0, "/dev/null", O_RDONLY, 0);
++    if (fd >= 0) {
++        posix_spawn_file_actions_adddup2(&actions, fd, 1);
++        posix_spawn_file_actions_adddup2(&actions, fd, 2);
++    }
++    pid_t pid;
++    int err = posix_spawn(&pid, exe.c_str(), &actions, nullptr, argv.data(), envp.data());
++    posix_spawn_file_actions_destroy(&actions);
++    if (fd >= 0) {
++        close(fd);
++    }
++    if (err != 0) {
++        return -1;
++    }
++    int status = 0;
++    while (waitpid(pid, &status, 0) == -1 && errno == EINTR) {
++    }
++    return WIFEXITED(status) ? WEXITSTATUS(status) : -1;
++}
++#endif
++
++bool Build(const std::vector<std::string>& files, std::string& error) {
++    fs::path builder = BuilderDir();
++    fs::path oot = Ship::Context::LocateFileAcrossAppDirs("oot.o2r", kAppShortName);
++    fs::path log = AppDir() / "logs" / "MissingShipBuilder.log";
++    std::error_code ec;
++    fs::create_directories(log.parent_path(), ec);
++    fs::create_directories(ModPath().parent_path(), ec);
++    fs::create_directories(StatePath("built.txt").parent_path(), ec);
++
++    std::vector<std::string> args = files;
++    args.insert(args.end(), { "--oot-o2r", fs::absolute(oot, ec).string(), "--out", ModPath().string(),
++                              "--save-rom", StatePath("tml_2_0.z64").string() });
++    int code = Run(builder / kBuilderExe, args, log);
++    if (code == 0 && fs::exists(ModPath(), ec)) {
++        std::ofstream(StatePath("built.txt"), std::ios::binary) << Stamp(builder);
++        return true;
++    }
++    // The builder's own explanation is its last "MissingShip builder: ..." line.
++    const std::string prefix = "MissingShip builder: ";
++    std::string line;
++    std::ifstream in(log);
++    error.clear();
++    while (std::getline(in, line)) {
++        if (!line.empty() && line.back() == '\r') {
++            line.pop_back();
++        }
++        if (line.rfind(prefix, 0) == 0) {
++            error = line.substr(prefix.size());
++        }
++    }
++    if (error.empty() || code == -1) {
++        error = code == -1 ? "The builder could not be started." : "The builder stopped (exit code " +
++                                                                        std::to_string(code) + ").";
++    }
++    error += "\n\nDetails: " + log.string();
++    return false;
++}
++
++} // namespace MissingShipBuilder
+diff --git a/soh/soh/Extractor/MissingShipBuilder.h b/soh/soh/Extractor/MissingShipBuilder.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..e596f948d68f5249bde69ba32ad978ec60629171
+--- /dev/null
++++ b/soh/soh/Extractor/MissingShipBuilder.h
+@@ -0,0 +1,30 @@
++#ifndef MISSINGSHIP_BUILDER_H
++#define MISSINGSHIP_BUILDER_H
++
++#include <string>
++#include <vector>
++
++// MissingShip: the player packages carry no game data. On first launch, after SoH has made oot.o2r, the game runs
++// the bundled mod builder (MissingShipBuilder, frozen from the MissingShip repo's pipeline/build_mod.py) on the
++// player's own files -- The Missing Link v2.0 ROM, or an OoT USA 1.0 ROM plus Kaze's patch -- to make
++// mods/MissingLink_Scenes.o2r. The builder keeps the ML ROM it used in <app dir>/MissingLink/, and the game records
++// which builder and oot.o2r made the mod, so an update that changes either rebuilds it without asking again.
++// Builds without a bundled builder (the development app) skip all of this.
++namespace MissingShipBuilder {
++
++// Whether the mod has to be (re)built: a builder is bundled, and the mod is missing or was made by another builder
++// or from another oot.o2r.
++bool Needed();
++
++// The ML ROM kept from an earlier build ("" if none): with it, a rebuild needs nothing from the player.
++std::string SavedRom();
++
++// Asks the player for their files (several at once); empty if they cancelled.
++std::vector<std::string> AskForFiles();
++
++// Runs the builder on `files` (blocking; call it off the main thread). On failure, `error` is the builder's message.
++bool Build(const std::vector<std::string>& files, std::string& error);
++
++} // namespace MissingShipBuilder
++
++#endif
 diff --git a/soh/soh/OTRGlobals.cpp b/soh/soh/OTRGlobals.cpp
-index 39f04ddbbd3a3894ac268a4364b3b7b711b3edee..e0e585c2ba4028aa660cd1d376f301afd627017d 100644
+index 39f04ddbbd3a3894ac268a4364b3b7b711b3edee..8ecd61a88a7cbd67a46c9208684dedcf9147e066 100644
 --- a/soh/soh/OTRGlobals.cpp
 +++ b/soh/soh/OTRGlobals.cpp
 @@ -1,3 +1,4 @@
@@ -2438,14 +2745,22 @@ index 39f04ddbbd3a3894ac268a4364b3b7b711b3edee..e0e585c2ba4028aa660cd1d376f301af
  #include "OTRGlobals.h"
  #include "OTRAudio.h"
  #include <algorithm>
-@@ -267,8 +268,39 @@ static bool VerifyArchiveVersion(OTRVersion version);
+@@ -46,6 +47,7 @@
+ 
+ #if not defined(__SWITCH__) && not defined(__WIIU__)
+ #include "Extractor/Extract.h"
++#include "Extractor/MissingShipBuilder.h"
+ #endif
+ 
+ #include <fast/interpreter.h>
+@@ -267,8 +269,30 @@ static bool VerifyArchiveVersion(OTRVersion version);
  std::string portArchivePath = "";
  static bool sohArchiveVersionMatch = false;
  
-+// MissingShip: the macOS player package keeps the default settings and the ML mod inside the app bundle
-+// (Contents/Resources) and its SHIP_HOME under Application Support. A new player's settings start from the bundled
-+// defaults, and the bundled mod is copied into SHIP_HOME/mods whenever it is missing or differs, so updating the app
-+// updates the mod. Builds without these files in their bundle (Windows, Linux, the development app) are unaffected.
++// MissingShip: the macOS player package keeps the default settings inside the app bundle (Contents/Resources) and its
++// SHIP_HOME under Application Support; a new player's settings start from the bundled defaults. (The ML mod is not
++// bundled: the game builds it on first launch, Extractor/MissingShipBuilder.h.) Builds without the file in their
++// bundle (Windows, Linux, the development app) are unaffected.
 +static void MissingShip_SeedAppDirectory() {
 +    namespace fs = std::filesystem;
 +    auto same = [](const fs::path& a, const fs::path& b) { return fs::weakly_canonical(a) == fs::weakly_canonical(b); };
@@ -2453,18 +2768,9 @@ index 39f04ddbbd3a3894ac268a4364b3b7b711b3edee..e0e585c2ba4028aa660cd1d376f301af
 +        fs::path home = Ship::Context::GetAppDirectoryPath(appShortName);
 +        fs::path config = home / "shipofharkinian.json";
 +        fs::path seedConfig = Ship::Context::GetPathRelativeToAppBundle("shipofharkinian.json");
-+        fs::path seedMod = Ship::Context::GetPathRelativeToAppBundle("mods/MissingLink_Scenes.o2r");
 +        if (fs::exists(seedConfig) && !fs::exists(config) && !same(seedConfig.parent_path(), home)) {
 +            fs::create_directories(home);
 +            fs::copy_file(seedConfig, config);
-+        }
-+        if (fs::exists(seedMod) && !same(seedMod.parent_path().parent_path(), home)) {
-+            fs::path mod = home / "mods" / "MissingLink_Scenes.o2r";
-+            if (!fs::exists(mod) || fs::file_size(mod) != fs::file_size(seedMod) ||
-+                fs::last_write_time(mod) < fs::last_write_time(seedMod)) {
-+                fs::create_directories(mod.parent_path());
-+                fs::copy_file(seedMod, mod, fs::copy_options::overwrite_existing);
-+            }
 +        }
 +    } catch (const fs::filesystem_error&) {
 +        // Missing or unwritable folders: start without the seed, as stock SoH would.
@@ -2479,7 +2785,139 @@ index 39f04ddbbd3a3894ac268a4364b3b7b711b3edee..e0e585c2ba4028aa660cd1d376f301af
  
      portArchivePath = Ship::Context::LocateFileAcrossAppDirs("soh.o2r");
      OTRVersion portArchiveVersion = DetectOTRVersion("soh.o2r", false);
-@@ -1529,6 +1561,7 @@ extern "C" void InitOTR(int argc, char* argv[]) {
+@@ -332,8 +356,17 @@ typedef enum ExtractSteps {
+     ES_EXTRACT_ARGS,
+     ES_EXTRACT,
+     ES_VERIFY,
++    ES_MISSINGSHIP,
+ } ExtractSteps;
+ 
++// MissingShip: building The Missing Link's mod after oot.o2r exists (Extractor/MissingShipBuilder.h).
++typedef enum MissingShipSteps {
++    MSS_CHECK,
++    MSS_PICK,
++    MSS_BUILD,
++    MSS_DONE,
++} MissingShipSteps;
++
+ typedef enum PromptSteps {
+     PS_FILE_CHECK,
+     PS_LOCAL,
+@@ -445,6 +478,11 @@ void OTRGlobals::RunExtract(int argc, char* argv[]) {
+ 
+     std::shared_ptr<BS::thread_pool> threadPool = std::make_shared<BS::thread_pool>(1);
+     std::optional<std::future<void>> extractionTask;
++    MissingShipSteps msStep = MSS_CHECK;
++    std::vector<std::string> msFiles;
++    std::string msRom, msError;
++    bool msBuilt = false;
++    std::chrono::steady_clock::time_point msBuildStart;
+ 
+ #if not defined(__SWITCH__) && not defined(__WIIU__)
+     CheckAndCreateModFolder();
+@@ -691,9 +729,77 @@ void OTRGlobals::RunExtract(int argc, char* argv[]) {
+                                           "No ROM O2R files detected. Please generate a ROM O2R and relaunch.", "OK",
+                                           "", [&]() { exit(0); });
+                 }
++#if not defined(__SWITCH__) && not defined(__WIIU__)
++                extractStep = ES_MISSINGSHIP;
++#else
+                 extractDone = true;
++#endif
+                 continue;
+             }
++#if not defined(__SWITCH__) && not defined(__WIIU__)
++            case ES_MISSINGSHIP: {
++                switch (msStep) {
++                    case MSS_CHECK: {
++                        if (!MissingShipBuilder::Needed()) {
++                            extractDone = true;
++                            continue;
++                        }
++                        std::string saved = MissingShipBuilder::SavedRom();
++                        if (!saved.empty()) { // an update: rebuild from the ROM kept last time, unasked
++                            msFiles = { saved };
++                            msStep = MSS_BUILD;
++                            continue;
++                        }
++                        // The OoT ROM just extracted can be Kaze's base; then only his patch is needed.
++                        if (!extract.GetRomPath().empty() && !extract.IsMasterQuest()) {
++                            msRom = extract.GetRomPath();
++                        }
++                        std::string msg =
++                            "One more step: MissingShip builds The Missing Link from your own files.\n\n"
++                            "Next, select Kaze's v2.0 patch (the .bps, or the .zip from his page)";
++                        msg += msRom.empty()
++                                   ? " together with your Ocarina of Time USA 1.0 ROM (select both).\n"
++                                   : ". If the ROM you just used is not USA 1.0, also select a USA 1.0 ROM.\n";
++                        msg += "\nAlready have The Missing Link v2.0 ROM? Select that instead.";
++                        SohGui::RegisterPopup(
++                            "The Missing Link", msg, "Continue", "Quit", [&]() { msStep = MSS_PICK; },
++                            [&]() { exit(0); });
++                        continue;
++                    }
++                    case MSS_PICK: {
++                        msFiles = MissingShipBuilder::AskForFiles();
++                        if (msFiles.empty()) {
++                            msStep = MSS_CHECK;
++                            continue;
++                        }
++                        if (!msRom.empty()) {
++                            msFiles.push_back(msRom);
++                        }
++                        msStep = MSS_BUILD;
++                        continue;
++                    }
++                    case MSS_BUILD: {
++                        msBuildStart = std::chrono::steady_clock::now();
++                        extractionTask = threadPool->submit_task([&]() -> void {
++                            msBuilt = MissingShipBuilder::Build(msFiles, msError);
++                            msStep = MSS_DONE;
++                        });
++                        continue;
++                    }
++                    case MSS_DONE: {
++                        if (msBuilt) {
++                            extractDone = true;
++                            continue;
++                        }
++                        msStep = MSS_CHECK;
++                        SohGui::RegisterPopup("Couldn't build The Missing Link", msError, "Try again", "Quit",
++                                              [&]() { msStep = MSS_PICK; }, [&]() { exit(1); });
++                        continue;
++                    }
++                }
++                break;
++            }
++#endif
+             default:
+                 break;
+         }
+@@ -735,10 +841,22 @@ void OTRGlobals::RunExtract(int argc, char* argv[]) {
+                 ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(color.x, color.y, color.z, 0.6f));
+                 ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(color.x, color.y, color.z, 1.0f));
+                 ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.0f, 0.0f, 0.0f, 0.3f));
+-                if (ImGui::BeginPopupModal("ROM Extraction", NULL,
++                if (extractStep == ES_MISSINGSHIP &&
++                    ImGui::BeginPopupModal("ROM Extraction", NULL,
+                                            ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize |
+                                                ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
+                                                ImGuiWindowFlags_NoSavedSettings)) {
++                    // The builder reports no progress; show that it is alive and how long it has taken.
++                    auto elapsed = std::chrono::steady_clock::now() - msBuildStart;
++                    auto seconds = std::chrono::duration_cast<std::chrono::seconds>(elapsed).count();
++                    ImGui::Text("Building The Missing Link... (usually under a minute)");
++                    float sweep = fmodf((float)ImGui::GetTime() * 0.5f, 1.0f);
++                    ImGui::ProgressBar(sweep, ImVec2(600.0f, 50.0f), fmt::format("{}s", seconds).c_str());
++                    ImGui::EndPopup();
++                } else if (ImGui::BeginPopupModal("ROM Extraction", NULL,
++                                                  ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize |
++                                                      ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
++                                                      ImGuiWindowFlags_NoSavedSettings)) {
+                     float progress = (totalExtract > 0.0f ? (float)extractCount / (float)totalExtract : 0) * 100.0f;
+                     auto filename = std::filesystem::path(file).filename().string();
+                     ImGui::Text("Extracting %s...%s", filename.c_str(),
+@@ -1529,6 +1647,7 @@ extern "C" void InitOTR(int argc, char* argv[]) {
      if (CVarGetInteger(CVAR_REMOTE_ANCHOR("Enabled"), 0)) {
          Anchor::Instance->Enable();
      }
