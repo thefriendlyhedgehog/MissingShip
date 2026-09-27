@@ -191,8 +191,10 @@ def _bundle_dylibs(binary, frameworks):
 
 def macos():
     out = os.path.join(DIST, 'MissingShip-macos.zip')
-    stage = os.path.join(DIST, 'macos')
-    shutil.rmtree(stage, ignore_errors=True)
+    # Stage outside the repo: a MissingShip.app left under dist/ gets indexed by Spotlight and registered with Launch
+    # Services under the same bundle id as the development app, so launchers (Raycast, Spotlight) open the wrong one.
+    import tempfile
+    stage = tempfile.mkdtemp(prefix='missingship-macos-')
     app = os.path.join(stage, 'MissingShip.app')
     shutil.copytree(DEV_APP, app, symlinks=True)
     contents = os.path.join(app, 'Contents')
@@ -225,6 +227,7 @@ def macos():
     if os.path.exists(out):
         os.remove(out)
     subprocess.run(['ditto', '-c', '-k', '--sequesterRsrc', stage, out], check=True)
+    shutil.rmtree(stage)
     print('bundled', len(libs), 'libraries:', ' '.join(libs))
     return out
 
