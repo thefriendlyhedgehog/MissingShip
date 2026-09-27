@@ -72,7 +72,7 @@ class MlWorld:
         self._entrance_flags()
 
     def _entrances_of(self, scene):
-        return self.scenes.setdefault(scene, {'entrances': {}})['entrances']
+        return self.scenes.setdefault(scene, {}).setdefault('entrances', {})
 
     # ---- U1 ----
 
