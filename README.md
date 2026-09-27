@@ -277,6 +277,7 @@ differences, e.g. `MS_HACK=hacks/selftest python3 tools/codediff.py`.
 | `dist/` | release packages from `tools/package.py` (not committed) |
 | `docs/ROADMAP.md` | status, history and the remaining long-term work |
 | `docs/ENGINE_CHANGES.md` | every engine change, why it exists, and its drop-in path |
+| `docs/UNBOUND_MAP.md` | every engine change placed against SoH: Unbound, and the order of work there |
 | `docs/ML_ACTOR_INVENTORY.md` | per-actor port status |
 | `docs/PORTING_ACTORS.md` | how to port an actor (diff → C → object → build) |
 | `docs/DROPIN_PROPOSALS.md` | what each engine change would need to move upstream or into data |
