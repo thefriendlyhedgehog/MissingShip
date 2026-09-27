@@ -80,13 +80,15 @@ def name_files():
 
 # Every step runs with Python's UTF-8 mode, so the scripts read the repo's UTF-8 files the same way on Windows.
 ENV = dict(os.environ, PYTHONUTF8='1')
+# Inside the frozen mod builder (build_mod.py, MS-154) there is no python: the builder runs each step itself.
+PYTHON = [sys.executable, '--run-script'] if getattr(sys, 'frozen', False) else [sys.executable]
 
 
 def py(script, log=None, cwd=PIPE, **env):
     """Run a pipeline script with this Python; stop the build if it fails."""
     out = open(os.path.join(PIPE, log), 'w') if log else None
     try:
-        subprocess.run([sys.executable, os.path.join(PIPE, script)], cwd=cwd, env=dict(ENV, **env),
+        subprocess.run(PYTHON + [os.path.join(PIPE, script)], cwd=cwd, env=dict(ENV, **env),
                        stdout=out, stderr=subprocess.STDOUT if out else None, check=True)
     finally:
         if out:

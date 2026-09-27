@@ -94,7 +94,7 @@ for slot, (dma, name) in by_slot.items():
                 e = m.cs_destination(code)
                 if e is not None: used[e] += 1
 rom = open(ML_ROM, 'rb').read()
-code = open(PIPE + '/ml_code.bin', 'rb').read()
+code = get_file(rom, *struct.unpack('>IIII', rom[0x12F70 + 16 * 114:0x12F70 + 16 * 114 + 16]))   # ML's `code` (dma 114)
 dma = [struct.unpack('>IIII', rom[0x12F70 + 16 * i:0x12F70 + 16 * i + 16]) for i in range(1600)]
 vrom = struct.unpack('>I', code[0xF9440 + 0x9B * 0x20:0xF9440 + 0x9B * 0x20 + 4])[0]   # Door_Ana (actor 0x9B)
 door_ana = get_file(rom, *next(e for e in dma if e[0] == vrom))

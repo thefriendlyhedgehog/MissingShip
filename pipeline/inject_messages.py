@@ -54,8 +54,8 @@ for _ in range(count):
     ln = struct.unpack('<I', d[off+4:off+8])[0]
     van[mid] = (typ, pos, d[off+8:off+8+ln]); order.append(mid); off += 8 + ln
 
-code = open(PIPE + '/ml_code.bin', 'rb').read()
 rom = open(ML_ROM, 'rb').read()
+code = get_file(rom, *struct.unpack('>IIII', rom[0x12F70 + 16 * 114:0x12F70 + 16 * 114 + 16]))   # ML's `code` (dma 114)
 E = []; p = 0x12f70
 while True:
     a, b, c, e = struct.unpack('>IIII', rom[p:p+16])

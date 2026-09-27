@@ -53,8 +53,9 @@ def apply_bps(src, patch):
     assert got_src == f_src and got_tgt == f_tgt, "CRC verification failed"
     return bytes(out)
 
-src = open(sys.argv[1],'rb').read()
-patch = open(sys.argv[2],'rb').read()
-out = apply_bps(src, patch)
-open(sys.argv[3],'wb').write(out)
-print(f"wrote {sys.argv[3]} ({len(out)} bytes)")
+if __name__ == '__main__':
+    src = open(sys.argv[1],'rb').read()
+    patch = open(sys.argv[2],'rb').read()
+    out = apply_bps(src, patch)
+    open(sys.argv[3],'wb').write(out)
+    print(f"wrote {sys.argv[3]} ({len(out)} bytes)")

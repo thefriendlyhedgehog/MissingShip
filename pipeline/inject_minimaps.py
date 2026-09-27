@@ -52,7 +52,7 @@ while True:
     E.append((a, b, c, d)); p += 16
 blob = get_file(rom, *E[BLOB_DMA])
 
-code = open(PIPE + '/ml_code.bin', 'rb').read()
+code = get_file(rom, *struct.unpack('>IIII', rom[0x12F70 + 16 * 114:0x12F70 + 16 * 114 + 16]))   # ML's `code` (dma 114)
 ptrs = [struct.unpack('>I', code[T+i*4:T+i*4+4])[0] for i in range(28)]
 def arr(idx, n, signed=True):
     o = ptrs[idx] - BASE
