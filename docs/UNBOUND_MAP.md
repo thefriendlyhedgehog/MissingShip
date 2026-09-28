@@ -58,7 +58,8 @@ placements to them; vanilla scenes keep the vanilla actor. `base` still comes fi
 | Row | ML actor | Status |
 |---|---|---|
 | 60 | `ML_Bg_Spot02_Objects` | **Done** (2026-09-28, Unbound `8193a334f`): ML's Init and Draw on vanilla's instance and action functions, with the live switch (MS-149). ML's Kakariko (entrance 0xDB), which crashed on its first frame, runs by log and screenshot on macOS (Metal). Left there: `Actor_Spawn: no actor has id 0x6` twice (ML's Kakariko places id 6, params 0 and 1, which no ledger row names; not yet looked at) |
-| 14 | `ML_En_Md` | **Done** (2026-09-28, Unbound `d83a41c52`): ML's Init (always stays at home), Update (no action function; 0x1046 → 0x1044 once the slingshot has ammo) and Kokiri Forest text (the Mido's House lines), on vanilla's instance and helpers. ML's Kokiri Forest (entrance 0xEE), which crashed on its first frame, runs on macOS (Metal); a screenshot shows Mido at his placement, targetable. Talking to him not yet checked in game. Left there: `Actor_Spawn: no actor has id 0x5` (row 20, ML's tree bridge, a new actor) |
+| 14 | `ML_En_Md` | **Done** (2026-09-28, Unbound `d83a41c52`): ML's Init (always stays at home), Update (no action function; 0x1046 → 0x1044 once the slingshot has ammo) and Kokiri Forest text (the Mido's House lines), on vanilla's instance and helpers. ML's Kokiri Forest (entrance 0xEE), which crashed on its first frame, runs on macOS (Metal); a screenshot shows Mido at his placement, targetable. Talking to him not yet checked in game. The `no actor has id 0x5` it left was row 20, below |
+| 20 | `ML_TreeBridge` | **Done** (2026-09-28, Unbound `84ff78cae`): ML's own actor (vanilla's unused 0x005), ported from the fork with its collision in Unbound's layout; needs B1. In ML's Kokiri Forest, with a temporary hook setting its switch: the tree falls under ML's camera, and Link stands on the fallen bridge for 15 s (crash without B1). ML's Blade Beam (Soul-Charged sword) is not ported yet; a charged spin next to the tree fells it, as in ML |
 
 ## D. SoH-fork only: not needed on Unbound, or the owner decides
 
@@ -73,7 +74,7 @@ placements to them; vanilla scenes keep the vanilla actor. `base` still comes fi
 
 | Id | Rows | Fix |
 |---|---|---|
-| B1 | 23 | NULL-check `cameraDataList` in `z_bgcheck.c` |
+| B1 | 23 | NULL-check `cameraDataList` in `z_bgcheck.c`. **Carried on our Unbound branch** (2026-09-28, `84ff78cae`, with row 20, whose bridge needs it; crash without, none with) |
 | B2 | 19 | Song-cone width for widescreen (`Oceff_Wipe`-`Wipe4`) |
 | B3 | 44 | libultraship `GfxDpLoadBlock` `word_size_shift` sign |
 | B4 | 64 | Skip the place-name card when the scene has none |

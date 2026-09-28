@@ -63,12 +63,13 @@ ML_TYPES = {
         'assets': {'objects/gameplay_field_keep/gGrottoDL': 'objects/object_ml_gkeep/gMlGrottoDL'}}},
 }
 
-# ML's changes to vanilla actors that need code (docs/UNBOUND_MAP.md, C: owner decision 2026-09-28): actors our Unbound
-# branch registers by name (Unbound's unbound-docs/missinglink-actors.md), keyed by the vanilla number ML's own scenes
-# place them under. Vanilla scenes keep the vanilla actor.
+# ML's changes to vanilla actors that need code, and ML's own new actors (docs/UNBOUND_MAP.md, C: owner decision
+# 2026-09-28): actors our Unbound branch registers by name (Unbound's unbound-docs/missinglink-actors.md), keyed by
+# the number ML's own scenes place them under. Vanilla scenes keep the vanilla actor.
 ML_CODE_ACTORS = {
     0x9C: 'ML_Bg_Spot02_Objects',                       # ledger row 60: ML's Kakariko objects (object 0xA1)
     0x16D: 'ML_En_Md',                                  # ledger row 14: ML's Mido, in its Kokiri Forest
+    0x005: 'ML_TreeBridge',                             # ledger row 20: ML's own tree bridge (vanilla's unused 0x005)
 }
 RENAMES = {**{t['replaces']: name for name, t in ML_TYPES.items()}, **ML_CODE_ACTORS}
 
