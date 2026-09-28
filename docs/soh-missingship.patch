@@ -4617,7 +4617,7 @@ index b3bc053f107700fc8df4635a50a4c47d1fd9f7c0..7d851af9de6ecbc8cb83cd957f7bb6d7
  
  std::vector<std::string> questItemNamesFra = {
 diff --git a/soh/soh/z_scene_otr.cpp b/soh/soh/z_scene_otr.cpp
-index 2ac7b8e3839e20d97f49866280004382915182df..3ad525f36dd8f002066a374788826e25cd1f6879 100644
+index 2ac7b8e3839e20d97f49866280004382915182df..f8fd38c46c591cb0817f319e0e17210175b24c23 100644
 --- a/soh/soh/z_scene_otr.cpp
 +++ b/soh/soh/z_scene_otr.cpp
 @@ -340,9 +340,16 @@ bool Scene_CommandAlternateHeaderList(PlayState* play, SOH::ISceneCommand* cmd)
@@ -4649,6 +4649,26 @@ index 2ac7b8e3839e20d97f49866280004382915182df..3ad525f36dd8f002066a374788826e25
  
                  // "Using adult day data there!"
                  osSyncPrintf("\nそこで、大人の昼データを使用するでええっす！！");
+@@ -385,6 +391,19 @@ bool Scene_CommandMiscSettings(PlayState* play, SOH::ISceneCommand* cmd) {
+ 
+     YREG(15) = cmdCam->settings.cameraMovement;
+     gSaveContext.worldMapArea = cmdCam->settings.worldMapArea;
++    // MissingShip: ML remaps the area through its table (hook 0x800993E4 -> 0x80607D00, pairs at 0x80607CF0; first
++    // match wins), so its scenes light up its redrawn world-map regions. Here, not in z_scene.c's handler, which
++    // SoH never runs (scenes go through OTRScene_ExecuteCommands).
++    {
++        static const u8 sMlAreaMap[][2] = { { 1, 4 }, { 4, 9 }, { 10, 6 }, { 14, 14 }, { 9, 1 }, { 6, 10 } };
++
++        for (s32 i = 0; i < ARRAY_COUNT(sMlAreaMap); i++) {
++            if (gSaveContext.worldMapArea == sMlAreaMap[i][0]) {
++                gSaveContext.worldMapArea = sMlAreaMap[i][1];
++                break;
++            }
++        }
++    }
+ 
+     if ((play->sceneNum == SCENE_BAZAAR) || (play->sceneNum == SCENE_SHOOTING_GALLERY)) {
+         if (LINK_AGE_IN_YEARS == YEARS_ADULT) {
 diff --git a/soh/src/code/audio_load.c b/soh/src/code/audio_load.c
 index 6f6b4f4a3b11b1cda5577986889abba1fe27f212..9fe9920223891eaf00e1570f5afea40859c20114 100644
 --- a/soh/src/code/audio_load.c
@@ -7230,30 +7250,6 @@ index 34750ed2cc7fc7cfc66f9999de6581ea2fc091b4..f284c4820e8ac2279131de089e907af4
  
      if (CVarGetInteger(CVAR_ENHANCEMENT("ToggleStrength"), 0) &&
          CVarGetInteger(CVAR_ENHANCEMENT("StrengthDisabled"), 0)) {
-diff --git a/soh/src/code/z_scene.c b/soh/src/code/z_scene.c
-index c138bd4cf539e6ff34e7d28e35ebccadc6dcdb55..8072508a27061c17a551af59aff47143ee7ba20c 100644
---- a/soh/src/code/z_scene.c
-+++ b/soh/src/code/z_scene.c
-@@ -461,6 +461,19 @@ void Scene_CommandCutsceneData(PlayState* play, SceneCmd* cmd) {
- void Scene_CommandMiscSettings(PlayState* play, SceneCmd* cmd) {
-     YREG(15) = cmd->miscSettings.cameraMovement;
-     gSaveContext.worldMapArea = cmd->miscSettings.area;
-+    // MissingShip: ML remaps the area through its table (hook 0x800993E4 -> 0x80607D00, pairs at 0x80607CF0; first
-+    // match wins), so its scenes light up its redrawn world-map regions.
-+    {
-+        static const u8 sMlAreaMap[][2] = { { 1, 4 }, { 4, 9 }, { 10, 6 }, { 14, 14 }, { 9, 1 }, { 6, 10 } };
-+        s32 i;
-+
-+        for (i = 0; i < ARRAY_COUNT(sMlAreaMap); i++) {
-+            if (gSaveContext.worldMapArea == sMlAreaMap[i][0]) {
-+                gSaveContext.worldMapArea = sMlAreaMap[i][1];
-+                break;
-+            }
-+        }
-+    }
- 
-     if ((play->sceneNum == SCENE_BAZAAR) || (play->sceneNum == SCENE_SHOOTING_GALLERY)) {
-         if (LINK_AGE_IN_YEARS == YEARS_ADULT) {
 diff --git a/soh/src/code/z_scene_table.c b/soh/src/code/z_scene_table.c
 index 090d52fa669b430d62a246cd9a9dc4382e46f686..ece4ce9de8f58d45fccbc3a48751b3431c9e9fcf 100644
 --- a/soh/src/code/z_scene_table.c
