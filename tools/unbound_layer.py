@@ -52,6 +52,13 @@ ML_TYPES = {
                       for w in ('CrackedStoneFloor', 'BombableWall', 'LargeBombableWall')},
                    **{f'{HIDAN}{w}Col': 'objects/object_ml_crackwall/gMlCrackWallCol'
                       for w in ('CrackedStoneFloor', 'BombableWall', 'LargeBombableWall')}}}},
+    # Ledger row 25: ML draws its grotto hole from its own gameplay_keep, so it shows in any scene; its destinations and
+    # return point are unbound/grottos.json (tools/unbound_ml_world.py).
+    'ml/grotto': {'replaces': 0x9B, 'type': {
+        'name': 'Missing Link: grotto',
+        'base': 'Door_Ana',
+        'object': 0x01,                                  # OBJECT_GAMEPLAY_KEEP, vanilla's OBJECT_GAMEPLAY_FIELD_KEEP
+        'assets': {'objects/gameplay_field_keep/gGrottoDL': 'objects/object_ml_gkeep/gMlGrottoDL'}}},
 }
 RENAMES = {t['replaces']: name for name, t in ML_TYPES.items()}
 
@@ -176,6 +183,9 @@ def layer(vanilla, ml, out, world, ui, maps, pause):
         z.writestr('unbound/maps.json', json.dumps(doc, indent=1))
         stats['dungeon maps'] = sum(1 for v in doc.values() if v != {'minimap': False})
         z.writestr('unbound/pause.json', json.dumps(pause.pause(), indent=1))
+        grottos = world.grottos()
+        z.writestr('unbound/grottos.json', json.dumps(grottos, indent=1))
+        stats['grotto destinations'] = sum(1 for d in grottos['destinations'].values() if 'entrance' in d)
     return stats
 
 

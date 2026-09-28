@@ -11,7 +11,9 @@ engine submodule), so the two stay in step:
   - U4 new save: ML's starting loadout (z_sram.c) and where Skip Intro lands (SkipIntro.cpp);
   - row 28: where a loaded save and the game-over Continue resume. Vanilla's code names those entrances by number,
     and the fork reads each number through ML's entrance table (ml_entrance_map.c), so they become the scenes'
-    `saveReturn` and the arrival entrances' `continueAt` where ML's meaning differs from vanilla's.
+    `saveReturn` and the arrival entrances' `continueAt` where ML's meaning differs from vanilla's;
+  - U5 grottos (row 25): ML's grotto table (z_door_ana.c sGrottoEntrances) where it differs from vanilla's, and no
+    return point on any slot, since ML's grottos are ordinary scenes left through their own exits.
 """
 import json, os, re, struct
 
@@ -65,6 +67,7 @@ def _unpack(field):
 
 class MlWorld:
     def __init__(self, unbound_src):
+        self.unbound_src = unbound_src
         self.table = _entrance_table(os.path.join(ENGINE, 'include', 'tables', 'entrance_table.h'))
         self.unbound_demo = _read(os.path.join(unbound_src, 'soh', 'src', 'code', 'z_demo.c'))
         self.fork_demo = _read(os.path.join(ENGINE, 'src', 'code', 'z_demo.c'))
@@ -200,6 +203,33 @@ class MlWorld:
             entrance['continueAt'] = self.entrance_name(ml)
             continue_points += 1
         return save_returns, continue_points
+
+    # ---- U5 ----
+
+    def grottos(self):
+        """unbound/grottos.json: ML's destination for each grotto slot where the fork's table differs from Unbound's;
+        every slot without the return point when the fork leaves it out (ML nops Play_SetupRespawnPoint there)."""
+        path = os.path.join('src', 'overlays', 'actors', 'ovl_Door_Ana', 'z_door_ana.c')
+
+        def table(src):
+            body = src[src.index('sGrottoEntrances[] = {'):]
+            return re.findall(r'ENTR_\w+', body[:body.index('};')])
+
+        fork_src = _read(os.path.join(ENGINE, path))
+        fork, vanilla = table(fork_src), table(_read(os.path.join(self.unbound_src, 'soh', path)))
+        assert len(fork) == len(vanilla)
+        index = {row[0]: i for i, row in self.table.items()}
+        return_point = 'Play_SetupRespawnPoint(play, RESPAWN_MODE_RETURN' in fork_src
+        destinations = {}
+        for slot, (ml, ub) in enumerate(zip(fork, vanilla)):
+            d = {}
+            if ml != ub:
+                d['entrance'] = self.entrance_name(index[ml])
+            if not return_point:
+                d['returnPoint'] = False
+            if d:
+                destinations[str(slot)] = d
+        return {'destinations': destinations}
 
     # ---- U3 ----
 
