@@ -70,6 +70,7 @@ ML_TYPES = {
 # the number ML's own scenes place them under. Vanilla scenes keep the vanilla actor.
 ML_CODE_ACTORS = {
     0x121: 'ML_EventSpawner',                           # ledger rows 26, 54: ML's rewrite of En_Fz (Freezard)
+    0xE7: 'ML_Malon',                                   # ledger row 34: ML's rewrite of En_Ma1 (young Malon)
     0x9C: 'ML_Bg_Spot02_Objects',                       # ledger row 60: ML's Kakariko objects (object 0xA1)
     0x16D: 'ML_En_Md',                                  # ledger row 14: ML's Mido, in its Kokiri Forest
     0x005: 'ML_TreeBridge',                             # ledger row 20: ML's own tree bridge (vanilla's unused 0x005)
