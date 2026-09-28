@@ -72,6 +72,7 @@ ML_CODE_ACTORS = {
     0x9C: 'ML_Bg_Spot02_Objects',                       # ledger row 60: ML's Kakariko objects (object 0xA1)
     0x16D: 'ML_En_Md',                                  # ledger row 14: ML's Mido, in its Kokiri Forest
     0x005: 'ML_TreeBridge',                             # ledger row 20: ML's own tree bridge (vanilla's unused 0x005)
+    0x006: 'ML_Villager',                               # ledger row 10: ML's Kakariko villagers (vanilla's unused 0x006)
 }
 ML_MARKER = 'missinglink/mod.json'
 RENAMES = {**{t['replaces']: name for name, t in ML_TYPES.items()}, **ML_CODE_ACTORS}
