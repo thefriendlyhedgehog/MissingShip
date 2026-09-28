@@ -12,6 +12,8 @@ vanilla-format scene overrides are not read there. This converts them with Unbou
   - every other changed or added file is copied whole;
   - ML's changes to a vanilla actor that need no code become actor types that extend it (`base`, Unbound
     SPEC §7.3, ML_TYPES below), and ML's placements of that actor are renamed to the type;
+  - ML's changes to a vanilla actor that need code are actors our Unbound branch registers by name
+    (ML_CODE_ACTORS below, Unbound's unbound-docs/missinglink-actors.md), and ML's placements are renamed to them;
   - ML's changes to a vanilla actor's InitVars, which reach every copy of it, become overrides of that actor
     (Unbound SPEC §7.4, ML_OVERRIDES below);
   - ML's story wiring (entrances, intro cutscenes, cutscene destinations, the new save) becomes unbound/scenes.json,
@@ -24,7 +26,7 @@ vanilla-format scene overrides are not read there. This converts them with Unbou
   - ML's pause menu (age rules, slot and world-map positions, cursor rules, ammo counts, map points, colours) becomes
     unbound/pause.json (Unbound SPEC §7.9; tools/unbound_ml_pause.py).
 The result goes in Unbound's mods/ folder beside an ordinary oot.o2r. It carries ML's scenes, text and assets, not
-the behaviour our SoH fork adds in C.
+the rest of the behaviour our SoH fork adds in C.
 """
 import argparse, json, os, shutil, subprocess, sys, tempfile, zipfile
 
@@ -60,7 +62,14 @@ ML_TYPES = {
         'object': 0x01,                                  # OBJECT_GAMEPLAY_KEEP, vanilla's OBJECT_GAMEPLAY_FIELD_KEEP
         'assets': {'objects/gameplay_field_keep/gGrottoDL': 'objects/object_ml_gkeep/gMlGrottoDL'}}},
 }
-RENAMES = {t['replaces']: name for name, t in ML_TYPES.items()}
+
+# ML's changes to vanilla actors that need code (docs/UNBOUND_MAP.md, C: owner decision 2026-09-28): actors our Unbound
+# branch registers by name (Unbound's unbound-docs/missinglink-actors.md), keyed by the vanilla number ML's own scenes
+# place them under. Vanilla scenes keep the vanilla actor.
+ML_CODE_ACTORS = {
+    0x9C: 'ML_Bg_Spot02_Objects',                       # ledger row 60: ML's Kakariko objects (object 0xA1)
+}
+RENAMES = {**{t['replaces']: name for name, t in ML_TYPES.items()}, **ML_CODE_ACTORS}
 
 # ML's changes to vanilla actors' InitVars (docs/UNBOUND_MAP.md, U9). They apply to every copy, including the Skulltulas
 # ML's crates and soil patch spawn, so they are overrides of the actor itself rather than types.
@@ -124,16 +133,16 @@ def rename_exits(doc, world, stats):
 
 
 def rename_actors(doc, stats):
-    """ML's placements of a vanilla actor ML_TYPES extends, placed as the type instead."""
+    """ML's placements of a vanilla actor ML_TYPES extends or ML_CODE_ACTORS replaces, placed by that name instead."""
     for setup in (doc.get('setups') or {}).values():
         for actor in (setup.get('actors') or {}).values():
             if actor.get('id') in RENAMES:
                 actor['id'] = RENAMES[actor['id']]
-                stats['actor types placed'] += 1
+                stats['actors placed by name'] += 1
 
 
 def layer(vanilla, ml, out, world, ui, maps, pause):
-    stats = dict.fromkeys(('added', 'changed', 'scene documents', 'messages', 'actor types placed', 'exits named',
+    stats = dict.fromkeys(('added', 'changed', 'scene documents', 'messages', 'actors placed by name', 'exits named',
                            'exit padding dropped'), 0)
     with zipfile.ZipFile(vanilla) as v, zipfile.ZipFile(ml) as m, zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED) as z:
         base = {i.filename: i.CRC for i in v.infolist()}
