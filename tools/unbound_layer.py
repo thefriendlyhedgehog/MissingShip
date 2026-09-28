@@ -14,6 +14,8 @@ vanilla-format scene overrides are not read there. This converts them with Unbou
     SPEC §7.3, ML_TYPES below), and ML's placements of that actor are renamed to the type;
   - ML's changes to a vanilla actor that need code are actors our Unbound branch registers by name
     (ML_CODE_ACTORS below, Unbound's unbound-docs/missinglink-actors.md), and ML's placements are renamed to them;
+  - ML's changes to the game's own code (a vanilla actor the game spawns by number, a player hook) are switched on
+    in our Unbound branch by the marker file missinglink/mod.json, which the layer ships;
   - ML's changes to a vanilla actor's InitVars, which reach every copy of it, become overrides of that actor
     (Unbound SPEC §7.4, ML_OVERRIDES below);
   - ML's story wiring (entrances, intro cutscenes, cutscene destinations, the new save) becomes unbound/scenes.json,
@@ -71,6 +73,7 @@ ML_CODE_ACTORS = {
     0x16D: 'ML_En_Md',                                  # ledger row 14: ML's Mido, in its Kokiri Forest
     0x005: 'ML_TreeBridge',                             # ledger row 20: ML's own tree bridge (vanilla's unused 0x005)
 }
+ML_MARKER = 'missinglink/mod.json'
 RENAMES = {**{t['replaces']: name for name, t in ML_TYPES.items()}, **ML_CODE_ACTORS}
 
 # ML's changes to vanilla actors' InitVars (docs/UNBOUND_MAP.md, U9). They apply to every copy, including the Skulltulas
@@ -173,6 +176,9 @@ def layer(vanilla, ml, out, world, ui, maps, pause):
                 stats['changed' if n in base else 'added'] += 1
             z.writestr(n, data)
         z.writestr('unbound.json', json.dumps(MANIFEST, indent=1))
+        # Tells our Unbound branch that ML is mounted, which switches on ML's changes to the game's own code (Unbound's
+        # unbound-docs/missinglink-actors.md): ML's En_M_Thunder in actor slot 0x57, the Blade Beam spawner
+        z.writestr(ML_MARKER, json.dumps({'name': 'The Missing Link'}, indent=1))
         z.writestr('unbound/actors.json',
                    json.dumps({**ML_OVERRIDES, **{k: t['type'] for k, t in ML_TYPES.items()}}, indent=1))
         world.intros(m.namelist())
