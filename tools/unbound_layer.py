@@ -76,6 +76,8 @@ ML_CODE_ACTORS = {
     0x005: 'ML_TreeBridge',                             # ledger row 20: ML's own tree bridge (vanilla's unused 0x005)
     0x003: 'ML_Fishpond',                               # ledger row 10: ML's fishing pond scenery (vanilla's unused 0x003)
     0x006: 'ML_Villager',                               # ledger row 10: ML's Kakariko villagers (vanilla's unused 0x006)
+    0x174: 'ML_FogWall',                                # ledger row 26: ML's copy of En_Holl in Demo_Gt's slot
+    0x192: 'ML_HintNuts',                               # ledger row 26: ML's rewrite of En_Hintnuts (talking scrubs)
 }
 ML_MARKER = 'missinglink/mod.json'
 RENAMES = {**{t['replaces']: name for name, t in ML_TYPES.items()}, **ML_CODE_ACTORS}
