@@ -12,6 +12,9 @@ engine submodule), so the two stay in step:
   - row 28: where a loaded save and the game-over Continue resume. Vanilla's code names those entrances by number,
     and the fork reads each number through ML's entrance table (ml_entrance_map.c), so they become the scenes'
     `saveReturn` and the arrival entrances' `continueAt` where ML's meaning differs from vanilla's;
+  - ML's scene draw configs (ENGINE_CHANGES "Scene draw configs" row, pipeline/ml_scene_map.json): each scene ML
+    ships gets `drawConfig`, its draw config in ML's scene table. ML's config 0 runs the Deku Tree's handler (ML nops
+    the default one, code 0x80099550), so it is written as that handler's number;
   - U5 grottos (row 25): ML's grotto table (z_door_ana.c sGrottoEntrances) where it differs from vanilla's, and no
     return point on any slot, since ML's grottos are ordinary scenes left through their own exits.
 """
@@ -77,6 +80,7 @@ class MlWorld:
         self._fork_entrances()
         self._entrance_flags()
         self.save_returns, self.continue_points = self._returns(unbound_src)
+        self.draw_configs = self._draw_configs(unbound_src)
 
     def _entrances_of(self, scene):
         return self.scenes.setdefault(scene, {}).setdefault('entrances', {})
@@ -203,6 +207,29 @@ class MlWorld:
             entrance['continueAt'] = self.entrance_name(ml)
             continue_points += 1
         return save_returns, continue_points
+
+    # ---- scene draw configs ----
+
+    def _draw_configs(self, unbound_src):
+        """`drawConfig` on every scene ML ships whose draw config in ML differs from Unbound's (see the module doc)."""
+        z64scene = _read(os.path.join(unbound_src, 'soh', 'include', 'z64scene.h'))
+        sdc = re.findall(r'/\* +\d+ \*/ (SDC_\w+)', z64scene)
+        table = _read(os.path.join(unbound_src, 'soh', 'include', 'tables', 'scene_table.h'))
+        vanilla = dict(re.findall(r'DEFINE_SCENE\(\w+, \w+, (SCENE_\w+), (SDC_\w+)', table))
+        fork_table = _read(os.path.join(ENGINE, 'src', 'code', 'z_scene_table.c'))
+        default = re.search(r'void func_80099550\(PlayState\* play\) \{\s*(func_\w+)\(play\);', fork_table)
+        handlers = re.findall(r'func_\w+', fork_table[fork_table.index('sSceneDrawHandlers[]'):][:2000])
+        with open(os.path.join(ROOT, 'pipeline', 'ml_scene_map.json')) as f:
+            ml = json.load(f)
+        changed = 0
+        for entry in ml.values():
+            config = entry['config']
+            if config == 0 and default:                 # ML's default handler runs another's code
+                config = handlers.index(default.group(1))
+            if sdc[config] != vanilla[entry['enum']]:
+                self.scenes.setdefault(entry['enum'], {})['drawConfig'] = config
+                changed += 1
+        return changed
 
     # ---- U5 ----
 
