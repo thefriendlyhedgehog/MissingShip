@@ -167,6 +167,8 @@ def layer(vanilla, ml, out, world, ui, maps, pause):
         labels = ui.labels()
         z.writestr('unbound/labels.json', json.dumps(labels, indent=1))
         stats['vanilla scenes changed'] = len(world.scenes)
+        stats['save returns'] = world.save_returns
+        stats['game-over continue points'] = world.continue_points
         stats['cutscene destinations'] = len(destinations)
         stats['item labels'] = len(labels['items'])
         stats['time splits'] = len(labels['timeSplits']['splits'])

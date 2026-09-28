@@ -8,7 +8,10 @@ engine submodule), so the two stay in step:
   - U3 intro cutscenes: ML's eleven (z_demo.c sEntranceCutsceneTable) on their entrances, and vanilla's (read from
     Unbound's z_demo.c) removed, which also removes the Requiem and Nocturne triggers (row 114);
   - U2 cutscene destinations: every ML cutscene whose destination command the pipeline rewrote or ML patched;
-  - U4 new save: ML's starting loadout (z_sram.c) and where Skip Intro lands (SkipIntro.cpp).
+  - U4 new save: ML's starting loadout (z_sram.c) and where Skip Intro lands (SkipIntro.cpp);
+  - row 28: where a loaded save and the game-over Continue resume. Vanilla's code names those entrances by number,
+    and the fork reads each number through ML's entrance table (ml_entrance_map.c), so they become the scenes'
+    `saveReturn` and the arrival entrances' `continueAt` where ML's meaning differs from vanilla's.
 """
 import json, os, re, struct
 
@@ -70,6 +73,7 @@ class MlWorld:
         self.fork_groups = []            # (start, end, scene, key) of each registered fork entrance
         self._fork_entrances()
         self._entrance_flags()
+        self.save_returns, self.continue_points = self._returns(unbound_src)
 
     def _entrances_of(self, scene):
         return self.scenes.setdefault(scene, {}).setdefault('entrances', {})
@@ -126,6 +130,76 @@ class MlWorld:
         if index < FORK_FIRST:
             return self.table[index][0]
         return self.fork_names.get(index)
+
+    # ---- row 28 ----
+
+    @staticmethod
+    def _ml_entrance_map():
+        """ML's entrance table as the fork reads it: ML number -> SoH index, and SoH index -> ML number."""
+        src = _read(os.path.join(ENGINE, 'src', 'code', 'ml_entrance_map.c'))
+
+        def table(name):
+            body = src[src.index(name):]
+            return [int(v, 16) for v in re.findall(r'0x[0-9A-Fa-f]+', body[body.index('{') + 1:body.index('};')])]
+
+        return table('sMlToSoh'), table('sSohToMl')
+
+    @staticmethod
+    def _cases(block):
+        """A C switch on an entrance or scene as {case name: the entrance name it assigns, or None to keep it}."""
+        out, pending = {}, []
+        for m in re.finditer(r'case (\w+):|gSaveContext\.entranceIndex = ([^;]+);|break;', block):
+            if m.group(1):
+                pending.append(m.group(1))
+                continue
+            for case in pending:
+                out[case] = m.group(2)
+            pending = []
+        return out
+
+    def _returns(self, unbound_src):
+        """Ledger row 28 (see the module doc): `saveReturn` and `continueAt` where the fork's differ from vanilla's."""
+        ml_to_soh, soh_to_ml = self._ml_entrance_map()
+        vanilla = {row[0]: i for i, row in self.table.items() if i < FORK_FIRST}
+        fork_sram = _read(os.path.join(ENGINE, 'src', 'code', 'z_sram.c'))
+        fork_kaleido = _read(os.path.join(ENGINE, 'src', 'overlays', 'misc', 'ovl_kaleido_scope',
+                                          'z_kaleido_scope_PAL.c'))
+        assert 'MlEntrance_ToSoh(sDungeonEntrances' in fork_sram and 'MlEntrance_FromSoh(sohEntrance)' in fork_kaleido
+
+        # Sram_OpenSave: the saved scene's entrance, ML's number for it
+        sram = _read(os.path.join(unbound_src, 'soh', 'src', 'code', 'z_sram.c'))
+        dungeons = dict((s, e) for e, s in re.findall(r'(ENTR_\w+),\s*// (SCENE_\w+)', sram))
+        body = sram[sram.index('void Sram_OpenSave'):]
+        body = body[body.index('switch (gSaveContext.savedSceneNum)'):body.index('default:')]
+        save_returns = 0
+        for scene, entrance in self._cases(body).items():
+            entrance = dungeons[scene] if entrance.startswith('sDungeonEntrances') else entrance
+            ml = ml_to_soh[vanilla[entrance]]
+            if ml != vanilla[entrance]:
+                self.scenes.setdefault(scene, {})['saveReturn'] = self.entrance_name(ml)
+                save_returns += 1
+
+        # the game-over Continue: the arrival entrance as ML's number, through vanilla's switch, and back
+        kaleido = _read(os.path.join(unbound_src, 'soh', 'src', 'overlays', 'misc', 'ovl_kaleido_scope',
+                                     'z_kaleido_scope_PAL.c'))
+        body = kaleido[kaleido.index('case 0x10:'):]
+        body = body[body.index('switch (gSaveContext.entranceIndex)'):body.index('} else {')]
+        redirects = {vanilla[a]: vanilla[b] for a, b in self._cases(body).items() if b is not None}
+        continue_points = 0
+        for x in range(max(self.table) + 1):
+            m = soh_to_ml[x] if x < len(soh_to_ml) else x
+            ml = ml_to_soh[redirects[m]] if m in redirects else x
+            if ml == redirects.get(x, x):
+                continue
+            if x < FORK_FIRST:
+                name, scene = self.table[x][:2]
+                entrance = self._entrances_of(scene).setdefault(name, {})
+            else:
+                start, end, scene, key = next(g for g in self.fork_groups if g[0] == x)
+                entrance = self._entrances_of(scene)[key]
+            entrance['continueAt'] = self.entrance_name(ml)
+            continue_points += 1
+        return save_returns, continue_points
 
     # ---- U3 ----
 
