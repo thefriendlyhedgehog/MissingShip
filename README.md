@@ -211,6 +211,10 @@ It writes `mod/MissingLink_Unbound.o2r` (10 MB: 25 scenes, 304 messages, ML's ob
 Unbound's `mods/` folder, beside an ordinary `oot.o2r`. It carries ML's world, not the behaviour our SoH fork adds in C;
 that is the rest of the plan in `docs/ROADMAP.md`.
 
+Playing it on Unbound, turn on **Enhancements → Quality of Life → Saving → Remember Save Location**. ML resumes a save
+where it was made; without the option, a save made outside a dungeon loads at Link's House, which in ML is the
+prologue's stub. A save made in a dungeon resumes where ML sends it either way.
+
 ### Checks
 
 ```bash
