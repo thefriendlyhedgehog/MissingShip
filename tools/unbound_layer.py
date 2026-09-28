@@ -68,6 +68,7 @@ ML_TYPES = {
 # place them under. Vanilla scenes keep the vanilla actor.
 ML_CODE_ACTORS = {
     0x9C: 'ML_Bg_Spot02_Objects',                       # ledger row 60: ML's Kakariko objects (object 0xA1)
+    0x16D: 'ML_En_Md',                                  # ledger row 14: ML's Mido, in its Kokiri Forest
 }
 RENAMES = {**{t['replaces']: name for name, t in ML_TYPES.items()}, **ML_CODE_ACTORS}
 
