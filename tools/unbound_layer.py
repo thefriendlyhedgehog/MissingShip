@@ -30,7 +30,7 @@ vanilla-format scene overrides are not read there. This converts them with Unbou
 The result goes in Unbound's mods/ folder beside an ordinary oot.o2r. It carries ML's scenes, text and assets, not
 the rest of the behaviour our SoH fork adds in C.
 """
-import argparse, json, os, shutil, subprocess, sys, tempfile, zipfile
+import argparse, json, os, re, shutil, struct, subprocess, sys, tempfile, zipfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from unbound_ml_maps import MlMaps
@@ -80,6 +80,10 @@ ML_CODE_ACTORS = {
     0x192: 'ML_HintNuts',                               # ledger row 26: ML's rewrite of En_Hintnuts (talking scrubs)
 }
 ML_MARKER = 'missinglink/mod.json'
+# ML's title-card ribbon (ML custom code +0x3BE0, 160x8 IA16), which our Unbound branch draws by this path while ML is
+# mounted (Unbound's soh/soh/missinglink/MlTitleCard.c). Read from the fork's generated copy.
+ML_BANNER = 'textures/ml_titlecard/gMlTitleCardBannerTex'
+ML_BANNER_INC = os.path.join(ROOT, 'engine', 'soh', 'src', 'code', 'ml_titlecard_banner.inc')
 RENAMES = {**{t['replaces']: name for name, t in ML_TYPES.items()}, **ML_CODE_ACTORS}
 
 # ML's changes to vanilla actors' InitVars (docs/UNBOUND_MAP.md, U9). They apply to every copy, including the Skulltulas
@@ -152,6 +156,15 @@ def rename_actors(doc, stats):
                 stats['actors placed by name'] += 1
 
 
+def ml_banner(vanilla):
+    """ML's ribbon as a texture resource: a vanilla texture's resource header with LUS's GrayscaleAlpha16bpp (9)."""
+    src = '\n'.join(l for l in open(ML_BANNER_INC).read().splitlines() if not l.lstrip().startswith('//'))
+    pixels = bytes(int(b, 16) for b in re.findall(r'0x([0-9A-Fa-f]{2})\b', src))
+    assert len(pixels) == 160 * 8 * 2, len(pixels)
+    header = vanilla.read('textures/g_pn_31/gKokiriForestTitleCardENGTex')[:0x40]
+    return header + struct.pack('<IIII', 9, 160, 8, len(pixels)) + pixels
+
+
 def layer(vanilla, ml, out, world, ui, maps, pause):
     stats = dict.fromkeys(('added', 'changed', 'scene documents', 'messages', 'actors placed by name', 'exits named',
                            'exit padding dropped'), 0)
@@ -183,8 +196,9 @@ def layer(vanilla, ml, out, world, ui, maps, pause):
             z.writestr(n, data)
         z.writestr('unbound.json', json.dumps(MANIFEST, indent=1))
         # Tells our Unbound branch that ML is mounted, which switches on ML's changes to the game's own code (Unbound's
-        # unbound-docs/missinglink-actors.md): ML's En_M_Thunder in actor slot 0x57, the Blade Beam spawner
+        # unbound-docs/missinglink-actors.md): ML's En_M_Thunder in actor slot 0x57, the Blade Beam spawner, ...
         z.writestr(ML_MARKER, json.dumps({'name': 'The Missing Link'}, indent=1))
+        z.writestr(ML_BANNER, ml_banner(v))
         z.writestr('unbound/actors.json',
                    json.dumps({**ML_OVERRIDES, **{k: t['type'] for k, t in ML_TYPES.items()}}, indent=1))
         world.intros(m.namelist())
