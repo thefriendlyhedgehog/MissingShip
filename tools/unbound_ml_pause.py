@@ -11,7 +11,8 @@ Our SoH fork edits the pause menu (kaleido) in C (ledger row 24); Unbound takes 
   - the world map's piece positions and ML's point rules (points 0 and 1 hidden, six following its story flags);
   - the info panel's colours.
 The fork also edits sPageVtxColor*, but SoH draws the pages from its own cosmetics defaults (pageColors), so those
-edits never showed; `colors.pages` is not written, and the pages keep the colours the fork shows.
+edits never showed; `colors.pages` is not written, and the pages keep the colours the fork shows (the owner's choice
+over ML's parchment, 2026-09-28).
 """
 import os, re
 
