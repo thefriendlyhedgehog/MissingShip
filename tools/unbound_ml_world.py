@@ -278,7 +278,8 @@ class MlWorld:
     @staticmethod
     def new_save():
         """ML's new-save template (ledger row 13) and Skip Intro's destination (row 115). The fork's QoL option for
-        where the Ocarina goes (MissingShip.StartOcarinaButton) is ours, not ML's, so this is ML's own C-Left."""
+        where the Ocarina goes (MissingShip.StartOcarinaButton) is ours, not ML's, so this is ML's own C-Left (the owner's
+        choice for Unbound, 2026-09-28)."""
         SLOT_OCARINA, ITEM_OCARINA_TIME, ITEM_SWORD_KOKIRI = 7, 0x08, 0x3B
         return {
             'items': {str(SLOT_OCARINA): ITEM_OCARINA_TIME},
