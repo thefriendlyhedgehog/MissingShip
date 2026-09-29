@@ -104,6 +104,8 @@ ML_OVERRIDES = {
     'En_Vm': {'flags': {'clear': ATTENTION}},           # row 82: Beamos are never Z-targetable (0x11 -> 0x10)
     'En_Karebaba': {'flags': {'clear': HOSTILE}},       # row 94 (5 -> 1); ML never places it
     'Bg_Treemouth': {'spawn': False},                   # rows 8 and 122: ML guts the Deku Tree's mouth
+    'En_Firefly': {'flags': {'clear': HOSTILE}},        # row 27: Keese are not enemies (0x5005 -> 0x5001)
+    'En_Dekubaba': {'flags': {'clear': HOSTILE}},       # row 27: nor Deku Babas (5 -> 1)
 }
 
 
