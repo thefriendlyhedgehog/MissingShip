@@ -103,12 +103,13 @@ placements to them; vanilla scenes keep the vanilla actor. `base` still comes fi
 | Id | Rows | Fix |
 |---|---|---|
 | B1 | 23 | NULL-check `cameraDataList` in `z_bgcheck.c`. **Carried on our Unbound branch** (2026-09-28, `84ff78cae`, with row 20, whose bridge needs it; crash without, none with) |
-| B2 | 19 | Song-cone width for widescreen (`Oceff_Wipe`-`Wipe4`) |
-| B3 | 44 | libultraship `GfxDpLoadBlock` `word_size_shift` sign |
-| B4 | 64 | Skip the place-name card when the scene has none |
-| B6 | 124 | libultraship: texture-edge (`CVG_X_ALPHA`) modes stay alpha-tested when the blender reads memory |
-| B7 | 126 | Controllable Bombchus: release control on rail walkways (general form: on a "no bombchu" surface) |
-| B8 | — | ZAPD: two bytes per skeleton limb and one per soundfont drum entry are written uninitialized, so `oot.o2r` differs between platforms (found 2026-09-27) |
+| B2 | 19 | Song-cone width for widescreen (`Oceff_Wipe`-`Wipe4`). **Carried on our Unbound branch** (2026-09-29, `8688d074c`): at 16:9 the cone spans the window, screenshot |
+| B3 | 44 | libultraship `GfxDpLoadBlock` `word_size_shift` sign. **Not on Unbound**: roborich's libultraship `unbound` still has `uint32_t`; carrying it needs a libultraship we can push (the owner's decision) |
+| B4 | 64 | Skip the place-name card when the scene has none. **Already in Unbound**: its `TitleCard_InitPlaceName` returns without a card in the switch's `default` |
+| B6 | 124 | libultraship: texture-edge (`CVG_X_ALPHA`) modes stay alpha-tested when the blender reads memory. **Not on Unbound**, and ML needs it (the cyan halo around Deku Grove's fronds, gates and trims); as B3 |
+| B7 | 126 | Controllable Bombchus: release control on rail walkways (general form: on a "no bombchu" surface). **Carried in ML's form** (2026-09-29, `116496ebc`, `MlEnBomChu_OnRail`); the general form is still to offer |
+| B8 | — | ZAPD: two bytes per skeleton limb and one per soundfont drum entry are written uninitialized, so `oot.o2r` differs between platforms (found 2026-09-27). Not needed for ML on Unbound (Unbound converts `oot.o2r` itself); roborich's ZAPDTR, as B3 |
+| B9 | — | Unbound: a custom scene's `titleCardTexture` never showed (read after the title-card switch had returned, and without the `__OTR__` prefix). **Fixed on our Unbound branch** (2026-09-29, `8688d074c`, fixture `examples/title-card`): a custom copy of Kokiri Forest shows Hyrule Field's card, screenshot. Found while checking B4 |
 
 Pipeline rows (128 grass floors, 129 sky seams, 139 split samples) are data changes already inside the mod archive
 and need nothing from Unbound.
