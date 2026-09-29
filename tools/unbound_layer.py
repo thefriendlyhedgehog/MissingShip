@@ -202,8 +202,9 @@ def layer(vanilla, ml, out, world, ui, maps, pause):
         # unbound-docs/missinglink-actors.md): ML's En_M_Thunder in actor slot 0x57, the Blade Beam spawner, ...
         z.writestr(ML_MARKER, json.dumps({'name': 'The Missing Link'}, indent=1))
         z.writestr(ML_BANNER, ml_banner(v))
-        z.writestr('unbound/actors.json',
-                   json.dumps({**ML_OVERRIDES, **{k: t['type'] for k, t in ML_TYPES.items()}}, indent=1))
+        # One file per actor (Unbound SPEC §7.2): a vanilla actor's name is an override, any other name a type.
+        for name, doc in {**ML_OVERRIDES, **{k: t['type'] for k, t in ML_TYPES.items()}}.items():
+            z.writestr(f'unbound/actors/{name}.json', json.dumps(doc, indent=1))
         world.intros(m.namelist())
         for scene, name in ui.scene_names().items():
             world.scenes.setdefault(scene, {})['name'] = name
