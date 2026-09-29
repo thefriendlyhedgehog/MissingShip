@@ -78,6 +78,9 @@ ML_CODE_ACTORS = {
     0x006: 'ML_Villager',                               # ledger row 10: ML's Kakariko villagers (vanilla's unused 0x006)
     0x174: 'ML_FogWall',                                # ledger row 26: ML's copy of En_Holl in Demo_Gt's slot
     0x192: 'ML_HintNuts',                               # ledger row 26: ML's rewrite of En_Hintnuts (talking scrubs)
+    0xBA: 'ML_BossVa',                                  # ledger row 78: ML's rewrite of Boss_Va (the Shadow Temple boss)
+    0x17B: 'ML_Elevator',                               # ledger row 71: ML's rewrite of En_Kakasi (HAKAdan's elevators)
+    0x040: 'ML_ElevatorSpawner',                        # ledger row 70: ML's rewrite of Bg_Hidan_Dalm
 }
 ML_MARKER = 'missinglink/mod.json'
 # ML's title-card ribbon (ML custom code +0x3BE0, 160x8 IA16), which our Unbound branch draws by this path while ML is
