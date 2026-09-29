@@ -1,7 +1,7 @@
 """ML as an SoH: Unbound mod layer (step 1 of "ML on Unbound", docs/ROADMAP.md).
 
     python3 tools/unbound_layer.py --unbound <Unbound's soh binary> --oot-o2r <oot.o2r> --mod <MissingLink_Scenes.o2r>
-                                   [--soh-o2r <Unbound's soh.o2r>] [--out <MissingLink_Unbound.o2r>]
+                                   [--soh-o2r <Unbound's soh.o2r>] [--out <MissingLink_Unbound.o2r>] [--pack]
 
 Unbound reads vanilla scenes and text only in its own JSON form, converted from oot.o2r at start-up, so ML's
 vanilla-format scene overrides are not read there. This converts them with Unbound's own converter
@@ -36,6 +36,10 @@ vanilla-format scene overrides are not read there. This converts them with Unbou
     (tools/unbound_ml_items.py).
 The result goes in Unbound's mods/ folder beside an ordinary oot.o2r. It carries ML's scenes, text and assets, not
 the rest of the behaviour our SoH fork adds in C.
+
+With --pack the result is the layer as a pack of deltas (tools/deltapack.py, Unbound SPEC §1.7): ML's own bytes plus
+copies from oot.o2r and Unbound's conversion of it, which every player's game has. It carries none of the game's data,
+so it is what we distribute; make it from an oot.o2r that Unbound's own extractor wrote.
 """
 import argparse, glob, json, os, re, shutil, struct, subprocess, sys, tempfile, zipfile
 
@@ -47,6 +51,7 @@ from unbound_ml_pause import MlPause
 from unbound_ml_shops import MlShops
 from unbound_ml_ui import MlUi
 from unbound_ml_world import MlWorld
+import deltapack
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, 'pipeline'))
@@ -332,6 +337,8 @@ def main():
     ap.add_argument('--oot-o2r', required=True, help='the oot.o2r ML was built against')
     ap.add_argument('--mod', default=os.path.join(ROOT, 'mod', 'MissingLink_Scenes.o2r'))
     ap.add_argument('--out', default=os.path.join(ROOT, 'mod', 'MissingLink_Unbound.o2r'))
+    ap.add_argument('--pack', action='store_true', help="write the layer as a pack of deltas against the player's "
+                                                        "oot.o2r and Unbound's conversion of it (what we distribute)")
     args = ap.parse_args()
     # the converter runs in a temporary folder, so every path must be absolute
     args.oot_o2r, args.mod, args.out = map(os.path.abspath, (args.oot_o2r, args.mod, args.out))
@@ -355,8 +362,11 @@ def main():
         merged_archive(args.oot_o2r, args.mod, merged)
         export(args.unbound, soh_o2r, args.oot_o2r, os.path.join(work, 'vanilla.o2r'), work)
         export(args.unbound, soh_o2r, merged, os.path.join(work, 'ml.o2r'), work)
-        stats = layer(os.path.join(work, 'vanilla.o2r'), os.path.join(work, 'ml.o2r'), args.out, world, ui, maps, pause,
+        out = os.path.join(work, 'layer.o2r') if args.pack else args.out
+        stats = layer(os.path.join(work, 'vanilla.o2r'), os.path.join(work, 'ml.o2r'), out, world, ui, maps, pause,
                       getitem, shops, items)
+        if args.pack:             # vanilla.o2r is what the player's game converts oot.o2r to (oot-unbound.o2r)
+            deltapack.make(out, args.out, [args.oot_o2r, os.path.join(work, 'vanilla.o2r')])
     finally:
         shutil.rmtree(work, ignore_errors=True)
     print(f'{args.out}: ' + ', '.join(f'{v} {k}' for k, v in stats.items()))

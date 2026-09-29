@@ -1,6 +1,7 @@
 """MissingShip's mod builder (MS-154): The Missing Link's mod archive, built from the player's own files.
 
     build_mod.py <files...> --oot-o2r <oot.o2r> --out <MissingLink_Scenes.o2r>
+    build_mod.py <files...> --unbound <Unbound app> [--pack] [--oot-o2r <oot.o2r>] [--out <MissingLink_Unbound.o2r>]
 
 <files> are whatever the player has, in any order. The builder tells them apart by their contents:
   - The Missing Link v2.0 ROM, already patched; or
@@ -9,6 +10,10 @@
 ROMs may be in .z64, .n64 or .v64 byte order, loose or inside a .zip. `oot.o2r` is the archive Ship of Harkinian made
 from the player's OoT ROM. (--rom, --patch and --ml-rom still work, as names for the same inputs.) --save-rom keeps the
 ML ROM it used, so MissingShip can rebuild the mod after an update without asking again.
+
+With --unbound it writes ML's SoH: Unbound layer instead (tools/unbound_layer.py), and with --pack that layer as a
+pack of deltas against the player's own base (tools/deltapack.py): ML's own bytes and none of the game's, the file we
+distribute for players to drop into Unbound's mods/ folder.
 
 It runs the same pipeline as ms_cycle.py, in a temporary work folder, replaying pipeline/baseline.json instead of
 reading the debug ROM, with SoH's files and ZAPD from the builder's own folder. The packages ship it frozen per OS,
@@ -141,13 +146,13 @@ def unbound_layer(args, step, env, oot, mod, work):
     src = os.path.join(HERE, 'unbound') if FROZEN else os.path.join(os.path.dirname(HERE), 'Unbound')
     src = os.environ.get('MS_UNBOUND_SRC') or src
     layer = os.path.join(work, 'mod', 'MissingLink_Unbound.o2r')
-    print('MissingShip builder: making the SoH: Unbound layer')
+    print('MissingShip builder: making the SoH: Unbound ' + ('pack' if args.pack else 'layer'))
     r = subprocess.run(step + [os.path.join(tools, 'unbound_layer.py'), '--unbound', os.path.abspath(args.unbound),
-                               '--unbound-src', src, '--oot-o2r', oot, '--mod', mod, '--out', layer],
-                       env=env, capture_output=True, text=True)
+                               '--unbound-src', src, '--oot-o2r', oot, '--mod', mod, '--out', layer] +
+                       (['--pack'] if args.pack else []), env=env, capture_output=True, text=True)
     if r.returncode != 0 or not os.path.exists(layer):
         print((r.stdout + r.stderr).strip(), file=sys.stderr)
-        fail('making the SoH: Unbound layer failed')
+        fail('making the SoH: Unbound ' + ('pack' if args.pack else 'layer') + ' failed')
     return layer
 
 
@@ -219,6 +224,9 @@ def main():
     p.add_argument('--out', help='where to write MissingLink_Scenes.o2r (with --unbound, MissingLink_Unbound.o2r; '
                                  'on macOS the default is the mods folder in its home folder)')
     p.add_argument('--unbound', help="build for SoH: Unbound: its macOS app, or its binary with soh.o2r beside it")
+    p.add_argument('--pack', action='store_true', help="with --unbound, write the mod as a pack of deltas against the "
+                                                       "player's own base, carrying none of the game's data: what we "
+                                                       "distribute (give an oot.o2r from Unbound's own extractor)")
     p.add_argument('--save-rom', help='also write The Missing Link v2.0 ROM (.z64) here')
     p.add_argument('--verbose', action='store_true', help='show every pipeline step')
     p.add_argument('--keep', action='store_true', help='keep the temporary work folder')
@@ -226,6 +234,8 @@ def main():
     args.files += args.more
     if not args.files:
         p.error('give The Missing Link v2.0 ROM, or an OoT USA 1.0 ROM and Kaze\'s patch')
+    if args.pack and not args.unbound:
+        p.error('--pack needs --unbound: packs are read by SoH: Unbound')
     if args.unbound and (not args.oot_o2r or not args.out):
         home = unbound_home()
         if home is None:

@@ -30,14 +30,13 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
      swaps and text remaps). Prelude of Light may be used for manual scene fixes.
      Done 2026-09-29: every ledger row is built, carried or covered on our Unbound branch (UNBOUND_MAP.md, "Step 3
      is complete"); what remains is the owner's (section D: packaging and the builder, menu curation, debug aids).
-  4. Packaging, owner decision 2026-09-29: ML on Unbound is a standard romhack tool. Players keep Unbound and run the
-     mod builder with `--unbound`, which writes `mods/MissingLink_Unbound.o2r`. macOS done 2026-09-29
-     (`tools/package.py unbound-macos`); Windows and Linux next.
-     Toward the end goal (a modpack players drop into the `mods/` folder of their own Unbound): our Unbound branch
-     reads delta files (2026-09-29), and `tools/deltapack.py` makes ML's layer a 5.0 MB pack of ML's own bytes plus
-     copies from the player's `oot.o2r` and `oot-unbound.o2r`, verified in game on macOS over an `oot.o2r` from
-     roborich's extractor and over our fork's. Still needed for a stock install: roborich taking delta files and the
-     ledger features (held offers), and one pack per supported ROM version.
+  4. Packaging, owner decision 2026-09-29: the pack route. Players drop one file, `MissingLink_Unbound.o2r`, into the
+     `mods/` folder of their own Unbound; no ML ROM, no builder. Our Unbound branch reads delta files, and
+     `build_mod.py --unbound --pack` makes the pack (ML's own bytes plus copies from the player's `oot.o2r` and
+     `oot-unbound.o2r`, 4.96 MB); `tools/package.py unbound-pack` zips it with a README (3.3 MB). Verified in game on
+     macOS over an `oot.o2r` from roborich's extractor and over our fork's. The earlier route, a builder players run
+     (macOS done, `tools/package.py unbound-macos`), stays for testers. Still needed for a stock install: roborich
+     taking delta files and the ledger features (held offers), and one pack per supported ROM version.
 
 ## Open work
 

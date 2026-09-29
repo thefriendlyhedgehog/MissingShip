@@ -211,20 +211,30 @@ It writes `mod/MissingLink_Unbound.o2r` (10 MB: 25 scenes, 304 messages, ML's ob
 Unbound's `mods/` folder, beside an ordinary `oot.o2r`. It carries ML's world, not the behaviour our SoH fork adds in C;
 that is the rest of the plan in `docs/ROADMAP.md`.
 
-For players it is a standard romhack tool (owner decision, 2026-09-29): they keep Unbound as it is and build ML as its
-mod. The mod builder does the whole job with `--unbound`, given Unbound's macOS app or its binary:
+For players it is a pack (owner decision, 2026-09-29: the pack route): one file they drop into the `mods/` folder of
+their own Unbound, with no ROM of ML and no builder. Unbound reads *delta files* (our branch; Unbound SPEC §1.7,
+`unbound-docs/delta-files.md`), so the pack holds ML's own bytes and copies everything it shares with OoT, as the game
+loads it, from the player's `oot.o2r` and `oot-unbound.o2r`. It carries none of Nintendo's data, and is the same file
+on every OS. We build it with the mod builder:
 
 ```bash
-MissingShipBuilder --unbound "/Applications/<Unbound>.app" <OoT ROM> <Kaze's patch>    # or <ML ROM>
+python3 pipeline/build_mod.py pipeline/tml_2_0.z64 --unbound <Unbound build>/soh/soh-macos --pack \
+    --oot-o2r <oot.o2r from Unbound's own extractor> --out MissingLink_Unbound.o2r
+python3 tools/package.py unbound-pack MissingLink_Unbound.o2r     # dist/MissingLink-Unbound.zip, with a README
 ```
 
-It builds ML's archive, then the layer, and on macOS reads `oot.o2r` from and writes `mods/MissingLink_Unbound.o2r` to
-Unbound's folder (`~/Library/Application Support/com.shipofharkinian.soh`, or `SHIP_HOME`; `--oot-o2r` and `--out`
-choose others). The frozen builder carries the layer tools and the 5.6 MB of fork and Unbound files they compare
-(`unbound/`, and `unbound.txt` naming the Unbound commit they came from: they must match the Unbound players run). It
-refuses an Unbound install without its `assets/` folder, where Unbound would wait on a popup. `python3 tools/package.py
-unbound-macos` zips it with a README as `dist/MissingLink-Unbound-macos.zip`; other systems come later. Test runs set
-`SHIP_HOME` to a scratch folder: the default is the Mac user's real SoH folder.
+It builds ML's archive, then the layer, then the pack (`tools/deltapack.py`, about 25 s in all): 4.96 MB, 3.3 MB
+zipped, against a 10.2 MB layer. Make it from an `oot.o2r` that Unbound's own extractor wrote, since that is what a
+player has; limbs, rooms and sound fonts are never copied from, because extractors write them differently. A player
+whose `oot.o2r` comes from another ROM version gets the game without the mod and a log line naming what is missing.
+Until roborich takes delta files and the features ML needs, players need our Unbound build.
+
+Without `--pack` the builder writes the whole layer, which holds the game's data too: for testing only. On macOS it
+reads `oot.o2r` from and writes `mods/MissingLink_Unbound.o2r` to Unbound's folder
+(`~/Library/Application Support/com.shipofharkinian.soh`, or `SHIP_HOME`; `--oot-o2r` and `--out` choose others).
+The frozen builder (`tools/freeze_builder.py`, `tools/package.py unbound-macos`), which let players build the layer
+themselves, stays for testers. It refuses an Unbound install without its `assets/` folder, where Unbound would wait on
+a popup. Test runs set `SHIP_HOME` to a scratch folder: the default is the Mac user's real SoH folder.
 
 Playing it on Unbound, turn on **Enhancements → Quality of Life → Saving → Remember Save Location**. ML resumes a save
 where it was made; without the option, a save made outside a dungeon loads at Link's House, which in ML is the

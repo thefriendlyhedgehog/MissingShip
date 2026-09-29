@@ -39,7 +39,7 @@ UNBOUND_GLOBS = ['soh/assets/objects/*/*.h']
 # The SoH: Unbound layer (pipeline/build_mod.py --unbound)
 TOOLS = ['tools/unbound_layer.py', 'tools/unbound_ml_getitem.py', 'tools/unbound_ml_items.py',
          'tools/unbound_ml_maps.py', 'tools/unbound_ml_pause.py', 'tools/unbound_ml_shops.py', 'tools/unbound_ml_ui.py',
-         'tools/unbound_ml_world.py']
+         'tools/unbound_ml_world.py', 'tools/deltapack.py']
 # Pipeline files that are development-only or outputs; everything else tracked under pipeline/ ships.
 DEV_ONLY = ('gen_entrance_flags.py', 'gen_entrance_map.py', 'gen_scene_config.py', 'gen_textures.py',
             'ms_cycle.sh')

@@ -4,6 +4,7 @@
     python3 tools/package.py <artifact dir>
     python3 tools/package.py macos         # the local macOS build (engine/build-ml), on this Mac
     python3 tools/package.py unbound-macos # The Missing Link for SoH: Unbound: the builder alone, on this Mac
+    python3 tools/package.py unbound-pack <MissingLink_Unbound.o2r>   # the pack players drop into mods/ (any OS)
 
 For macOS, build the engine first (cmake --build engine/build-ml --target soh) at the commit being released.
 
@@ -278,6 +279,48 @@ MissingShipBuilder/unbound.txt names the Unbound build this package was made for
 """
 
 
+UNBOUND_PACK_README = """The Missing Link for SoH: Unbound
+
+The Missing Link v2.0 by Kaze Emanuar, as a mod for SoH: Unbound, on Windows, macOS and Linux. The mod holds only
+The Missing Link's own work: everything it shares with Ocarina of Time is copied, as the game loads it, from the
+files your SoH: Unbound made from your own ROM. Nothing from Nintendo's game is included.
+
+You need
+  - a SoH: Unbound that reads delta files and has The Missing Link's features: for now MissingShip's build of it
+    (branch missinglink), until they are part of SoH: Unbound itself;
+  - started once with your Ocarina of Time USA 1.0 (NTSC 1.0) ROM, so that it has made oot.o2r.
+
+Put MissingLink_Unbound.o2r in SoH: Unbound's mods folder and start the game:
+  - macOS: ~/Library/Application Support/com.shipofharkinian.soh/mods
+  - Windows and Linux: the mods folder beside the game (or in the folder SHIP_HOME names)
+
+If The Missing Link does not appear, SoH: Unbound's log (the logs folder beside mods) says why. "Not adding Archive
+... its delta files need ..." means your oot.o2r was made from another ROM version than USA 1.0: make it again from a
+USA 1.0 ROM (delete oot.o2r and oot-unbound.o2r and start the game).
+"""
+
+
+def check_unbound_pack(path):
+    """A pack for players: deltas and ML's own files, never a game archive."""
+    if not os.path.isfile(path):
+        sys.exit(f'{path} not found (build it: pipeline/build_mod.py --unbound <app> --pack ...)')
+    with zipfile.ZipFile(path) as z:
+        names = z.namelist()
+        if 'version' in names or 'delta-sources.json' not in names:
+            sys.exit(f'{path} is not a pack (no delta-sources.json, or it has a game version file)')
+        deltas = sum(z.read(n)[:4] == b'LUSD' for n in names)
+    print(f'pack: {len(names)} files, {deltas} deltas')
+
+
+def unbound_pack(pack):
+    """The pack players drop into Unbound's mods/ folder, with how to (owner decision 2026-09-29: the pack route)."""
+    out = os.path.join(DIST, 'MissingLink-Unbound.zip')
+    with zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED) as z:
+        z.write(pack, 'MissingLink for Unbound/MissingLink_Unbound.o2r')
+        z.writestr('MissingLink for Unbound/README.txt', UNBOUND_PACK_README)
+    return out
+
+
 def unbound_macos():
     """The builder with its SoH: Unbound layer, and how to run it: ML as an ordinary Unbound mod (owner decision
     2026-09-29: a standard romhack tool, not a renamed game)."""
@@ -321,6 +364,12 @@ def check_unbound_builder(path):
 
 
 def main():
+    if len(sys.argv) == 3 and sys.argv[1] == 'unbound-pack':
+        os.makedirs(DIST, exist_ok=True)
+        check_unbound_pack(sys.argv[2])
+        path = unbound_pack(sys.argv[2])
+        print(f'{os.path.relpath(path, ROOT)}  {os.path.getsize(path) / 1e6:.1f} MB')
+        return
     if len(sys.argv) != 2:
         sys.exit(__doc__)
     os.makedirs(DIST, exist_ok=True)
