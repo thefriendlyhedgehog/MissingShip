@@ -97,6 +97,10 @@ ML_CODE_ACTORS = {
     0x098: 'ML_Pillar',                                 # ledger row 86: ML's rewrite of En_Du (Bmori1's pillars)
     0x0C3: 'ML_Thief',                                  # ledger row 87: ML's rewrite of En_Nb (Bmori1's thieves)
     0x027: 'ML_Torch',                                  # ledger row 85: ML's copy of Obj_Syokudai in Boss_Dodongo's slot
+    0x01C: 'ML_BeamHeart',                              # ledger row 30: ML's Blade Beam heart spawner (En_Reeba's slot)
+    0x115: 'ML_SkullKid',                               # ledger row 31: ML's rewrite of En_Skj (Deku Road)
+    0x18C: 'ML_HoleScrub',                              # ledger row 33: ML's hole-hopping scrub (En_Weiyer's slot)
+    0x06A: 'ML_TalkSpot',                               # ledger row 62: ML's talk spot (Bg_Toki_Hikari's slot)
 }
 ML_MARKER = 'missinglink/mod.json'
 # ML's title-card ribbon (ML custom code +0x3BE0, 160x8 IA16), which our Unbound branch draws by this path while ML is
