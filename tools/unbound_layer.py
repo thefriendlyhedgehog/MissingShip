@@ -102,6 +102,7 @@ ML_CODE_ACTORS = {
     0x18C: 'ML_HoleScrub',                              # ledger row 33: ML's hole-hopping scrub (En_Weiyer's slot)
     0x06A: 'ML_TalkSpot',                               # ledger row 62: ML's talk spot (Bg_Toki_Hikari's slot)
     0x01F: 'ML_Prologue',                               # ledger row 29: ML's illustrated prologue (vanilla's unused 0x01F)
+    0x1D1: 'ML_SongBlock',                              # ledger row 21: ML's rewrite of Obj_Timeblock (Saria's house block)
 }
 ML_MARKER = 'missinglink/mod.json'
 # ML's title-card ribbon (ML custom code +0x3BE0, 160x8 IA16), which our Unbound branch draws by this path while ML is
