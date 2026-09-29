@@ -1,7 +1,7 @@
 """A mod archive as a delta pack: its files as recipes against the player's own base archives.
 
     deltapack.py make  <mod.o2r> <pack.o2r> <base.o2r> [<base.o2r> ...]    write the pack, and say what it ships
-    deltapack.py apply <pack.o2r> <out.o2r> <base.o2r> [<base.o2r> ...]    rebuild the mod as the game would
+    deltapack.py apply <pack.o2r> <out.o2r> <base.o2r> [<base.o2r> ...]    rebuild the pack's files as the game would
     deltapack.py scan  <pack.o2r> <base.o2r> [<base.o2r> ...]              base bytes the pack still carries, per folder
 
 A romhack is distributed as a patch: it copies what it can from the player's own ROM and carries only the hack's own
@@ -9,7 +9,9 @@ bytes. A pack does the same for an .o2r, file by file, against the archives the 
 and Unbound's converted base oot-unbound.o2r), so it can be shared without Nintendo's data. Bases are listed lowest
 priority first, as the game mounts them.
 
-A file of the pack is either the mod's file as it is, or a delta (libultraship rebuilds it when the file is loaded):
+A file of the mod that equals what the base has at its path is left out: the player's base supplies it (with its
+own copy of any bytes the extractor leaves uninitialised, which the game never reads). Any other file of the pack is
+either the mod's file as it is, or a delta (libultraship rebuilds it when the file is loaded):
 
     'LUSD' u8 version (1)
     u32 size, u64 crc                       of the rebuilt file
@@ -34,9 +36,11 @@ SCAN = 64           # block that finds candidate sources anywhere in the base
 MAX_SOURCES = 8     # sources per delta: the file at the same path, then those sharing the most blocks
 SOURCES = 'delta-sources.json'       # every source of the pack's deltas: the game mounts the pack only if all are there
 KEEP = {'version', 'portVersion', SOURCES}    # read by the archive itself as it mounts, never rebuilt
-# Never sources: the extractors write parts of a sound font that no ROM byte sets, so its bytes can differ between
-# players' oot.o2r (fixed in the fork's ZAPD and our Unbound branch; the upstream offer is held, see UNBOUND_MAP.md B8).
-UNSTABLE = ('audio/fonts/',)
+# Never sources: resource types whose bytes differ between two players' oot.o2r. Upstream ZAPD leaves bytes it
+# writes uninitialised in skeleton limbs, rooms and sound fonts (UNBOUND_MAP.md B8), and an oot.o2r extracted by stock
+# SoH, which Unbound reuses, has them; across ten extractions (two extractors, macOS and Linux, before and after the
+# fixes) every entry that differed was one of these types.
+UNSTABLE_TYPES = {b'OSLB', b'OROM', b'OSFT'}      # SkeletonLimb, Room, SoundFont, as the resource header spells them
 
 _POLY, _MASK = 0x42F0E1EBA9EA3693, (1 << 64) - 1
 _TABLE = []
@@ -71,10 +75,18 @@ class Base:
         self.zips = [zipfile.ZipFile(a) for a in archives]
         self.names = [set(z.namelist()) for z in self.zips]
         self._crc = {}
+        self._type = {}
         self.sources = set(range(len(self.zips)))
 
     def read(self, key):
         return self.zips[key[0]].read(key[1])
+
+    def top(self, path):
+        """What the game loads at this path without the mod: the top archive's file, or None."""
+        for a in reversed(range(len(self.zips))):
+            if path in self.names[a]:
+                return self.zips[a].read(path)
+        return None
 
     def at(self, path):
         """Every usable base file at this path, the top archive first."""
@@ -87,7 +99,12 @@ class Base:
                     yield a, path
 
     def usable(self, key):
-        return not key[1].endswith('/') and not key[1].startswith(UNSTABLE) and key[0] in self.sources
+        if key[1].endswith('/') or key[0] not in self.sources:
+            return False
+        if key not in self._type:
+            with self.zips[key[0]].open(key[1]) as f:
+                self._type[key] = f.read(8)[4:8][::-1]
+        return self._type[key] not in UNSTABLE_TYPES
 
     def crc(self, key):
         if key not in self._crc:
@@ -216,6 +233,9 @@ def make(mod, pack, bases, sources=None):
             dst = zin.read(info)
             if dst.startswith(MAGIC):
                 sys.exit(f'{info.filename} starts with {MAGIC!r} and would read as a delta')
+            if info.filename not in KEEP and base.top(info.filename) == dst:
+                stats['same'][0] += 1; stats['same'][1] += len(dst)     # the player's base has it already
+                continue
             rec, kind = dst, 'own'
             same = whole.get(hashlib.sha1(dst).digest())
             if info.filename in KEEP or len(dst) < 64:
