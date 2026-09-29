@@ -33,6 +33,11 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
   4. Packaging, owner decision 2026-09-29: ML on Unbound is a standard romhack tool. Players keep Unbound and run the
      mod builder with `--unbound`, which writes `mods/MissingLink_Unbound.o2r`. macOS done 2026-09-29
      (`tools/package.py unbound-macos`); Windows and Linux next.
+     Toward the end goal (a modpack players drop into the `mods/` folder of their own Unbound): our Unbound branch
+     reads delta files (2026-09-29), and `tools/deltapack.py` makes ML's layer a 5.0 MB pack of ML's own bytes plus
+     copies from the player's `oot.o2r` and `oot-unbound.o2r`, verified in game on macOS. Still needed for a stock
+     install: roborich taking delta files and the ledger features (held offers), one pack per supported ROM version,
+     and a check against an `oot.o2r` from roborich's release extractor.
 
 ## Open work
 
