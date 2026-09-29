@@ -5325,10 +5325,10 @@ index 0000000000000000000000000000000000000000..b3e5a87f7eed1795dea7fb1abc931997
 +#endif
 diff --git a/soh/src/code/ml_state.c b/soh/src/code/ml_state.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..60679e3d5b298ace47c7b93bc1a44cabb455e696
+index 0000000000000000000000000000000000000000..992c28825aade87f122b9a1ae105fa19ce237d05
 --- /dev/null
 +++ b/soh/src/code/ml_state.c
-@@ -0,0 +1,308 @@
+@@ -0,0 +1,312 @@
 +#include "ml_state.h"
 +#include "ml_entrance_map.h"
 +#include "objects/gameplay_keep/gameplay_keep.h"
@@ -5516,7 +5516,11 @@ index 0000000000000000000000000000000000000000..60679e3d5b298ace47c7b93bc1a44cab
 +
 +void MlState_LinkAnimation(LinkAnimationHeader** animation, f32* endFrame) {
 +    if (MlAnim_Is(*animation, gPlayerAnim_link_normal_run_jump)) {
-+        *animation = (LinkAnimationHeader*)sMlJumpAnims[sMlJumpStep];
++        // The first jump keeps the caller's pointer: each file has its own copy of the path, and the player's landing
++        // picks run_jump_end only when skelAnime.animation is z_player.c's copy (in ML it is a single address)
++        if (sMlJumpStep != 0) {
++            *animation = (LinkAnimationHeader*)sMlJumpAnims[sMlJumpStep];
++        }
 +        *endFrame = Animation_GetLastFrame(*animation);
 +        sMlJumpPlayed = sMlJumpStep;
 +    }
