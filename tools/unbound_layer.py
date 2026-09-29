@@ -81,6 +81,11 @@ ML_CODE_ACTORS = {
     0xBA: 'ML_BossVa',                                  # ledger row 78: ML's rewrite of Boss_Va (the Shadow Temple boss)
     0x17B: 'ML_Elevator',                               # ledger row 71: ML's rewrite of En_Kakasi (HAKAdan's elevators)
     0x040: 'ML_ElevatorSpawner',                        # ledger row 70: ML's rewrite of Bg_Hidan_Dalm
+    0x01A: 'ML_RoomClearSwitch',                        # ledger row 69: ML's room-clear switch (holds switch 0x25)
+    0x087: 'ML_HakaLift',                               # ledger row 72: ML's rewrite of Bg_Mori_Elevator
+    0x0DC: 'ML_SlideBlock',                             # ledger row 68: ML's rewrite of Boss_Tw (sliding blocks)
+    0x12C: 'ML_Lift',                                   # ledger row 12: ML's rewrite of Obj_Lift
+    0x0E3: 'ML_LiftBlock',                              # ledger row 12: ML's rewrite of Bg_Mori_Hashira4
 }
 ML_MARKER = 'missinglink/mod.json'
 # ML's title-card ribbon (ML custom code +0x3BE0, 160x8 IA16), which our Unbound branch draws by this path while ML is
