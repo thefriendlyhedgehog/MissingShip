@@ -8,7 +8,8 @@ vanilla-format scene overrides are not read there. This converts them with Unbou
 (`--export-unbound`): once for oot.o2r alone, once for oot.o2r with ML's files on top, and keeps what ML adds or changes:
   - scene documents ML changes carry `"$replace": true` (SPEC §3.4), so ML's scene replaces vanilla's instead of
     merging key by key;
-  - text/<lang>/messages.json keeps only the ids ML changes or adds (a keyed list merges per id);
+  - text/<lang>/messages.json keeps only the ids ML changes or adds (a keyed list merges per id), plus our own lines
+    (OUR_MESSAGES below);
   - every other changed or added file is copied whole;
   - ML's changes to a vanilla actor that need no code become actor types that extend it (`base`, Unbound
     SPEC §7.3, ML_TYPES below), and ML's placements of that actor are renamed to the type;
@@ -107,8 +108,26 @@ ML_CODE_ACTORS = {
     0x06A: 'ML_TalkSpot',                               # ledger row 62: ML's talk spot (Bg_Toki_Hikari's slot)
     0x01F: 'ML_Prologue',                               # ledger row 29: ML's illustrated prologue (vanilla's unused 0x01F)
     0x1D1: 'ML_SongBlock',                              # ledger row 21: ML's rewrite of Obj_Timeblock (Saria's house block)
+    0x012: 'ML_Ending',                                 # ledger row 92: ML's ending card (En_Dodongo's slot)
 }
 ML_MARKER = 'missinglink/mod.json'
+# Messages that are ours, not ML's: English message id -> the fork's C++ file that builds the same line (its raw bytes
+# as C string literals after `std::string text =`), so the two stay in step. 0xF0A2 (ledger row 127): the grotto
+# shop's line once its Piece of Heart is sold, which our Unbound branch shows instead of ML's 0x10A2 (MlEnDns.c).
+OUR_MESSAGES = {
+    '0xF0A2': os.path.join(ROOT, 'engine', 'soh', 'soh', 'Enhancements', 'MlScrubShopText.cpp'),
+}
+
+
+def our_message(path):
+    """The raw message bytes a fork file builds, as Unbound's text JSON writes them (one code point per byte)."""
+    with open(path) as f:
+        src = f.read()
+    block = src[src.index('std::string text ='):]
+    block = block[:block.index(';')]
+    raw = ''.join(re.findall(r'"((?:[^"\\]|\\.)*)"', block))
+    text = raw.encode('latin-1').decode('unicode_escape')
+    return {'box': 0, 'ypos': 0, 'text': text}   # TEXTBOX_TYPE_BLACK, TEXTBOX_POS_VARIABLE, as the fork's line
 # ML's title-card ribbon (ML custom code +0x3BE0, 160x8 IA16), which our Unbound branch draws by this path while ML is
 # mounted (Unbound's soh/soh/missinglink/MlTitleCard.c). Read from the fork's generated copy.
 ML_BANNER = 'textures/ml_titlecard/gMlTitleCardBannerTex'
@@ -210,6 +229,8 @@ def layer(vanilla, ml, out, world, ui, maps, pause, getitem, shops, items):
                 old = json.loads(v.read(n))['messages']
                 doc = json.loads(data)
                 doc['messages'] = {k: val for k, val in doc['messages'].items() if old.get(k) != val}
+                if n == 'text/eng/messages.json':
+                    doc['messages'].update({k: our_message(f) for k, f in OUR_MESSAGES.items()})
                 stats['messages'] += len(doc['messages'])
                 data = json.dumps(doc, indent=1)
             elif n.startswith('scenes/') and n.endswith('.json'):
