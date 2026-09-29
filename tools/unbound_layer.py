@@ -86,6 +86,8 @@ ML_CODE_ACTORS = {
     0x0DC: 'ML_SlideBlock',                             # ledger row 68: ML's rewrite of Boss_Tw (sliding blocks)
     0x12C: 'ML_Lift',                                   # ledger row 12: ML's rewrite of Obj_Lift
     0x0E3: 'ML_LiftBlock',                              # ledger row 12: ML's rewrite of Bg_Mori_Hashira4
+    0x119: 'ML_DnsShop',                                # ledger row 27: ML's copy of En_Dns (the grotto shop)
+    0x17A: 'ML_PushBlock',                              # ledger row 91: ML's copy of Obj_Oshihiki (Library)
 }
 ML_MARKER = 'missinglink/mod.json'
 # ML's title-card ribbon (ML custom code +0x3BE0, 160x8 IA16), which our Unbound branch draws by this path while ML is
