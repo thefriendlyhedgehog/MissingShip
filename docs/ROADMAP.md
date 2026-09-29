@@ -30,6 +30,9 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
      swaps and text remaps). Prelude of Light may be used for manual scene fixes.
      Done 2026-09-29: every ledger row is built, carried or covered on our Unbound branch (UNBOUND_MAP.md, "Step 3
      is complete"); what remains is the owner's (section D: packaging and the builder, menu curation, debug aids).
+  4. Packaging, owner decision 2026-09-29: ML on Unbound is a standard romhack tool. Players keep Unbound and run the
+     mod builder with `--unbound`, which writes `mods/MissingLink_Unbound.o2r`. macOS done 2026-09-29
+     (`tools/package.py unbound-macos`); Windows and Linux next.
 
 ## Open work
 

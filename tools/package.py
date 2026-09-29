@@ -3,6 +3,7 @@
     python3 tools/package.py <run id>      # downloads the run's artifacts with gh
     python3 tools/package.py <artifact dir>
     python3 tools/package.py macos         # the local macOS build (engine/build-ml), on this Mac
+    python3 tools/package.py unbound-macos # The Missing Link for SoH: Unbound: the builder alone, on this Mac
 
 For macOS, build the engine first (cmake --build engine/build-ml --target soh) at the commit being released.
 
@@ -255,6 +256,49 @@ def macos():
     return out
 
 
+UNBOUND_README = """The Missing Link for SoH: Unbound (macOS)
+
+This builds The Missing Link as a mod for SoH: Unbound from your own files. Nothing from the games is included.
+
+You need
+  - SoH: Unbound, started once with your Ocarina of Time USA 1.0 (NTSC 1.0) ROM, so it has made oot.o2r.
+  - Kaze's The Missing Link v2.0 patch from https://www.romhacking.net/hacks/5334/ (the .zip as downloaded is fine)
+    and that same OoT ROM; or a Missing Link v2.0 ROM you already patched.
+
+Build it (Terminal, in this folder; about a minute)
+  MissingShipBuilder/MissingShipBuilder --unbound "/Applications/<your Unbound>.app" <OoT ROM> <patch .zip>
+or, with a Missing Link ROM:
+  MissingShipBuilder/MissingShipBuilder --unbound "/Applications/<your Unbound>.app" <Missing Link ROM>
+
+It reads oot.o2r from Unbound's folder (~/Library/Application Support/com.shipofharkinian.soh) and writes
+mods/MissingLink_Unbound.o2r there. Start Unbound and The Missing Link is loaded. Build it again after updating
+Unbound or this package. --oot-o2r and --out choose other places.
+
+MissingShipBuilder/unbound.txt names the Unbound build this package was made for.
+"""
+
+
+def unbound_macos():
+    """The builder with its SoH: Unbound layer, and how to run it: ML as an ordinary Unbound mod (owner decision
+    2026-09-29: a standard romhack tool, not a renamed game)."""
+    out = os.path.join(DIST, 'MissingLink-Unbound-macos.zip')
+    import tempfile
+    stage = tempfile.mkdtemp(prefix='missinglink-unbound-')
+    top = os.path.join(stage, 'MissingLink for Unbound')
+    shutil.copytree(MAC_BUILDER, os.path.join(top, 'MissingShipBuilder'), symlinks=True)
+    with open(os.path.join(top, 'README.txt'), 'w') as f:
+        f.write(UNBOUND_README)
+    subprocess.run(['xattr', '-cr', top], check=True)
+    for path, _ in files_under(top):
+        if not os.path.islink(path) and open(path, 'rb').read(4) in (b'\xcf\xfa\xed\xfe', b'\xca\xfe\xba\xbe'):
+            subprocess.run(['codesign', '--force', '--sign', '-', path], check=True, capture_output=True)
+    if os.path.exists(out):
+        os.remove(out)
+    subprocess.run(['ditto', '-c', '-k', '--sequesterRsrc', '--keepParent', top, out], check=True)
+    shutil.rmtree(stage)
+    return out
+
+
 def check_builder(path):
     """The frozen mod builder for a package: present, and made from this checkout's commit."""
     version = os.path.join(path, 'version.txt')
@@ -267,10 +311,24 @@ def check_builder(path):
         print(f'warning: the builder in {path} was frozen from {made}, not HEAD')
 
 
+def check_unbound_builder(path):
+    """The builder also carries the layer's Unbound files, from a known Unbound commit."""
+    check_builder(path)
+    ub = os.path.join(path, 'unbound.txt')
+    if not os.path.isfile(ub) or not os.path.isdir(os.path.join(path, '_internal', 'unbound')):
+        sys.exit(f'the builder at {path} has no SoH: Unbound files: freeze it again (tools/freeze_builder.py)')
+    print(f'builder made for Unbound {open(ub).read().strip()[:10]}')
+
+
 def main():
     if len(sys.argv) != 2:
         sys.exit(__doc__)
     os.makedirs(DIST, exist_ok=True)
+    if sys.argv[1] == 'unbound-macos':
+        check_unbound_builder(MAC_BUILDER)
+        path = unbound_macos()
+        print(f'{os.path.relpath(path, ROOT)}  {os.path.getsize(path) / 1e6:.1f} MB')
+        return
     if sys.argv[1] == 'macos':
         check_builder(MAC_BUILDER)
         path = macos()

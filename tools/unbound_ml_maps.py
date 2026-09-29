@@ -10,10 +10,12 @@ Our SoH fork edits vanilla's map tables in C (ledger rows 5, 48, 49, 138); Unbou
   - `minimap: false` on the overworld scenes: ML never draws an overworld minimap (row 5), and the dungeon minimap
     stays as vanilla shows it (row 138).
 """
-import os, re
+import os, re, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FORK = os.path.join(ROOT, 'engine', 'soh')
+sys.path.insert(0, os.path.join(ROOT, 'pipeline'))
+from mspaths import SOH   # engine/soh, or the copy MS_SHIPWRIGHT names (the builder's)
+FORK = SOH
 
 DUNGEONS = ['SCENE_DEKU_TREE', 'SCENE_DODONGOS_CAVERN', 'SCENE_JABU_JABU', 'SCENE_FOREST_TEMPLE',
             'SCENE_FIRE_TEMPLE', 'SCENE_WATER_TEMPLE', 'SCENE_SPIRIT_TEMPLE', 'SCENE_SHADOW_TEMPLE',

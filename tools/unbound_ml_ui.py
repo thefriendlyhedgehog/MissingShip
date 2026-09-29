@@ -8,10 +8,12 @@ sources (the engine submodule), compared with Unbound's where the fork changed a
     shows (MlCountShown);
   - Time Splits' list and groups (TimeSplits.cpp) and the countdown timer's icon (TimeDisplay.cpp).
 """
-import os, re
+import os, re, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FORK = os.path.join(ROOT, 'engine', 'soh')
+sys.path.insert(0, os.path.join(ROOT, 'pipeline'))
+from mspaths import SOH   # engine/soh, or the copy MS_SHIPWRIGHT names (the builder's)
+FORK = SOH
 
 
 def _read(path):

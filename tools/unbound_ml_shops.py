@@ -5,13 +5,15 @@ Our SoH fork edits En_GirlA's shop table (shopItemEntries) in C (ledger row 67: 
 Read from the fork's z_en_girla.c against Unbound's, so the two stay in step: every shop item whose price differs.
 ML's own text already names its prices.
 """
-import os
+import os, sys
 
 from unbound_ml_maps import _num, _read, _source, _table
 from unbound_ml_pause import _enum_names
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FORK = os.path.join(ROOT, 'engine', 'soh')
+sys.path.insert(0, os.path.join(ROOT, 'pipeline'))
+from mspaths import SOH   # engine/soh, or the copy MS_SHIPWRIGHT names (the builder's)
+FORK = SOH
 GIRLA = os.path.join('src', 'overlays', 'actors', 'ovl_En_GirlA')
 PRICE = 3  # ShopItemEntry: objID, giDrawId, hiliteFunc, price, count, ...
 

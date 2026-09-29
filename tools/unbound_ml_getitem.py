@@ -7,13 +7,15 @@ Unbound's, so the two stay in step: each row whose draw function or display list
 function named by the first Unbound row that draws with it (`drawAs`, left out when it is the row's own), its display
 lists by the asset paths their headers define (Unbound's objects, and ML's in the fork's ml_assets.h).
 """
-import glob, os, re
+import glob, os, re, sys
 
 from unbound_ml_maps import _read, _source, _table
 from unbound_ml_pause import _enum_names
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FORK = os.path.join(ROOT, 'engine', 'soh')
+sys.path.insert(0, os.path.join(ROOT, 'pipeline'))
+from mspaths import SOH   # engine/soh, or the copy MS_SHIPWRIGHT names (the builder's)
+FORK = SOH
 PATH_DEFINE = re.compile(r'^#define dg(\w+) "__OTR__([^"]+)"', flags=re.M)
 
 

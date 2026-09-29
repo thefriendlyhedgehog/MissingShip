@@ -124,10 +124,37 @@ def zapd():
     return path
 
 
+def unbound_home():
+    """Where Unbound keeps oot.o2r and mods/: SHIP_HOME, else on macOS the folder SoH's own builds use
+    (libultraship Context::GetAppDirectoryPath, SDL_GetPrefPath). Elsewhere the builds are portable: no default."""
+    if os.environ.get('SHIP_HOME'):
+        return os.path.expanduser(os.environ['SHIP_HOME'])
+    if sys.platform == 'darwin':
+        return os.path.expanduser('~/Library/Application Support/com.shipofharkinian.soh')
+    return None
+
+
+def unbound_layer(args, step, env, oot, mod, work):
+    """MissingLink_Unbound.o2r from the built mod, with the player's Unbound (tools/unbound_layer.py). The Unbound
+    sources it compares against are the builder's own copy (unbound/), or a checkout's ../Unbound."""
+    tools = os.path.join(HERE, 'tools')
+    src = os.path.join(HERE, 'unbound') if FROZEN else os.path.join(os.path.dirname(HERE), 'Unbound')
+    src = os.environ.get('MS_UNBOUND_SRC') or src
+    layer = os.path.join(work, 'mod', 'MissingLink_Unbound.o2r')
+    print('MissingShip builder: making the SoH: Unbound layer')
+    r = subprocess.run(step + [os.path.join(tools, 'unbound_layer.py'), '--unbound', os.path.abspath(args.unbound),
+                               '--unbound-src', src, '--oot-o2r', oot, '--mod', mod, '--out', layer],
+                       env=env, capture_output=True, text=True)
+    if r.returncode != 0 or not os.path.exists(layer):
+        print((r.stdout + r.stderr).strip(), file=sys.stderr)
+        fail('making the SoH: Unbound layer failed')
+    return layer
+
+
 def build(args):
     oot = os.path.abspath(args.oot_o2r)
     if not os.path.exists(oot):
-        fail(f'{oot} not found: start MissingShip once so it makes oot.o2r from your ROM')
+        fail(f'{oot} not found: start the game once so it makes oot.o2r from your ROM')
     out = os.path.abspath(args.out)
     work = tempfile.mkdtemp(prefix='missingship-build-')
     try:
@@ -163,6 +190,8 @@ def build(args):
                 print('\n'.join(tail), file=sys.stderr)
             fail('building the mod failed')
         built = os.path.join(work, 'mod', 'MissingLink_Scenes.o2r')
+        if args.unbound:                                # SoH: Unbound reads ML as its own mod layer
+            built = unbound_layer(args, step, env, oot, built, work)
         os.makedirs(os.path.dirname(out), exist_ok=True)
         shutil.copyfile(built, out + '.tmp')
         os.replace(out + '.tmp', out)
@@ -185,8 +214,11 @@ def main():
     p.add_argument('files', nargs='*', help='The Missing Link v2.0 ROM, or an OoT USA 1.0 ROM and Kaze\'s patch '
                                             '(.bps or the .zip from his page), in any order')
     p.add_argument('--rom', '--ml-rom', '--patch', dest='more', action='append', default=[], help=argparse.SUPPRESS)
-    p.add_argument('--oot-o2r', required=True, help='the oot.o2r Ship of Harkinian made from your ROM')
-    p.add_argument('--out', required=True, help='where to write MissingLink_Scenes.o2r')
+    p.add_argument('--oot-o2r', help='the oot.o2r Ship of Harkinian made from your ROM (with --unbound on macOS, '
+                                     'default: the one in its home folder)')
+    p.add_argument('--out', help='where to write MissingLink_Scenes.o2r (with --unbound, MissingLink_Unbound.o2r; '
+                                 'on macOS the default is the mods folder in its home folder)')
+    p.add_argument('--unbound', help="build for SoH: Unbound: its macOS app, or its binary with soh.o2r beside it")
     p.add_argument('--save-rom', help='also write The Missing Link v2.0 ROM (.z64) here')
     p.add_argument('--verbose', action='store_true', help='show every pipeline step')
     p.add_argument('--keep', action='store_true', help='keep the temporary work folder')
@@ -194,6 +226,14 @@ def main():
     args.files += args.more
     if not args.files:
         p.error('give The Missing Link v2.0 ROM, or an OoT USA 1.0 ROM and Kaze\'s patch')
+    if args.unbound and (not args.oot_o2r or not args.out):
+        home = unbound_home()
+        if home is None:
+            p.error('give --oot-o2r and --out: the folder Unbound keeps oot.o2r and mods/ in')
+        args.oot_o2r = args.oot_o2r or os.path.join(home, 'oot.o2r')
+        args.out = args.out or os.path.join(home, 'mods', 'MissingLink_Unbound.o2r')
+    if not args.oot_o2r or not args.out:
+        p.error('give --oot-o2r and --out')
     build(args)
 
 

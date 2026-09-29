@@ -7,13 +7,15 @@ restriction table (sRestrictionFlags). Unbound takes the tables as unbound/items
 restrictions as each scene's `restrictions` in unbound/scenes.json (§7.1). Everything is read from the fork's sources
 against Unbound's, so the two stay in step: only what differs is written.
 """
-import os, re
+import os, re, sys
 
 from unbound_ml_maps import _num, _read, _source, _table
 from unbound_ml_pause import _enum_names
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FORK = os.path.join(ROOT, 'engine', 'soh')
+sys.path.insert(0, os.path.join(ROOT, 'pipeline'))
+from mspaths import SOH   # engine/soh, or the copy MS_SHIPWRIGHT names (the builder's)
+FORK = SOH
 INVENTORY = os.path.join('src', 'code', 'z_inventory.c')
 PARAMETER = os.path.join('src', 'code', 'z_parameter.c')
 VANILLA_BOTTLES = ['SLOT_BOTTLE_1', 'SLOT_BOTTLE_2', 'SLOT_BOTTLE_3', 'SLOT_BOTTLE_4']

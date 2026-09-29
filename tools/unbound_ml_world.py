@@ -18,10 +18,12 @@ engine submodule), so the two stay in step:
   - U5 grottos (row 25): ML's grotto table (z_door_ana.c sGrottoEntrances) where it differs from vanilla's, and no
     return point on any slot, since ML's grottos are ordinary scenes left through their own exits.
 """
-import json, os, re, struct
+import json, os, re, struct, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ENGINE = os.path.join(ROOT, 'engine', 'soh')
+sys.path.insert(0, os.path.join(ROOT, 'pipeline'))
+from mspaths import SOH   # engine/soh, or the copy MS_SHIPWRIGHT names (the builder's)
+ENGINE = SOH
 FORK_FIRST = 0x614                  # the fork's entrances start after vanilla's table
 TRANS_FADE_BLACK, TRANS_FADE_WHITE = 2, 3
 EVENT_LAYER = 4                     # cutsceneIndex 0xFFF0: the scene's first cutscene setup

@@ -211,6 +211,21 @@ It writes `mod/MissingLink_Unbound.o2r` (10 MB: 25 scenes, 304 messages, ML's ob
 Unbound's `mods/` folder, beside an ordinary `oot.o2r`. It carries ML's world, not the behaviour our SoH fork adds in C;
 that is the rest of the plan in `docs/ROADMAP.md`.
 
+For players it is a standard romhack tool (owner decision, 2026-09-29): they keep Unbound as it is and build ML as its
+mod. The mod builder does the whole job with `--unbound`, given Unbound's macOS app or its binary:
+
+```bash
+MissingShipBuilder --unbound "/Applications/<Unbound>.app" <OoT ROM> <Kaze's patch>    # or <ML ROM>
+```
+
+It builds ML's archive, then the layer, and on macOS reads `oot.o2r` from and writes `mods/MissingLink_Unbound.o2r` to
+Unbound's folder (`~/Library/Application Support/com.shipofharkinian.soh`, or `SHIP_HOME`; `--oot-o2r` and `--out`
+choose others). The frozen builder carries the layer tools and the 5.6 MB of fork and Unbound files they compare
+(`unbound/`, and `unbound.txt` naming the Unbound commit they came from: they must match the Unbound players run). It
+refuses an Unbound install without its `assets/` folder, where Unbound would wait on a popup. `python3 tools/package.py
+unbound-macos` zips it with a README as `dist/MissingLink-Unbound-macos.zip`; other systems come later. Test runs set
+`SHIP_HOME` to a scratch folder: the default is the Mac user's real SoH folder.
+
 Playing it on Unbound, turn on **Enhancements → Quality of Life → Saving → Remember Save Location**. ML resumes a save
 where it was made; without the option, a save made outside a dungeon loads at Link's House, which in ML is the
 prologue's stub. A save made in a dungeon resumes where ML sends it either way.

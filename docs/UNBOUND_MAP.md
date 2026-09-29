@@ -95,7 +95,7 @@ placements to them; vanilla scenes keep the vanilla actor. `base` still comes fi
 | What | Rows | Note |
 |---|---|---|
 | Menu, editor and preset curation (removed options, hidden cosmetics, retired CVars, Randomizer/Network tabs) | 106, 116–118, 120, 130–136 | Stock SoH menus on Unbound unless a generic "mod profile" feature is wanted; our rule of never mirroring stock settings still holds |
-| Packaging, app name, first-launch builder | 140–144 | Revisit when ML on Unbound is playable: the builder would add `tools/unbound_layer.py` |
+| Packaging, app name, first-launch builder | 140–144 | **macOS builder done** (2026-09-29). Owner decision: ML on Unbound is a standard romhack tool, not a renamed game, so rows 140–144 (app name, bundled builder run by the game) are not carried. The mod builder's `--unbound` builds ML's archive and then the layer with the player's Unbound app, bundling the layer tools and the fork's and Unbound's files they read; `tools/package.py unbound-macos` packages it. The frozen builder's output matches the checkout's entry for entry. Windows and Linux follow |
 | Debug aids | 104 (trace log), 113 (console cutscene index) | Dev-only; 113 could be offered to Unbound |
 | Removed rows | 102 | Nothing to carry |
 

@@ -37,7 +37,7 @@ vanilla-format scene overrides are not read there. This converts them with Unbou
 The result goes in Unbound's mods/ folder beside an ordinary oot.o2r. It carries ML's scenes, text and assets, not
 the rest of the behaviour our SoH fork adds in C.
 """
-import argparse, json, os, re, shutil, struct, subprocess, sys, tempfile, zipfile
+import argparse, glob, json, os, re, shutil, struct, subprocess, sys, tempfile, zipfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from unbound_ml_getitem import MlGetItem
@@ -49,6 +49,8 @@ from unbound_ml_ui import MlUi
 from unbound_ml_world import MlWorld
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(ROOT, 'pipeline'))
+from mspaths import PIPE, SOH   # the fork's files: engine/soh, or the builder's copy
 SKIP = ('version', 'portVersion', 'unbound.json')     # archive metadata: the base provides it
 MANIFEST = {'format': 'unbound', 'formatVersion': 2, 'requires': {'formatVersion': 2}}   # `base` is format 2
 
@@ -115,7 +117,7 @@ ML_MARKER = 'missinglink/mod.json'
 # as C string literals after `std::string text =`), so the two stay in step. 0xF0A2 (ledger row 127): the grotto
 # shop's line once its Piece of Heart is sold, which our Unbound branch shows instead of ML's 0x10A2 (MlEnDns.c).
 OUR_MESSAGES = {
-    '0xF0A2': os.path.join(ROOT, 'engine', 'soh', 'soh', 'Enhancements', 'MlScrubShopText.cpp'),
+    '0xF0A2': os.path.join(SOH, 'soh', 'Enhancements', 'MlScrubShopText.cpp'),
 }
 
 
@@ -131,7 +133,7 @@ def our_message(path):
 # ML's title-card ribbon (ML custom code +0x3BE0, 160x8 IA16), which our Unbound branch draws by this path while ML is
 # mounted (Unbound's soh/soh/missinglink/MlTitleCard.c). Read from the fork's generated copy.
 ML_BANNER = 'textures/ml_titlecard/gMlTitleCardBannerTex'
-ML_BANNER_INC = os.path.join(ROOT, 'engine', 'soh', 'src', 'code', 'ml_titlecard_banner.inc')
+ML_BANNER_INC = os.path.join(SOH, 'src', 'code', 'ml_titlecard_banner.inc')
 RENAMES = {**{t['replaces']: name for name, t in ML_TYPES.items()}, **ML_CODE_ACTORS}
 
 # ML's changes to vanilla actors' InitVars (docs/UNBOUND_MAP.md, U9). They apply to every copy, including the Skulltulas
@@ -169,7 +171,23 @@ def export(unbound, soh_o2r, oot, out, work):
     r = subprocess.run([unbound, '--export-unbound', out], cwd=home, env=dict(os.environ, SHIP_HOME=home),
                        capture_output=True, text=True, timeout=600)
     if r.returncode != 0 or not os.path.exists(out):
-        sys.exit(f'Unbound export failed ({r.returncode}); see {home}/logs')
+        logs = sorted(glob.glob(os.path.join(home, 'logs', '*.log')))
+        tail = (open(logs[-1], errors='replace').read() if logs else r.stdout + r.stderr).splitlines()[-15:]
+        sys.exit('\n'.join(tail + [f'Unbound export failed ({r.returncode})']))
+
+
+def unbound_game(path):
+    """(binary, soh.o2r) of an Unbound install: a macOS app (Contents/MacOS/soh, Contents/Resources/soh.o2r), or a
+    binary with soh.o2r beside it (a build folder, Windows, Linux)."""
+    path = os.path.abspath(path)
+    if os.path.isdir(os.path.join(path, 'Contents', 'MacOS')):
+        macos = os.path.join(path, 'Contents', 'MacOS')
+        binary = next((os.path.join(macos, n) for n in ('soh', 'soh-macos') if os.path.isfile(os.path.join(macos, n))),
+                      None)
+        if binary is None:
+            sys.exit(f'{path} holds no Ship of Harkinian binary')
+        return binary, os.path.join(path, 'Contents', 'Resources', 'soh.o2r')
+    return path, os.path.join(os.path.dirname(path), 'soh.o2r')
 
 
 def _is_entrance(value):
@@ -210,7 +228,7 @@ def ml_scenes():
     """The vanilla scene slots ML's ROM has (pipeline/ml_scene_map.json), for the marker file: with ML mounted, our
     Unbound branch refuses an entrance into any other vanilla scene (ledger row 119), since oot.o2r still holds
     vanilla's scenes there."""
-    with open(os.path.join(ROOT, 'pipeline', 'ml_scene_map.json')) as f:
+    with open(os.path.join(PIPE, 'ml_scene_map.json')) as f:
         scenes = sorted({entry['enum'] for entry in json.load(f).values()})
     if len(scenes) != 25:
         raise SystemExit(f'pipeline/ml_scene_map.json names {len(scenes)} scene slots; ML has 25')
@@ -306,8 +324,9 @@ def layer(vanilla, ml, out, world, ui, maps, pause, getitem, shops, items):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
-    ap.add_argument('--unbound', required=True, help="Unbound's soh binary (build-*/soh/soh-macos, soh.elf, soh.exe)")
-    ap.add_argument('--soh-o2r', help="Unbound's soh.o2r (default: next to the binary)")
+    ap.add_argument('--unbound', required=True, help="Unbound: its macOS app, or its binary (build-*/soh/soh-macos, "
+                                                     "soh.elf, soh.exe)")
+    ap.add_argument('--soh-o2r', help="Unbound's soh.o2r (default: the app's, or next to the binary)")
     ap.add_argument('--unbound-src', help="Unbound's source tree (default: the tree the binary was built in, "
                                           "build-*/soh/<binary>)")
     ap.add_argument('--oot-o2r', required=True, help='the oot.o2r ML was built against')
@@ -315,10 +334,19 @@ def main():
     ap.add_argument('--out', default=os.path.join(ROOT, 'mod', 'MissingLink_Unbound.o2r'))
     args = ap.parse_args()
     # the converter runs in a temporary folder, so every path must be absolute
-    args.unbound, args.oot_o2r, args.mod, args.out = map(os.path.abspath, (args.unbound, args.oot_o2r, args.mod,
-                                                                           args.out))
-    soh_o2r = args.soh_o2r or os.path.join(os.path.dirname(os.path.abspath(args.unbound)), 'soh.o2r')
+    args.oot_o2r, args.mod, args.out = map(os.path.abspath, (args.oot_o2r, args.mod, args.out))
+    args.unbound, soh_o2r = unbound_game(args.unbound)
+    # Without its extractor assets Unbound stops at start-up behind a popup that waits for a click (OTRGlobals.cpp
+    # "Extractor assets not found"), so an install without them is refused before anything runs.
+    assets = os.path.join(os.path.dirname(soh_o2r), 'assets')
+    soh_o2r = os.path.abspath(args.soh_o2r) if args.soh_o2r else soh_o2r
+    if not os.path.isfile(soh_o2r):
+        sys.exit(f"Unbound's soh.o2r not found: {soh_o2r}")
+    if not os.path.isdir(assets):
+        sys.exit(f"Unbound's assets/ folder not found ({assets}): reinstall Unbound")
     unbound_src = args.unbound_src or os.path.dirname(os.path.dirname(os.path.dirname(args.unbound)))
+    if not os.path.isfile(os.path.join(unbound_src, 'soh', 'include', 'z64item.h')):
+        sys.exit(f"Unbound's sources not found in {unbound_src}: give --unbound-src")
     world, ui, maps, pause = MlWorld(unbound_src), MlUi(unbound_src), MlMaps(unbound_src), MlPause(unbound_src)
     getitem, shops, items = MlGetItem(unbound_src), MlShops(unbound_src), MlItems(unbound_src)
     work = tempfile.mkdtemp(prefix='missingship-unbound-')

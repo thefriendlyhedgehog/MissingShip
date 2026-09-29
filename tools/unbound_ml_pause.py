@@ -14,12 +14,14 @@ The fork also edits sPageVtxColor*, but SoH draws the pages from its own cosmeti
 edits never showed; `colors.pages` is not written, and the pages keep the colours the fork shows (the owner's choice
 over ML's parchment, 2026-09-28).
 """
-import os, re
+import os, re, sys
 
 from unbound_ml_maps import _num, _read, _source, _table
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FORK = os.path.join(ROOT, 'engine', 'soh')
+sys.path.insert(0, os.path.join(ROOT, 'pipeline'))
+from mspaths import SOH   # engine/soh, or the copy MS_SHIPWRIGHT names (the builder's)
+FORK = SOH
 KALEIDO = os.path.join('src', 'overlays', 'misc', 'ovl_kaleido_scope')
 
 AGES = {'AGE_REQ_NONE': 'any', 'AGE_REQ_CHILD': 'child', 'AGE_REQ_ADULT': 'adult'}
