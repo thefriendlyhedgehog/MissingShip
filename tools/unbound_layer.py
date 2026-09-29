@@ -93,6 +93,10 @@ ML_CODE_ACTORS = {
     0x0E3: 'ML_LiftBlock',                              # ledger row 12: ML's rewrite of Bg_Mori_Hashira4
     0x119: 'ML_DnsShop',                                # ledger row 27: ML's copy of En_Dns (the grotto shop)
     0x17A: 'ML_PushBlock',                              # ledger row 91: ML's copy of Obj_Oshihiki (Library)
+    0x093: 'ML_BgmTrigger',                             # ledger row 63: ML's rewrite of Bg_Po_Event (music triggers)
+    0x098: 'ML_Pillar',                                 # ledger row 86: ML's rewrite of En_Du (Bmori1's pillars)
+    0x0C3: 'ML_Thief',                                  # ledger row 87: ML's rewrite of En_Nb (Bmori1's thieves)
+    0x027: 'ML_Torch',                                  # ledger row 85: ML's copy of Obj_Syokudai in Boss_Dodongo's slot
 }
 ML_MARKER = 'missinglink/mod.json'
 # ML's title-card ribbon (ML custom code +0x3BE0, 160x8 IA16), which our Unbound branch draws by this path while ML is
