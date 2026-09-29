@@ -28,6 +28,8 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
      Done 2026-09-27: [UNBOUND_MAP.md](UNBOUND_MAP.md). Step 1 is done too (`tools/unbound_layer.py`).
   3. Build the features one at a time, starting with `base` (a vanilla actor's code under a new type, with asset
      swaps and text remaps). Prelude of Light may be used for manual scene fixes.
+     Done 2026-09-29: every ledger row is built, carried or covered on our Unbound branch (UNBOUND_MAP.md, "Step 3
+     is complete"); what remains is the owner's (section D: packaging and the builder, menu curation, debug aids).
 
 ## Open work
 

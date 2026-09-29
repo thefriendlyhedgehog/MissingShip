@@ -206,6 +206,17 @@ def rename_actors(doc, stats):
                 stats['actors placed by name'] += 1
 
 
+def ml_scenes():
+    """The vanilla scene slots ML's ROM has (pipeline/ml_scene_map.json), for the marker file: with ML mounted, our
+    Unbound branch refuses an entrance into any other vanilla scene (ledger row 119), since oot.o2r still holds
+    vanilla's scenes there."""
+    with open(os.path.join(ROOT, 'pipeline', 'ml_scene_map.json')) as f:
+        scenes = sorted({entry['enum'] for entry in json.load(f).values()})
+    if len(scenes) != 25:
+        raise SystemExit(f'pipeline/ml_scene_map.json names {len(scenes)} scene slots; ML has 25')
+    return scenes
+
+
 def ml_banner(vanilla):
     """ML's ribbon as a texture resource: a vanilla texture's resource header with LUS's GrayscaleAlpha16bpp (9)."""
     src = '\n'.join(l for l in open(ML_BANNER_INC).read().splitlines() if not l.lstrip().startswith('//'))
@@ -249,7 +260,7 @@ def layer(vanilla, ml, out, world, ui, maps, pause, getitem, shops, items):
         z.writestr('unbound.json', json.dumps(MANIFEST, indent=1))
         # Tells our Unbound branch that ML is mounted, which switches on ML's changes to the game's own code (Unbound's
         # unbound-docs/missinglink-actors.md): ML's En_M_Thunder in actor slot 0x57, the Blade Beam spawner, ...
-        z.writestr(ML_MARKER, json.dumps({'name': 'The Missing Link'}, indent=1))
+        z.writestr(ML_MARKER, json.dumps({'name': 'The Missing Link', 'scenes': ml_scenes()}, indent=1))
         z.writestr(ML_BANNER, ml_banner(v))
         # One file per actor (Unbound SPEC §7.2): a vanilla actor's name is an override, any other name a type.
         for name, doc in {**ML_OVERRIDES, **{k: t['type'] for k, t in ML_TYPES.items()}}.items():
