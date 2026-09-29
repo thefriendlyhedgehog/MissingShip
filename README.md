@@ -276,7 +276,7 @@ differences, e.g. `MS_HACK=hacks/selftest python3 tools/codediff.py`.
 | `home/` | self-contained SHIP_HOME for development (settings, saves, `oot.o2r`; local only, not in git) |
 | `profile/` | the default settings every new player starts with |
 | `pipeline/` | ROM → `.o2r` pipeline: ZAPD XMLs (`xml/scenes`, `xml/objects`), injectors, maps |
-| `tools/` | hack-vs-baseline analysis: `modcheck`, `aligndiff`, `dumpactor`, `codediff`, `pldiff`, `mlcustom`, …; project checks: `check`, `genpatch`, `survey_actors`, …; release packaging: `package` |
+| `tools/` | hack-vs-baseline analysis: `modcheck`, `aligndiff`, `dumpactor`, `codediff`, `pldiff`, `mlcustom`, …; project checks: `check`, `genpatch`, `survey_actors`, …; audio: `sfxtrace` (which sound effects play a font slot); release packaging: `package` |
 | `hacks/` | per-hack configs for `tools/` (`ml`, `selftest`) |
 | `dist/` | release packages from `tools/package.py` (not committed) |
 | `docs/ROADMAP.md` | status, history and the remaining long-term work |
