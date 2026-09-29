@@ -1,3 +1,24 @@
+diff --git a/ZAPD/OtherStructs/SkinLimbStructs.h b/ZAPD/OtherStructs/SkinLimbStructs.h
+index 0bc35a25b90f72fa38c9169f59a689a4b73d25ad..d080c5a91e500c0e29ebd21acaa653bb839a7553 100644
+--- a/ZAPD/OtherStructs/SkinLimbStructs.h
++++ b/ZAPD/OtherStructs/SkinLimbStructs.h
+@@ -101,10 +101,12 @@ public:
+ 	size_t GetRawDataSize() const override;
+ 
+ public:
+-	uint16_t totalVtxCount;
+-	uint16_t limbModifCount;     // Length of limbModifications
+-	segptr_t limbModifications;  // SkinLimbModif*
+-	segptr_t dlist;              // Gfx*
++	// Initialised: a limb that is not a skin limb never parses this struct, but the
++	// exporter still reads totalVtxCount and dlist from it.
++	uint16_t totalVtxCount = 0;
++	uint16_t limbModifCount = 0;     // Length of limbModifications
++	segptr_t limbModifications = 0;  // SkinLimbModif*
++	segptr_t dlist = 0;              // Gfx*
+ 
+ 	std::vector<SkinLimbModif> limbModifications_arr;
+ 	// ZDisplayList* unk_8_dlist = nullptr;
 diff --git a/ZAPD/ZAudio.cpp b/ZAPD/ZAudio.cpp
 index 03c1efa99341ba516d3a44c5c4d533c08e49474e..9dee9dfb38b4c49071e40e7daba340702fb47182 100644
 --- a/ZAPD/ZAudio.cpp
@@ -19,4 +40,52 @@ index 03c1efa99341ba516d3a44c5c4d533c08e49474e..9dee9dfb38b4c49071e40e7daba34070
 +
  		ParseSoundFont(audioBankData, audioTableData, sampleBankTable, sft);
  	}
+ 
+diff --git a/ZAPD/ZAudio.h b/ZAPD/ZAudio.h
+index 0c6c0875cb827aff1d92e17beb65eb7086c89b9f..db423a2b95b74ce7558d14b5514fff54bb4854b7 100644
+--- a/ZAPD/ZAudio.h
++++ b/ZAPD/ZAudio.h
+@@ -59,11 +59,13 @@ struct DrumEntry
+ 
+ struct InstrumentEntry
+ {
+-	bool isValidInstrument;
+-	uint8_t loaded;
+-	uint8_t normalRangeLo;
+-	uint8_t normalRangeHi;
+-	uint8_t releaseRate;
++	// Initialised: an empty instrument slot (offset 0) parses none of these, but the
++	// exporter still writes them.
++	bool isValidInstrument = false;
++	uint8_t loaded = 0;
++	uint8_t normalRangeLo = 0;
++	uint8_t normalRangeHi = 0;
++	uint8_t releaseRate = 0;
+ 	std::vector<AdsrEnvelope*> env;
+ 	SoundFontEntry* lowNotesSound = nullptr;
+ 	SoundFontEntry* normalNotesSound = nullptr;
+diff --git a/ZAPD/ZRoom/Commands/SetMesh.h b/ZAPD/ZRoom/Commands/SetMesh.h
+index c0f15da9d3868b880b404afa8dcd627b2dc346de..a8a7c06c7a61bbc4b9238bee993aa789be12bcf9 100644
+--- a/ZAPD/ZRoom/Commands/SetMesh.h
++++ b/ZAPD/ZRoom/Commands/SetMesh.h
+@@ -44,8 +44,9 @@ protected:
+ class RoomShapeImageMultiBgEntry : public ZResource
+ {
+ public:
+-	uint16_t unk_00;
+-	uint8_t id;
++	// Only the multi layout has these two; the single layout leaves them at zero.
++	uint16_t unk_00 = 0;
++	uint8_t id = 0;
+ 	segptr_t source;
+ 	uint32_t unk_0C;
+ 	uint32_t tlut;
+@@ -141,7 +142,7 @@ public:
+ class SetMesh : public ZRoomCommand
+ {
+ public:
+-	uint8_t data;
++	uint8_t data = 0;  // Never parsed; the exporter writes it, so it must not be garbage.
+ 	uint8_t meshHeaderType;
+ 	std::shared_ptr<PolygonTypeBase> polyType;
  
