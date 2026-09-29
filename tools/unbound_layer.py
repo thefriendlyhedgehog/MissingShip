@@ -28,7 +28,8 @@ vanilla-format scene overrides are not read there. This converts them with Unbou
   - ML's pause menu (age rules, slot and world-map positions, cursor rules, ammo counts, map points, colours) becomes
     unbound/pause.json (Unbound SPEC §7.9; tools/unbound_ml_pause.py);
   - ML's GetItem models (its Deku Nut Milk, the Soul-Charged Kokiri Sword, a red Blue Potion) become
-    unbound/getitem.json (Unbound SPEC §7.11; tools/unbound_ml_getitem.py).
+    unbound/getitem.json (Unbound SPEC §7.11; tools/unbound_ml_getitem.py);
+  - ML's shop prices (its cheaper Bombchus) become unbound/shops.json (Unbound SPEC §7.12; tools/unbound_ml_shops.py).
 The result goes in Unbound's mods/ folder beside an ordinary oot.o2r. It carries ML's scenes, text and assets, not
 the rest of the behaviour our SoH fork adds in C.
 """
@@ -38,6 +39,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from unbound_ml_getitem import MlGetItem
 from unbound_ml_maps import MlMaps
 from unbound_ml_pause import MlPause
+from unbound_ml_shops import MlShops
 from unbound_ml_ui import MlUi
 from unbound_ml_world import MlWorld
 
@@ -180,7 +182,7 @@ def ml_banner(vanilla):
     return header + struct.pack('<IIII', 9, 160, 8, len(pixels)) + pixels
 
 
-def layer(vanilla, ml, out, world, ui, maps, pause, getitem):
+def layer(vanilla, ml, out, world, ui, maps, pause, getitem, shops):
     stats = dict.fromkeys(('added', 'changed', 'scene documents', 'messages', 'actors placed by name', 'exits named',
                            'exit padding dropped'), 0)
     with zipfile.ZipFile(vanilla) as v, zipfile.ZipFile(ml) as m, zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED) as z:
@@ -243,6 +245,9 @@ def layer(vanilla, ml, out, world, ui, maps, pause, getitem):
         draws = getitem.getitem()
         z.writestr('unbound/getitem.json', json.dumps(draws, indent=1))
         stats['GetItem models'] = len(draws['draws'])
+        prices = shops.shops()
+        z.writestr('unbound/shops.json', json.dumps(prices, indent=1))
+        stats['shop prices'] = len(prices['items'])
     return stats
 
 
@@ -262,7 +267,7 @@ def main():
     soh_o2r = args.soh_o2r or os.path.join(os.path.dirname(os.path.abspath(args.unbound)), 'soh.o2r')
     unbound_src = args.unbound_src or os.path.dirname(os.path.dirname(os.path.dirname(args.unbound)))
     world, ui, maps, pause = MlWorld(unbound_src), MlUi(unbound_src), MlMaps(unbound_src), MlPause(unbound_src)
-    getitem = MlGetItem(unbound_src)
+    getitem, shops = MlGetItem(unbound_src), MlShops(unbound_src)
     work = tempfile.mkdtemp(prefix='missingship-unbound-')
     try:
         merged = os.path.join(work, 'oot-ml.o2r')
@@ -270,7 +275,7 @@ def main():
         export(args.unbound, soh_o2r, args.oot_o2r, os.path.join(work, 'vanilla.o2r'), work)
         export(args.unbound, soh_o2r, merged, os.path.join(work, 'ml.o2r'), work)
         stats = layer(os.path.join(work, 'vanilla.o2r'), os.path.join(work, 'ml.o2r'), args.out, world, ui, maps, pause,
-                      getitem)
+                      getitem, shops)
     finally:
         shutil.rmtree(work, ignore_errors=True)
     print(f'{args.out}: ' + ', '.join(f'{v} {k}' for k, v in stats.items()))
