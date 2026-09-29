@@ -17,6 +17,12 @@ _sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), 
 from mspaths import ROOT, SHIPWRIGHT
 import subprocess, sys
 
+# A git hook runs us with GIT_DIR etc. exported (an absolute .git/worktrees/<name> in a worktree), which would make
+# `git -C engine ...` read MissingShip instead of the fork. Drop git's repo-location vars so every git call finds its
+# repo from -C.
+for _v in subprocess.run(['git', 'rev-parse', '--local-env-vars'], capture_output=True, text=True).stdout.split():
+    _os.environ.pop(_v, None)
+
 BASE = '9.2.3'
 BRANCH = 'missingship'
 DOCS = _os.path.join(ROOT, 'docs')
