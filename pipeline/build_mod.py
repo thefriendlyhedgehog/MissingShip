@@ -149,7 +149,9 @@ def unbound_layer(args, step, env, oot, mod, work):
     print('MissingShip builder: making the SoH: Unbound ' + ('pack' if args.pack else 'layer'))
     r = subprocess.run(step + [os.path.join(tools, 'unbound_layer.py'), '--unbound', os.path.abspath(args.unbound),
                                '--unbound-src', src, '--oot-o2r', oot, '--mod', mod, '--out', layer] +
-                       (['--pack'] if args.pack else []), env=env, capture_output=True, text=True)
+                       (['--pack'] if args.pack else []) +
+                       [x for other in args.also_base for x in ('--also-base', os.path.abspath(other))],
+                       env=env, capture_output=True, text=True)
     if r.returncode != 0 or not os.path.exists(layer):
         print((r.stdout + r.stderr).strip(), file=sys.stderr)
         fail('making the SoH: Unbound ' + ('pack' if args.pack else 'layer') + ' failed')
@@ -227,6 +229,9 @@ def main():
     p.add_argument('--pack', action='store_true', help="with --unbound, write the mod as a pack of deltas against the "
                                                        "player's own base, carrying none of the game's data: what we "
                                                        "distribute (give an oot.o2r from Unbound's own extractor)")
+    p.add_argument('--also-base', action='append', default=[], metavar='OOT_O2R',
+                   help='with --pack, an oot.o2r another SoH 9.x extractor wrote from the same ROM, so the pack '
+                        'works over it too (players keep an oot.o2r from whichever SoH they had)')
     p.add_argument('--save-rom', help='also write The Missing Link v2.0 ROM (.z64) here')
     p.add_argument('--verbose', action='store_true', help='show every pipeline step')
     p.add_argument('--keep', action='store_true', help='keep the temporary work folder')
@@ -236,6 +241,8 @@ def main():
         p.error('give The Missing Link v2.0 ROM, or an OoT USA 1.0 ROM and Kaze\'s patch')
     if args.pack and not args.unbound:
         p.error('--pack needs --unbound: packs are read by SoH: Unbound')
+    if args.also_base and not args.pack:
+        p.error('--also-base needs --pack')
     if args.unbound and (not args.oot_o2r or not args.out):
         home = unbound_home()
         if home is None:

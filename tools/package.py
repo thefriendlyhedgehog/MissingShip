@@ -308,8 +308,8 @@ def check_unbound_pack(path):
         sys.exit(f'{path} not found (build it: pipeline/build_mod.py --unbound <app> --pack ...)')
     with zipfile.ZipFile(path) as z:
         names = z.namelist()
-        if 'version' in names or 'delta-sources.json' not in names:
-            sys.exit(f'{path} is not a pack (no delta-sources.json, or it has a game version file)')
+        if 'version' in names or 'deltas.json' not in names:
+            sys.exit(f'{path} is not a pack (no deltas.json, or it has a game version file)')
         deltas = sum(z.read(n)[:4] == b'LUSD' for n in names)
     print(f'pack: {len(names)} files, {deltas} deltas')
 

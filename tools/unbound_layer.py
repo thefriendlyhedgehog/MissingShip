@@ -1,7 +1,8 @@
 """ML as an SoH: Unbound mod layer (step 1 of "ML on Unbound", docs/ROADMAP.md).
 
     python3 tools/unbound_layer.py --unbound <Unbound's soh binary> --oot-o2r <oot.o2r> --mod <MissingLink_Scenes.o2r>
-                                   [--soh-o2r <Unbound's soh.o2r>] [--out <MissingLink_Unbound.o2r>] [--pack]
+                                   [--soh-o2r <Unbound's soh.o2r>] [--out <MissingLink_Unbound.o2r>]
+                                   [--pack [--also-base <another extractor version's oot.o2r>]...]
 
 Unbound reads vanilla scenes and text only in its own JSON form, converted from oot.o2r at start-up, so ML's
 vanilla-format scene overrides are not read there. This converts them with Unbound's own converter
@@ -39,7 +40,8 @@ the rest of the behaviour our SoH fork adds in C.
 
 With --pack the result is the layer as a pack of deltas (tools/deltapack.py, Unbound SPEC §1.7): ML's own bytes plus
 copies from oot.o2r and Unbound's conversion of it, which every player's game has. It carries none of the game's data,
-so it is what we distribute; make it from an oot.o2r that Unbound's own extractor wrote.
+so it is what we distribute; make it from an oot.o2r that Unbound's own extractor wrote, with --also-base for each
+other SoH 9.x extractor's oot.o2r of the same ROM (they lay some files out differently).
 """
 import argparse, glob, json, os, re, shutil, struct, subprocess, sys, tempfile, zipfile
 
@@ -339,6 +341,9 @@ def main():
     ap.add_argument('--out', default=os.path.join(ROOT, 'mod', 'MissingLink_Unbound.o2r'))
     ap.add_argument('--pack', action='store_true', help="write the layer as a pack of deltas against the player's "
                                                         "oot.o2r and Unbound's conversion of it (what we distribute)")
+    ap.add_argument('--also-base', action='append', default=[], metavar='OOT_O2R',
+                    help='with --pack, an oot.o2r another SoH extractor version wrote from the same ROM: the pack '
+                         'then works over it too (Unbound takes any 9.x oot.o2r)')
     args = ap.parse_args()
     # the converter runs in a temporary folder, so every path must be absolute
     args.oot_o2r, args.mod, args.out = map(os.path.abspath, (args.oot_o2r, args.mod, args.out))
@@ -366,7 +371,12 @@ def main():
         stats = layer(os.path.join(work, 'vanilla.o2r'), os.path.join(work, 'ml.o2r'), out, world, ui, maps, pause,
                       getitem, shops, items)
         if args.pack:             # vanilla.o2r is what the player's game converts oot.o2r to (oot-unbound.o2r)
-            deltapack.make(out, args.out, [args.oot_o2r, os.path.join(work, 'vanilla.o2r')])
+            also = []
+            for i, other in enumerate(args.also_base):
+                converted = os.path.join(work, f'vanilla-{i}.o2r')
+                export(args.unbound, soh_o2r, os.path.abspath(other), converted, work)
+                also.append([os.path.abspath(other), converted])
+            deltapack.make(out, args.out, [args.oot_o2r, os.path.join(work, 'vanilla.o2r')], also=also)
     finally:
         shutil.rmtree(work, ignore_errors=True)
     print(f'{args.out}: ' + ', '.join(f'{v} {k}' for k, v in stats.items()))

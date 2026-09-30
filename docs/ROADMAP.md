@@ -37,7 +37,9 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
      macOS over an `oot.o2r` from roborich's extractor and over our fork's. Players get it inside the game: Unbound
      loads mods from the app's own folder (our branch), and `tools/package.py unbound-app-macos` makes a DMG of
      Unbound with the pack inside (22 MB; a first-time player setup converts its base and plays ML, 2026-09-29).
-     Portable builds for every Mac, Windows and Linux need Unbound's CI on our branch: the owner adds a submodule
+     Packs work over several extractor versions (`--also-base`): the owner's own SoH 9.1.1 `oot.o2r` refused the
+     first pack, and the same DMG now plays ML over it and over a 9.2.3 one (2026-09-29). Portable builds for every
+     Mac, Windows and Linux need Unbound's CI on our branch: the owner adds a submodule
      token to MissingShip-Unbound. Notarizing needs an Apple Developer ID. The earlier route, a builder players run
      (macOS done, `tools/package.py unbound-macos`), stays for testers. Still needed for a stock install: roborich
      taking delta files and the ledger features (held offers), and one pack per supported ROM version.

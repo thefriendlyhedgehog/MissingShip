@@ -219,7 +219,8 @@ on every OS. We build it with the mod builder:
 
 ```bash
 python3 pipeline/build_mod.py pipeline/tml_2_0.z64 --unbound <Unbound build>/soh/soh-macos --pack \
-    --oot-o2r <oot.o2r from Unbound's own extractor> --out MissingLink_Unbound.o2r
+    --oot-o2r <oot.o2r from Unbound's own extractor> --also-base <oot.o2r from SoH 9.1's extractor> \
+    --out MissingLink_Unbound.o2r
 python3 tools/package.py unbound-pack MissingLink_Unbound.o2r     # dist/MissingLink-Unbound.zip, with a README
 ```
 
@@ -233,8 +234,12 @@ Unbound's CI build (universal, older macOS), and notarizing needs an Apple Devel
 players who already have our Unbound.
 
 It builds ML's archive, then the layer, then the pack (`tools/deltapack.py`, about 25 s in all): 4.96 MB, 3.3 MB
-zipped, against a 10.2 MB layer. Make it from an `oot.o2r` that Unbound's own extractor wrote, since that is what a
-player has; limbs, rooms and sound fonts are never copied from, because extractors write them differently. A player
+zipped, against a 10.2 MB layer. Make it from an `oot.o2r` that Unbound's own extractor wrote, and give each other
+SoH 9.x extractor's `oot.o2r` of the same ROM with `--also-base`: players keep the one their SoH made (Unbound takes
+any 9.x), and 9.1 names samples differently and writes some files differently, so a pack made against 9.2 alone is
+refused over a 9.1 base. Sources are then files every version has (under any of their names, with any byte a version
+writes differently never copied), and where no delta fits every version the pack carries one variant per version.
+Limbs, rooms and sound fonts are never copied from, because extractors leave some of their bytes uninitialised. A player
 whose `oot.o2r` comes from another ROM version gets the game without the mod and a log line naming what is missing.
 Until roborich takes delta files and the features ML needs, players need our Unbound build.
 
