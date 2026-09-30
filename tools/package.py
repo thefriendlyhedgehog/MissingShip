@@ -5,6 +5,8 @@
     python3 tools/package.py macos         # the local macOS build (engine/build-ml), on this Mac
     python3 tools/package.py unbound-macos # The Missing Link for SoH: Unbound: the builder alone, on this Mac
     python3 tools/package.py unbound-pack <MissingLink_Unbound.o2r>   # the pack players drop into mods/ (any OS)
+    python3 tools/package.py unbound-app-macos <MissingLink_Unbound.o2r> [<soh.app or Unbound .dmg>]
+                                           # SoH: Unbound with the pack inside, as a DMG players open and play
 
 For macOS, build the engine first (cmake --build engine/build-ml --target soh) at the commit being released.
 
@@ -321,6 +323,129 @@ def unbound_pack(pack):
     return out
 
 
+UNBOUND_APP = 'The Missing Link (SoH Unbound).app'
+# Unbound's own package (cd build-ub && cpack): the app with its libraries bundled, before the DMG is made.
+UNBOUND_CPACK_APP = os.path.join(os.path.dirname(ROOT), 'Unbound', 'build-ub', '_CPack_Packages', 'Darwin', 'Bundle')
+
+UNBOUND_APP_README = """The Missing Link for SoH: Unbound (macOS)
+
+The Missing Link v2.0 by Kaze Emanuar, playing in SoH: Unbound. Nothing from Nintendo's game is included: on first
+launch the game makes its files from your own Ocarina of Time ROM, and The Missing Link copies what it shares with
+Ocarina of Time from them.
+
+1. Drag "{app}" to Applications.
+2. Open it. macOS asks first, because the app is not notarized yet: if it says it cannot check the app, open
+   System Settings > Privacy & Security, and click "Open Anyway" beside its name.
+3. The first time, it asks for your Ocarina of Time ROM: the USA 1.0 (NTSC 1.0) one. It takes a minute to make the
+   game's files, then The Missing Link starts.
+
+The game keeps its files and saves in ~/Library/Application Support/com.shipofharkinian.soh, the folder Ship of
+Harkinian uses too. The Missing Link travels inside the app, so your own SoH is not changed; it is listed in the
+game's Mod Menu, where you can turn it off to play Ocarina of Time.
+
+Runs on: {runs_on}.
+"""
+
+
+def macos_app_support(app):
+    """The Macs an app bundle runs on: its CPU types, and the newest macOS any of its binaries asks for."""
+    binaries = [os.path.join(app, 'Contents', 'MacOS', n) for n in os.listdir(os.path.join(app, 'Contents', 'MacOS'))]
+    frameworks = os.path.join(app, 'Contents', 'Frameworks')
+    if os.path.isdir(frameworks):
+        binaries += [os.path.join(frameworks, n) for n in os.listdir(frameworks) if n.endswith('.dylib')]
+    archs = subprocess.run(['lipo', '-archs', binaries[0]], check=True, capture_output=True, text=True).stdout.split()
+    newest = (0,)
+    for b in binaries:
+        out = subprocess.run(['vtool', '-show-build', b], capture_output=True, text=True).stdout.split()
+        for i, word in enumerate(out[:-1]):
+            if word == 'minos':
+                newest = max(newest, tuple(int(x) for x in out[i + 1].split('.')))
+    cpus = ' and '.join({'arm64': 'Apple silicon', 'x86_64': 'Intel'}.get(a, a) for a in archs)
+    return f'{cpus} Macs, macOS {".".join(map(str, newest))} or later'
+
+
+def unbound_source_app(source):
+    """Unbound's soh.app: the given app, the app inside the given DMG (mounted out of sight), or cpack's."""
+    import glob, tempfile
+    if source and source.endswith('.dmg'):
+        mount = tempfile.mkdtemp(prefix='unbound-dmg-')
+        subprocess.run(['hdiutil', 'attach', '-nobrowse', '-readonly', '-mountpoint', mount, source], check=True,
+                       capture_output=True)
+        return os.path.join(mount, 'soh.app'), mount
+    if source:
+        return source, None
+    found = sorted(glob.glob(os.path.join(UNBOUND_CPACK_APP, '*', 'soh.app')))
+    if not found:
+        sys.exit('no Unbound app: give its soh.app or .dmg, or package it first (cd ../Unbound/build-ub && cpack)')
+    return found[-1], None
+
+
+def bundle_sdl3(app):
+    """Homebrew's SDL2 is sdl2-compat, which loads SDL3 when the game starts (from beside itself first), so the
+    bundling that follows link-time libraries leaves SDL3 out and the app stops with "Failed loading SDL3 library".
+    A build with a real SDL2 (Unbound's CI, MacPorts) needs nothing."""
+    frameworks = os.path.join(app, 'Contents', 'Frameworks')
+    sdl2 = os.path.join(frameworks, 'libSDL2-2.0.0.dylib')
+    if not os.path.isfile(sdl2) or b'libSDL3.dylib' not in open(sdl2, 'rb').read():
+        return
+    if os.path.exists(os.path.join(frameworks, 'libSDL3.dylib')):
+        return
+    brew = subprocess.run(['brew', '--prefix', 'sdl3'], capture_output=True, text=True).stdout.strip()
+    sdl3 = os.path.realpath(os.path.join(brew, 'lib', 'libSDL3.dylib')) if brew else ''
+    if not os.path.isfile(sdl3):
+        sys.exit('the app\'s SDL2 is sdl2-compat, which needs SDL3: brew install sdl3')
+    shutil.copyfile(sdl3, os.path.join(frameworks, 'libSDL3.dylib'))
+    subprocess.run(['install_name_tool', '-id', '@loader_path/libSDL3.dylib', os.path.join(frameworks, 'libSDL3.dylib')],
+                   check=True, capture_output=True)
+    print('bundled SDL3 for sdl2-compat')
+
+
+def unbound_app_macos(pack, source):
+    """SoH: Unbound with the pack in the app's own mods folder (our Unbound branch reads Contents/Resources/mods), as a
+    DMG with an Applications link: players open the app and play, with no mods folder to find."""
+    import tempfile
+    app, mount = unbound_source_app(source)
+    stage = tempfile.mkdtemp(prefix='missinglink-app-')
+    try:
+        if not os.path.isfile(os.path.join(app, 'Contents', 'Resources', 'soh.o2r')):
+            sys.exit(f'{app} is not a SoH: Unbound app')
+        top = os.path.join(stage, 'The Missing Link')
+        os.makedirs(top)
+        dest = os.path.join(top, UNBOUND_APP)
+        subprocess.run(['ditto', app, dest], check=True)
+    finally:
+        if mount:
+            subprocess.run(['hdiutil', 'detach', mount], capture_output=True)
+    bundle_sdl3(dest)
+    mods = os.path.join(dest, 'Contents', 'Resources', 'mods')
+    os.makedirs(mods, exist_ok=True)
+    shutil.copyfile(pack, os.path.join(mods, 'MissingLink_Unbound.o2r'))
+    subprocess.run(['xattr', '-cr', dest], check=True)
+    # Every file in Frameworks and MacOS is signed before the bundle, the data file SDL's controller list keeps in
+    # MacOS too (codesign keeps its signature in extended attributes, which xattr -cr just removed).
+    macos_dir = os.path.join(dest, 'Contents', 'MacOS')
+    inner = list(files_under(os.path.join(dest, 'Contents', 'Frameworks')))
+    inner += [(os.path.join(macos_dir, n), n) for n in os.listdir(macos_dir) if n != 'soh']
+    for path, _ in inner:
+        subprocess.run(['codesign', '--force', '--sign', '-', path], check=True, capture_output=True)
+    subprocess.run(['codesign', '--force', '--sign', '-', dest], check=True, capture_output=True)
+    subprocess.run(['codesign', '--verify', '--strict', dest], check=True)
+    runs_on = macos_app_support(dest)
+    with open(os.path.join(top, 'README.txt'), 'w') as f:
+        f.write(UNBOUND_APP_README.format(app=UNBOUND_APP, runs_on=runs_on))
+    os.symlink('/Applications', os.path.join(top, 'Applications'))
+    out = os.path.join(DIST, 'MissingLink-Unbound-macos.dmg')
+    # Made plain, then compressed: compressing while hdiutil fills the image from the folder came out three times as
+    # large. LZMA (ULMO) is a third of zlib's size and opens on macOS 10.15 and later.
+    plain = os.path.join(stage, 'plain.dmg')
+    subprocess.run(['hdiutil', 'create', '-quiet', '-ov', '-volname', 'The Missing Link', '-srcfolder', top,
+                    '-format', 'UDRW', plain], check=True)
+    subprocess.run(['hdiutil', 'convert', '-quiet', '-ov', plain, '-format', 'ULMO', '-o', out], check=True)
+    shutil.rmtree(stage)
+    print(f'runs on {runs_on}')
+    return out
+
+
 def unbound_macos():
     """The builder with its SoH: Unbound layer, and how to run it: ML as an ordinary Unbound mod (owner decision
     2026-09-29: a standard romhack tool, not a renamed game)."""
@@ -364,6 +489,12 @@ def check_unbound_builder(path):
 
 
 def main():
+    if len(sys.argv) in (3, 4) and sys.argv[1] == 'unbound-app-macos':
+        os.makedirs(DIST, exist_ok=True)
+        check_unbound_pack(sys.argv[2])
+        path = unbound_app_macos(sys.argv[2], sys.argv[3] if len(sys.argv) == 4 else None)
+        print(f'{os.path.relpath(path, ROOT)}  {os.path.getsize(path) / 1e6:.1f} MB')
+        return
     if len(sys.argv) == 3 and sys.argv[1] == 'unbound-pack':
         os.makedirs(DIST, exist_ok=True)
         check_unbound_pack(sys.argv[2])

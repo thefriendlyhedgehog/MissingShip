@@ -223,6 +223,15 @@ python3 pipeline/build_mod.py pipeline/tml_2_0.z64 --unbound <Unbound build>/soh
 python3 tools/package.py unbound-pack MissingLink_Unbound.o2r     # dist/MissingLink-Unbound.zip, with a README
 ```
 
+Players never run Python or a builder: they get the game ready to play. `python3 tools/package.py unbound-app-macos
+MissingLink_Unbound.o2r` takes Unbound's own app (`cd ../Unbound/build-ub && cpack`, or a CI release `.dmg`), puts the
+pack in the app's own mods folder (our Unbound branch loads mods from `Contents/Resources/mods`), signs it ad hoc and
+writes `dist/MissingLink-Unbound-macos.dmg` (22 MB) with an Applications link and a README. The player drags the app
+to Applications, opens it, and gives it their OoT ROM on first launch as SoH always asks; ML is enabled in the Mod
+Menu. Built on this Mac it runs only on Apple silicon with the newest macOS (Homebrew's libraries); a release needs
+Unbound's CI build (universal, older macOS), and notarizing needs an Apple Developer ID. `unbound-pack` above stays for
+players who already have our Unbound.
+
 It builds ML's archive, then the layer, then the pack (`tools/deltapack.py`, about 25 s in all): 4.96 MB, 3.3 MB
 zipped, against a 10.2 MB layer. Make it from an `oot.o2r` that Unbound's own extractor wrote, since that is what a
 player has; limbs, rooms and sound fonts are never copied from, because extractors write them differently. A player
