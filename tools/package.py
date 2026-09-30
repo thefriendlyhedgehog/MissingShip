@@ -297,8 +297,9 @@ Put MissingLink_Unbound.o2r in SoH: Unbound's mods folder and start the game:
   - Windows and Linux: the mods folder beside the game (or in the folder SHIP_HOME names)
 
 If The Missing Link does not appear, SoH: Unbound's log (the logs folder beside mods) says why. "Not adding Archive
-... its delta files need ..." means your oot.o2r was made from another ROM version than USA 1.0: make it again from a
-USA 1.0 ROM (delete oot.o2r and oot-unbound.o2r and start the game).
+... its delta files need ..." means your oot.o2r was made by an older Ship of Harkinian (before 9.1) or from another
+ROM version than USA 1.0: delete oot.o2r and oot-unbound.o2r and start the game, and it makes them again from your
+USA 1.0 ROM.
 """
 
 
@@ -337,7 +338,9 @@ Ocarina of Time from them.
 2. Open it. macOS asks first, because the app is not notarized yet: if it says it cannot check the app, open
    System Settings > Privacy & Security, and click "Open Anyway" beside its name.
 3. The first time, it asks for your Ocarina of Time ROM: the USA 1.0 (NTSC 1.0) one. It takes a minute to make the
-   game's files, then The Missing Link starts.
+   game's files, then The Missing Link starts. If you have played Ship of Harkinian before, it uses the files that
+   made; if those are older than SoH 9.1, The Missing Link is left out (the Mod Menu does not list it): delete
+   oot.o2r and oot-unbound.o2r in the folder below and open the game again.
 
 The game keeps its files and saves in ~/Library/Application Support/com.shipofharkinian.soh, the folder Ship of
 Harkinian uses too. The Missing Link travels inside the app, so your own SoH is not changed; it is listed in the
