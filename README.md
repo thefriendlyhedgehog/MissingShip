@@ -219,7 +219,8 @@ on every OS. We build it with the mod builder:
 
 ```bash
 python3 pipeline/build_mod.py pipeline/tml_2_0.z64 --unbound <Unbound build>/soh/soh-macos --pack \
-    --oot-o2r <oot.o2r from Unbound's own extractor> --also-base <oot.o2r from SoH 9.1's extractor> \
+    --oot-o2r <USA 1.0 oot.o2r from Unbound's own extractor> \
+    --also-base <USA 1.1 oot.o2r> --also-base <USA 1.2 oot.o2r> --also-base <an oot.o2r from SoH 9.1's extractor> \
     --out MissingLink_Unbound.o2r
 python3 tools/package.py unbound-pack MissingLink_Unbound.o2r     # dist/MissingLink-Unbound.zip, with a README
 ```
@@ -233,14 +234,16 @@ Menu. Built on this Mac it runs only on Apple silicon with the newest macOS (Hom
 Unbound's CI build (universal, older macOS), and notarizing needs an Apple Developer ID. `unbound-pack` above stays for
 players who already have our Unbound.
 
-It builds ML's archive, then the layer, then the pack (`tools/deltapack.py`, about 25 s in all): 4.96 MB, 3.3 MB
-zipped, against a 10.2 MB layer. Make it from an `oot.o2r` that Unbound's own extractor wrote, and give each other
+It builds ML's archive, then the layer, then the pack (`tools/deltapack.py`, about a minute in all): 4.98 MB against
+a 10.2 MB layer. Make it from an `oot.o2r` that Unbound's own extractor wrote, and give each other
 SoH 9.x extractor's `oot.o2r` of the same ROM with `--also-base`: players keep the one their SoH made (Unbound takes
 any 9.x), and 9.1 names samples differently and writes some files differently, so a pack made against 9.2 alone is
 refused over a 9.1 base. Sources are then files every version has (under any of their names, with any byte a version
 writes differently never copied), and where no delta fits every version the pack carries one variant per version.
-Limbs, rooms and sound fonts are never copied from, because extractors leave some of their bytes uninitialised. A player
-whose `oot.o2r` comes from another ROM version gets the game without the mod and a log line naming what is missing.
+Limbs, rooms and sound fonts are never copied from, because extractors leave some of their bytes uninitialised. ROM
+releases differ the same way, so each supported release joins with `--also-base` too: the pack we ship covers USA 1.0,
+1.1 and 1.2 by Unbound's extractor, and USA 1.2 by SoH 9.1.1's. A player whose `oot.o2r` comes from another release
+(PAL, GameCube) gets the game without the mod, and a popup at startup that says why.
 Until roborich takes delta files and the features ML needs, players need our Unbound build.
 
 Without `--pack` the builder writes the whole layer, which holds the game's data too: for testing only. On macOS it

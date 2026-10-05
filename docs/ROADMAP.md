@@ -42,9 +42,9 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
      support the latest SoH and later, not 9.0; a new extractor version joins with `--also-base`, and players with an
      older `oot.o2r` extract again (the READMEs say how). A refused pack is named at startup in a popup that says
      why and what to do, and marked *(not loaded)* in the Mod Menu (our branch, 2026-09-29). A clean install from the
-     DMG with only a USA 1.0 ROM extracts, converts and plays ML; the owner's `oot.o2r` is from a USA 1.2 ROM (by
-     9.1.1), which the pack also covers, and other releases (PAL, GameCube, 1.1) would be refused until a base from
-     each joins with `--also-base`. Portable builds for every
+     DMG with only a USA 1.0 ROM extracts, converts and plays ML. The pack covers USA 1.0, 1.1 and 1.2 by Unbound's
+     extractor and the owner's USA 1.2 by 9.1.1 (2026-10-05: each mounts it and reaches ML's title and scene select);
+     PAL and GameCube releases would be refused until a base from each joins with `--also-base`. Portable builds for every
      Mac, Windows and Linux need Unbound's CI on our branch: the owner adds a submodule
      token to MissingShip-Unbound. Notarizing needs an Apple Developer ID. The earlier route, a builder players run
      (macOS done, `tools/package.py unbound-macos`), stays for testers. Still needed for a stock install: roborich
