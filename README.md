@@ -221,6 +221,7 @@ on every OS. We build it with the mod builder:
 python3 pipeline/build_mod.py pipeline/tml_2_0.z64 --unbound <Unbound build>/soh/soh-macos --pack \
     --oot-o2r <USA 1.0 oot.o2r from Unbound's own extractor> \
     --also-base <USA 1.1 oot.o2r> --also-base <USA 1.2 oot.o2r> --also-base <an oot.o2r from SoH 9.1's extractor> \
+    --also-base <USA 1.0, 1.1 and 1.2 oot.o2r from SoH 9.3's extractor, one --also-base each> \
     --out MissingLink_Unbound.o2r
 python3 tools/package.py unbound-pack MissingLink_Unbound.o2r     # dist/MissingLink-Unbound.zip, with a README
 ```
@@ -242,7 +243,8 @@ refused over a 9.1 base. Sources are then files every version has (under any of 
 writes differently never copied), and where no delta fits every version the pack carries one variant per version.
 Limbs, rooms and sound fonts are never copied from, because extractors leave some of their bytes uninitialised. ROM
 releases differ the same way, so each supported release joins with `--also-base` too: the pack we ship covers USA 1.0,
-1.1 and 1.2 by Unbound's extractor, and USA 1.2 by SoH 9.1.1's. A player whose `oot.o2r` comes from another release
+1.1 and 1.2 by Unbound's extractor (SoH 9.2.3's) and by SoH 9.3.0's (Torch, which writes 58 files differently: sound
+fonts and boss title cards), and USA 1.2 by SoH 9.1.1's. A player whose `oot.o2r` comes from another release
 (PAL, GameCube) gets the game without the mod, and a popup at startup that says why.
 Until roborich takes delta files and the features ML needs, players need our Unbound build.
 
