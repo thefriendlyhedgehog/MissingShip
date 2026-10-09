@@ -325,6 +325,13 @@ def unbound_pack(pack):
 
 
 UNBOUND_APP = 'The Missing Link (SoH Unbound).app'
+# The app's own folder for its files, settings and saves (owner decision 2026-10-09). Sharing Ship of Harkinian's
+# folder let each game move the other's randomizer saves aside (they keep only saves of their exact version), mixed
+# ML and SoH saves in the same slots, and left the settings file in whichever format the newer game wrote. Unbound's
+# Info.plist names the folder (SHIP_HOME in LSEnvironment); its own bundle identifier keeps macOS from confusing the
+# two apps, and from launching ours with an Info.plist it cached before.
+UNBOUND_APP_HOME = '~/Library/Application Support/The Missing Link'
+UNBOUND_APP_ID = 'com.missingship.TheMissingLink'
 # Unbound's own package (cd build-ub && cpack): the app with its libraries bundled, before the DMG is made.
 UNBOUND_CPACK_APP = os.path.join(os.path.dirname(ROOT), 'Unbound', 'build-ub', '_CPack_Packages', 'Darwin', 'Bundle')
 
@@ -338,13 +345,14 @@ Ocarina of Time from them.
 2. Open it. macOS asks first, because the app is not notarized yet: if it says it cannot check the app, open
    System Settings > Privacy & Security, and click "Open Anyway" beside its name.
 3. The first time, it asks for your Ocarina of Time ROM: a USA one (1.0, 1.1 or 1.2; not Master Quest). It takes a
-   minute to make the game's files, then The Missing Link starts. If you have played Ship of Harkinian before, it
-   uses the files that made; if those are older than SoH 9.1 or from another ROM, the game says The Missing Link was
-   not loaded: delete oot.o2r and oot-unbound.o2r in the folder below and open the game again.
+   minute to make the game's files, then The Missing Link starts. If the game says The Missing Link was not loaded,
+   the ROM is another release: delete oot.o2r and oot-unbound.o2r in the folder below, and open the game again with
+   a USA ROM.
 
-The game keeps its files and saves in ~/Library/Application Support/com.shipofharkinian.soh, the folder Ship of
-Harkinian uses too. The Missing Link travels inside the app, so your own SoH is not changed; it is listed in the
-game's Mod Menu, where you can turn it off to play Ocarina of Time.
+The game keeps its files, settings and saves in its own folder:
+  {home}
+Your Ship of Harkinian, its saves and its settings are not touched. Other mods go in the mods folder there. The Missing Link travels inside the app; it is
+listed in the game's Mod Menu, where you can turn it off to play Ocarina of Time.
 
 Runs on: {runs_on}.
 """
@@ -423,6 +431,16 @@ def unbound_app_macos(pack, source):
     mods = os.path.join(dest, 'Contents', 'Resources', 'mods')
     os.makedirs(mods, exist_ok=True)
     shutil.copyfile(pack, os.path.join(mods, 'MissingLink_Unbound.o2r'))
+    plist_path = os.path.join(dest, 'Contents', 'Info.plist')
+    with open(plist_path, 'rb') as f:
+        plist = plistlib.load(f)
+    if 'SHIP_HOME' not in plist.get('LSEnvironment', {}):
+        sys.exit(f'{app}: its Info.plist does not set SHIP_HOME, so the app would share another folder')
+    plist['LSEnvironment']['SHIP_HOME'] = UNBOUND_APP_HOME
+    plist['CFBundleIdentifier'] = UNBOUND_APP_ID
+    plist['CFBundleName'] = 'The Missing Link'
+    with open(plist_path, 'wb') as f:
+        plistlib.dump(plist, f)
     subprocess.run(['xattr', '-cr', dest], check=True)
     # Every file in Frameworks and MacOS is signed before the bundle, the data file SDL's controller list keeps in
     # MacOS too (codesign keeps its signature in extended attributes, which xattr -cr just removed).
@@ -435,7 +453,7 @@ def unbound_app_macos(pack, source):
     subprocess.run(['codesign', '--verify', '--strict', dest], check=True)
     runs_on = macos_app_support(dest)
     with open(os.path.join(top, 'README.txt'), 'w') as f:
-        f.write(UNBOUND_APP_README.format(app=UNBOUND_APP, runs_on=runs_on))
+        f.write(UNBOUND_APP_README.format(app=UNBOUND_APP, runs_on=runs_on, home=UNBOUND_APP_HOME))
     os.symlink('/Applications', os.path.join(top, 'Applications'))
     out = os.path.join(DIST, 'MissingLink-Unbound-macos.dmg')
     # Made plain, then compressed: compressing while hdiutil fills the image from the folder came out three times as

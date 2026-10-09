@@ -49,7 +49,10 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
      58 differ (sound fonts, boss title cards), so the pack was refused over it. The pack now also covers USA 1.0-1.2
      by 9.3.0 (2026-10-09, in game). Unbound itself is still 9.2.3: merging 9.3.0 means about 79 conflicting files
      and porting Unbound's ROM extractor (desktop and browser) to Torch, roborich's call first. A player's 9.3.0
-     randomizer saves are moved aside by our app (exact-version check, shared save folder): owner decision pending. Portable builds for every
+     randomizer saves were moved aside by our app (exact-version check, shared save folder): owner decision 2026-10-09,
+     the app has its own folder (`~/Library/Application Support/The Missing Link`) and SoH's is never touched
+     (checked through a real `open` launch). Owner decision 2026-10-09: wait for roborich's Unbound 9.3.0 (his
+     `wasm` branch is on 9.3.0 with the extractor on Torch, Oct 7), then merge it. Portable builds for every
      Mac, Windows and Linux need Unbound's CI on our branch: the owner adds a submodule
      token to MissingShip-Unbound. Notarizing needs an Apple Developer ID. The earlier route, a builder players run
      (macOS done, `tools/package.py unbound-macos`), stays for testers. Still needed for a stock install: roborich

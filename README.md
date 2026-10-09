@@ -231,7 +231,9 @@ MissingLink_Unbound.o2r` takes Unbound's own app (`cd ../Unbound/build-ub && cpa
 pack in the app's own mods folder (our Unbound branch loads mods from `Contents/Resources/mods`), signs it ad hoc and
 writes `dist/MissingLink-Unbound-macos.dmg` (22 MB) with an Applications link and a README. The player drags the app
 to Applications, opens it, and gives it their OoT ROM on first launch as SoH always asks; ML is enabled in the Mod
-Menu. Built on this Mac it runs only on Apple silicon with the newest macOS (Homebrew's libraries); a release needs
+Menu. The app keeps its files, settings and saves in its own folder (`~/Library/Application Support/The Missing
+Link`, set in its Info.plist), never Ship of Harkinian's: sharing it let each game move the other's randomizer saves
+aside and mixed their save slots and settings. Built on this Mac it runs only on Apple silicon with the newest macOS (Homebrew's libraries); a release needs
 Unbound's CI build (universal, older macOS), and notarizing needs an Apple Developer ID. `unbound-pack` above stays for
 players who already have our Unbound.
 
