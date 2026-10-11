@@ -10,6 +10,7 @@ matching environment variable (e.g. `MS_DEBUG_ROM=/path/to/rom.z64 python3 tools
     MS_ZAPD         ZAPD built with the engine (patched ZAPDTR)  default: $MS_SHIPWRIGHT/build-ml/ZAPD/ZAPD.out
                     (ZAPD.exe, or Release/ZAPD.exe for a Visual Studio build, on Windows: MS-082)
     MS_ZAPD_CWD     working directory ZAPD runs in               default: $MS_SHIPWRIGHT/soh
+    MS_UNBOUND_SRC  SoH: Unbound at UNBOUND_COMPARE (below)      default: ../Unbound-923-src
 
 One ZAPD and one set of engine tables for every step (MS-009): the engine fork's own. It must be the patched
 ZAPDTR (MissingShip-ZAPDTR), whose ZAudio guard ML's audio needs.
@@ -43,6 +44,28 @@ def _zapd_default():
 
 ZAPD = _env('MS_ZAPD', _zapd_default())
 ZAPD_CWD = _env('MS_ZAPD_CWD', SOH)
+
+# The SoH: Unbound layer tools (tools/unbound_ml_*.py) compare the fork's tables with Unbound's on the fork's own SoH
+# version, so the layer holds ML's changes alone. It names everything it changes, so it applies to later Unbound
+# releases too. This is the last missinglink commit on SoH 9.2.3, before Unbound 0.11 moved to 9.3.0; it moves when
+# the fork moves to a newer SoH.
+UNBOUND_COMPARE = '7714a97bf0708eec33a1434406ce6d2aab657f4f'
+UNBOUND_SRC = _env('MS_UNBOUND_SRC', os.path.join(os.path.dirname(ROOT), 'Unbound-923-src'))
+
+
+def unbound_src_problem(path):
+    """Why `path` is not an Unbound checkout at UNBOUND_COMPARE, or None."""
+    import subprocess
+    try:
+        head = subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=path, capture_output=True, text=True).stdout.strip()
+    except OSError:
+        head = ''
+    if head == UNBOUND_COMPARE:
+        return None
+    return (f'{path} is ' + (f'at {head[:10]}' if head else 'not a checkout') + f', not Unbound {UNBOUND_COMPARE[:10]} '
+            '(the fork\'s SoH version). Make one beside this repo with\n'
+            f'  git -C ../Unbound worktree add --detach ../Unbound-923-src {UNBOUND_COMPARE[:10]}\n'
+            'or name one with MS_UNBOUND_SRC.')
 
 
 def zapd_config():

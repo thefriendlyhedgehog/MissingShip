@@ -211,6 +211,15 @@ It writes `mod/MissingLink_Unbound.o2r` (10 MB: 25 scenes, 304 messages, ML's ob
 Unbound's `mods/` folder, beside an ordinary `oot.o2r`. It carries ML's world, not the behaviour our SoH fork adds in C;
 that is the rest of the plan in `docs/ROADMAP.md`.
 
+The layer is what our fork changes, found by comparing the fork's tables with Unbound's on the same SoH version: Unbound
+at its last SoH 9.2.3 commit (`mspaths.UNBOUND_COMPARE`), not the Unbound players run, which is on 9.3.0 since 0.11.
+The layer names everything it changes, so it applies to either. The tools read that tree from `../Unbound-923-src`
+(or `MS_UNBOUND_SRC`) and say how to make it when it is missing:
+
+```bash
+git -C ../Unbound worktree add --detach ../Unbound-923-src 7714a97bf0
+```
+
 For players it is a pack (owner decision, 2026-09-29: the pack route): one file they drop into the `mods/` folder of
 their own Unbound, with no ROM of ML and no builder. Unbound reads *delta files* (our branch; Unbound SPEC §1.7,
 `unbound-docs/delta-files.md`), so the pack holds ML's own bytes and copies everything it shares with OoT, as the game
@@ -227,7 +236,7 @@ python3 tools/package.py unbound-pack MissingLink_Unbound.o2r     # dist/Missing
 ```
 
 Players never run Python or a builder: they get the game ready to play. `python3 tools/package.py unbound-app-macos
-MissingLink_Unbound.o2r` takes Unbound's own app (`cd ../Unbound/build-ub && cpack`, or a CI release `.dmg`), puts the
+MissingLink_Unbound.o2r` takes Unbound's own app (`cd ../Unbound/build-930 && cpack`, or a CI release `.dmg`), puts the
 pack in the app's own mods folder (our Unbound branch loads mods from `Contents/Resources/mods`), signs it ad hoc and
 writes `dist/MissingLink-Unbound-macos.dmg` (22 MB) with an Applications link and a README. The player drags the app
 to Applications, opens it, and gives it their OoT ROM on first launch as SoH always asks; ML is enabled in the Mod
@@ -245,8 +254,8 @@ refused over a 9.1 base. Sources are then files every version has (under any of 
 writes differently never copied), and where no delta fits every version the pack carries one variant per version.
 Limbs, rooms and sound fonts are never copied from, because extractors leave some of their bytes uninitialised. ROM
 releases differ the same way, so each supported release joins with `--also-base` too: the pack we ship covers USA 1.0,
-1.1 and 1.2 by Unbound's extractor (SoH 9.2.3's) and by SoH 9.3.0's (Torch, which writes 58 files differently: sound
-fonts and boss title cards), and USA 1.2 by SoH 9.1.1's. A player whose `oot.o2r` comes from another release
+1.1 and 1.2 by SoH 9.2.3's extractor (Unbound through 0.10) and by SoH 9.3.0's (stock SoH and Unbound 0.11: Torch,
+which writes 58 files differently: sound fonts and boss title cards), and USA 1.2 by SoH 9.1.1's. A player whose `oot.o2r` comes from another release
 (PAL, GameCube) gets the game without the mod, and a popup at startup that says why.
 Until roborich takes delta files and the features ML needs, players need our Unbound build.
 

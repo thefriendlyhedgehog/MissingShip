@@ -27,7 +27,8 @@ SOH_FILES = ['include/tables/scene_table.h', 'include/tables/entrance_table.h', 
              'src/overlays/actors/ovl_En_GirlA/z_en_girla.c', 'src/overlays/misc/ovl_kaleido_scope',
              'src/overlays/misc/ovl_map_mark_data/z_map_mark_data.c']
 # SoH: Unbound's own files the layer compares against (paths under its checkout; the object headers are globbed:
-# unbound_ml_getitem.py looks display lists up in them). They must match the Unbound the players run.
+# unbound_ml_getitem.py looks display lists up in them). They come from Unbound at the fork's SoH version
+# (mspaths.UNBOUND_COMPARE), not the Unbound the players run: the layer holds ML's changes alone and names them.
 UNBOUND_FILES = ['soh/assets/textures/map_i_static/map_i_static.h', 'soh/include/tables/actor_table.h',
                  'soh/include/tables/scene_table.h', 'soh/include/z64item.h', 'soh/include/z64scene.h',
                  'soh/soh/Enhancements/gameplaystats.cpp', 'soh/soh/util.cpp', 'soh/src/code/z_demo.c',
@@ -73,14 +74,17 @@ def main():
     ap.add_argument('--zapd', default=mspaths.ZAPD, help='the ZAPD binary to bundle (the engine build\'s)')
     ap.add_argument('--out', default=os.path.join(ROOT, 'dist', 'builder'))
     ap.add_argument('--soh', default=mspaths.SOH, help='engine/soh, for the SoH files')
-    ap.add_argument('--unbound-src', default=os.path.join(os.path.dirname(ROOT), 'Unbound'),
-                    help='the SoH: Unbound checkout the players\' Unbound was built from')
+    ap.add_argument('--unbound-src', default=mspaths.UNBOUND_SRC,
+                    help='SoH: Unbound at the fork\'s SoH version (mspaths.UNBOUND_COMPARE)')
     args = ap.parse_args()
     # PyInstaller resolves relative paths against its spec folder (--out), not the working directory.
     args.zapd, args.out, args.soh, args.unbound_src = (os.path.abspath(a) for a in (args.zapd, args.out, args.soh,
                                                                                     args.unbound_src))
     if not os.path.isfile(args.zapd):
         sys.exit(f'ZAPD not found: {args.zapd}')
+    problem = mspaths.unbound_src_problem(args.unbound_src)
+    if problem:
+        sys.exit(problem)
 
     stage = os.path.join(args.out, 'stage')
     shutil.rmtree(args.out, ignore_errors=True)
@@ -141,7 +145,7 @@ def main():
                            capture_output=True, text=True).stdout.strip()
     with open(os.path.join(args.out, 'MissingShipBuilder', 'version.txt'), 'w') as f:
         f.write(head.stdout.strip() + ('-dirty' if dirty else '') + '\n')
-    # The Unbound the bundled sources came from: the layer matches the Unbound built from this commit.
+    # The Unbound commit the bundled sources came from (mspaths.UNBOUND_COMPARE).
     ub = subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=args.unbound_src, check=True, capture_output=True, text=True)
     with open(os.path.join(args.out, 'MissingShipBuilder', 'unbound.txt'), 'w') as f:
         f.write(ub.stdout.strip() + '\n')

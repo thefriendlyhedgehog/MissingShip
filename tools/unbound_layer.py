@@ -58,6 +58,7 @@ import deltapack
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, 'pipeline'))
 from mspaths import PIPE, SOH   # the fork's files: engine/soh, or the builder's copy
+import mspaths
 SKIP = ('version', 'portVersion', 'unbound.json')     # archive metadata: the base provides it
 MANIFEST = {'format': 'unbound', 'formatVersion': 2, 'requires': {'formatVersion': 2}}   # `base` is format 2
 
@@ -334,8 +335,8 @@ def main():
     ap.add_argument('--unbound', required=True, help="Unbound: its macOS app, or its binary (build-*/soh/soh-macos, "
                                                      "soh.elf, soh.exe)")
     ap.add_argument('--soh-o2r', help="Unbound's soh.o2r (default: the app's, or next to the binary)")
-    ap.add_argument('--unbound-src', help="Unbound's source tree (default: the tree the binary was built in, "
-                                          "build-*/soh/<binary>)")
+    ap.add_argument('--unbound-src', help="Unbound's source tree at the fork's SoH version (default: "
+                                          "mspaths.UNBOUND_SRC, checked against mspaths.UNBOUND_COMPARE)")
     ap.add_argument('--oot-o2r', required=True, help='the oot.o2r ML was built against')
     ap.add_argument('--mod', default=os.path.join(ROOT, 'mod', 'MissingLink_Scenes.o2r'))
     ap.add_argument('--out', default=os.path.join(ROOT, 'mod', 'MissingLink_Unbound.o2r'))
@@ -356,7 +357,9 @@ def main():
         sys.exit(f"Unbound's soh.o2r not found: {soh_o2r}")
     if not os.path.isdir(assets):
         sys.exit(f"Unbound's assets/ folder not found ({assets}): reinstall Unbound")
-    unbound_src = args.unbound_src or os.path.dirname(os.path.dirname(os.path.dirname(args.unbound)))
+    unbound_src = args.unbound_src or mspaths.UNBOUND_SRC
+    if not args.unbound_src and mspaths.unbound_src_problem(unbound_src):
+        sys.exit(mspaths.unbound_src_problem(unbound_src))
     if not os.path.isfile(os.path.join(unbound_src, 'soh', 'include', 'z64item.h')):
         sys.exit(f"Unbound's sources not found in {unbound_src}: give --unbound-src")
     world, ui, maps, pause = MlWorld(unbound_src), MlUi(unbound_src), MlMaps(unbound_src), MlPause(unbound_src)

@@ -19,7 +19,7 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
 - **Next: Prod, no game data.** Owner decision, 2026-09-27: public builds carry no Nintendo data. Players build the ML mod from their own ROM on first launch, as SoH does for `oot.o2r`. Kaze Emanuar has given permission for the port, which covers ML's own work; Nintendo's assets are still never distributed. Since 2026-09-27 the packages carry the builder instead of the mod, and the game builds the mod on first launch (MS-155, MS-156).
 
 - **Next after that: ML on SoH: Unbound.** Owner decision, 2026-09-27: The Missing Link becomes a mod for
-  [SoH: Unbound](https://github.com/roborich/Shipwright/tree/unbound) (roborich's fork, on the same SoH 9.2.3 base). What
+  [SoH: Unbound](https://github.com/roborich/Shipwright/tree/unbound) (roborich's fork; on SoH 9.3.0 since Unbound 0.11, while our fork stays on 9.2.3). What
   Unbound lacks, we build ourselves in its style, so it can be offered to its author. The work lives in the private repo
   `thefriendlyhedgehog/MissingShip-Unbound` (branch `missinglink`; `unbound` tracks roborich's). Our SoH fork gets no new
   features; it keeps the current beta running. Players still bring the OoT ROM and Kaze's patch or ML ROM. Order:
@@ -47,12 +47,13 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
      PAL and GameCube releases would be refused until a base from each joins with `--also-base`.
      SoH 9.3.0 (2026-10-06) replaced ZAPD with Torch: its `oot.o2r` has the same 38k files at the same paths, but
      58 differ (sound fonts, boss title cards), so the pack was refused over it. The pack now also covers USA 1.0-1.2
-     by 9.3.0 (2026-10-09, in game). Unbound itself is still 9.2.3: merging 9.3.0 means about 79 conflicting files
-     and porting Unbound's ROM extractor (desktop and browser) to Torch, roborich's call first. A player's 9.3.0
+     by 9.3.0 (2026-10-09, in game). A player's 9.3.0
      randomizer saves were moved aside by our app (exact-version check, shared save folder): owner decision 2026-10-09,
      the app has its own folder (`~/Library/Application Support/The Missing Link`) and SoH's is never touched
-     (checked through a real `open` launch). Owner decision 2026-10-09: wait for roborich's Unbound 9.3.0 (his
-     `wasm` branch is on 9.3.0 with the extractor on Torch, Oct 7), then merge it. Portable builds for every
+     (checked through a real `open` launch). Owner decision 2026-10-09: wait for roborich's Unbound 9.3.0, then merge
+     it. Done 2026-10-11: Unbound 0.11 (SoH 9.3.0, Torch) is merged into our branch; the pack mounts over 9.2.3 and
+     9.3.0 bases and reaches ML's title. The layer tools still compare our fork with Unbound at its last 9.2.3 commit
+     (`mspaths.UNBOUND_COMPARE`). Portable builds for every
      Mac, Windows and Linux need Unbound's CI on our branch: the owner adds a submodule
      token to MissingShip-Unbound. Notarizing needs an Apple Developer ID. The earlier route, a builder players run
      (macOS done, `tools/package.py unbound-macos`), stays for testers. Still needed for a stock install: roborich

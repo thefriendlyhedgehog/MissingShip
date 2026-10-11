@@ -332,8 +332,8 @@ UNBOUND_APP = 'The Missing Link (SoH Unbound).app'
 # two apps, and from launching ours with an Info.plist it cached before.
 UNBOUND_APP_HOME = '~/Library/Application Support/The Missing Link'
 UNBOUND_APP_ID = 'com.missingship.TheMissingLink'
-# Unbound's own package (cd build-ub && cpack): the app with its libraries bundled, before the DMG is made.
-UNBOUND_CPACK_APP = os.path.join(os.path.dirname(ROOT), 'Unbound', 'build-ub', '_CPack_Packages', 'Darwin', 'Bundle')
+# Unbound's own package (cd build-930 && cpack): the app with its libraries bundled, before the DMG is made.
+UNBOUND_CPACK_APP = os.path.join(os.path.dirname(ROOT), 'Unbound', 'build-930', '_CPack_Packages', 'Darwin', 'Bundle')
 
 UNBOUND_APP_README = """The Missing Link for SoH: Unbound (macOS)
 
@@ -387,7 +387,7 @@ def unbound_source_app(source):
         return source, None
     found = sorted(glob.glob(os.path.join(UNBOUND_CPACK_APP, '*', 'soh.app')))
     if not found:
-        sys.exit('no Unbound app: give its soh.app or .dmg, or package it first (cd ../Unbound/build-ub && cpack)')
+        sys.exit('no Unbound app: give its soh.app or .dmg, or package it first (cd ../Unbound/build-930 && cpack)')
     return found[-1], None
 
 

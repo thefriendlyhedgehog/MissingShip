@@ -141,10 +141,18 @@ def unbound_home():
 
 def unbound_layer(args, step, env, oot, mod, work):
     """MissingLink_Unbound.o2r from the built mod, with the player's Unbound (tools/unbound_layer.py). The Unbound
-    sources it compares against are the builder's own copy (unbound/), or a checkout's ../Unbound."""
+    sources it compares against are the builder's own copy (unbound/), or in a checkout Unbound at the fork's SoH
+    version (mspaths.UNBOUND_SRC)."""
     tools = os.path.join(HERE, 'tools')
-    src = os.path.join(HERE, 'unbound') if FROZEN else os.path.join(os.path.dirname(HERE), 'Unbound')
-    src = os.environ.get('MS_UNBOUND_SRC') or src
+    if FROZEN:
+        src = os.environ.get('MS_UNBOUND_SRC') or os.path.join(HERE, 'unbound')
+    else:
+        sys.path.insert(0, PIPE_SRC)
+        import mspaths
+        src = mspaths.UNBOUND_SRC
+        problem = mspaths.unbound_src_problem(src)
+        if problem:
+            fail(problem)
     layer = os.path.join(work, 'mod', 'MissingLink_Unbound.o2r')
     print('MissingShip builder: making the SoH: Unbound ' + ('pack' if args.pack else 'layer'))
     r = subprocess.run(step + [os.path.join(tools, 'unbound_layer.py'), '--unbound', os.path.abspath(args.unbound),
