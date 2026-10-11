@@ -24,7 +24,9 @@
         <Animation Name="gMlBossVaTurnLeftAnim" Offset="0x306F0"/>
         <Animation Name="gMlBossVaTurnRightAnim" Offset="0x31AC8"/>
         <Skeleton Name="gMlBossVaSkel" Type="Flex" LimbType="Standard" Offset="0x31D00"/>
-        <Texture Name="gMlBossVaTitleCardTex" OutName="title_card" Format="i8" Width="128" Height="40" Offset="0x31D10"/>
+        <!-- IA8, as SoH 9.3.0's extractor (Torch) types the vanilla boss title cards; ZAPD's XMLs said i8. The pixels and
+             the draw (TitleCard_Draw's own format) are the same either way (tools/extractor_parity.py). -->
+        <Texture Name="gMlBossVaTitleCardTex" OutName="title_card" Format="ia8" Width="128" Height="40" Offset="0x31D10"/>
         <DList Name="gMlBossVaShotDL" Offset="0x34200"/>
     </File>
 </Root>

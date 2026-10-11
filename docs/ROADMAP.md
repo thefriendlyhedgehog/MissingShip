@@ -58,6 +58,25 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
      token to MissingShip-Unbound. Notarizing needs an Apple Developer ID. The earlier route, a builder players run
      (macOS done, `tools/package.py unbound-macos`), stays for testers. Still needed for a stock install: roborich
      taking delta files and the ledger features (held offers), and one pack per supported ROM version.
+  5. **End goal, owner 2026-10-11: the builder for stock Unbound.** A player who wants ML with Ship's features gets
+     the builder from the MissingShip thread, brings ML's ROM (or the OoT ROM and Kaze's patch, which the builder
+     applies), and the builder writes ML for the stock Unbound they already have, with code-mod support from
+     [skijer/Shipwright#11](https://github.com/skijer/Shipwright/pull/11). Once that support is upstream, the builder
+     is the only thing we maintain. What it takes:
+     - **The builder stays in parity with the current SoH.** It extracts ML with our fork's ZAPD (9.2.3's extractor);
+       SoH 9.3.0 extracts with Torch, built to write what ZAPD wrote. `tools/extractor_parity.py` compares the two
+       over the PAL MQ Debug ROM ML is built on; 2026-10-11 they agree on all 35,612 files but the boss title cards'
+       texture type, which ML's own card now follows. Run it on each SoH release; a real difference is fixed in the
+       builder, and porting the builder to Torch is the fallback if they ever drift apart in format.
+     - **ML's C behaviour becomes a code mod** on #11's API: actors through `RegisterActor`, vanilla actors through
+       the actor hooks and `RegisterVB`, items, pause and text through its registries and hooks. A code mod is one
+       `.o2r` (manifest, Windows/Linux/macOS binaries, its assets), so the builder can write a single file: our
+       prebuilt code (no Nintendo data) plus the assets it makes from the player's ROM. Gaps seen in #11: no
+       room-load hook, and on Windows only globals marked `HOST_DATA` are reachable (`sDrawItemTable` is not).
+       #11 is on Unbound 0.9 (SoH 9.2.3) and unsigned mods load by default (`UNBOUND_MOD_POLICY open`).
+     - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
+       roborich or move into the code mod. Delta packs only matter for handing out ML without the builder: a
+       player who builds from their own ROM gets the whole layer.
 
 ## Open work
 

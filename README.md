@@ -220,6 +220,12 @@ The layer names everything it changes, so it applies to either. The tools read t
 git -C ../Unbound worktree add --detach ../Unbound-923-src 7714a97bf0
 ```
 
+ML's files themselves come from our fork's ZAPD, SoH 9.2.3's extractor. SoH 9.3.0 replaced it with Torch, which was
+built to write the same files, so on each SoH release we check that it still does: extract the PAL MQ Debug ROM ML is
+built on with both games (each writes `oot-mq.o2r` into a scratch `SHIP_HOME`) and compare them with
+`python3 tools/extractor_parity.py <ZAPD's> <Torch's>`. For 9.3.0 the only difference the game sees is the boss title
+cards' texture type (IA8, not I8), and ML's own card now follows Torch.
+
 For players it is a pack (owner decision, 2026-09-29: the pack route): one file they drop into the `mods/` folder of
 their own Unbound, with no ROM of ML and no builder. Unbound reads *delta files* (our branch; Unbound SPEC §1.7,
 `unbound-docs/delta-files.md`), so the pack holds ML's own bytes and copies everything it shares with OoT, as the game
