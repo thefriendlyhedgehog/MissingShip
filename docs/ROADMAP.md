@@ -138,7 +138,9 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        step when slowed, B Cancels Choices with both of ML's options in Enhancements > Missing Link, Navi's sounds
        muted, no dispersed sparkles, ML's world-map areas, the title screen's setup and the refusal of vanilla
        scenes ML lacks. Out of reach: the refusal from the debug map select.
-       Left: Controllable Bombchus letting go on the rail, and the registries stock does not read.
+       Then Controllable Bombchus letting go of a Bombchu on ML's rail, 2026-10-12: stock's steering lets go on an A
+       press, so En_Bom_Chu's slot presses A for it there, the input put back before the next actor updates.
+       Left: the registries stock does not read.
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
        roborich or move into the code mod. Delta packs only matter for handing out ML without the builder: a
        player who builds from their own ROM gets the whole layer.
