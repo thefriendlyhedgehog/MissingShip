@@ -40,7 +40,7 @@ UNBOUND_GLOBS = ['soh/assets/objects/*/*.h']
 # The SoH: Unbound layer (pipeline/build_mod.py --unbound)
 TOOLS = ['tools/unbound_layer.py', 'tools/unbound_ml_getitem.py', 'tools/unbound_ml_items.py',
          'tools/unbound_ml_maps.py', 'tools/unbound_ml_pause.py', 'tools/unbound_ml_shops.py', 'tools/unbound_ml_ui.py',
-         'tools/unbound_ml_world.py', 'tools/deltapack.py']
+         'tools/unbound_ml_world.py', 'tools/unbound_stock.py', 'tools/deltapack.py']
 # Pipeline files that are development-only or outputs; everything else tracked under pipeline/ ships.
 DEV_ONLY = ('gen_entrance_flags.py', 'gen_entrance_map.py', 'gen_scene_config.py', 'gen_textures.py',
             'ms_cycle.sh')
@@ -102,6 +102,11 @@ def main():
             shutil.copy2(src, dest)
 
     import glob
+    sys.path.insert(0, os.path.join(ROOT, 'tools'))
+    from unbound_stock import CODE_NAMES, code_names
+    os.makedirs(os.path.join(stage, 'unbound'), exist_ok=True)
+    with open(os.path.join(stage, 'unbound', CODE_NAMES), 'w') as f:   # --stock's check, without Unbound's sources
+        f.write('\n'.join(sorted(code_names(args.unbound_src))) + '\n')
     unbound = UNBOUND_FILES + sorted(os.path.relpath(f, args.unbound_src) for g in UNBOUND_GLOBS
                                      for f in glob.glob(os.path.join(args.unbound_src, g)))
     for f in unbound:

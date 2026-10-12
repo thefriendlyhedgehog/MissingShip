@@ -265,6 +265,16 @@ which writes 58 files differently: sound fonts and boss title cards), and USA 1.
 (PAL, GameCube) gets the game without the mod, and a popup at startup that says why.
 Until roborich takes delta files and the features ML needs, players need our Unbound build.
 
+For a stock Unbound (roborich's, or skijer's code-mod branch, the end goal in `docs/ROADMAP.md`), add `--stock`
+(not with `--pack`, which stock Unbound does not read). Stock Unbound refuses our branch's entries for vanilla
+scenes, and a scene whose exits name an entrance ML adds to a vanilla scene fails to load there, so the stock layer
+ships no `unbound/scenes.json` and rewrites those exits to vanilla entrances (`tools/unbound_stock.py`): one that
+lands where ML's does, else a spare vanilla entrance into the scene that neither ML nor the game's code uses, else
+the scene's own entrance. The builder lists each rewrite and counts what stock Unbound does not read (scene names,
+restrictions, save return points, draw configs, ML's entrance flags, intro cutscenes, continue points). On
+2026-10-11 all eight of ML's such exits fall back to the scene's own entrance (the spare Temple of Time entrances
+are vanilla cutscene destinations), and all 25 of ML's scenes load on skijer's branch.
+
 Without `--pack` the builder writes the whole layer, which holds the game's data too: for testing only. On macOS it
 reads `oot.o2r` from and writes `mods/MissingLink_Unbound.o2r` to Unbound's folder
 (`~/Library/Application Support/com.shipofharkinian.soh`, or `SHIP_HOME`; `--oot-o2r` and `--out` choose others).

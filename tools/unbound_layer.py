@@ -2,7 +2,7 @@
 
     python3 tools/unbound_layer.py --unbound <Unbound's soh binary> --oot-o2r <oot.o2r> --mod <MissingLink_Scenes.o2r>
                                    [--soh-o2r <Unbound's soh.o2r>] [--out <MissingLink_Unbound.o2r>]
-                                   [--pack [--also-base <another extractor version's oot.o2r>]...]
+                                   [--pack [--also-base <another extractor version's oot.o2r>]... | --stock]
 
 Unbound reads vanilla scenes and text only in its own JSON form, converted from oot.o2r at start-up, so ML's
 vanilla-format scene overrides are not read there. This converts them with Unbound's own converter
@@ -42,6 +42,10 @@ With --pack the result is the layer as a pack of deltas (tools/deltapack.py, Unb
 copies from oot.o2r and Unbound's conversion of it, which every player's game has. It carries none of the game's data,
 so it is what we distribute; make it from an oot.o2r that Unbound's own extractor wrote, with --also-base for each
 other SoH 9.x extractor's oot.o2r of the same ROM (they lay some files out differently).
+
+With --stock the layer is for a stock Unbound, which reads neither packs nor our branch's entries for vanilla scenes:
+it ships no unbound/scenes.json, and exits to the entrances ML adds become vanilla entrances (tools/unbound_stock.py),
+with a report of what stock Unbound does not read.
 """
 import argparse, glob, json, os, re, shutil, struct, subprocess, sys, tempfile, zipfile
 
@@ -53,6 +57,7 @@ from unbound_ml_pause import MlPause
 from unbound_ml_shops import MlShops
 from unbound_ml_ui import MlUi
 from unbound_ml_world import MlWorld
+from unbound_stock import not_read, stock_scenes
 import deltapack
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -252,11 +257,13 @@ def ml_banner(vanilla):
     return header + struct.pack('<IIII', 9, 160, 8, len(pixels)) + pixels
 
 
-def layer(vanilla, ml, out, world, ui, maps, pause, getitem, shops, items):
+def layer(vanilla, ml, out, world, ui, maps, pause, getitem, shops, items, unbound_src=None, stock=False):
     stats = dict.fromkeys(('added', 'changed', 'scene documents', 'messages', 'actors placed by name', 'exits named',
                            'exit padding dropped'), 0)
+    report = None
     with zipfile.ZipFile(vanilla) as v, zipfile.ZipFile(ml) as m, zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED) as z:
         base = {i.filename: i.CRC for i in v.infolist()}
+        scene_docs = {}                 # written after the loop: --stock rewrites exits across scenes
         for info in m.infolist():
             n = info.filename
             if n in SKIP or base.get(n) == info.CRC:
@@ -279,10 +286,15 @@ def layer(vanilla, ml, out, world, ui, maps, pause, getitem, shops, items):
                     stats['scene documents'] += 1
                 else:
                     stats['added'] += 1
-                data = json.dumps(doc, indent=1)
+                scene_docs[n] = doc
+                continue
             else:
                 stats['changed' if n in base else 'added'] += 1
             z.writestr(n, data)
+        if stock:
+            report, rewritten = stock_scenes(scene_docs, world, unbound_src)
+        for n, doc in scene_docs.items():
+            z.writestr(n, json.dumps(doc, indent=1))
         z.writestr('unbound.json', json.dumps(MANIFEST, indent=1))
         # Tells our Unbound branch that ML is mounted, which switches on ML's changes to the game's own code (Unbound's
         # unbound-docs/missinglink-actors.md): ML's En_M_Thunder in actor slot 0x57, the Blade Beam spawner, ...
@@ -298,7 +310,10 @@ def layer(vanilla, ml, out, world, ui, maps, pause, getitem, shops, items):
         restrictions = items.restrictions()
         for scene, fields in restrictions.items():
             world.scenes.setdefault(scene, {})['restrictions'] = fields
-        z.writestr('unbound/scenes.json', json.dumps(world.scenes, indent=1))
+        if stock:
+            report.update(not_read(world, rewritten))
+        else:
+            z.writestr('unbound/scenes.json', json.dumps(world.scenes, indent=1))
         z.writestr('unbound/cutscenes.json', json.dumps(destinations, indent=1))
         z.writestr('unbound/save.json', json.dumps(world.new_save(), indent=1))
         labels = ui.labels()
@@ -327,7 +342,7 @@ def layer(vanilla, ml, out, world, ui, maps, pause, getitem, shops, items):
         z.writestr('unbound/items.json', json.dumps(rules, indent=1))
         stats['item slots'] = len(rules.get('slots', {}))
         stats['scene restrictions'] = len(restrictions)
-    return stats
+    return stats, report
 
 
 def main():
@@ -342,10 +357,14 @@ def main():
     ap.add_argument('--out', default=os.path.join(ROOT, 'mod', 'MissingLink_Unbound.o2r'))
     ap.add_argument('--pack', action='store_true', help="write the layer as a pack of deltas against the player's "
                                                         "oot.o2r and Unbound's conversion of it (what we distribute)")
+    ap.add_argument('--stock', action='store_true', help='for a stock Unbound: no unbound/scenes.json, exits to the '
+                                                         "entrances ML adds rewritten (tools/unbound_stock.py)")
     ap.add_argument('--also-base', action='append', default=[], metavar='OOT_O2R',
                     help='with --pack, an oot.o2r another SoH extractor version wrote from the same ROM: the pack '
                          'then works over it too (Unbound takes any 9.x oot.o2r)')
     args = ap.parse_args()
+    if args.stock and args.pack:
+        ap.error('--stock and --pack: stock Unbound does not read packs')
     # the converter runs in a temporary folder, so every path must be absolute
     args.oot_o2r, args.mod, args.out = map(os.path.abspath, (args.oot_o2r, args.mod, args.out))
     args.unbound, soh_o2r = unbound_game(args.unbound)
@@ -371,8 +390,8 @@ def main():
         export(args.unbound, soh_o2r, args.oot_o2r, os.path.join(work, 'vanilla.o2r'), work)
         export(args.unbound, soh_o2r, merged, os.path.join(work, 'ml.o2r'), work)
         out = os.path.join(work, 'layer.o2r') if args.pack else args.out
-        stats = layer(os.path.join(work, 'vanilla.o2r'), os.path.join(work, 'ml.o2r'), out, world, ui, maps, pause,
-                      getitem, shops, items)
+        stats, report = layer(os.path.join(work, 'vanilla.o2r'), os.path.join(work, 'ml.o2r'), out, world, ui, maps,
+                              pause, getitem, shops, items, unbound_src, args.stock)
         if args.pack:             # vanilla.o2r is what the player's game converts oot.o2r to (oot-unbound.o2r)
             also = []
             for i, other in enumerate(args.also_base):
@@ -383,6 +402,9 @@ def main():
     finally:
         shutil.rmtree(work, ignore_errors=True)
     print(f'{args.out}: ' + ', '.join(f'{v} {k}' for k, v in stats.items()))
+    for kind, items in (report or {}).items():
+        print(f'stock Unbound, {kind}: {len(items)}' + (''.join(f'\n  {i}' for i in items) if kind[:9] != 'not read:'
+                                                        else ''))
 
 
 if __name__ == '__main__':
