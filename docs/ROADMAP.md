@@ -99,6 +99,10 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        the flags on the seven actors, Bg_Treemouth skipped in the Lost Woods, a Lost Woods grotto taking Link to the
        Deku Tree (ML's own Deku Tree entrance there is spawn 2, which stock does not have, so Link lands at the
        entrance), and the Deku Tree's breakable wall spawning with ML's collision and breaking into debris.
+       Kokiri Forest complete, 2026-10-11: `ML_En_Md` (Mido, row 14) and `ML_SongBlock` (row 21) ported as before,
+       so every actor ML places in Kokiri Forest runs on #11's branch and the scene loads with no errors. Left: 27 of the
+       30 actors ML's rooms place by name, and ML's changes to vanilla actors' code that our branch switches on
+       while ML is mounted (its Blade Beam in En_M_Thunder's slot, ...).
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
        roborich or move into the code mod. Delta packs only matter for handing out ML without the builder: a
        player who builds from their own ROM gets the whole layer.
