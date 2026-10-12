@@ -44,11 +44,13 @@ so it is what we distribute; make it from an oot.o2r that Unbound's own extracto
 other SoH 9.x extractor's oot.o2r of the same ROM (they lay some files out differently).
 
 With --stock the layer is for a stock Unbound, which reads neither packs nor our branch's entries for vanilla scenes:
-it ships no unbound/scenes.json, and exits to the entrances ML adds become vanilla entrances (tools/unbound_stock.py),
-with a report of what stock Unbound does not read. For ML's code mod (Unbound-modapi's mods/missinglink), which
-carries what stock does not read, it also writes the registries again as Blobs, missinglink/<name>, with the game's
-names in them as numbers, puts ML's event entrances on vanilla entrance rows ML never uses, missinglink/entrances,
-and writes ML's intro cutscenes by entrance, missinglink/intros.
+it ships no unbound/scenes.json (tools/unbound_stock.py), with a report of what stock Unbound does not read, and needs
+ML's code mod (Unbound-modapi's mods/missinglink), which carries it. For the mod it writes the registries again as
+Blobs, missinglink/<name>, with the game's names in them as numbers; puts every entrance ML adds on vanilla entrance
+rows ML never uses, missinglink/entrances, with ML's exits to them rewritten to those rows; and writes the rest of
+ML's entries for vanilla scenes by number: intro cutscenes by entrance (missinglink/intros), ML's flags on vanilla
+entrances and its continue points (missinglink/entrancechanges), and scene names, draw configs, save return points
+and restrictions (missinglink/scenes).
 """
 import argparse, glob, json, os, re, shutil, struct, subprocess, sys, tempfile, zipfile
 
@@ -60,7 +62,8 @@ from unbound_ml_pause import MlPause
 from unbound_ml_shops import MlShops
 from unbound_ml_ui import MlUi
 from unbound_ml_world import MlWorld
-from unbound_stock import event_entrances, game_names, not_read, numbered, stock_scenes, with_camera_entries
+from unbound_stock import (custom_entrances, game_names, not_read, numbered, scene_data, stock_scenes,
+                           entrance_changes, with_camera_entries)
 import deltapack
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -318,9 +321,43 @@ def layer(vanilla, ml, out, world, ui, maps, pause, getitem, shops, items, unbou
                     data = with_camera_entries(data)
                     camera_padded.append(n)
             z.writestr(n, data)
+        world.intros(m.namelist())
+        for scene, name in ui.scene_names().items():
+            world.scenes.setdefault(scene, {})['name'] = name
+        destinations = world.destinations(m)
+        restrictions = items.restrictions()
+        for scene, fields in restrictions.items():
+            world.scenes.setdefault(scene, {})['restrictions'] = fields
         if stock:
-            report, rewritten = stock_scenes(scene_docs, world, unbound_src)
+            # every entrance ML adds, on vanilla rows the code mod points at it, with every exit to it sent there; the
+            # rows are none that ML's data names anywhere
+            referenced = set(re.findall(r'\bENTR_\w+', json.dumps([world.scenes, destinations, world.grottos(),
+                                                                    world.new_save()])))
+            donors = custom_entrances(world, unbound_src, set(ml_scenes()), scene_docs, referenced)
+            names.update({name: donor for name, (donor, _) in donors.items()})
+            report, rewritten = stock_scenes(scene_docs, world, donors)
             report['collisions given empty camera entries'] = camera_padded
+            z.writestr('missinglink/entrances', blob(json.dumps(
+                {name: {'index': donor, 'rows': numbered(rows, names)} for name, (donor, rows) in donors.items()},
+                indent=1).encode()))
+            report["ML's entrances on unused vanilla rows"] = [f'{n} -> {world.table[d][0]}'
+                                                               for n, (d, _) in sorted(donors.items())]
+            # ML's intro cutscenes and the vanilla ones it removes, its changes to entrances (vanilla ones' flags,
+            # game-over continue points) and to vanilla scenes (names, save return points, restrictions), by number
+            intros = numbered({n: v['intro'] for d in world.scenes.values()
+                               for n, v in d.get('entrances', {}).items() if 'intro' in v}, names)
+            changed = numbered(entrance_changes(world), names)
+            scenes = numbered(scene_data(world), names)
+            unnamed = sorted(n for doc in (intros, changed, scenes) for n in doc if not n.isdigit())
+            unnamed += sorted(str(e.get('continueAt')) for e in changed.values()
+                              if not isinstance(e.get('continueAt', 0), int))
+            unnamed += sorted(str(d.get('saveReturn')) for d in scenes.values()
+                              if not isinstance(d.get('saveReturn', 0), int))
+            if unnamed:
+                raise SystemExit(f'stock layer: entrances or scenes with no number: {unnamed}')
+            z.writestr('missinglink/intros', blob(json.dumps(intros, indent=1).encode()))
+            z.writestr('missinglink/entrancechanges', blob(json.dumps(changed, indent=1).encode()))
+            z.writestr('missinglink/scenes', blob(json.dumps(scenes, indent=1).encode()))
         for n, doc in scene_docs.items():
             z.writestr(n, json.dumps(doc, indent=1))
         z.writestr('unbound.json', json.dumps(MANIFEST, indent=1))
@@ -337,32 +374,6 @@ def layer(vanilla, ml, out, world, ui, maps, pause, getitem, shops, items, unbou
         else:
             for name, doc in actors.items():
                 z.writestr(f'unbound/actors/{name}.json', json.dumps(doc, indent=1))
-        world.intros(m.namelist())
-        for scene, name in ui.scene_names().items():
-            world.scenes.setdefault(scene, {})['name'] = name
-        destinations = world.destinations(m)
-        if stock:
-            # ML's event entrances (the cutscene destinations' and the code mod's), on vanilla rows the code mod
-            # points at them
-            named = {d['destination']['entrance'] for d in destinations.values()} | \
-                    {n for n in world.fork_names.values() if n.endswith('_event')}
-            events = event_entrances(world, unbound_src, set(ml_scenes()), named - set(names))
-            names.update({name: donor for name, (donor, _) in events.items()})
-            z.writestr('missinglink/entrances', blob(json.dumps(
-                {name: {'index': donor, 'rows': numbered(rows, names)} for name, (donor, rows) in events.items()},
-                indent=1).encode()))
-            report['event entrances on unused vanilla rows'] = [f'{n} -> {world.table[d][0]}'
-                                                                for n, (d, _) in sorted(events.items())]
-            # ML's intro cutscenes and the vanilla ones it removes, by entrance number, which the code mod plays
-            intros = numbered({n: v['intro'] for d in world.scenes.values()
-                               for n, v in d.get('entrances', {}).items() if 'intro' in v}, names)
-            unnamed = sorted(n for n in intros if not n.isdigit())
-            if unnamed:
-                raise SystemExit(f'stock layer: intros on entrances with no number: {unnamed}')
-            z.writestr('missinglink/intros', blob(json.dumps(intros, indent=1).encode()))
-        restrictions = items.restrictions()
-        for scene, fields in restrictions.items():
-            world.scenes.setdefault(scene, {})['restrictions'] = fields
         if stock:
             report.update(stock_actors)
             report.update(not_read(world, rewritten))

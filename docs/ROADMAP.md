@@ -155,6 +155,13 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        them by entrance as `missinglink/intros`, and the code mod plays them before the game's table runs, refuses
        vanilla's rows and the Requiem, Nocturne and Saria-bridge triggers on those entrances, and keeps SoH's Skip
        Entrance Cutscenes (Unbound-modapi `854e28a55`).
+       Then the rest of `scenes.json`, 2026-10-12: all 18 of ML's entrances go on unused vanilla rows built from
+       ML's definitions, with the 8 exits to them rewritten to those rows (none falls back to a scene's default
+       entrance now), and the `--stock` layer ships ML's flags on 164 vanilla entrances and its 9 continue points
+       (`missinglink/entrancechanges`) and its scene names, draw configs, save return points and restrictions
+       (`missinglink/scenes`). The code mod applies them; the draw configs come from the layer instead of its own
+       table. Run on stock: four scenes' exits, the Continue, five scenes' restrictions, a save return and the names
+       (Unbound-modapi `0d0a4c33c`).
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
        roborich or move into the code mod. Delta packs only matter for handing out ML without the builder: a
        player who builds from their own ROM gets the whole layer.

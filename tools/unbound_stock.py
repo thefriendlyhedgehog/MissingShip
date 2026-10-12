@@ -3,33 +3,25 @@
 Stock Unbound (roborich's, 0.11, and skijer's mod-API branch on it) reads unbound/scenes.json only for new scenes:
 an entry keyed by a vanilla scene is refused ("has no scene path"), so the entrances ML adds to vanilla scenes do not
 exist there, and a scene whose exits name one fails to load (the game falls back to Dodongo's Cavern). ML has no new
-scenes, so the stock layer ships no unbound/scenes.json, and each exit to an entrance ML adds is rewritten into what
-stock Unbound can follow:
-  - a vanilla entrance into the same scene that lands on the same entrance-list slot, when there is one;
-  - else a vanilla entrance group into that scene that ML's exits never use, whose slot no used entrance lands on,
-    and which the game's code never names: that slot of the scene's entrance list (each setup's `entrances`, the
-    list the entrance table's spawn indexes, as in vanilla) is pointed where ML's entrance lands;
-  - else the scene's first used entrance: the scene loads, but Link arrives at that entrance, not ML's.
+scenes, so the stock layer ships no unbound/scenes.json. Each entrance ML adds goes on a run of vanilla entrance rows
+a stock Unbound never reaches with ML (rows into a scene ML lacks, which ML's code mod refuses, that the game's code
+never names and that none of ML's data names), built from ML's definition the way our branch builds its table; ML's
+code mod points those rows at ML's scene, spawn and flags (missinglink/entrances), and every exit to the entrance is
+rewritten to the run's first row.
 ML's actors' own collision (objects/*, LOCO resources) has no camera data, as in ML's ROM; vanilla's always has at
 least one entry. Standing on such a collision makes stock Unbound's camera read the missing list (z_bgcheck.c's
 func_80041A4C) and crash; our branch checks for it (row B1). The stock layer gives each one empty entries (setting 0,
 which the camera reads as "none", as our branch's check returns) up to the highest index its surfaces name.
-What else the vanilla-scene entries carried is not read by stock Unbound and is counted in the report: scene names,
-restrictions, save return points, ML's flags on vanilla entrances (transitions, music, title cards), intro cutscenes,
-game-over continue points, and the entrances only ML's other registries name. ML's scene draw configs are not read
-either, but a room drawn with the wrong one crashes the game, so ML's code mod sets them; the report lists them.
+What else the vanilla-scene entries carried is not read by stock Unbound either; the layer ships it by number for ML's
+code mod and the report counts it: scene names, draw configs, save return points and restrictions
+(missinglink/scenes), ML's flags on vanilla entrances (transitions, music, title cards) and its game-over continue
+points (missinglink/entrancechanges), and intro cutscenes (missinglink/intros). A room drawn with the wrong draw
+config crashes the game, so without the code mod the stock layer does not run.
 """
 import glob, os, re, struct
 from collections import defaultdict
 
 from unbound_ml_world import FORK_FIRST
-
-
-def scene_files(unbound_src):
-    """Vanilla scene enum -> its scene document's path in the layer (scene_table.h's file name without _scene)."""
-    src = open(os.path.join(unbound_src, 'soh', 'include', 'tables', 'scene_table.h')).read()
-    return {enum: f'scenes/{name[:-len("_scene")]}/scene.json'
-            for name, enum in re.findall(r'DEFINE_SCENE\((\w+_scene),\s*\w+,\s*(SCENE_\w+)', src)}
 
 
 CODE_NAMES = 'entrance_names_in_code.txt'    # the frozen builder's copy of _code_names (it ships no sources)
@@ -51,83 +43,40 @@ def code_names(unbound_src):
     return names
 
 
-def _runs(table):
-    """The vanilla table as runs of consecutive entries into one scene and slot: (first, last, scene, slot)."""
-    runs = []
-    for i in sorted(i for i in table if i < FORK_FIRST):
-        name, scene, slot = table[i][:3]
-        if runs and runs[-1][1] == i - 1 and runs[-1][2:] == (scene, slot):
-            runs[-1] = (runs[-1][0], i, scene, slot)
-        else:
-            runs.append((i, i, scene, slot))
-    return runs
-
-
-def stock_scenes(docs, world, unbound_src):
-    """Rewrite `docs` (layer path -> scene document) in place for stock Unbound; return the report and the entrances
-    whose exits were rewritten."""
-    table, files = world.table, scene_files(unbound_src)
-    exits = [(setup['exits'], key) for doc in docs.values() for setup in (doc.get('setups') or {}).values()
-             for key in (setup.get('exits') or {})]
-    used = {e[k] for e, k in exits if isinstance(e[k], int) and e[k] < FORK_FIRST}
-    used_slots = {table[i][1:3] for i in used}
-    code = code_names(unbound_src)
-    runs = _runs(table)
-    report = defaultdict(list)
-    chosen = {}
-
-    def resolve(target):
-        scene, key = target.split('/', 1)
-        slot = world.scenes[scene]['entrances'][key].get('spawn', 0)
-        same = [r for r in runs if r[2:] == (scene, slot)]
-        if same:
-            report['same slot'].append(f'{target} -> {table[same[0][0]][0]}')
-            return same[0][0]
-        doc = docs.get(files.get(scene))
-        free = [r for r in runs if r[2] == scene and (scene, r[3]) not in used_slots
-                and not any(r[0] <= i <= r[1] for i in used)
-                and not any(table[i][0] in code for i in range(r[0], r[1] + 1))]
-        if doc is not None and free:
-            first, _, _, spare = free[0]
-            for setup in (doc.get('setups') or {}).values():
-                entrances = setup.get('entrances')
-                if entrances and str(slot) in entrances:
-                    for gap in range(len(entrances), spare):
-                        entrances[str(gap)] = dict(entrances['0'])
-                    entrances[str(spare)] = dict(entrances[str(slot)])
-            used_slots.add((scene, spare))
-            used.update(range(first, free[0][1] + 1))
-            report['vanilla entrance reused'].append(f'{target} -> {table[first][0]} (slot {spare} -> {slot})')
-            return first
-        main = min((i for i in used if table[i][1] == scene), default=None)
-        if main is None:
-            main = next(r[0] for r in runs if r[2] == scene)
-        report['lands at the scene entrance'].append(f'{target} -> {table[main][0]}')
-        return main
-
-    for e, k in exits:
-        if isinstance(e[k], str):
-            if e[k] not in chosen:
-                chosen[e[k]] = resolve(e[k])
-            e[k] = chosen[e[k]]
-    return dict(report), set(chosen)
+def stock_scenes(docs, world, donors):
+    """Point each exit in `docs` (layer path -> scene document, changed in place) that names an entrance ML adds at that
+    entrance's donor rows (custom_entrances); return the report and the entrances exits now reach."""
+    report, chosen = defaultdict(list), set()
+    for doc in docs.values():
+        for setup in (doc.get('setups') or {}).values():
+            exits = setup.get('exits') or {}
+            for key, target in exits.items():
+                if isinstance(target, str) and '/' in target:
+                    if target not in donors:
+                        raise SystemExit(f'stock layer: an exit names {target}, which has no donor rows')
+                    exits[key] = donors[target][0]
+                    chosen.add(target)
+    report["exits to ML's entrances, on donor rows"] = sorted(f'{t} -> {donors[t][0]}' for t in chosen)
+    return dict(report), chosen
 
 
 def not_read(world, rewritten):
-    """What ML's entries for vanilla scenes carry that stock Unbound does not read, once the layer has added all of it
-    (names, restrictions and intros come after the scene documents); `rewritten` are the entrances exits now reach."""
+    """What ML's entries for vanilla scenes carry that stock Unbound does not read and ML's code mod carries instead,
+    counted for the report; `rewritten` are ML's entrances that exits now reach."""
     report, vanilla = {}, world.scenes
     for field in ('name', 'restrictions', 'saveReturn'):
-        report[f'not read: {field}'] = sorted(s for s, v in vanilla.items() if field in v)
+        report[f'{field} left to the code mod'] = sorted(s for s, v in vanilla.items() if field in v)
     # without ML's draw config some rooms draw through an unset segment and the game crashes on arrival: ML's code mod
     # sets these (skijer's branch, mod-sdk/mods/missinglink/ml_scenes.c, the same table)
     report['draw configs left to the code mod'] = sorted(f'{s} {v["drawConfig"]}' for s, v in vanilla.items()
                                                          if 'drawConfig' in v)
     overrides = [(s, n, v) for s, d in vanilla.items() for n, v in d.get('entrances', {}).items()]
-    report['not read: entrance flags'] = [f'{s}/{n}' for s, n, v in overrides if n.startswith('ENTR_')]
+    report['entrance flags left to the code mod'] = [f'{s}/{n}' for s, n, v in overrides
+                                                     if n.startswith('ENTR_') and any(k in v for k in ENTRANCE_FLAGS)]
     report['intros left to the code mod'] = [f'{s}/{n}' for s, n, v in overrides if 'intro' in v]
-    report['not read: continue points'] = [f'{s}/{n}' for s, n, v in overrides if 'continueAt' in v]
-    report['not read: entrances only other registries name'] = sorted(
+    report['continue points left to the code mod'] = [f'{s}/{n}' for s, n, v in overrides if 'continueAt' in v]
+    # the event entrances are reached by cutscene destinations, deku_tree_2 by a grotto
+    report["ML's entrances no scene exit reaches"] = sorted(
         f'{s}/{n}' for s, n, v in overrides if not n.startswith('ENTR_') and f'{s}/{n}' not in rewritten)
     return report
 
@@ -194,39 +143,76 @@ def numbered(doc, names):
     return doc
 
 
-EVENT_ROWS = 5         # an event entrance's 4 layers and the first cutscene layer, the only one ML's cutscenes land on
+def _pack(d, base):
+    """An entrance row's packed field (z64.h ENTRANCE_INFO_*), as our branch's PackEntranceField: `d`'s fields over
+    `base`'s, with SceneDB::RegisterEntrance's defaults (no music carried over, no title card, black fades)."""
+    get = lambda k, default: d.get(k, base.get(k, default))
+    return ((0x8000 if get('continueBgm', False) else 0) | (0x4000 if get('showTitleCard', False) else 0) |
+            ((get('endTransition', 2) << 7) & 0x3F80) | (get('startTransition', 2) & 0x7F))
 
 
-def _field(row):
-    """An entrance row's packed field (z64.h ENTRANCE_INFO_*): continue BGM, title card, end and start transitions."""
-    from unbound_ml_world import TRANS
-    trans = lambda t: TRANS[t] if t in TRANS else int(t, 0)
-    return (row[3] << 15) | (row[4] << 14) | (trans(row[5]) << 7) | trans(row[6])
+def entrance_rows(scene, d):
+    """A custom entrance's rows as our branch registers them (SceneDB::RegisterEntrance): its own fields on each of the
+    four layers, and each layer it lists over those (an event's is cutscene layer 4, the fifth row). Our branch pads a
+    group to whole fours with the entrance's own rows; ML lands on none past the ones listed, so they are left off."""
+    own = {'scene': scene, 'spawn': d.get('spawn', 0), 'field': _pack(d, {})}
+    rows = [dict(own) for _ in range(4)]
+    for key, layer in sorted((d.get('layers') or {}).items(), key=lambda kv: int(kv[0])):
+        while len(rows) <= int(key):
+            rows.append(dict(own))
+        rows[int(key)] = {'scene': scene, 'spawn': layer.get('spawn', own['spawn']), 'field': _pack(layer, d)}
+    return rows
 
 
-def event_entrances(world, unbound_src, ml_scenes, named):
-    """The entrances our branch adds that `named` (ML's registries' and code mod's entrance names) need, on vanilla
-    entrance rows a stock Unbound never reaches with ML: each takes EVENT_ROWS consecutive rows that all lead into scenes
-    ML does not have (ML's code mod refuses those) and that the game's code never names. ML's code mod points the rows
-    at ML's scene and spawn (missinglink/entrances), as our branch's table does. Name -> (first row, its rows)."""
+def custom_entrances(world, unbound_src, ml_scenes, docs, referenced):
+    """Every entrance ML adds to a vanilla scene, on vanilla entrance rows a stock Unbound never reaches with ML: each
+    takes as many consecutive rows as it has layers, all leading into scenes ML does not have (ML's code mod refuses
+    those), never named by the game's code (its intro table, its triggers, its game-over rules) and never named by ML's
+    data (`referenced`, and an exit's number). ML's code mod points the rows at ML's scene, spawn and flags
+    (missinglink/entrances), as our branch's table does. Scene/entrance name -> (first row, its rows)."""
     table, code = world.table, code_names(unbound_src)
-    groups = {name: start for start, name in world.fork_names.items() if name in named}
-    free = lambda i: i in table and table[i][1] not in ml_scenes and table[i][0] not in code
-    donors, i = [], 0
-    while len(donors) < len(groups) and i + EVENT_ROWS <= FORK_FIRST:
-        if all(free(j) for j in range(i, i + EVENT_ROWS)):
-            donors.append(i)
-            i += EVENT_ROWS
-        else:
+    used = {e for doc in docs.values() for setup in (doc.get('setups') or {}).values()
+            for e in (setup.get('exits') or {}).values() if isinstance(e, int)}
+    free = lambda i: (i in table and table[i][1] not in ml_scenes and table[i][0] not in code
+                      and table[i][0] not in referenced and i not in used)
+    groups = sorted((f'{scene}/{key}', entrance_rows(scene, d)) for scene, sd in world.scenes.items()
+                    for key, d in sd.get('entrances', {}).items() if not key.startswith('ENTR_'))
+    out, i = {}, 0
+    for name, rows in groups:
+        while i + len(rows) <= FORK_FIRST and not all(free(j) for j in range(i, i + len(rows))):
             i += 1
-    if len(donors) < len(groups):
-        raise SystemExit(f'stock layer: only {len(donors)} free entrance runs for {len(groups)} event entrances')
-    out = {}
-    for (name, start), donor in zip(sorted(groups.items()), donors):
-        rows = [{'scene': table[start + j][1], 'spawn': table[start + j][2], 'field': _field(table[start + j])}
-                for j in range(EVENT_ROWS)]
-        out[name] = (donor, rows)
+        if i + len(rows) > FORK_FIRST:
+            raise SystemExit(f'stock layer: no free run of {len(rows)} entrance rows left for {name}')
+        out[name] = (i, rows)
+        i += len(rows)
     return out
+
+
+ENTRANCE_FLAGS = ('continueBgm', 'showTitleCard', 'endTransition', 'startTransition')
+
+
+def entrance_changes(world):
+    """What ML changes on entrances besides their rows, by name: a vanilla entrance's flags (only the fields it sets,
+    which the code mod puts over the row's own, as SceneDB::OverrideEntrance does), and the game-over continue point
+    after arriving by any entrance (`continueAt`). A custom entrance's flags are in its rows (custom_entrances)."""
+    out = {}
+    for scene, sd in world.scenes.items():
+        for name, d in sd.get('entrances', {}).items():
+            entry = {k: d[k] for k in ENTRANCE_FLAGS if k in d and name.startswith('ENTR_')}
+            if 'continueAt' in d:
+                entry['continueAt'] = d['continueAt']
+            if entry:
+                out[name if name.startswith('ENTR_') else f'{scene}/{name}'] = entry
+    return out
+
+
+SCENE_FIELDS = ('name', 'drawConfig', 'saveReturn', 'restrictions')
+
+
+def scene_data(world):
+    """ML's name, draw config, save return point and item restrictions for each vanilla scene it sets them on."""
+    return {scene: {k: d[k] for k in SCENE_FIELDS if k in d}
+            for scene, d in world.scenes.items() if any(k in d for k in SCENE_FIELDS)}
 
 
 def with_camera_entries(data):
