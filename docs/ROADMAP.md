@@ -74,6 +74,13 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        prebuilt code (no Nintendo data) plus the assets it makes from the player's ROM. Gaps seen in #11: no
        room-load hook, and on Windows only globals marked `HOST_DATA` are reachable (`sDrawItemTable` is not).
        #11 is on Unbound 0.9 (SoH 9.2.3) and unsigned mods load by default (`UNBOUND_MOD_POLICY open`).
+       First actor, 2026-10-11: `ML_TreeBridge` as a code mod on #11's branch (MissingShip-Unbound `ml-codemod`,
+       `mod-sdk/mods/missinglink`), the branch's actor code unchanged. ML's Kokiri Forest spawns it by name from the
+       layer; it draws ML's model, burns, falls under ML's camera and carries Link. Stock Unbound refused parts of
+       ML's layer in the same runs: vanilla-scene entries in `scenes.json` (so the four scenes whose exits name
+       custom entrances on vanilla scenes fail to load, Kokiri Forest among them), actor types named after vanilla
+       actors and their `assets` key; it does not read the nine other registries the layer carries. Those are the
+       upstream offers' work, or the code mod's.
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
        roborich or move into the code mod. Delta packs only matter for handing out ML without the builder: a
        player who builds from their own ROM gets the whole layer.
