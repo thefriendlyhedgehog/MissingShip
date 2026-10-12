@@ -132,6 +132,103 @@ def not_read(world, rewritten):
     return report
 
 
+def _enums(text):
+    """Every enumerator of every enum in C source `text`, with its value (an explicit value is a number or an earlier
+    enumerator, plus or minus a number)."""
+    values = {}
+    for body in re.findall(r'\benum\b[^{;]*\{([^}]*)\}', re.sub(r'/\*.*?\*/|//[^\n]*', '', text, flags=re.S)):
+        n = -1
+        for entry in body.split(','):
+            m = re.fullmatch(r'\s*([A-Za-z_]\w*)\s*(?:=\s*(.+?))?\s*', entry)
+            if not m:
+                continue
+            if m[2] is None:
+                n += 1
+            else:
+                e = re.fullmatch(r'(\w+)\s*(?:([+-])\s*(\w+))?', m[2].strip('() '))
+                if not e:
+                    n = None
+                    continue
+                n = values.get(e[1]) if e[1] in values else int(e[1], 0) if e[1][0].isdigit() else None
+                if n is not None and e[2]:
+                    n += int(e[3], 0) * (1 if e[2] == '+' else -1)
+            if n is not None:
+                values[m[1]] = n
+    return values
+
+
+# The headers whose enums ML's registries name (items, slots, upgrades, quest items, GetItem models, shop items,
+# timestamps and counts)
+ENUM_HEADERS = (os.path.join('include', 'z64item.h'),
+                os.path.join('src', 'overlays', 'actors', 'ovl_En_GirlA', 'z_en_girla.h'),
+                os.path.join('soh', 'Enhancements', 'gameplaystats.h'))
+# Keys whose values are names the code mod reads as names: a time split's icon (TimeSplits.cpp's splitImage)
+KEEP_NAMES = ('icon', 'countdownTimer')
+
+
+def game_names(world, unbound_src):
+    """Name -> number for what ML's registries name: the enums of ENUM_HEADERS, vanilla's entrances and scenes."""
+    names = {}
+    for header in ENUM_HEADERS:
+        with open(os.path.join(unbound_src, 'soh', header)) as f:
+            names.update(_enums(f.read()))
+    for i in sorted(world.table, reverse=True):       # a group's first entry is its name's index
+        if i < FORK_FIRST:
+            names[world.table[i][0]] = i
+    with open(os.path.join(unbound_src, 'soh', 'include', 'tables', 'scene_table.h')) as f:
+        names.update({enum: i for i, enum in enumerate(re.findall(r'DEFINE_SCENE\(\w+,\s*\w+,\s*(SCENE_\w+)',
+                                                                       f.read()))})
+    return names
+
+
+def numbered(doc, names):
+    """`doc` with every key and string that is a name in `names` replaced by its number, for ML's code mod, which reads
+    the registries on a stock Unbound and has no tables of names (its keys stay strings: "13"); KEEP_NAMES' values
+    stay names."""
+    if isinstance(doc, dict):
+        return {str(names.get(k, k)): v if k in KEEP_NAMES else numbered(v, names) for k, v in doc.items()}
+    if isinstance(doc, list):
+        return [numbered(v, names) for v in doc]
+    if isinstance(doc, str):
+        return names.get(doc, doc)
+    return doc
+
+
+EVENT_ROWS = 5         # an event entrance's 4 layers and the first cutscene layer, the only one ML's cutscenes land on
+
+
+def _field(row):
+    """An entrance row's packed field (z64.h ENTRANCE_INFO_*): continue BGM, title card, end and start transitions."""
+    from unbound_ml_world import TRANS
+    trans = lambda t: TRANS[t] if t in TRANS else int(t, 0)
+    return (row[3] << 15) | (row[4] << 14) | (trans(row[5]) << 7) | trans(row[6])
+
+
+def event_entrances(world, unbound_src, ml_scenes, named):
+    """The entrances our branch adds that `named` (ML's registries' and code mod's entrance names) need, on vanilla
+    entrance rows a stock Unbound never reaches with ML: each takes EVENT_ROWS consecutive rows that all lead into scenes
+    ML does not have (ML's code mod refuses those) and that the game's code never names. ML's code mod points the rows
+    at ML's scene and spawn (missinglink/entrances), as our branch's table does. Name -> (first row, its rows)."""
+    table, code = world.table, code_names(unbound_src)
+    groups = {name: start for start, name in world.fork_names.items() if name in named}
+    free = lambda i: i in table and table[i][1] not in ml_scenes and table[i][0] not in code
+    donors, i = [], 0
+    while len(donors) < len(groups) and i + EVENT_ROWS <= FORK_FIRST:
+        if all(free(j) for j in range(i, i + EVENT_ROWS)):
+            donors.append(i)
+            i += EVENT_ROWS
+        else:
+            i += 1
+    if len(donors) < len(groups):
+        raise SystemExit(f'stock layer: only {len(donors)} free entrance runs for {len(groups)} event entrances')
+    out = {}
+    for (name, start), donor in zip(sorted(groups.items()), donors):
+        rows = [{'scene': table[start + j][1], 'spawn': table[start + j][2], 'field': _field(table[start + j])}
+                for j in range(EVENT_ROWS)]
+        out[name] = (donor, rows)
+    return out
+
+
 def with_camera_entries(data):
     """An object collision resource (LOCO) with no camera data, given empty entries up to the highest camera index its
     surfaces name; None for any other file or one that already has camera data. Layout:

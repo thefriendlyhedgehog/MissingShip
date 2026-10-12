@@ -140,7 +140,15 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        scenes ML lacks. Out of reach: the refusal from the debug map select.
        Then Controllable Bombchus letting go of a Bombchu on ML's rail, 2026-10-12: stock's steering lets go on an A
        press, so En_Bom_Chu's slot presses A for it there, the input put back before the next actor updates.
-       Left: the registries stock does not read.
+       Then the registries stock does not read, 2026-10-12: the `--stock` layer writes them again as Blobs
+       (`missinglink/<name>`, the game's names as numbers from the 9.2.3 headers), and the code mod applies them:
+       ML's item slots, capacities, bottles and Bombchu cap on SoH's VBs and tables, the Bombchu Shop's prices, its
+       GetItem models, the new save and Skip Intro's destination; its eight event entrances, on vanilla rows into
+       scenes ML lacks, and the 21 cutscene destinations, replaced when the cutscene runs its destination; its
+       dungeon maps and missing minimaps; its pause menu (ages, positions, cursor rules, ammo counts, arrow colours);
+       and its names in SoH's save editor, stats and Time Splits. That reaches the pond ride and the sword's lost
+       charge too. Out of reach: the stats' `countsShown` and the countdown icon, the labels on Windows, and a new
+       file's preview before its first save.
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
        roborich or move into the code mod. Delta packs only matter for handing out ML without the builder: a
        player who builds from their own ROM gets the whole layer.

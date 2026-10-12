@@ -45,7 +45,9 @@ other SoH 9.x extractor's oot.o2r of the same ROM (they lay some files out diffe
 
 With --stock the layer is for a stock Unbound, which reads neither packs nor our branch's entries for vanilla scenes:
 it ships no unbound/scenes.json, and exits to the entrances ML adds become vanilla entrances (tools/unbound_stock.py),
-with a report of what stock Unbound does not read.
+with a report of what stock Unbound does not read. For ML's code mod (Unbound-modapi's mods/missinglink), which
+carries what stock does not read, it also writes the registries again as Blobs, missinglink/<name>, with the game's
+names in them as numbers, and puts ML's event entrances on vanilla entrance rows ML never uses, missinglink/entrances.
 """
 import argparse, glob, json, os, re, shutil, struct, subprocess, sys, tempfile, zipfile
 
@@ -57,7 +59,7 @@ from unbound_ml_pause import MlPause
 from unbound_ml_shops import MlShops
 from unbound_ml_ui import MlUi
 from unbound_ml_world import MlWorld
-from unbound_stock import not_read, stock_scenes, with_camera_entries
+from unbound_stock import event_entrances, game_names, not_read, numbered, stock_scenes, with_camera_entries
 import deltapack
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -257,11 +259,31 @@ def ml_banner(vanilla):
     return header + struct.pack('<IIII', 9, 160, 8, len(pixels)) + pixels
 
 
+def blob(data):
+    """`data` as an LUS Blob resource (libultraship BlobFactory): a 64-byte OTR header (little-endian, custom, type
+    'OBLB', version 0), the size, the bytes. The resource manager hands its bytes to C as they are, where a .json file
+    in an archive would be parsed as a resource of its own."""
+    header = struct.pack('<BBxxIIQ', 0, 1, 0x4F424C42, 0, 0).ljust(0x40, b'\0')
+    return header + struct.pack('<I', len(data)) + data
+
+
+# The registries a stock Unbound does not read (only our branch does), which ML's code mod reads as Blobs instead,
+# missinglink/<name>, with the names in them as numbers (tools/unbound_stock.py numbered).
+STOCK_REGISTRIES = ('cutscenes', 'getitem', 'items', 'labels', 'maps', 'pause', 'save', 'shops')
+
+
 def layer(vanilla, ml, out, world, ui, maps, pause, getitem, shops, items, unbound_src=None, stock=False):
     stats = dict.fromkeys(('added', 'changed', 'scene documents', 'messages', 'actors placed by name', 'exits named',
                            'exit padding dropped'), 0)
     report = None
     with zipfile.ZipFile(vanilla) as v, zipfile.ZipFile(ml) as m, zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED) as z:
+        names = game_names(world, unbound_src) if stock else {}
+
+        def registry(name, doc):
+            z.writestr(f'unbound/{name}.json', json.dumps(doc, indent=1))
+            if stock and name in STOCK_REGISTRIES:
+                z.writestr(f'missinglink/{name}', blob(json.dumps(numbered(doc, names), indent=1).encode()))
+
         base = {i.filename: i.CRC for i in v.infolist()}
         scene_docs = {}                 # written after the loop: --stock rewrites exits across scenes
         camera_padded = []
@@ -318,6 +340,18 @@ def layer(vanilla, ml, out, world, ui, maps, pause, getitem, shops, items, unbou
         for scene, name in ui.scene_names().items():
             world.scenes.setdefault(scene, {})['name'] = name
         destinations = world.destinations(m)
+        if stock:
+            # ML's event entrances (the cutscene destinations' and the code mod's), on vanilla rows the code mod
+            # points at them
+            named = {d['destination']['entrance'] for d in destinations.values()} | \
+                    {n for n in world.fork_names.values() if n.endswith('_event')}
+            events = event_entrances(world, unbound_src, set(ml_scenes()), named - set(names))
+            names.update({name: donor for name, (donor, _) in events.items()})
+            z.writestr('missinglink/entrances', blob(json.dumps(
+                {name: {'index': donor, 'rows': numbered(rows, names)} for name, (donor, rows) in events.items()},
+                indent=1).encode()))
+            report['event entrances on unused vanilla rows'] = [f'{n} -> {world.table[d][0]}'
+                                                                for n, (d, _) in sorted(events.items())]
         restrictions = items.restrictions()
         for scene, fields in restrictions.items():
             world.scenes.setdefault(scene, {})['restrictions'] = fields
@@ -326,10 +360,10 @@ def layer(vanilla, ml, out, world, ui, maps, pause, getitem, shops, items, unbou
             report.update(not_read(world, rewritten))
         else:
             z.writestr('unbound/scenes.json', json.dumps(world.scenes, indent=1))
-        z.writestr('unbound/cutscenes.json', json.dumps(destinations, indent=1))
-        z.writestr('unbound/save.json', json.dumps(world.new_save(), indent=1))
+        registry('cutscenes', destinations)
+        registry('save', world.new_save())
         labels = ui.labels()
-        z.writestr('unbound/labels.json', json.dumps(labels, indent=1))
+        registry('labels', labels)
         stats['vanilla scenes changed'] = len(world.scenes)
         stats['save returns'] = world.save_returns
         stats['draw configs'] = world.draw_configs
@@ -338,20 +372,20 @@ def layer(vanilla, ml, out, world, ui, maps, pause, getitem, shops, items, unbou
         stats['item labels'] = len(labels['items'])
         stats['time splits'] = len(labels['timeSplits']['splits'])
         doc = maps.maps()
-        z.writestr('unbound/maps.json', json.dumps(doc, indent=1))
+        registry('maps', doc)
         stats['dungeon maps'] = sum(1 for v in doc.values() if v != {'minimap': False})
-        z.writestr('unbound/pause.json', json.dumps(pause.pause(), indent=1))
+        registry('pause', pause.pause())
         grottos = world.grottos()
-        z.writestr('unbound/grottos.json', json.dumps(grottos, indent=1))
+        registry('grottos', grottos)
         stats['grotto destinations'] = sum(1 for d in grottos['destinations'].values() if 'entrance' in d)
         draws = getitem.getitem()
-        z.writestr('unbound/getitem.json', json.dumps(draws, indent=1))
+        registry('getitem', draws)
         stats['GetItem models'] = len(draws['draws'])
         prices = shops.shops()
-        z.writestr('unbound/shops.json', json.dumps(prices, indent=1))
+        registry('shops', prices)
         stats['shop prices'] = len(prices['items'])
         rules = items.items_doc()
-        z.writestr('unbound/items.json', json.dumps(rules, indent=1))
+        registry('items', rules)
         stats['item slots'] = len(rules.get('slots', {}))
         stats['scene restrictions'] = len(restrictions)
     return stats, report
