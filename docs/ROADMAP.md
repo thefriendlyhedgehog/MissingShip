@@ -117,9 +117,10 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        `ML_PushBlock` and `ML_DnsShop` carry vanilla's code with ML's changes built in, and `ML_FogWall` moves the
        player's last-frame position with him after its loop, where our branch skips two wall push-outs.
        Then the Blade Beam, 2026-10-12: ML's En_M_Thunder in that actor's slot (its ActorDB entry, as the player
-       spawns it by number), with the beam spawner at `OnPlayerUpdate`.
-       Left: ML's other changes to vanilla actors' code that our branch switches on while ML is mounted (the Business
-       Scrubs' sale table, the push blocks' colours, ...), its player code (Magic Hourglass, triple jump, the
+       spawns it by number), with the beam spawner at `OnPlayerUpdate`. Then the Business Scrubs (En_Dns's slot: ML's
+       sale table, the empty bottle, the garden fee), vanilla's Init and Update wrapped.
+       Left: ML's other changes to vanilla actors' code that our branch switches on while ML is mounted (the push
+       blocks' colours, the fairies, ML's small edits to other actors), its player code (Magic Hourglass, triple jump, the
        Soul-Charged sword's model), and the registries stock does not read.
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
        roborich or move into the code mod. Delta packs only matter for handing out ML without the builder: a
