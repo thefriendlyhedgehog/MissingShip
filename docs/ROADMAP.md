@@ -125,9 +125,15 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        Update, the boulder's cutscene refused through `VB_PLAY_ONEPOINT_CS`, ML's title screen drawn in En_Mag's slot,
        and the ReDeads as vanilla's code with ML's changes built in. Each case was forced and checked on stock except
        the ones that need talking (the Birth Certificate's offer, the Bunny Hood sale, the cursed men's key).
-       Left: ML's player code (Magic Hourglass, triple jump and pond ride, the Soul-Charged sword's model, the
-       child's hands), its code patches outside actors (text speed, the ocarina note, HUD colours, the place-name
-       card), Controllable Bombchus letting go on the rail, and the registries stock does not read.
+       Then ML's player code, 2026-10-12, on the player's own ActorDB entry (vanilla's init and update wrapped) and
+       SoH's hooks: the Magic Hourglass (ML's aim and throw swapped in, the rewind and room counter, the cucco kept
+       through a void-out), the triple jump (swapped after vanilla starts the jump), the Soul-Charged sword, the
+       child's hands, ML's cucco as a cucco to the player, the Bunny Hood's speed, the void-out without damage, no
+       Navi toggle or Saria call, the music kept through holes, no enemy music, the place-name card at y 80 and no
+       revival fairy. Out of reach of any hook: the wall push-out skip after a room change, the child-shield rule,
+       the Bunny Hood's water factor beyond jumps and rolls, and the pond ride (it needs ML's entrance).
+       Left: ML's code patches outside actors (text speed, the ocarina note, HUD colours), Controllable Bombchus
+       letting go on the rail, and the registries stock does not read.
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
        roborich or move into the code mod. Delta packs only matter for handing out ML without the builder: a
        player who builds from their own ROM gets the whole layer.
