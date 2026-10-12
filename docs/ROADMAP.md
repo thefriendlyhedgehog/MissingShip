@@ -102,7 +102,10 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        Kokiri Forest complete, 2026-10-11: `ML_En_Md` (Mido, row 14) and `ML_SongBlock` (row 21) ported as before,
        so every actor ML places in Kokiri Forest runs on #11's branch and the scene loads with no errors. Then, the same day,
        `ML_Prologue` (row 29) and `ML_BgmTrigger` (row 63), which complete the link_home and Bombchu shop slots.
-       Left: 25 of the 30 actors ML's rooms place by name, and ML's changes to vanilla actors' code that our branch switches on
+       2026-10-12: Kakariko's (`ML_Bg_Spot02_Objects`, `ML_TalkSpot`, `ML_Villager`) and the fishing pond's
+       (`ML_Fishpond`, with the `ML_Elf` it spawns). `ML_PushBlock` (the Library) waits: it needs two calls inside
+       vanilla Obj_Oshihiki's code, which a mod cannot add without a hook there.
+       Left: 21 of the 30 actors ML's rooms place by name, and ML's changes to vanilla actors' code that our branch switches on
        while ML is mounted (its Blade Beam in En_M_Thunder's slot, ...).
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
        roborich or move into the code mod. Delta packs only matter for handing out ML without the builder: a
