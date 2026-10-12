@@ -132,8 +132,13 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        Navi toggle or Saria call, the music kept through holes, no enemy music, the place-name card at y 80 and no
        revival fairy. Out of reach of any hook: the wall push-out skip after a room change, the child-shield rule,
        the Bunny Hood's water factor beyond jumps and rolls, and the pond ride (it needs ML's entrance).
-       Left: ML's code patches outside actors (text speed, the ocarina note, HUD colours), Controllable Bombchus
-       letting go on the rail, and the registries stock does not read.
+       Then ML's code patches outside actors, 2026-10-12, on SoH's hooks around the code the branch patches: the HUD
+       (button and counter shadows at SoH's positions, the Start colour, the green A note, the Soul-Charged sword's B
+       icon), ML's title cards (its ribbon in its ten titled slots), text speed 2 by default and two characters a
+       step when slowed, B Cancels Choices with both of ML's options in Enhancements > Missing Link, Navi's sounds
+       muted, no dispersed sparkles, ML's world-map areas, the title screen's setup and the refusal of vanilla
+       scenes ML lacks. Out of reach: the refusal from the debug map select.
+       Left: Controllable Bombchus letting go on the rail, and the registries stock does not read.
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
        roborich or move into the code mod. Delta packs only matter for handing out ML without the builder: a
        player who builds from their own ROM gets the whole layer.
