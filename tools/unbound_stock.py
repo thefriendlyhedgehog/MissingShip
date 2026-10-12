@@ -125,7 +125,7 @@ def not_read(world, rewritten):
                                                          if 'drawConfig' in v)
     overrides = [(s, n, v) for s, d in vanilla.items() for n, v in d.get('entrances', {}).items()]
     report['not read: entrance flags'] = [f'{s}/{n}' for s, n, v in overrides if n.startswith('ENTR_')]
-    report['not read: intros'] = [f'{s}/{n}' for s, n, v in overrides if 'intro' in v]
+    report['intros left to the code mod'] = [f'{s}/{n}' for s, n, v in overrides if 'intro' in v]
     report['not read: continue points'] = [f'{s}/{n}' for s, n, v in overrides if 'continueAt' in v]
     report['not read: entrances only other registries name'] = sorted(
         f'{s}/{n}' for s, n, v in overrides if not n.startswith('ENTR_') and f'{s}/{n}' not in rewritten)

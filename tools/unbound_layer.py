@@ -47,7 +47,8 @@ With --stock the layer is for a stock Unbound, which reads neither packs nor our
 it ships no unbound/scenes.json, and exits to the entrances ML adds become vanilla entrances (tools/unbound_stock.py),
 with a report of what stock Unbound does not read. For ML's code mod (Unbound-modapi's mods/missinglink), which
 carries what stock does not read, it also writes the registries again as Blobs, missinglink/<name>, with the game's
-names in them as numbers, and puts ML's event entrances on vanilla entrance rows ML never uses, missinglink/entrances.
+names in them as numbers, puts ML's event entrances on vanilla entrance rows ML never uses, missinglink/entrances,
+and writes ML's intro cutscenes by entrance, missinglink/intros.
 """
 import argparse, glob, json, os, re, shutil, struct, subprocess, sys, tempfile, zipfile
 
@@ -352,6 +353,13 @@ def layer(vanilla, ml, out, world, ui, maps, pause, getitem, shops, items, unbou
                 indent=1).encode()))
             report['event entrances on unused vanilla rows'] = [f'{n} -> {world.table[d][0]}'
                                                                 for n, (d, _) in sorted(events.items())]
+            # ML's intro cutscenes and the vanilla ones it removes, by entrance number, which the code mod plays
+            intros = numbered({n: v['intro'] for d in world.scenes.values()
+                               for n, v in d.get('entrances', {}).items() if 'intro' in v}, names)
+            unnamed = sorted(n for n in intros if not n.isdigit())
+            if unnamed:
+                raise SystemExit(f'stock layer: intros on entrances with no number: {unnamed}')
+            z.writestr('missinglink/intros', blob(json.dumps(intros, indent=1).encode()))
         restrictions = items.restrictions()
         for scene, fields in restrictions.items():
             world.scenes.setdefault(scene, {})['restrictions'] = fields

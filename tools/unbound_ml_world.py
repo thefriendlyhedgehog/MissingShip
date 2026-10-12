@@ -5,7 +5,7 @@ engine submodule), so the two stay in step:
   - U1 entrances: the entrances the fork adds to vanilla scenes (entrance_table.h from 0x614) become entrances in
     those scenes, the eight-entry event groups with a cutscene layer 4, and ML's flags on the vanilla entrances it
     uses (ml_entrance_flags.c, ledger row 50) become overrides of those entrances;
-  - U3 intro cutscenes: ML's eleven (z_demo.c sEntranceCutsceneTable) on their entrances, and vanilla's (read from
+  - U3 intro cutscenes: ML's ten (z_demo.c sEntranceCutsceneTable) on their entrances, and vanilla's (read from
     Unbound's z_demo.c) removed, which also removes the Requiem and Nocturne triggers (row 114);
   - U2 cutscene destinations: every ML cutscene whose destination command the pipeline rewrote or ML patched;
   - U4 new save: ML's starting loadout (z_sram.c) and where Skip Intro lands (SkipIntro.cpp);
