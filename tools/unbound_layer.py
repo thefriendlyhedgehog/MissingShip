@@ -300,9 +300,15 @@ def layer(vanilla, ml, out, world, ui, maps, pause, getitem, shops, items, unbou
         # unbound-docs/missinglink-actors.md): ML's En_M_Thunder in actor slot 0x57, the Blade Beam spawner, ...
         z.writestr(ML_MARKER, json.dumps({'name': 'The Missing Link', 'scenes': ml_scenes()}, indent=1))
         z.writestr(ML_BANNER, ml_banner(v))
-        # One file per actor (Unbound SPEC §7.2): a vanilla actor's name is an override, any other name a type.
-        for name, doc in {**ML_OVERRIDES, **{k: t['type'] for k, t in ML_TYPES.items()}}.items():
-            z.writestr(f'unbound/actors/{name}.json', json.dumps(doc, indent=1))
+        # One file per actor (Unbound SPEC §7.2): a vanilla actor's name is an override, any other name a type. Stock
+        # Unbound refuses both (a vanilla name, `base`, `assets`): there ML's code mod applies the same table and
+        # registers the types under these names (skijer's branch, mod-sdk/mods/missinglink).
+        actors = {**ML_OVERRIDES, **{k: t['type'] for k, t in ML_TYPES.items()}}
+        if stock:
+            stock_actors = {'actors left to the code mod': sorted(actors)}
+        else:
+            for name, doc in actors.items():
+                z.writestr(f'unbound/actors/{name}.json', json.dumps(doc, indent=1))
         world.intros(m.namelist())
         for scene, name in ui.scene_names().items():
             world.scenes.setdefault(scene, {})['name'] = name
@@ -311,6 +317,7 @@ def layer(vanilla, ml, out, world, ui, maps, pause, getitem, shops, items, unbou
         for scene, fields in restrictions.items():
             world.scenes.setdefault(scene, {})['restrictions'] = fields
         if stock:
+            report.update(stock_actors)
             report.update(not_read(world, rewritten))
         else:
             z.writestr('unbound/scenes.json', json.dumps(world.scenes, indent=1))
@@ -357,8 +364,9 @@ def main():
     ap.add_argument('--out', default=os.path.join(ROOT, 'mod', 'MissingLink_Unbound.o2r'))
     ap.add_argument('--pack', action='store_true', help="write the layer as a pack of deltas against the player's "
                                                         "oot.o2r and Unbound's conversion of it (what we distribute)")
-    ap.add_argument('--stock', action='store_true', help='for a stock Unbound: no unbound/scenes.json, exits to the '
-                                                         "entrances ML adds rewritten (tools/unbound_stock.py)")
+    ap.add_argument('--stock', action='store_true', help='for a stock Unbound: no unbound/scenes.json or actor files '
+                                                         '(ML\'s code mod carries those), exits to the entrances ML '
+                                                         'adds rewritten (tools/unbound_stock.py)')
     ap.add_argument('--also-base', action='append', default=[], metavar='OOT_O2R',
                     help='with --pack, an oot.o2r another SoH extractor version wrote from the same ROM: the pack '
                          'then works over it too (Unbound takes any 9.x oot.o2r)')

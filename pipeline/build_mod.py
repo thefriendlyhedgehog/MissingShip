@@ -242,7 +242,8 @@ def main():
                                                        "distribute (give an oot.o2r from Unbound's own extractor)")
     p.add_argument('--stock', action='store_true', help="with --unbound, for a stock Unbound (roborich's, or with "
                                                         "skijer's code mods): exits only to entrances it has, no "
-                                                        "unbound/scenes.json; not with --pack")
+                                                        "unbound/scenes.json or actor files (ML's code mod carries "
+                                                        "those); not with --pack")
     p.add_argument('--also-base', action='append', default=[], metavar='OOT_O2R',
                    help='with --pack, an oot.o2r another SoH 9.x extractor wrote from the same ROM, so the pack '
                         'works over it too (players keep an oot.o2r from whichever SoH they had)')

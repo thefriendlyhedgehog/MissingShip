@@ -11,8 +11,9 @@ stock Unbound can follow:
     list the entrance table's spawn indexes, as in vanilla) is pointed where ML's entrance lands;
   - else the scene's first used entrance: the scene loads, but Link arrives at that entrance, not ML's.
 What else the vanilla-scene entries carried is not read by stock Unbound and is counted in the report: scene names,
-restrictions, save return points, draw configs, ML's flags on vanilla entrances (transitions, music, title cards),
-intro cutscenes, game-over continue points, and the entrances only ML's other registries name.
+restrictions, save return points, ML's flags on vanilla entrances (transitions, music, title cards), intro cutscenes,
+game-over continue points, and the entrances only ML's other registries name. ML's scene draw configs are not read
+either, but a room drawn with the wrong one crashes the game, so ML's code mod sets them; the report lists them.
 """
 import glob, os, re
 from collections import defaultdict
@@ -112,8 +113,12 @@ def not_read(world, rewritten):
     """What ML's entries for vanilla scenes carry that stock Unbound does not read, once the layer has added all of it
     (names, restrictions and intros come after the scene documents); `rewritten` are the entrances exits now reach."""
     report, vanilla = {}, world.scenes
-    for field in ('name', 'restrictions', 'saveReturn', 'drawConfig'):
+    for field in ('name', 'restrictions', 'saveReturn'):
         report[f'not read: {field}'] = sorted(s for s, v in vanilla.items() if field in v)
+    # without ML's draw config some rooms draw through an unset segment and the game crashes on arrival: ML's code mod
+    # sets these (skijer's branch, mod-sdk/mods/missinglink/ml_scenes.c, the same table)
+    report['draw configs left to the code mod'] = sorted(f'{s} {v["drawConfig"]}' for s, v in vanilla.items()
+                                                         if 'drawConfig' in v)
     overrides = [(s, n, v) for s, d in vanilla.items() for n, v in d.get('entrances', {}).items()]
     report['not read: entrance flags'] = [f'{s}/{n}' for s, n, v in overrides if n.startswith('ENTR_')]
     report['not read: intros'] = [f'{s}/{n}' for s, n, v in overrides if 'intro' in v]

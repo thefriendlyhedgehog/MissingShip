@@ -87,6 +87,18 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        `SCENE_HAIRAL_NIWA2`, Forest Temple) land at the scene's own entrance: stock's fixed entrance table has no spare
        entrance there that vanilla's cutscenes do not use. Landing where ML does needs custom entrances on vanilla
        scenes upstream (our branch's U1) or the code mod.
+       Stock actor data, 2026-10-11: stock Unbound refuses all ten of the layer's actor files, so `--stock` leaves
+       them out and the code mod carries them: ML's flag changes on seven vanilla actors (patched on their ActorDB
+       entries, as our branch's overrides do), Bg_Treemouth not spawned (`VB_SPAWN_ACTOR_ENTRY`), and `ml/grotto` and
+       `ml/crack_wall` registered under those names (vanilla's code with ML's models and collision; the grotto carries
+       ML's destination table, which our branch reads from `unbound/grottos.json`). The same pass found that "load"
+       had only meant "reached Scene Init": five scenes (Deku Tree, Forest Temple, Desert Colossus, Kakariko, Bongo
+       Bongo's room) crashed on their first frame, because stock does not read ML's scene draw configs and their rooms
+       draw through a segment only ML's config sets. The code mod now sets the 25 draw configs at `OnSceneInit`. All
+       25 scenes then ran 15 s with no critical log, and the only errors left are ML actors not yet ported. Tested:
+       the flags on the seven actors, Bg_Treemouth skipped in the Lost Woods, a Lost Woods grotto taking Link to the
+       Deku Tree (ML's own Deku Tree entrance there is spawn 2, which stock does not have, so Link lands at the
+       entrance), and the Deku Tree's breakable wall spawning with ML's collision and breaking into debris.
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
        roborich or move into the code mod. Delta packs only matter for handing out ML without the builder: a
        player who builds from their own ROM gets the whole layer.
