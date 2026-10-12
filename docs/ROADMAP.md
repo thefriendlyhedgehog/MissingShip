@@ -83,8 +83,8 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        upstream offers' work, or the code mod's.
        Stock scene data, 2026-10-11: `build_mod.py --stock` writes the layer without `unbound/scenes.json` and
        rewrites exits to ML's added entrances (`tools/unbound_stock.py`). All 25 ML scenes load on #11's branch. The
-       eight exits to entrances ML adds into vanilla scenes (Temple of Time, Stable, Back Alley House, the castle
-       courtyard scene, Forest Temple) land at the scene's own entrance: stock's fixed entrance table has no spare
+       eight exits to entrances ML adds into vanilla scenes (Temple of Time, Stable, Back Alley House,
+       `SCENE_HAIRAL_NIWA2`, Forest Temple) land at the scene's own entrance: stock's fixed entrance table has no spare
        entrance there that vanilla's cutscenes do not use. Landing where ML does needs custom entrances on vanilla
        scenes upstream (our branch's U1) or the code mod.
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
