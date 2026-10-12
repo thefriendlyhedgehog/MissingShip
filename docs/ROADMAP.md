@@ -148,7 +148,10 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        dungeon maps and missing minimaps; its pause menu (ages, positions, cursor rules, ammo counts, arrow colours);
        and its names in SoH's save editor, stats and Time Splits. That reaches the pond ride and the sword's lost
        charge too. Out of reach: the stats' `countsShown` and the countdown icon, the labels on Windows, and a new
-       file's preview before its first save.
+       file's preview before its first save. Every case was run on stock, 2026-10-12, through the pond's event chain
+       across all eight event entrances. That run found SoH's CreditsFix running some credits cases' destination
+       code twice; the code mod now keeps its destination through the second run (Unbound-modapi `a9fd5d273`).
+       Still not read on stock: ML's eleven intro cutscenes, which are in `unbound/scenes.json`.
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
        roborich or move into the code mod. Delta packs only matter for handing out ML without the builder: a
        player who builds from their own ROM gets the whole layer.
