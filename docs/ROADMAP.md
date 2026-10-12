@@ -120,8 +120,14 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        spawns it by number), with the beam spawner at `OnPlayerUpdate`. Then the Business Scrubs (En_Dns's slot: ML's
        sale table, the empty bottle, the garden fee), vanilla's Init and Update wrapped.
        Then the push-block colours (after Obj_Oshihiki's Init) and the fairies (En_Elf's update and draw wrapped).
-       Left: ML's small edits to other vanilla actors that our branch switches on while ML is mounted, its player code (Magic Hourglass, triple jump, the
-       Soul-Charged sword's model), and the registries stock does not read.
+       Then ML's small edits inside the other 25 vanilla actors, 2026-10-12, each on its actor's slot: ML's rules
+       around vanilla's Init and Update, ML's copies of the action functions it changed swapped in before vanilla's
+       Update, the boulder's cutscene refused through `VB_PLAY_ONEPOINT_CS`, ML's title screen drawn in En_Mag's slot,
+       and the ReDeads as vanilla's code with ML's changes built in. Each case was forced and checked on stock except
+       the ones that need talking (the Birth Certificate's offer, the Bunny Hood sale, the cursed men's key).
+       Left: ML's player code (Magic Hourglass, triple jump and pond ride, the Soul-Charged sword's model, the
+       child's hands), its code patches outside actors (text speed, the ocarina note, HUD colours, the place-name
+       card), Controllable Bombchus letting go on the rail, and the registries stock does not read.
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
        roborich or move into the code mod. Delta packs only matter for handing out ML without the builder: a
        player who builds from their own ROM gets the whole layer.
