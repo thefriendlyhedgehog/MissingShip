@@ -278,7 +278,8 @@ entries, which stock Unbound needs before Link can stand on them. The builder li
 to the code mod, and counts what stock Unbound does not read (scene names, restrictions, save return points, ML's
 entrance flags, intro cutscenes, continue points). On 2026-10-11 all eight of ML's such exits fall back to the
 scene's own entrance (the spare Temple of Time entrances are vanilla cutscene destinations), and all 25 of ML's
-scenes run on skijer's branch with the code mod.
+scenes run on skijer's branch with the code mod, which since 2026-10-12 holds every actor ML's rooms place by
+name.
 
 Without `--pack` the builder writes the whole layer, which holds the game's data too: for testing only. On macOS it
 reads `oot.o2r` from and writes `mods/MissingLink_Unbound.o2r` to Unbound's folder

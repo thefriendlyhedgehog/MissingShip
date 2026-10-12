@@ -103,16 +103,23 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        so every actor ML places in Kokiri Forest runs on #11's branch and the scene loads with no errors. Then, the same day,
        `ML_Prologue` (row 29) and `ML_BgmTrigger` (row 63), which complete the link_home and Bombchu shop slots.
        2026-10-12: Kakariko's (`ML_Bg_Spot02_Objects`, `ML_TalkSpot`, `ML_Villager`) and the fishing pond's
-       (`ML_Fishpond`, with the `ML_Elf` it spawns). `ML_PushBlock` (the Library) waits: it needs two calls inside
-       vanilla Obj_Oshihiki's code, which a mod cannot add without a hook there.
+       (`ML_Fishpond`, with the `ML_Elf` it spawns).
        Then the Deku Scrubs: `ML_HintNuts` (row 26; in the Deku Tree, Lost Woods, Gerudo Valley and Gerudo's
        Fortress slots) and `ML_HoleScrub` (row 33), which complete the Deku Tree.
        Then Hollow Root Keep's lifts and blocks (`ML_Lift`, `ML_LiftBlock`, `ML_Elevator`, `ML_ElevatorSpawner`,
        `ML_HakaLift`, `ML_RoomClearSwitch`, `ML_SlideBlock`), which complete it and the Gerudo's Fortress slot.
        Standing on the first lift crashed stock: ML's own collisions have no camera data, which stock's camera reads
        unchecked (our branch's B1). `--stock` now gives them empty camera entries, which covers every ML collision.
-       Left: 12 of the 30 actors ML's rooms place by name, and ML's changes to vanilla actors' code that our branch switches on
-       while ML is mounted (its Blade Beam in En_M_Thunder's slot, ...).
+       Then the last twelve, 2026-10-12, so all 30 actors ML's rooms place by name run on #11's branch: Bmori1's
+       (`ML_Pillar`, `ML_Thief`, `ML_Torch`), `ML_PushBlock`, `ML_DnsShop`, the Epona chase (`ML_EventSpawner`,
+       `ML_Malon` and her `ML_Cucco`), the boss (`ML_BossVa`, `ML_BossVaShot`, `ML_Light`), `ML_SkullKid`,
+       `ML_BeamHeart`, `ML_Ending` and `ML_FogWall`. The mod cannot hook inside vanilla code, so `ML_Torch`,
+       `ML_PushBlock` and `ML_DnsShop` carry vanilla's code with ML's changes built in, and `ML_FogWall` moves the
+       player's last-frame position with him after its loop, where our branch skips two wall push-outs.
+       Left: ML's changes to vanilla actors' code that our branch switches on while ML is mounted (its Blade Beam in
+       En_M_Thunder's slot, the Business Scrubs' sale table, ...), its player code (Magic Hourglass, triple jump), and
+       the registries stock does not read. Open: a red wedge across Bmori1 room 0 on stock, there without these
+       actors too.
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
        roborich or move into the code mod. Delta packs only matter for handing out ML without the builder: a
        player who builds from their own ROM gets the whole layer.
