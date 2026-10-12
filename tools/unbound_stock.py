@@ -10,12 +10,16 @@ stock Unbound can follow:
     and which the game's code never names: that slot of the scene's entrance list (each setup's `entrances`, the
     list the entrance table's spawn indexes, as in vanilla) is pointed where ML's entrance lands;
   - else the scene's first used entrance: the scene loads, but Link arrives at that entrance, not ML's.
+ML's actors' own collision (objects/*, LOCO resources) has no camera data, as in ML's ROM; vanilla's always has at
+least one entry. Standing on such a collision makes stock Unbound's camera read the missing list (z_bgcheck.c's
+func_80041A4C) and crash; our branch checks for it (row B1). The stock layer gives each one empty entries (setting 0,
+which the camera reads as "none", as our branch's check returns) up to the highest index its surfaces name.
 What else the vanilla-scene entries carried is not read by stock Unbound and is counted in the report: scene names,
 restrictions, save return points, ML's flags on vanilla entrances (transitions, music, title cards), intro cutscenes,
 game-over continue points, and the entrances only ML's other registries name. ML's scene draw configs are not read
 either, but a room drawn with the wrong one crashes the game, so ML's code mod sets them; the report lists them.
 """
-import glob, os, re
+import glob, os, re, struct
 from collections import defaultdict
 
 from unbound_ml_world import FORK_FIRST
@@ -126,3 +130,23 @@ def not_read(world, rewritten):
     report['not read: entrances only other registries name'] = sorted(
         f'{s}/{n}' for s, n, v in overrides if not n.startswith('ENTR_') and f'{s}/{n}' not in rewritten)
     return report
+
+
+def with_camera_entries(data):
+    """An object collision resource (LOCO) with no camera data, given empty entries up to the highest camera index its
+    surfaces name; None for any other file or one that already has camera data. Layout:
+    soh/soh/resource/importer/CollisionHeaderFactory.cpp (header 0x40, bounds, vertices, polygons, surface types,
+    then the camera data count and entries of u16 setting, s16 camera count, s32 position index)."""
+    if len(data) < 0x50 or data[4:8] != b'LOCO':
+        return None
+    o = 0x40 + 12
+    o += 4 + struct.unpack_from('<i', data, o)[0] * 6
+    o += 4 + struct.unpack_from('<I', data, o)[0] * 16
+    count = struct.unpack_from('<I', data, o)[0]
+    top = max((struct.unpack_from('<I', data, o + 4 + i * 8 + 4)[0] & 0xFF for i in range(count)), default=0)
+    o += 4 + count * 8
+    if struct.unpack_from('<I', data, o)[0] != 0:
+        return None
+    entries = top + 1
+    return data[:o] + struct.pack('<I', entries) + struct.pack('<HhI', 0, 0, 0) * entries + data[o + 4:]
+

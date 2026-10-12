@@ -107,7 +107,11 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        vanilla Obj_Oshihiki's code, which a mod cannot add without a hook there.
        Then the Deku Scrubs: `ML_HintNuts` (row 26; in the Deku Tree, Lost Woods, Gerudo Valley and Gerudo's
        Fortress slots) and `ML_HoleScrub` (row 33), which complete the Deku Tree.
-       Left: 19 of the 30 actors ML's rooms place by name, and ML's changes to vanilla actors' code that our branch switches on
+       Then Hollow Root Keep's lifts and blocks (`ML_Lift`, `ML_LiftBlock`, `ML_Elevator`, `ML_ElevatorSpawner`,
+       `ML_HakaLift`, `ML_RoomClearSwitch`, `ML_SlideBlock`), which complete it and the Gerudo's Fortress slot.
+       Standing on the first lift crashed stock: ML's own collisions have no camera data, which stock's camera reads
+       unchecked (our branch's B1). `--stock` now gives them empty camera entries, which covers every ML collision.
+       Left: 12 of the 30 actors ML's rooms place by name, and ML's changes to vanilla actors' code that our branch switches on
        while ML is mounted (its Blade Beam in En_M_Thunder's slot, ...).
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
        roborich or move into the code mod. Delta packs only matter for handing out ML without the builder: a

@@ -273,7 +273,8 @@ lands where ML's does, else a spare vanilla entrance into the scene that neither
 the scene's own entrance. Stock Unbound refuses the layer's actor files too (ML's changes to vanilla actors, and
 its grotto and breakable wall as types of vanilla ones), so the stock layer leaves them out: ML's code mod on
 skijer's branch (MissingShip-Unbound `ml-codemod`, `mod-sdk/mods/missinglink`) carries them, along with ML's scene
-draw configs, without which five of ML's scenes crash on arrival. The builder lists each rewrite and what it left
+draw configs, without which five of ML's scenes crash on arrival. It also gives ML's own collisions empty camera
+entries, which stock Unbound needs before Link can stand on them. The builder lists each rewrite and what it left
 to the code mod, and counts what stock Unbound does not read (scene names, restrictions, save return points, ML's
 entrance flags, intro cutscenes, continue points). On 2026-10-11 all eight of ML's such exits fall back to the
 scene's own entrance (the spare Temple of Time entrances are vanilla cutscene destinations), and all 25 of ML's

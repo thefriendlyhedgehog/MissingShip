@@ -57,7 +57,7 @@ from unbound_ml_pause import MlPause
 from unbound_ml_shops import MlShops
 from unbound_ml_ui import MlUi
 from unbound_ml_world import MlWorld
-from unbound_stock import not_read, stock_scenes
+from unbound_stock import not_read, stock_scenes, with_camera_entries
 import deltapack
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -264,6 +264,7 @@ def layer(vanilla, ml, out, world, ui, maps, pause, getitem, shops, items, unbou
     with zipfile.ZipFile(vanilla) as v, zipfile.ZipFile(ml) as m, zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED) as z:
         base = {i.filename: i.CRC for i in v.infolist()}
         scene_docs = {}                 # written after the loop: --stock rewrites exits across scenes
+        camera_padded = []
         for info in m.infolist():
             n = info.filename
             if n in SKIP or base.get(n) == info.CRC:
@@ -290,9 +291,13 @@ def layer(vanilla, ml, out, world, ui, maps, pause, getitem, shops, items, unbou
                 continue
             else:
                 stats['changed' if n in base else 'added'] += 1
+                if stock and with_camera_entries(data) is not None:
+                    data = with_camera_entries(data)
+                    camera_padded.append(n)
             z.writestr(n, data)
         if stock:
             report, rewritten = stock_scenes(scene_docs, world, unbound_src)
+            report['collisions given empty camera entries'] = camera_padded
         for n, doc in scene_docs.items():
             z.writestr(n, json.dumps(doc, indent=1))
         z.writestr('unbound.json', json.dumps(MANIFEST, indent=1))
