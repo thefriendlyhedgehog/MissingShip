@@ -118,8 +118,7 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        player's last-frame position with him after its loop, where our branch skips two wall push-outs.
        Left: ML's changes to vanilla actors' code that our branch switches on while ML is mounted (its Blade Beam in
        En_M_Thunder's slot, the Business Scrubs' sale table, ...), its player code (Magic Hourglass, triple jump), and
-       the registries stock does not read. Open: a red wedge across Bmori1 room 0 on stock, there without these
-       actors too.
+       the registries stock does not read.
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
        roborich or move into the code mod. Delta packs only matter for handing out ML without the builder: a
        player who builds from their own ROM gets the whole layer.
