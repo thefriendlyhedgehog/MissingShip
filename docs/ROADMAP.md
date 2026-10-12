@@ -105,7 +105,9 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        2026-10-12: Kakariko's (`ML_Bg_Spot02_Objects`, `ML_TalkSpot`, `ML_Villager`) and the fishing pond's
        (`ML_Fishpond`, with the `ML_Elf` it spawns). `ML_PushBlock` (the Library) waits: it needs two calls inside
        vanilla Obj_Oshihiki's code, which a mod cannot add without a hook there.
-       Left: 21 of the 30 actors ML's rooms place by name, and ML's changes to vanilla actors' code that our branch switches on
+       Then the Deku Scrubs: `ML_HintNuts` (row 26; in the Deku Tree, Lost Woods, Gerudo Valley and Gerudo's
+       Fortress slots) and `ML_HoleScrub` (row 33), which complete the Deku Tree.
+       Left: 19 of the 30 actors ML's rooms place by name, and ML's changes to vanilla actors' code that our branch switches on
        while ML is mounted (its Blade Beam in En_M_Thunder's slot, ...).
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
        roborich or move into the code mod. Delta packs only matter for handing out ML without the builder: a
