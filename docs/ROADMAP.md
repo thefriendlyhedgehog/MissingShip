@@ -161,7 +161,8 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        (`missinglink/entrancechanges`) and its scene names, draw configs, save return points and restrictions
        (`missinglink/scenes`). The code mod applies them; the draw configs come from the layer instead of its own
        table. Run on stock: four scenes' exits, the Continue, five scenes' restrictions, a save return and the names
-       (Unbound-modapi `0d0a4c33c`).
+       (Unbound-modapi `0d0a4c33c`). The untested cases then ran on stock too: ML's flags on arrival (title cards,
+       music, transitions), all nine continue points, all 21 save returns and the grotto's slot 2 (`dd4f7b27f`).
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
        roborich or move into the code mod. Delta packs only matter for handing out ML without the builder: a
        player who builds from their own ROM gets the whole layer.
