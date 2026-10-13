@@ -167,6 +167,8 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        file select first writes a new file and saves again, so the file and its preview data hold ML's start, as on
        the branch (`d39c96be9`). With that, everything ML's layer carries reaches a stock Unbound with the code mod;
        what stays out of reach is listed in the mod's README.
+       Then ML's countdown timer icon, 2026-10-13: the Kokiri Sword, set on SoH's `itemMapping` Master Sword entry
+       while a countdown runs (macOS and Linux; `5a7784fd8`). The gameplay stats' `countsShown` stays out of reach.
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
        roborich or move into the code mod. Delta packs only matter for handing out ML without the builder: a
        player who builds from their own ROM gets the whole layer.
