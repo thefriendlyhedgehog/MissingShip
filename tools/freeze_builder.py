@@ -5,7 +5,9 @@
 Needs PyInstaller (pip install pyinstaller). Writes <out>/MissingShipBuilder/ (default dist/builder/): the program,
 plus the pipeline's scripts and data, the SoH files the pipeline reads, ZAPD, and version.txt (the commit it was frozen
 from; the game rebuilds the mod when it changes). For SoH: Unbound (build_mod.py --unbound) it also carries the layer
-tools, the fork's and Unbound's files they read, and unbound.txt (the Unbound commit those came from). No ROM or game data goes in: the builder makes everything from the
+tools, the fork's and Unbound's files they read, and unbound.txt (the Unbound commit those came from); and ML's code
+mod for a stock Unbound (tools/codemod.py's, with codemod.txt naming its commit), when there is one. No ROM or game
+data goes in: the builder makes everything from the
 player's own files. Run it on each OS; PyInstaller can't cross-compile.
 """
 import argparse, ast, os, shutil, subprocess, sys
@@ -76,6 +78,8 @@ def main():
     ap.add_argument('--soh', default=mspaths.SOH, help='engine/soh, for the SoH files')
     ap.add_argument('--unbound-src', default=mspaths.UNBOUND_SRC,
                     help='SoH: Unbound at the fork\'s SoH version (mspaths.UNBOUND_COMPARE)')
+    ap.add_argument('--code-mod', default=mspaths.CODEMOD,
+                    help='ML\'s code mod for every OS (tools/codemod.py), written beside a --stock layer')
     args = ap.parse_args()
     # PyInstaller resolves relative paths against its spec folder (--out), not the working directory.
     args.zapd, args.out, args.soh, args.unbound_src = (os.path.abspath(a) for a in (args.zapd, args.out, args.soh,
@@ -117,6 +121,14 @@ def main():
             os.makedirs(os.path.dirname(dest), exist_ok=True)
             shutil.copy2(src, dest)
 
+    codemod_txt = os.path.join(os.path.dirname(os.path.abspath(args.code_mod)), 'codemod.txt')
+    if os.path.isfile(args.code_mod) and os.path.isfile(codemod_txt):
+        os.makedirs(os.path.join(stage, 'codemod'))
+        shutil.copy2(args.code_mod, os.path.join(stage, 'codemod', 'missinglink.o2r'))
+        shutil.copy2(codemod_txt, os.path.join(stage, 'codemod', 'codemod.txt'))
+    else:
+        print(f'warning: no code mod at {args.code_mod} (tools/codemod.py): this builder can\'t do --stock')
+
     sep = os.pathsep
     cmd = [sys.executable, '-m', 'PyInstaller', '--noconfirm', '--onedir', '--console', '--name', 'MissingShipBuilder',
            '--distpath', args.out, '--workpath', os.path.join(args.out, 'work'), '--specpath', args.out,
@@ -125,6 +137,8 @@ def main():
            '--add-data', f'{os.path.join(stage, "tools")}{sep}tools',
            '--add-data', f'{os.path.join(stage, "unbound")}{sep}unbound',
            '--add-binary', f'{args.zapd}{sep}.']
+    if os.path.isdir(os.path.join(stage, 'codemod')):
+        cmd += ['--add-data', f'{os.path.join(stage, "codemod")}{sep}codemod']
     # macOS: Homebrew's SDL2 (which ZAPD links) is sdl2-compat, which loads SDL3 at start-up from its own folder
     # and aborts without it. PyInstaller can't see that, so SDL3 goes in by hand, under the name it looks for.
     if sys.platform == 'darwin':
@@ -154,6 +168,8 @@ def main():
     ub = subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=args.unbound_src, check=True, capture_output=True, text=True)
     with open(os.path.join(args.out, 'MissingShipBuilder', 'unbound.txt'), 'w') as f:
         f.write(ub.stdout.strip() + '\n')
+    if os.path.isdir(os.path.join(args.out, 'MissingShipBuilder', '_internal', 'codemod')):
+        shutil.copy2(codemod_txt, os.path.join(args.out, 'MissingShipBuilder', 'codemod.txt'))
     print('builder:', os.path.join(args.out, 'MissingShipBuilder'))
 
 

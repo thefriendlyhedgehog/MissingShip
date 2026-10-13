@@ -277,7 +277,14 @@ It reads oot.o2r from Unbound's folder (~/Library/Application Support/com.shipof
 mods/MissingLink_Unbound.o2r there. Start Unbound and The Missing Link is loaded. Build it again after updating
 Unbound or this package. --oot-o2r and --out choose other places.
 
-MissingShipBuilder/unbound.txt names the Unbound build this package was made for.
+For a stock Unbound with code mods (skijer's NEI Unbound), add --stock:
+  MissingShipBuilder/MissingShipBuilder --unbound "/Applications/<your Unbound>.app" --stock <OoT ROM> <patch .zip>
+It then also writes mods/missinglink.o2r, The Missing Link's behaviour as a code mod (compiled code only, for
+Windows, Linux and macOS). It is not signed yet: a build of Unbound that loads only signed mods refuses it, and one
+that asks shows its name and content hash the first time; answer "Always load this version".
+
+MissingShipBuilder/unbound.txt names the Unbound build this package was made for, and MissingShipBuilder/codemod.txt
+the code mod's commit.
 """
 
 
@@ -507,6 +514,10 @@ def check_unbound_builder(path):
     if not os.path.isfile(ub) or not os.path.isdir(os.path.join(path, '_internal', 'unbound')):
         sys.exit(f'the builder at {path} has no SoH: Unbound files: freeze it again (tools/freeze_builder.py)')
     print(f'builder made for Unbound {open(ub).read().strip()[:10]}')
+    cm = os.path.join(path, 'codemod.txt')
+    if not os.path.isfile(cm) or not os.path.isfile(os.path.join(path, '_internal', 'codemod', 'missinglink.o2r')):
+        sys.exit(f'the builder at {path} has no code mod for --stock: make it (tools/codemod.py), then freeze again')
+    print(f'builder carries the code mod from {open(cm).read().strip()}')
 
 
 def main():

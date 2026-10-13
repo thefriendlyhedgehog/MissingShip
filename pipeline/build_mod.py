@@ -13,13 +13,15 @@ ML ROM it used, so MissingShip can rebuild the mod after an update without askin
 
 With --unbound it writes ML's SoH: Unbound layer instead (tools/unbound_layer.py), and with --pack that layer as a
 pack of deltas against the player's own base (tools/deltapack.py): ML's own bytes and none of the game's, the file we
-distribute for players to drop into Unbound's mods/ folder.
+distribute for players to drop into Unbound's mods/ folder. With --stock (a stock Unbound with skijer's mod API) it
+also writes ML's code mod, missinglink.o2r, beside the layer: compiled code only, which the builder carries
+(tools/codemod.py makes it), checked against the layer it has just made.
 
 It runs the same pipeline as ms_cycle.py, in a temporary work folder, replaying pipeline/baseline.json instead of
 reading the debug ROM, with SoH's files and ZAPD from the builder's own folder. The packages ship it frozen per OS,
 so players need no Python. A frozen builder also runs each pipeline step: `<builder> --run-script <step.py>`.
 """
-import argparse, os, runpy, shutil, subprocess, sys, tempfile, zipfile, zlib
+import argparse, json, os, runpy, shutil, subprocess, sys, tempfile, zipfile, zlib
 
 ML_CRC = 0x59CD42A3        # The Missing Link v2.0, .z64 byte order
 OOT10_CRC = 0xCD16C529     # OoT NTSC-U 1.0, .z64 byte order: the ROM Kaze's patch is made for
@@ -169,11 +171,47 @@ def unbound_layer(args, step, env, oot, mod, work):
     return layer
 
 
+def code_mod(args):
+    """ML's code mod: --code-mod, MS_CODEMOD, the frozen builder's own (codemod/), or a checkout's
+    (mspaths.CODEMOD, made by tools/codemod.py)."""
+    path = args.code_mod or os.environ.get('MS_CODEMOD')
+    if not path and FROZEN:
+        path = os.path.join(HERE, 'codemod', 'missinglink.o2r')
+    if not path:
+        sys.path.insert(0, PIPE_SRC)
+        import mspaths
+        path = mspaths.CODEMOD
+    if not os.path.isfile(path):
+        fail(f'ML\'s code mod is missing ({path})' + ('' if FROZEN else ': make it with tools/codemod.py'))
+    return os.path.abspath(path)
+
+
+def write_code_mod(path, layer, out_dir):
+    """Write the code mod beside the layer, once every resource its manifest requires is in the layer."""
+    with zipfile.ZipFile(path) as z:
+        manifest = json.loads(z.read('manifest.json'))
+    with zipfile.ZipFile(layer) as z:
+        have = set(z.namelist())
+    missing = [r for r in manifest.get('requires', []) if r not in have]
+    if missing:
+        fail(f'ML\'s code mod needs {", ".join(missing)}, which the layer does not have: this builder\'s code mod and '
+             'layer tools do not match')
+    platform = {'win32': 'windows_x64', 'darwin': 'darwin'}.get(sys.platform, 'linux_x64')
+    if platform not in manifest.get('binaries', {}):
+        print(f'MissingShip builder: note: the code mod has no {platform} binary, only '
+              f'{", ".join(sorted(manifest.get("binaries", {})))}')
+    dest = os.path.join(out_dir, manifest.get('name', 'missinglink') + '.o2r')
+    shutil.copyfile(path, dest + '.tmp')
+    os.replace(dest + '.tmp', dest)
+    print(f'MissingShip builder: wrote {dest}')
+
+
 def build(args):
     oot = os.path.abspath(args.oot_o2r)
     if not os.path.exists(oot):
         fail(f'{oot} not found: start the game once so it makes oot.o2r from your ROM')
     out = os.path.abspath(args.out)
+    codemod = code_mod(args) if args.stock else None      # before the build, so a missing one fails at once
     work = tempfile.mkdtemp(prefix='missingship-build-')
     try:
         shutil.copytree(PIPE_SRC, os.path.join(work, 'pipeline'), ignore=SKIP)
@@ -214,6 +252,8 @@ def build(args):
         shutil.copyfile(built, out + '.tmp')
         os.replace(out + '.tmp', out)
         print(f'MissingShip builder: wrote {out}')
+        if codemod:
+            write_code_mod(codemod, out, os.path.dirname(out))
     finally:
         if not args.keep:
             shutil.rmtree(work, ignore_errors=True)
@@ -244,6 +284,8 @@ def main():
                                                         "skijer's code mods): exits only to entrances it has, no "
                                                         "unbound/scenes.json or actor files (ML's code mod carries "
                                                         "those); not with --pack")
+    p.add_argument('--code-mod', help='with --stock, the code mod to write beside the layer (default: the builder\'s '
+                                      'own)')
     p.add_argument('--also-base', action='append', default=[], metavar='OOT_O2R',
                    help='with --pack, an oot.o2r another SoH 9.x extractor wrote from the same ROM, so the pack '
                         'works over it too (players keep an oot.o2r from whichever SoH they had)')
@@ -258,6 +300,8 @@ def main():
         p.error('--pack needs --unbound: packs are read by SoH: Unbound')
     if args.stock and (args.pack or not args.unbound):
         p.error('--stock needs --unbound and not --pack: stock Unbound does not read packs')
+    if args.code_mod and not args.stock:
+        p.error('--code-mod needs --stock: only a stock Unbound takes ML\'s behaviour as a code mod')
     if args.also_base and not args.pack:
         p.error('--also-base needs --pack')
     if args.unbound and (not args.oot_o2r or not args.out):

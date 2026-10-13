@@ -11,6 +11,8 @@ matching environment variable (e.g. `MS_DEBUG_ROM=/path/to/rom.z64 python3 tools
                     (ZAPD.exe, or Release/ZAPD.exe for a Visual Studio build, on Windows: MS-082)
     MS_ZAPD_CWD     working directory ZAPD runs in               default: $MS_SHIPWRIGHT/soh
     MS_UNBOUND_SRC  SoH: Unbound at UNBOUND_COMPARE (below)      default: ../Unbound-923-src
+    MS_CODEMOD_SRC  ML's code mod checkout (MissingShip-Unbound)  default: ../Unbound-modapi
+    MS_CODEMOD      ML's code mod for every OS (tools/codemod.py) default: dist/codemod/missinglink.o2r
 
 One ZAPD and one set of engine tables for every step (MS-009): the engine fork's own. It must be the patched
 ZAPDTR (MissingShip-ZAPDTR), whose ZAudio guard ML's audio needs.
@@ -51,6 +53,11 @@ ZAPD_CWD = _env('MS_ZAPD_CWD', SOH)
 # the fork moves to a newer SoH.
 UNBOUND_COMPARE = '7714a97bf0708eec33a1434406ce6d2aab657f4f'
 UNBOUND_SRC = _env('MS_UNBOUND_SRC', os.path.join(os.path.dirname(ROOT), 'Unbound-923-src'))
+
+# ML's C behaviour as a code mod for a stock Unbound with skijer's mod API (MissingShip-Unbound, branch ml-codemod,
+# mod-sdk/mods/missinglink). tools/codemod.py packs it for every OS; the builder writes it beside a --stock layer.
+CODEMOD_SRC = _env('MS_CODEMOD_SRC', os.path.join(os.path.dirname(ROOT), 'Unbound-modapi'))
+CODEMOD = _env('MS_CODEMOD', os.path.join(ROOT, 'dist', 'codemod', 'missinglink.o2r'))
 
 
 def unbound_src_problem(path):

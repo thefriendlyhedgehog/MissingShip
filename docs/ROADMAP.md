@@ -206,6 +206,12 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        from the game. The merged package runs on macOS. On Linux it ran on skijer's own release (his modder
        AppImage, the unsigned mod pre-approved by its content hash): each of ML's 25 scenes and the title screen for
        20 s, with no error. Windows is built, not yet run (no Windows test machine). The macOS binary is arm64 only.
+       Then the builder delivers it, 2026-10-13: `tools/codemod.py` takes the `ml-codemod` checkout's pushed commit,
+       builds the macOS binary, takes Windows and Linux from that commit's green CI run and merges the three into
+       `dist/codemod/missinglink.o2r` (`codemod.txt` names the commit and run). `freeze_builder.py` carries it, and
+       `build_mod.py --stock` writes it as `mods/missinglink.o2r` beside the layer, after checking every resource its
+       manifest requires is in the layer it just made. Run from the checkout, the two files load together on macOS
+       with no error. The frozen builder is not yet re-frozen with it (PyInstaller is no longer installed here).
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
        roborich or move into the code mod. Delta packs only matter for handing out ML without the builder: a
        player who builds from their own ROM gets the whole layer.
