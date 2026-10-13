@@ -194,6 +194,11 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        and every label through the mod API's label entries, so on Windows too. The `--stock` layer's labels now carry
        the timestamps of ML's items the stats list and the countdown icon's item number, which the mod can't look up
        there. Each case ran on a host with the five PRs. `ml-codemod` keeps the stock versions until they merge.
+       After skijer's review the same evening: the wall push-out hook was withdrawn (no case needs it; `ml-codemod`'s
+       fog wall moves the last-frame position, and the playthrough's maze passed on stock), ML's child-shield answer
+       is now always false (the no-shield half was a side effect of ML's nop), and the rest went to skijer as one PR,
+       [skijer/Shipwright#32](https://github.com/skijer/Shipwright/pull/32), with the song cone and the no-camera-data
+       fix.
        Then the last note of something unported, 2026-10-13: the Blade Beam's params 0xBEEF, called the sword's glow
        and left inert until ML's `object_link_child` was ported, is an unfinished figure with Link's eyes that ML
        shows for at most 4 frames of a sword draw, away from Link (ML's spawner and actor disassembled; no ML
