@@ -199,6 +199,12 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        shows for at most 4 frames of a sword draw, away from Link (ML's spawner and actor disassembled; no ML
        cutscene or code holds the sword-draw pose). It stays inert in every port; the notes now say why. With that,
        nothing ML does in play is left that stock, with skijer's offered hooks, doesn't reach.
+       Then the code mod for Windows and Linux, 2026-10-13: a workflow on MissingShip-Unbound builds it alone on
+       Windows (linked against `soh.lib` from skijer's NEI Unbound modder release) and Linux, for `ml-codemod` and
+       `ml-codemod-hooks`; with the macOS build, `merge_mod_packages.py` makes one package for all three. Windows needed
+       six game globals declared as imports (`ml_pause.c`, `ml_maps.c`). Its link resolves everything the mod takes
+       from the game. The merged package runs on macOS; Windows and Linux are built, not yet run (no Windows test
+       machine; the Linux box was offline). The macOS binary is arm64 only.
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
        roborich or move into the code mod. Delta packs only matter for handing out ML without the builder: a
        player who builds from their own ROM gets the whole layer.
