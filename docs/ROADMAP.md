@@ -181,7 +181,10 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        `7e0b3c73d`).
        Then the HUD shadows on the pause screen's copy frame, 2026-10-13: drawn at `OnPlayDrawEnd` on that frame,
        after the copy and under the buttons, as on the branch (A/B on stock; `92f354912`). Rechecked as out of reach:
-       the wall push-out skip for every actor (inside `Actor_UpdateBgCheckInfo`), `countsShown` and the water factor. Of ML's player edits, `talkActor` and
+       the wall push-out skip for every actor (inside `Actor_UpdateBgCheckInfo`), `countsShown` and the water factor.
+       Then B Cancels Choices in the gameplay stats, 2026-10-13: the mod changes the whole frame's input on a choice
+       prompt, and the stats (its only other reader) now count the press as B, as on the branch (A/B on stock;
+       `3d7490858`). What stock still doesn't reach is listed in the mod's README; none of it has a hook. Of ML's player edits, `talkActor` and
        LOD 0 turned out to be no gap; the wall push-out skip, the child-shield rule and the water factor's other
        uses stay out of reach (called or kept inside the host).
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
