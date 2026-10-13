@@ -73,13 +73,15 @@ class MlUi:
         table = src[src.index('sMlAreas = {'):]
         return dict(re.findall(r'\{ (SCENE_\w+), "([^"]*)" \}', table[:table.index('};')]))
 
+    def _timestamp_names(self, src):
+        """TIMESTAMP_*/ITEM_* -> the name gameplaystats.cpp's SetupDisplayNames gives it."""
+        return dict(re.findall(r'itemTimestampDisplayName\[(\w+)\],\s*"([^"]*)"',
+                               _function(src, 'void SetupDisplayNames()')))
+
     def _timestamps(self, items):
         """Timestamps ML names that the item labels leave as SoH's: events, and items SoH doesn't list."""
-        def names(src):
-            return dict(re.findall(r'itemTimestampDisplayName\[(\w+)\],\s*"([^"]*)"',
-                                   _function(src, 'void SetupDisplayNames()')))
-        ub = names(self.ub('soh', 'Enhancements', 'gameplaystats.cpp'))
-        fork = names(self.fork('soh', 'Enhancements', 'gameplaystats.cpp'))
+        ub = self._timestamp_names(self.ub('soh', 'Enhancements', 'gameplaystats.cpp'))
+        fork = self._timestamp_names(self.fork('soh', 'Enhancements', 'gameplaystats.cpp'))
         out = {}
         for key, fork_name in fork.items():
             ub_name = ub.get(key, '')
@@ -101,6 +103,16 @@ class MlUi:
         groups = {k: re.findall(r'\w+', v) for k, v in
                   re.findall(r'\{ (ITEM_\w+),\s*\{([^}]*)\} \}', popups[:popups.index('};')])}
         return {'splits': splits, 'groups': groups}
+
+    def stock_labels(self, labels):
+        """`labels` for ML's code mod (missinglink/labels): an item's label also names the item's timestamp where the
+        stats list it, which the mod can't see in SoH's tables on every platform, so those timestamps are written out;
+        and the countdown icon's item again as `countdownTimerItem`, which becomes its number."""
+        listed = self._timestamp_names(self.ub('soh', 'Enhancements', 'gameplaystats.cpp'))
+        timestamps = {key: label for key, label in labels['items'].items() if key in listed}
+        timestamps.update(labels['timestamps'])
+        icons = dict(labels['icons'], countdownTimerItem=labels['icons']['countdownTimer'])
+        return dict(labels, timestamps=timestamps, icons=icons)
 
     def labels(self):
         """unbound/labels.json (Unbound SPEC §7.7)."""

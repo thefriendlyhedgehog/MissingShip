@@ -187,6 +187,13 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        `3d7490858`). What stock still doesn't reach is listed in the mod's README; none of it has a hook. Of ML's player edits, `talkActor` and
        LOD 0 turned out to be no gap; the wall push-out skip, the child-shield rule and the water factor's other
        uses stay out of reach (called or kept inside the host).
+       Then ML's side of the hooks offered to skijer, 2026-10-13, on Unbound-modapi `ml-codemod-hooks` (`ml-codemod`
+       with skijer/Shipwright#23 to #27 merged; `fd5fae4e7`): the child-shield rule (ML's fist-and-shield hand now
+       draws), the wall push-out skip (a room's first frame, the Hourglass rewind, the fog wall's teleport, which no
+       longer moves the player's last-frame position), the Bunny Hood's water factor in all its uses, `countsShown`,
+       and every label through the mod API's label entries, so on Windows too. The `--stock` layer's labels now carry
+       the timestamps of ML's items the stats list and the countdown icon's item number, which the mod can't look up
+       there. Each case ran on a host with the five PRs. `ml-codemod` keeps the stock versions until they merge.
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
        roborich or move into the code mod. Delta packs only matter for handing out ML without the builder: a
        player who builds from their own ROM gets the whole layer.

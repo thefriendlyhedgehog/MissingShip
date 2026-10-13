@@ -286,7 +286,8 @@ def layer(vanilla, ml, out, world, ui, maps, pause, getitem, shops, items, unbou
         def registry(name, doc):
             z.writestr(f'unbound/{name}.json', json.dumps(doc, indent=1))
             if stock and name in STOCK_REGISTRIES:
-                z.writestr(f'missinglink/{name}', blob(json.dumps(numbered(doc, names), indent=1).encode()))
+                stock_doc = ui.stock_labels(doc) if name == 'labels' else doc
+                z.writestr(f'missinglink/{name}', blob(json.dumps(numbered(stock_doc, names), indent=1).encode()))
 
         base = {i.filename: i.CRC for i in v.infolist()}
         scene_docs = {}                 # written after the loop: --stock rewrites exits across scenes
