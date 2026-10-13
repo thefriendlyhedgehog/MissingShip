@@ -3,8 +3,8 @@
 Our SoH fork edits the pause menu (kaleido) in C (ledger row 24); Unbound takes it as unbound/pause.json (Unbound SPEC
 §7.9). Everything is read from the fork's sources compared with Unbound's, so the two stay in step:
   - the age rules (gSlotAgeReqs, gItemAgeReqs, gEquipAgeReqs) ML opens to either age;
-  - the item grid's X, the ammo counts ML shows (slots 8-10, Sticks and Nuts placed over slots 9 and 10) and the
-    Bombchu count drawn full at 20;
+  - the item grid's X, the ammo counts ML shows (slots 8-10, Sticks and Nuts placed over slots 9 and 10, Bombs over
+    slot 8 by the owner's choice: AMMO_DIGITS_OWNER) and the Bombchu count drawn full at 20;
   - the equipment page's column X and ML's vertical cursor (its remap, stopping on any slot);
   - the quest page's slot positions (ML parks the slots it does not use off the page), the slot the page is entered on
     from the right, and ML's cursor redirects;
@@ -30,6 +30,9 @@ EQUIP_CELLS = [['ITEM_QUIVER_30', 'ITEM_SWORD_KOKIRI', 'ITEM_SWORD_MASTER', 'ITE
                ['ITEM_BRACELET', 'ITEM_TUNIC_KOKIRI', 'ITEM_TUNIC_GORON', 'ITEM_TUNIC_ZORA'],
                ['ITEM_SCALE_SILVER', 'ITEM_BOOTS_KOKIRI', 'ITEM_BOOTS_IRON', 'ITEM_BOOTS_HOVER']]
 AMMO_ITEMS = ['ITEM_STICK', 'ITEM_NUT', 'ITEM_BOMB', 'ITEM_BOW', 'ITEM_SLINGSHOT', 'ITEM_BOMBCHU', 'ITEM_BEAN']
+# ML places each count by item (kaleido +0x74B0): its digit table keeps vanilla's Bomb place, slot 2, which its layout
+# leaves empty, while its Bombs sit in slot 8. The owner's look has every count on slots 8-10 (2026-10-13).
+AMMO_DIGITS_OWNER = {'ITEM_BOMB': 8}
 EDGES = {'PAUSE_CURSOR_PAGE_LEFT': 'left', 'PAUSE_CURSOR_PAGE_RIGHT': 'right'}
 
 
@@ -100,6 +103,7 @@ class MlPause:
         if fork.ammo_slots is not None:
             ammo['slots'] = fork.ammo_slots
         digits = {AMMO_ITEMS[i]: f // 4 for i, (u, f) in enumerate(zip(ub.ammo_digits, fork.ammo_digits)) if u != f}
+        digits.update(AMMO_DIGITS_OWNER)
         if digits:
             ammo['digits'] = digits
         full = {i: n for i, n in fork.full.items() if ub.full.get(i) != n}
