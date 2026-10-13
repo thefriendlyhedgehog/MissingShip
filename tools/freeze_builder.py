@@ -107,12 +107,14 @@ def main():
 
     import glob
     sys.path.insert(0, os.path.join(ROOT, 'tools'))
-    from unbound_stock import CODE_NAMES, code_names
+    from unbound_stock import CODE_NAMES, ENUM_HEADERS, code_names
     os.makedirs(os.path.join(stage, 'unbound'), exist_ok=True)
     with open(os.path.join(stage, 'unbound', CODE_NAMES), 'w') as f:   # --stock's check, without Unbound's sources
         f.write('\n'.join(sorted(code_names(args.unbound_src))) + '\n')
-    unbound = UNBOUND_FILES + sorted(os.path.relpath(f, args.unbound_src) for g in UNBOUND_GLOBS
-                                     for f in glob.glob(os.path.join(args.unbound_src, g)))
+    # --stock reads ENUM_HEADERS (unbound_stock.game_names)
+    headers = [os.path.join('soh', h) for h in ENUM_HEADERS if os.path.join('soh', h) not in UNBOUND_FILES]
+    unbound = UNBOUND_FILES + headers + sorted(os.path.relpath(f, args.unbound_src) for g in UNBOUND_GLOBS
+                                               for f in glob.glob(os.path.join(args.unbound_src, g)))
     for f in unbound:
         src, dest = os.path.join(args.unbound_src, f), os.path.join(stage, 'unbound', f)
         if os.path.isdir(src):

@@ -211,7 +211,9 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        `dist/codemod/missinglink.o2r` (`codemod.txt` names the commit and run). `freeze_builder.py` carries it, and
        `build_mod.py --stock` writes it as `mods/missinglink.o2r` beside the layer, after checking every resource its
        manifest requires is in the layer it just made. Run from the checkout, the two files load together on macOS
-       with no error. The frozen builder is not yet re-frozen with it (PyInstaller is no longer installed here).
+       with no error. Frozen, the builder writes the same two files (the layer's 6,138 entries identical to the
+       checkout's, the code mod byte for byte), and they load the same. That first frozen `--stock` run found the
+       freeze missing a header `--stock` reads (`gameplaystats.h`); the freeze now takes them from `unbound_stock`.
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
        roborich or move into the code mod. Delta packs only matter for handing out ML without the builder: a
        player who builds from their own ROM gets the whole layer.
