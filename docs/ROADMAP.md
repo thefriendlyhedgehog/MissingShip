@@ -194,6 +194,11 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        and every label through the mod API's label entries, so on Windows too. The `--stock` layer's labels now carry
        the timestamps of ML's items the stats list and the countdown icon's item number, which the mod can't look up
        there. Each case ran on a host with the five PRs. `ml-codemod` keeps the stock versions until they merge.
+       Then the last note of something unported, 2026-10-13: the Blade Beam's params 0xBEEF, called the sword's glow
+       and left inert until ML's `object_link_child` was ported, is an unfinished figure with Link's eyes that ML
+       shows for at most 4 frames of a sword draw, away from Link (ML's spawner and actor disassembled; no ML
+       cutscene or code holds the sword-draw pose). It stays inert in every port; the notes now say why. With that,
+       nothing ML does in play is left that stock, with skijer's offered hooks, doesn't reach.
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
        roborich or move into the code mod. Delta packs only matter for handing out ML without the builder: a
        player who builds from their own ROM gets the whole layer.
