@@ -171,7 +171,11 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        while a countdown runs (macOS and Linux; `5a7784fd8`). The gameplay stats' `countsShown` stays out of reach.
        Then the scene refusal in `Play_Init`, 2026-10-13: it runs at `VB_PLAY_TRANSITION_CS` and picks the layer as
        `Play_Init` does, so the debug map select is refused too; run on stock with the map select, a transition, a
-       warp point, a new file's opening and the title screen (`30dc91a25`), then a file load from the file select (`bd00ec9bd`). Of ML's player edits, `talkActor` and
+       warp point, a new file's opening and the title screen (`30dc91a25`), then a file load from the file select (`bd00ec9bd`).
+       Then Text Speed's default and the green A note on frames without the HUD, 2026-10-13: set at
+       `OnPlayDrawBegin` instead of after `Interface_Draw`, so SoH's "no UI" effect and the title and credits game
+       modes keep them (A/B on stock; `358407b68`). Rechecked as out of reach: the child-shield rule (ten
+       direct calls in the player code) and the labels on Windows (no C accessor for SoH's name tables). Of ML's player edits, `talkActor` and
        LOD 0 turned out to be no gap; the wall push-out skip, the child-shield rule and the water factor's other
        uses stay out of reach (called or kept inside the host).
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
