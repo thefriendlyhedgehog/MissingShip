@@ -178,7 +178,10 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        direct calls in the player code) and the labels on Windows (no C accessor for SoH's name tables).
        The title and credits case then ran on stock: ML shows no message text outside the normal game mode (its
        title credits are pictures; its credits tour stays in the normal mode, its staff texts appearing whole;
-       `7e0b3c73d`). Of ML's player edits, `talkActor` and
+       `7e0b3c73d`).
+       Then the HUD shadows on the pause screen's copy frame, 2026-10-13: drawn at `OnPlayDrawEnd` on that frame,
+       after the copy and under the buttons, as on the branch (A/B on stock; `92f354912`). Rechecked as out of reach:
+       the wall push-out skip for every actor (inside `Actor_UpdateBgCheckInfo`), `countsShown` and the water factor. Of ML's player edits, `talkActor` and
        LOD 0 turned out to be no gap; the wall push-out skip, the child-shield rule and the water factor's other
        uses stay out of reach (called or kept inside the host).
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
