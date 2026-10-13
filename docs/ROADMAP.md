@@ -169,6 +169,11 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        what stays out of reach is listed in the mod's README.
        Then ML's countdown timer icon, 2026-10-13: the Kokiri Sword, set on SoH's `itemMapping` Master Sword entry
        while a countdown runs (macOS and Linux; `5a7784fd8`). The gameplay stats' `countsShown` stays out of reach.
+       Then the scene refusal in `Play_Init`, 2026-10-13: it runs at `VB_PLAY_TRANSITION_CS` and picks the layer as
+       `Play_Init` does, so the debug map select is refused too; run on stock with the map select, a transition, a
+       warp point, a new file's opening and the title screen (`30dc91a25`). Of ML's player edits, `talkActor` and
+       LOD 0 turned out to be no gap; the wall push-out skip, the child-shield rule and the water factor's other
+       uses stay out of reach (called or kept inside the host).
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
        roborich or move into the code mod. Delta packs only matter for handing out ML without the builder: a
        player who builds from their own ROM gets the whole layer.
