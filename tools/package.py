@@ -4,6 +4,8 @@
     python3 tools/package.py <artifact dir>
     python3 tools/package.py macos         # the local macOS build (engine/build-ml), on this Mac
     python3 tools/package.py unbound-macos # The Missing Link for SoH: Unbound: the builder alone, on this Mac
+    python3 tools/package.py unbound-ci <run id or artifact dir>   # the same for Windows and Linux, from the builders
+                                           # a generate-builds run froze (missingship-builder-<os>)
     python3 tools/package.py unbound-pack <MissingLink_Unbound.o2r>   # the pack players drop into mods/ (any OS)
     python3 tools/package.py unbound-app-macos <MissingLink_Unbound.o2r> [<soh.app or Unbound .dmg>]
                                            # SoH: Unbound with the pack inside, as a DMG players open and play
@@ -289,6 +291,43 @@ the code mod's commit.
 """
 
 
+UNBOUND_README_PORTABLE = """The Missing Link for SoH: Unbound ({os})
+
+This builds The Missing Link as a mod for SoH: Unbound from your own files. Nothing from the games is included.
+
+You need
+  - SoH: Unbound on SoH 9.3.0 or later with skijer's code mods (NEI Unbound 2.0), started once with your Ocarina of
+    Time USA 1.0 (NTSC 1.0) ROM, so it has made oot.o2r. Unbound keeps oot.o2r and mods/ in the folder it starts
+    from{home_note}.
+  - Kaze's The Missing Link v2.0 patch from https://www.romhacking.net/hacks/5334/ (the .zip as downloaded is fine)
+    and that same OoT ROM; or a Missing Link v2.0 ROM you already patched.
+{prepare}
+Build it ({shell}, in this folder; about a minute)
+  {builder} --unbound {game} --stock --oot-o2r "{folder}{sep}oot.o2r" --out "{folder}{sep}mods{sep}MissingLink_Unbound.o2r" <OoT ROM> <patch .zip>
+or, with a Missing Link ROM, give it in place of <OoT ROM> <patch .zip>.
+
+It writes mods{sep}MissingLink_Unbound.o2r and mods{sep}missinglink.o2r, The Missing Link's behaviour as a code mod
+(compiled code only, for Windows, Linux and macOS). Start Unbound and The Missing Link is loaded. Build it again after
+updating Unbound or this package. The builder refuses an Unbound on an SoH older than 9.3.0: the code mod calls 9.3.0's
+functions. The code mod is not signed yet: a build of Unbound that loads only signed mods refuses it, and one that asks
+shows its name and content hash the first time; answer "Always load this version".
+
+MissingShipBuilder{sep}unbound.txt names the Unbound build this package was made for, and
+MissingShipBuilder{sep}codemod.txt the code mod's commit.
+"""
+
+UNBOUND_PORTABLE = {
+    'windows': dict(os='Windows', home_note='', prepare='', shell='Command Prompt', sep='\\',
+                    builder='MissingShipBuilder\\MissingShipBuilder.exe', game='"<Unbound folder>\\soh.exe"',
+                    folder='<Unbound folder>'),
+    'linux': dict(os='Linux', home_note=' (or SHIP_HOME, when set)', sep='/',
+                  prepare='\nUnpack Unbound\'s AppImage once, in its folder (the builder runs the game inside it):\n'
+                          '  ./soh.appimage --appimage-extract\n',
+                  shell='a terminal', builder='MissingShipBuilder/MissingShipBuilder',
+                  game='"<Unbound folder>/squashfs-root/usr/bin/soh.elf"', folder='<Unbound folder>'),
+}
+
+
 UNBOUND_PACK_README = """The Missing Link for SoH: Unbound
 
 The Missing Link v2.0 by Kaze Emanuar, as a mod for SoH: Unbound, on Windows, macOS and Linux. The mod holds only
@@ -496,6 +535,42 @@ def unbound_macos():
     return out
 
 
+def unbound_ci(arg):
+    """The builder alone for Windows and Linux, like unbound-macos, from a generate-builds run's frozen builders."""
+    if os.path.isdir(arg):
+        art = arg
+    else:
+        art = os.path.join(DIST, f'run-{arg}-builders')
+        if not os.path.isdir(art):
+            subprocess.run(['gh', 'run', 'download', arg, '--repo', FORK, '--dir', art,
+                            '--name', 'missingship-builder-windows', '--name', 'missingship-builder-linux'], check=True)
+    made = []
+    for osname in ('windows', 'linux'):
+        builder = os.path.join(art, f'missingship-builder-{osname}')
+        check_unbound_builder(builder)
+        readme = UNBOUND_README_PORTABLE.format(**UNBOUND_PORTABLE[osname])
+        top = 'MissingLink for Unbound'
+        if osname == 'windows':
+            out = os.path.join(DIST, 'MissingLink-Unbound-windows.zip')
+            with zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED) as z:
+                for path, rel in files_under(builder):
+                    z.write(path, f'{top}/MissingShipBuilder/{rel}')
+                z.writestr(f'{top}/README.txt', readme.replace('\n', '\r\n'))
+        else:
+            out = os.path.join(DIST, 'MissingLink-Unbound-linux.tar.gz')
+            with tarfile.open(out, 'w:gz') as t:
+                def add(name, data, mode):
+                    info = tarfile.TarInfo(f'{top}/{name}')
+                    info.size, info.mode = len(data), mode
+                    t.addfile(info, io.BytesIO(data))
+                for path, rel in files_under(builder):  # artifacts drop executable bits: the builder and ZAPD get them
+                    mode = 0o755 if rel in ('MissingShipBuilder', '_internal/ZAPD.out') else 0o644
+                    add(f'MissingShipBuilder/{rel}', open(path, 'rb').read(), mode)
+                add('README.txt', readme.encode(), 0o644)
+        made.append(out)
+    return made
+
+
 def check_builder(path):
     """The frozen mod builder for a package: present, and made from this checkout's commit."""
     version = os.path.join(path, 'version.txt')
@@ -534,9 +609,13 @@ def main():
         path = unbound_pack(sys.argv[2])
         print(f'{os.path.relpath(path, ROOT)}  {os.path.getsize(path) / 1e6:.1f} MB')
         return
+    os.makedirs(DIST, exist_ok=True)
+    if len(sys.argv) == 3 and sys.argv[1] == 'unbound-ci':
+        for path in unbound_ci(sys.argv[2]):
+            print(f'{os.path.relpath(path, ROOT)}  {os.path.getsize(path) / 1e6:.1f} MB')
+        return
     if len(sys.argv) != 2:
         sys.exit(__doc__)
-    os.makedirs(DIST, exist_ok=True)
     if sys.argv[1] == 'unbound-macos':
         check_unbound_builder(MAC_BUILDER)
         path = unbound_macos()
