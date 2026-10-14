@@ -201,7 +201,9 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        0.11 (SoH 9.3.0) that night, it was redone on the new base as
        [skijer/Shipwright#33](https://github.com/skijer/Shipwright/pull/33), and the code mod was ported to 9.3.0
        (MissingShip-Unbound `ml-codemod-930`: 9.3.0's function and field names, TimeSplits' types, Blob padding);
-       it boots, loads every table and plays the playthrough's first segment on #33's macOS build.
+       it boots, loads every table and plays the playthrough's first four segments on #33's macOS build. skijer
+       merged #33 on 2026-10-14 (eed5004cc); the code mod's Windows build links against his build of it until he
+       publishes a 9.3.0 release.
        Then the last note of something unported, 2026-10-13: the Blade Beam's params 0xBEEF, called the sword's glow
        and left inert until ML's `object_link_child` was ported, is an unfinished figure with Link's eyes that ML
        shows for at most 4 frames of a sword draw, away from Link (ML's spawner and actor disassembled; no ML

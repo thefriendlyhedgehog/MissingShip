@@ -117,16 +117,17 @@ B1, B2, B7 and B9 went there as #28 to #31, together with five hooks the mod can
 After his review the same evening, #24 and #30 were withdrawn as not needed, and at his request the rest except #31 went
 in as one PR, skijer/Shipwright#32. skijer then moved `unbound-modapi` to Unbound 0.11 (SoH 9.3.0, NEI 2.0 beta), so #32 was
 closed and redone on that base as [skijer/Shipwright#33](https://github.com/skijer/Shipwright/pull/33) (the labels API takes 9.3.0's
-time-split types). ML's code mod for that base is MissingShip-Unbound `ml-codemod-930`; it boots and plays on #33's macOS build. Only the child-shield rule changes normal
+time-split types). skijer merged it on 2026-10-14 (eed5004cc, after a Windows-only link fix). ML's code mod for that base is
+MissingShip-Unbound `ml-codemod-930`; it boots and plays the first four playthrough segments on the macOS build. Only the child-shield rule changes normal
 play; the others are fidelity (the water factor), SoH's windows, or fixes ML already works around.
 
 | Hook | For | PR |
 |---|---|---|
-| `VB_BE_CHILD_WITH_HYLIAN_SHIELD` | ML's child holds the Hylian Shield like any shield | [skijer/Shipwright#33](https://github.com/skijer/Shipwright/pull/33) |
+| `VB_BE_CHILD_WITH_HYLIAN_SHIELD` | ML's child holds the Hylian Shield like any shield | merged, [skijer/Shipwright#33](https://github.com/skijer/Shipwright/pull/33) |
 | `VB_PUSH_ACTOR_OUT_OF_WALL` | push-outs skipped on a room's first frames, the Hourglass rewind, the Deep Woods teleport | withdrawn (#24): the fog wall's teleport needs no hook (`ml_fogwall.c` moves `home.pos` and `prevPos`), and no other case was found |
-| `SOH_PLAYER_MOTION_WATER_SPEED` | Bunny Hood 1.25 water speed factor | [skijer/Shipwright#33](https://github.com/skijer/Shipwright/pull/33) |
-| `VB_SHOW_GAMEPLAY_STATS_COUNT` | the stats window lists only ML's enemies and ammo | [skijer/Shipwright#33](https://github.com/skijer/Shipwright/pull/33) |
-| `SetLabel`, `SetTimeSplits`, `SetTimeSplitGroup`, `ClearTimeSplitGroups`, `SetItemIcon` | ML's names, split list and icons in SoH's windows, on Windows too | [skijer/Shipwright#33](https://github.com/skijer/Shipwright/pull/33) |
+| `SOH_PLAYER_MOTION_WATER_SPEED` | Bunny Hood 1.25 water speed factor | merged, [skijer/Shipwright#33](https://github.com/skijer/Shipwright/pull/33) |
+| `VB_SHOW_GAMEPLAY_STATS_COUNT` | the stats window lists only ML's enemies and ammo | merged, [skijer/Shipwright#33](https://github.com/skijer/Shipwright/pull/33) |
+| `SetLabel`, `SetTimeSplits`, `SetTimeSplitGroup`, `ClearTimeSplitGroups`, `SetItemIcon` | ML's names, split list and icons in SoH's windows, on Windows too | merged, [skijer/Shipwright#33](https://github.com/skijer/Shipwright/pull/33) |
 
 B3 and B6 stay with roborich/libultraship (#2, #3) and B8 with roborich's ZAPDTR; skijer's branch takes those submodules from roborich.
 
