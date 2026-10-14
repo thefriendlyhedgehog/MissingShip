@@ -11,7 +11,7 @@ matching environment variable (e.g. `MS_DEBUG_ROM=/path/to/rom.z64 python3 tools
                     (ZAPD.exe, or Release/ZAPD.exe for a Visual Studio build, on Windows: MS-082)
     MS_ZAPD_CWD     working directory ZAPD runs in               default: $MS_SHIPWRIGHT/soh
     MS_UNBOUND_SRC  SoH: Unbound at UNBOUND_COMPARE (below)      default: ../Unbound-923-src
-    MS_CODEMOD_SRC  ML's code mod checkout (MissingShip-Unbound)  default: ../Unbound-modapi
+    MS_CODEMOD_SRC  ML's code mod checkout (MissingShip-Unbound)  default: ../Unbound-skijer930
     MS_CODEMOD      ML's code mod for every OS (tools/codemod.py) default: dist/codemod/missinglink.o2r
 
 One ZAPD and one set of engine tables for every step (MS-009): the engine fork's own. It must be the patched
@@ -54,9 +54,12 @@ ZAPD_CWD = _env('MS_ZAPD_CWD', SOH)
 UNBOUND_COMPARE = '7714a97bf0708eec33a1434406ce6d2aab657f4f'
 UNBOUND_SRC = _env('MS_UNBOUND_SRC', os.path.join(os.path.dirname(ROOT), 'Unbound-923-src'))
 
-# ML's C behaviour as a code mod for a stock Unbound with skijer's mod API (MissingShip-Unbound, branch ml-codemod,
+# ML's C behaviour as a code mod for a stock Unbound with skijer's mod API (MissingShip-Unbound, branch ml-codemod-930,
 # mod-sdk/mods/missinglink). tools/codemod.py packs it for every OS; the builder writes it beside a --stock layer.
-CODEMOD_SRC = _env('MS_CODEMOD_SRC', os.path.join(os.path.dirname(ROOT), 'Unbound-modapi'))
+# Only SoH 9.3.0 hosts: the code mod calls 9.3.0's names, so the checkout must hold skijer's 9.3.0 mod API with
+# ML's host hooks (skijer/Shipwright#33, merged as CODEMOD_HOST). The 9.2.3 branch (ml-codemod) is retired.
+CODEMOD_SRC = _env('MS_CODEMOD_SRC', os.path.join(os.path.dirname(ROOT), 'Unbound-skijer930'))
+CODEMOD_HOST = 'eed5004cc00cde05284fe6dd89957faf36d54604'
 CODEMOD = _env('MS_CODEMOD', os.path.join(ROOT, 'dist', 'codemod', 'missinglink.o2r'))
 
 

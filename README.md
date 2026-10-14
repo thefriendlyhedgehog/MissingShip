@@ -265,14 +265,15 @@ which writes 58 files differently: sound fonts and boss title cards), and USA 1.
 (PAL, GameCube) gets the game without the mod, and a popup at startup that says why.
 Until roborich takes delta files and the features ML needs, players need our Unbound build.
 
-For a stock Unbound (roborich's, or skijer's code-mod branch, the end goal in `docs/ROADMAP.md`), add `--stock`
+For a stock Unbound with skijer's code mods (NEI Unbound 2.0, SoH 9.3.0 or later; the end goal in `docs/ROADMAP.md`),
+add `--stock`
 (not with `--pack`, which stock Unbound does not read). Stock Unbound refuses our branch's entries for vanilla
 scenes, and a scene whose exits name an entrance ML adds to a vanilla scene fails to load there, so the stock layer
 ships no `unbound/scenes.json` and rewrites those exits to vanilla entrances (`tools/unbound_stock.py`): one that
 lands where ML's does, else a spare vanilla entrance into the scene that neither ML nor the game's code uses, else
 the scene's own entrance. Stock Unbound refuses the layer's actor files too (ML's changes to vanilla actors, and
 its grotto and breakable wall as types of vanilla ones), so the stock layer leaves them out: ML's code mod on
-skijer's branch (MissingShip-Unbound `ml-codemod`, `mod-sdk/mods/missinglink`) carries them, along with ML's scene
+skijer's branch (MissingShip-Unbound `ml-codemod-930`, `mod-sdk/mods/missinglink`) carries them, along with ML's scene
 draw configs, without which five of ML's scenes crash on arrival. It also gives ML's own collisions empty camera
 entries, which stock Unbound needs before Link can stand on them. The builder lists each rewrite and what it left
 to the code mod, and counts what stock Unbound does not read (scene names, restrictions, save return points, ML's
@@ -280,7 +281,8 @@ entrance flags, intro cutscenes, continue points). On 2026-10-11 all eight of ML
 scene's own entrance (the spare Temple of Time entrances are vanilla cutscene destinations), and all 25 of ML's
 scenes run on skijer's branch with the code mod, which since 2026-10-12 holds every actor ML's rooms place by
 name, ML's edits inside vanilla actors and ML's player code (a few player edits no hook reaches are listed in the
-mod's README).
+mod's README). The code mod calls the host by SoH 9.3.0's names (skijer/Shipwright#33), so it is built for 9.3.0
+hosts only and the builder refuses `--stock` for an Unbound built on an older SoH (its `soh.o2r`'s `portVersion`).
 
 Without `--pack` the builder writes the whole layer, which holds the game's data too: for testing only. On macOS it
 reads `oot.o2r` from and writes `mods/MissingLink_Unbound.o2r` to Unbound's folder

@@ -3,10 +3,11 @@
     python3 tools/codemod.py [--out <missinglink.o2r>]
 
 The code mod (ML's C behaviour for a stock Unbound with skijer's mod API) lives in MissingShip-Unbound, branch
-ml-codemod, mod-sdk/mods/missinglink (mspaths.CODEMOD_SRC). This takes the checkout's commit, builds the macOS binary
-here, takes the Windows and Linux ones from that commit's build-missinglink CI run (pushed, finished, green), and
-merges the three with the SDK's merge_mod_packages.py into mspaths.CODEMOD, with codemod.txt beside it naming the
-commit. It holds compiled code only: no ROM or game data.
+ml-codemod-930, mod-sdk/mods/missinglink (mspaths.CODEMOD_SRC). It is for SoH 9.3.0 hosts only: the checkout must
+hold skijer's 9.3.0 mod API with ML's host hooks (mspaths.CODEMOD_HOST, skijer/Shipwright#33). This takes the
+checkout's commit, builds the macOS binary here, takes the Windows and Linux ones from that commit's build-missinglink
+CI run (pushed, finished, green), and merges the three with the SDK's merge_mod_packages.py into mspaths.CODEMOD,
+with codemod.txt beside it naming the commit. It holds compiled code only: no ROM or game data.
 """
 import argparse, json, os, subprocess, sys, tempfile, zipfile
 
@@ -45,7 +46,7 @@ def ci_packages(commit, dest):
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument('--out', default=mspaths.CODEMOD)
-    ap.add_argument('--src', default=mspaths.CODEMOD_SRC, help='the MissingShip-Unbound checkout (ml-codemod)')
+    ap.add_argument('--src', default=mspaths.CODEMOD_SRC, help='the MissingShip-Unbound checkout (ml-codemod-930)')
     args = ap.parse_args()
     src, out = os.path.abspath(args.src), os.path.abspath(args.out)
     mod_dir = os.path.join('mod-sdk', 'mods', MOD)
@@ -54,6 +55,10 @@ def main():
     if git(src, 'status', '--porcelain', '--', mod_dir):
         sys.exit(f'{mod_dir} has uncommitted changes in {src}: commit and push them first')
     commit, branch = git(src, 'rev-parse', 'HEAD'), git(src, 'rev-parse', '--abbrev-ref', 'HEAD')
+    if subprocess.run(['git', '-C', src, 'merge-base', '--is-ancestor', mspaths.CODEMOD_HOST, commit],
+                      capture_output=True).returncode != 0:
+        sys.exit(f'{branch} {commit[:10]} lacks skijer\'s 9.3.0 mod API ({mspaths.CODEMOD_HOST[:10]}, '
+                 'skijer/Shipwright#33): the code mod is built for SoH 9.3.0 hosts only (ml-codemod-930)')
     if git(src, 'branch', '-r', '--contains', commit) == '':
         sys.exit(f'{commit[:10]} is not pushed: CI builds the Windows and Linux binaries from the pushed branch')
 

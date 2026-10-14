@@ -277,11 +277,12 @@ It reads oot.o2r from Unbound's folder (~/Library/Application Support/com.shipof
 mods/MissingLink_Unbound.o2r there. Start Unbound and The Missing Link is loaded. Build it again after updating
 Unbound or this package. --oot-o2r and --out choose other places.
 
-For a stock Unbound with code mods (skijer's NEI Unbound), add --stock:
+For a stock Unbound with code mods (skijer's NEI Unbound 2.0, on SoH 9.3.0 or later), add --stock:
   MissingShipBuilder/MissingShipBuilder --unbound "/Applications/<your Unbound>.app" --stock <OoT ROM> <patch .zip>
 It then also writes mods/missinglink.o2r, The Missing Link's behaviour as a code mod (compiled code only, for
-Windows, Linux and macOS). It is not signed yet: a build of Unbound that loads only signed mods refuses it, and one
-that asks shows its name and content hash the first time; answer "Always load this version".
+Windows, Linux and macOS). It needs an Unbound on SoH 9.3.0 or later: the builder refuses an older one. It is not
+signed yet: a build of Unbound that loads only signed mods refuses it, and one that asks shows its name and content
+hash the first time; answer "Always load this version".
 
 MissingShipBuilder/unbound.txt names the Unbound build this package was made for, and MissingShipBuilder/codemod.txt
 the code mod's commit.

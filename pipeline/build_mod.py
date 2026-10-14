@@ -13,9 +13,10 @@ ML ROM it used, so MissingShip can rebuild the mod after an update without askin
 
 With --unbound it writes ML's SoH: Unbound layer instead (tools/unbound_layer.py), and with --pack that layer as a
 pack of deltas against the player's own base (tools/deltapack.py): ML's own bytes and none of the game's, the file we
-distribute for players to drop into Unbound's mods/ folder. With --stock (a stock Unbound with skijer's mod API) it
-also writes ML's code mod, missinglink.o2r, beside the layer: compiled code only, which the builder carries
-(tools/codemod.py makes it), checked against the layer it has just made.
+distribute for players to drop into Unbound's mods/ folder. With --stock (a stock Unbound on SoH 9.3.0 or later
+with skijer's mod API) it also writes ML's code mod, missinglink.o2r, beside the layer: compiled code only, which the
+builder carries (tools/codemod.py makes it), checked against the layer it has just made. It refuses an Unbound built
+on an older SoH, which lacks the names the code mod calls.
 
 It runs the same pipeline as ms_cycle.py, in a temporary work folder, replaying pipeline/baseline.json instead of
 reading the debug ROM, with SoH's files and ZAPD from the builder's own folder. The packages ship it frozen per OS,
@@ -206,12 +207,37 @@ def write_code_mod(path, layer, out_dir):
     print(f'MissingShip builder: wrote {dest}')
 
 
+# ML's code mod calls the host by SoH 9.3.0's names, through skijer's mod API as of skijer/Shipwright#33: an Unbound on
+# an older SoH lacks them and cannot load it
+CODEMOD_MIN_SOH = (9, 3, 0)
+
+
+def unbound_soh_version(path):
+    """The SoH version an Unbound install was built on: its soh.o2r's portVersion (None when it can't be read)."""
+    path = os.path.abspath(path)
+    if os.path.isdir(os.path.join(path, 'Contents', 'MacOS')):
+        soh_o2r = os.path.join(path, 'Contents', 'Resources', 'soh.o2r')
+    else:
+        soh_o2r = os.path.join(os.path.dirname(path), 'soh.o2r')
+    try:
+        with zipfile.ZipFile(soh_o2r) as z:
+            v = z.read('portVersion')
+    except (OSError, KeyError, zipfile.BadZipFile):
+        return None
+    return tuple(int.from_bytes(v[i:i + 2], 'big') for i in (1, 3, 5)) if len(v) >= 7 else None
+
+
 def build(args):
     oot = os.path.abspath(args.oot_o2r)
     if not os.path.exists(oot):
         fail(f'{oot} not found: start the game once so it makes oot.o2r from your ROM')
     out = os.path.abspath(args.out)
     codemod = code_mod(args) if args.stock else None      # before the build, so a missing one fails at once
+    if args.stock:
+        version = unbound_soh_version(args.unbound)
+        if version is not None and version < CODEMOD_MIN_SOH:
+            fail(f'this Unbound is built on SoH {".".join(map(str, version))}: The Missing Link\'s code mod needs SoH: '
+                 'Unbound on SoH 9.3.0 or later with skijer\'s mod API (NEI Unbound 2.0)')
     work = tempfile.mkdtemp(prefix='missingship-build-')
     try:
         shutil.copytree(PIPE_SRC, os.path.join(work, 'pipeline'), ignore=SKIP)
@@ -280,10 +306,10 @@ def main():
     p.add_argument('--pack', action='store_true', help="with --unbound, write the mod as a pack of deltas against the "
                                                        "player's own base, carrying none of the game's data: what we "
                                                        "distribute (give an oot.o2r from Unbound's own extractor)")
-    p.add_argument('--stock', action='store_true', help="with --unbound, for a stock Unbound (roborich's, or with "
-                                                        "skijer's code mods): exits only to entrances it has, no "
-                                                        "unbound/scenes.json or actor files (ML's code mod carries "
-                                                        "those); not with --pack")
+    p.add_argument('--stock', action='store_true', help="with --unbound, for a stock Unbound with skijer's code "
+                                                        "mods (NEI Unbound 2.0, SoH 9.3.0 or later): exits only to "
+                                                        "entrances it has, no unbound/scenes.json or actor files "
+                                                        "(ML's code mod carries those); not with --pack")
     p.add_argument('--code-mod', help='with --stock, the code mod to write beside the layer (default: the builder\'s '
                                       'own)')
     p.add_argument('--also-base', action='append', default=[], metavar='OOT_O2R',
