@@ -103,8 +103,8 @@ placements to them; vanilla scenes keep the vanilla actor. `base` still comes fi
 
 | Id | Rows | Fix |
 |---|---|---|
-| B1 | 23 | NULL-check `cameraDataList` in `z_bgcheck.c`. **Carried on our Unbound branch** (2026-09-28, `84ff78cae`, with row 20, whose bridge needs it; crash without, none with). Offered to skijer's `unbound-modapi` (2026-10-13), now in [skijer/Shipwright#32](https://github.com/skijer/Shipwright/pull/32) |
-| B2 | 19 | Song-cone width for widescreen (`Oceff_Wipe`-`Wipe4`). **Carried on our Unbound branch** (2026-09-29, `8688d074c`): at 16:9 the cone spans the window, screenshot. Offered to skijer's `unbound-modapi` (2026-10-13), now in [skijer/Shipwright#32](https://github.com/skijer/Shipwright/pull/32); at his suggestion also ready for HarbourMasters (Shipwright-VR branch `hm-offer/widescreen-song-cone`, on `develop`), PR not opened yet |
+| B1 | 23 | NULL-check `cameraDataList` in `z_bgcheck.c`. **Carried on our Unbound branch** (2026-09-28, `84ff78cae`, with row 20, whose bridge needs it; crash without, none with). Offered to skijer's `unbound-modapi` (2026-10-13), now in [skijer/Shipwright#33](https://github.com/skijer/Shipwright/pull/33) |
+| B2 | 19 | Song-cone width for widescreen (`Oceff_Wipe`-`Wipe4`). **Carried on our Unbound branch** (2026-09-29, `8688d074c`): at 16:9 the cone spans the window, screenshot. Offered to skijer's `unbound-modapi` (2026-10-13), now in [skijer/Shipwright#33](https://github.com/skijer/Shipwright/pull/33); at his suggestion also ready for HarbourMasters (Shipwright-VR branch `hm-offer/widescreen-song-cone`, on `develop`), PR not opened yet |
 | B3 | 44 | libultraship `GfxDpLoadBlock` `word_size_shift` sign. **Carried on our Unbound branch** (2026-09-29, Unbound `3537e047b`): its libultraship submodule is now our private MissingShip-libultraship branch `missinglink`, roborich's `unbound` plus B3 and B6 (the owner's choice). Offered upstream as [roborich/libultraship#2](https://github.com/roborich/libultraship/pull/2) |
 | B4 | 64 | Skip the place-name card when the scene has none. **Already in Unbound**: its `TitleCard_InitPlaceName` returns without a card in the switch's `default` |
 | B6 | 124 | libultraship: texture-edge (`CVG_X_ALPHA`) modes stay alpha-tested when the blender reads memory. **Carried on our Unbound branch** with B3 (2026-09-29, Unbound `3537e047b`): in ML's Deku Grove an A/B screenshot shows the cyan fringe along the fence and trim before and clean edges after. Offered upstream as [roborich/libultraship#3](https://github.com/roborich/libultraship/pull/3) |
@@ -115,16 +115,18 @@ placements to them; vanilla scenes keep the vanilla actor. `base` still comes fi
 On 2026-10-13 the owner moved the offers to skijer, whose `unbound-modapi` holds the mod API ML's code mod is built on.
 B1, B2, B7 and B9 went there as #28 to #31, together with five hooks the mod can't do without host changes (#23 to #27).
 After his review the same evening, #24 and #30 were withdrawn as not needed, and at his request the rest except #31 went
-in as one PR, [skijer/Shipwright#32](https://github.com/skijer/Shipwright/pull/32): built on his branch's tip and booted with ML on macOS. Only the child-shield rule changes normal
+in as one PR, skijer/Shipwright#32. skijer then moved `unbound-modapi` to Unbound 0.11 (SoH 9.3.0, NEI 2.0 beta), so #32 was
+closed and redone on that base as [skijer/Shipwright#33](https://github.com/skijer/Shipwright/pull/33) (the labels API takes 9.3.0's
+time-split types). ML's code mod for that base is MissingShip-Unbound `ml-codemod-930`; it boots and plays on #33's macOS build. Only the child-shield rule changes normal
 play; the others are fidelity (the water factor), SoH's windows, or fixes ML already works around.
 
 | Hook | For | PR |
 |---|---|---|
-| `VB_BE_CHILD_WITH_HYLIAN_SHIELD` | ML's child holds the Hylian Shield like any shield | [skijer/Shipwright#32](https://github.com/skijer/Shipwright/pull/32) |
+| `VB_BE_CHILD_WITH_HYLIAN_SHIELD` | ML's child holds the Hylian Shield like any shield | [skijer/Shipwright#33](https://github.com/skijer/Shipwright/pull/33) |
 | `VB_PUSH_ACTOR_OUT_OF_WALL` | push-outs skipped on a room's first frames, the Hourglass rewind, the Deep Woods teleport | withdrawn (#24): the fog wall's teleport needs no hook (`ml_fogwall.c` moves `home.pos` and `prevPos`), and no other case was found |
-| `SOH_PLAYER_MOTION_WATER_SPEED` | Bunny Hood 1.25 water speed factor | [skijer/Shipwright#32](https://github.com/skijer/Shipwright/pull/32) |
-| `VB_SHOW_GAMEPLAY_STATS_COUNT` | the stats window lists only ML's enemies and ammo | [skijer/Shipwright#32](https://github.com/skijer/Shipwright/pull/32) |
-| `SetLabel`, `SetTimeSplits`, `SetTimeSplitGroup`, `ClearTimeSplitGroups`, `SetItemIcon` | ML's names, split list and icons in SoH's windows, on Windows too | [skijer/Shipwright#32](https://github.com/skijer/Shipwright/pull/32) |
+| `SOH_PLAYER_MOTION_WATER_SPEED` | Bunny Hood 1.25 water speed factor | [skijer/Shipwright#33](https://github.com/skijer/Shipwright/pull/33) |
+| `VB_SHOW_GAMEPLAY_STATS_COUNT` | the stats window lists only ML's enemies and ammo | [skijer/Shipwright#33](https://github.com/skijer/Shipwright/pull/33) |
+| `SetLabel`, `SetTimeSplits`, `SetTimeSplitGroup`, `ClearTimeSplitGroups`, `SetItemIcon` | ML's names, split list and icons in SoH's windows, on Windows too | [skijer/Shipwright#33](https://github.com/skijer/Shipwright/pull/33) |
 
 B3 and B6 stay with roborich/libultraship (#2, #3) and B8 with roborich's ZAPDTR; skijer's branch takes those submodules from roborich.
 
