@@ -1,14 +1,15 @@
 diff --git a/.github/workflows/generate-builds.yml b/.github/workflows/generate-builds.yml
-index 19f25345bc8651763c47f7ef8b35ebcef562dc9f..586a7913255b91292cfcb343aeaa8aa8a8e198eb 100644
+index 19f25345bc8651763c47f7ef8b35ebcef562dc9f..7b9fdbd16bc6661b54755eba14e979d5ad48dc89 100644
 --- a/.github/workflows/generate-builds.yml
 +++ b/.github/workflows/generate-builds.yml
-@@ -1,7 +1,11 @@
+@@ -1,12 +1,47 @@
  name: generate-builds
 +# MissingShip: Windows and Linux builds of the MissingShip engine, run by hand (Actions > generate-builds > Run
 +# workflow) so pushes don't spend Actions minutes; macOS is built locally. The libultraship and ZAPDTR submodules are
 +# private forks, so checkout needs SUBMODULES_TOKEN: a fine-grained token with read-only Contents on
-+# MissingShip-Shipwright, MissingShip-libultraship, MissingShip-ZAPDTR and MissingShip (whose pipeline is frozen here
-+# into the mod builder, with this job's ZAPD: MS-154).
++# MissingShip-Shipwright, MissingShip-libultraship, MissingShip-ZAPDTR, MissingShip (whose pipeline is frozen here
++# into the mod builder, with this job's ZAPD: MS-154) and MissingShip-Unbound (the Unbound files the builder's layer
++# tools read); ML's code mod comes from a MissingShip release (CODEMOD_RELEASE).
  on:
 -  push:
 -  pull_request:
@@ -16,7 +17,42 @@ index 19f25345bc8651763c47f7ef8b35ebcef562dc9f..586a7913255b91292cfcb343aeaa8aa8
  concurrency:
    group: ${{ github.workflow }}-${{ github.ref }}
    cancel-in-progress: true
-@@ -14,6 +18,7 @@ jobs:
++env:
++  # the MissingShip release whose missinglink.o2r (ML's code mod, tools/codemod.py) the builders carry for --stock
++  CODEMOD_RELEASE: unbound-930-builder-1
+ jobs:
+ 
++  builder-inputs:
++    # the frozen builders also need SoH: Unbound at the fork's SoH version and ML's code mod: fetch both here first, so
++    # a token without access fails in a minute instead of after the builds
++    runs-on: ubuntu-22.04
++    steps:
++    - name: Check out MissingShip
++      uses: actions/checkout@v6
++      with:
++        repository: thefriendlyhedgehog/MissingShip
++        path: missingship
++        token: ${{ secrets.SUBMODULES_TOKEN }}
++    - name: Which Unbound the builder's layer tools compare against
++      id: unbound
++      run: echo "ref=$(python3 -c "import sys; sys.path.insert(0, 'missingship/pipeline'); import mspaths; print(mspaths.UNBOUND_COMPARE)")" >> "$GITHUB_OUTPUT"
++    - name: Check out that Unbound (MissingShip-Unbound)
++      uses: actions/checkout@v6
++      with:
++        repository: thefriendlyhedgehog/MissingShip-Unbound
++        ref: ${{ steps.unbound.outputs.ref }}
++        path: Unbound-923-src
++        sparse-checkout: soh/include/tables
++        token: ${{ secrets.SUBMODULES_TOKEN }}
++    - name: Get ML's code mod
++      env:
++        GH_TOKEN: ${{ secrets.SUBMODULES_TOKEN }}
++      run: gh release download "$CODEMOD_RELEASE" --repo thefriendlyhedgehog/MissingShip --pattern missinglink.o2r --pattern codemod.txt --dir codemod && cat codemod/codemod.txt
++
+   generate-soh-otr:
+     runs-on: ubuntu-22.04
+     steps:
+@@ -14,6 +49,7 @@ jobs:
        uses: actions/checkout@v6
        with:
          submodules: true
@@ -24,7 +60,7 @@ index 19f25345bc8651763c47f7ef8b35ebcef562dc9f..586a7913255b91292cfcb343aeaa8aa8
      - name: Configure ccache
        uses: hendrikmuhs/ccache-action@v1.2
        with:
-@@ -74,82 +79,6 @@ jobs:
+@@ -74,90 +110,15 @@ jobs:
          path: soh.o2r
          retention-days: 3
  
@@ -105,9 +141,11 @@ index 19f25345bc8651763c47f7ef8b35ebcef562dc9f..586a7913255b91292cfcb343aeaa8aa8
 -        path: /opt/local/
 -
    build-linux:
-     needs: generate-soh-otr
+-    needs: generate-soh-otr
++    needs: [generate-soh-otr, builder-inputs]
      runs-on: ubuntu-22.04
-@@ -158,6 +87,7 @@ jobs:
+     steps:
+     - name: Git Checkout
        uses: actions/checkout@v6
        with:
          submodules: true
@@ -115,7 +153,7 @@ index 19f25345bc8651763c47f7ef8b35ebcef562dc9f..586a7913255b91292cfcb343aeaa8aa8
      - name: Install dependencies
        run: |
          sudo apt-get update
-@@ -241,7 +171,7 @@ jobs:
+@@ -241,7 +202,7 @@ jobs:
      - name: Build SoH
        run: |
          export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
@@ -124,7 +162,7 @@ index 19f25345bc8651763c47f7ef8b35ebcef562dc9f..586a7913255b91292cfcb343aeaa8aa8
          cmake --build build-cmake --config Release -j3
          (cd build-cmake && cpack -G External)
  
-@@ -250,10 +180,30 @@ jobs:
+@@ -250,10 +211,51 @@ jobs:
        env:
          CC: gcc-12
          CXX: g++-12
@@ -138,11 +176,32 @@ index 19f25345bc8651763c47f7ef8b35ebcef562dc9f..586a7913255b91292cfcb343aeaa8aa8
 +      uses: actions/setup-python@v6
 +      with:
 +        python-version: '3.13'
++    - name: Which Unbound the builder's layer tools compare against
++      id: unbound
++      shell: bash
++      run: echo "ref=$(python -c "import sys; sys.path.insert(0, 'missingship/pipeline'); import mspaths; print(mspaths.UNBOUND_COMPARE)")" >> "$GITHUB_OUTPUT"
++    - name: Check out that Unbound (MissingShip-Unbound, the fork's SoH version)
++      uses: actions/checkout@v6
++      with:
++        repository: thefriendlyhedgehog/MissingShip-Unbound
++        ref: ${{ steps.unbound.outputs.ref }}
++        path: Unbound-923-src
++        token: ${{ secrets.SUBMODULES_TOKEN }}
++    - name: Get ML's code mod (the builder writes it beside a --stock layer)
++      shell: bash
++      env:
++        GH_TOKEN: ${{ secrets.SUBMODULES_TOKEN }}
++      run: gh release download "$CODEMOD_RELEASE" --repo thefriendlyhedgehog/MissingShip --pattern missinglink.o2r --pattern codemod.txt --dir codemod
 +    - name: Freeze the mod builder
 +      run: |
 +        python -m pip install pyinstaller
-+        python missingship/tools/freeze_builder.py --zapd build-cmake/ZAPD/ZAPD.out --soh soh --out builder
++        python missingship/tools/freeze_builder.py --zapd build-cmake/ZAPD/ZAPD.out --soh soh --out builder --unbound-src Unbound-923-src --code-mod codemod/missinglink.o2r
 +        builder/MissingShipBuilder/MissingShipBuilder --help
++    - name: The builder carries Unbound's files and the code mod
++      shell: bash
++      run: |
++        test -f builder/MissingShipBuilder/unbound.txt && test -f builder/MissingShipBuilder/codemod.txt
++        cat builder/MissingShipBuilder/unbound.txt builder/MissingShipBuilder/codemod.txt
 +    - name: Upload mod builder
 +      uses: actions/upload-artifact@v7
 +      with:
@@ -156,7 +215,16 @@ index 19f25345bc8651763c47f7ef8b35ebcef562dc9f..586a7913255b91292cfcb343aeaa8aa8
          path: |
            soh.appimage
            readme.txt
-@@ -276,6 +226,7 @@ jobs:
+@@ -265,7 +267,7 @@ jobs:
+         path: deps
+ 
+   build-windows:
+-    needs: generate-soh-otr
++    needs: [generate-soh-otr, builder-inputs]
+     runs-on: windows-latest
+     steps:
+     - name: Install dependencies
+@@ -276,6 +278,7 @@ jobs:
        uses: actions/checkout@v6
        with:
          submodules: true
@@ -164,7 +232,7 @@ index 19f25345bc8651763c47f7ef8b35ebcef562dc9f..586a7913255b91292cfcb343aeaa8aa8
      - name: Configure sccache
        uses: hendrikmuhs/ccache-action@v1.2
        with:
-@@ -308,7 +259,7 @@ jobs:
+@@ -308,7 +311,7 @@ jobs:
          VCPKG_ROOT: ${{github.workspace}}/vcpkg
        run: |
          set $env:PATH="$env:USERPROFILE/.cargo/bin;$env:PATH"
@@ -173,7 +241,7 @@ index 19f25345bc8651763c47f7ef8b35ebcef562dc9f..586a7913255b91292cfcb343aeaa8aa8
          cmake --build build-windows --config Release --parallel 10
  
          (cd build-windows && cpack)
-@@ -316,10 +267,30 @@ jobs:
+@@ -316,10 +319,51 @@ jobs:
          mv _packages/*.zip _packages/soh-windows.zip
      - name: Unzip package
        run: Expand-Archive -Path _packages/soh-windows.zip -DestinationPath soh-windows
@@ -187,11 +255,32 @@ index 19f25345bc8651763c47f7ef8b35ebcef562dc9f..586a7913255b91292cfcb343aeaa8aa8
 +      uses: actions/setup-python@v6
 +      with:
 +        python-version: '3.13'
++    - name: Which Unbound the builder's layer tools compare against
++      id: unbound
++      shell: bash
++      run: echo "ref=$(python -c "import sys; sys.path.insert(0, 'missingship/pipeline'); import mspaths; print(mspaths.UNBOUND_COMPARE)")" >> "$GITHUB_OUTPUT"
++    - name: Check out that Unbound (MissingShip-Unbound, the fork's SoH version)
++      uses: actions/checkout@v6
++      with:
++        repository: thefriendlyhedgehog/MissingShip-Unbound
++        ref: ${{ steps.unbound.outputs.ref }}
++        path: Unbound-923-src
++        token: ${{ secrets.SUBMODULES_TOKEN }}
++    - name: Get ML's code mod (the builder writes it beside a --stock layer)
++      shell: bash
++      env:
++        GH_TOKEN: ${{ secrets.SUBMODULES_TOKEN }}
++      run: gh release download "$CODEMOD_RELEASE" --repo thefriendlyhedgehog/MissingShip --pattern missinglink.o2r --pattern codemod.txt --dir codemod
 +    - name: Freeze the mod builder
 +      run: |
 +        python -m pip install pyinstaller
-+        python missingship/tools/freeze_builder.py --zapd build-windows/ZAPD/ZAPD.exe --soh soh --out builder
++        python missingship/tools/freeze_builder.py --zapd build-windows/ZAPD/ZAPD.exe --soh soh --out builder --unbound-src Unbound-923-src --code-mod codemod/missinglink.o2r
 +        builder/MissingShipBuilder/MissingShipBuilder.exe --help
++    - name: The builder carries Unbound's files and the code mod
++      shell: bash
++      run: |
++        test -f builder/MissingShipBuilder/unbound.txt && test -f builder/MissingShipBuilder/codemod.txt
++        cat builder/MissingShipBuilder/unbound.txt builder/MissingShipBuilder/codemod.txt
 +    - name: Upload mod builder
 +      uses: actions/upload-artifact@v7
 +      with:
