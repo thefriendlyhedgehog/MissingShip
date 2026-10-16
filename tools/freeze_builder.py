@@ -138,7 +138,11 @@ def main():
            '--add-data', f'{os.path.join(stage, "soh")}{sep}soh',
            '--add-data', f'{os.path.join(stage, "tools")}{sep}tools',
            '--add-data', f'{os.path.join(stage, "unbound")}{sep}unbound',
-           '--add-binary', f'{args.zapd}{sep}.']
+           '--add-binary', f'{args.zapd}{sep}.',
+           # Python's UTF-8 mode, as ms_cycle's PYTHONUTF8=1 gives a plain Python: the frozen program ignores that
+           # variable, so on Windows the steps read the repo's UTF-8 sources as cp1252 (ml_entrance.py's z_demo.c).
+           # Python's spelling, -X utf8 ("X utf8_mode=1" is taken and does nothing; checked on Windows 2026-10-16)
+           '--python-option', 'X utf8']
     if os.path.isdir(os.path.join(stage, 'codemod')):
         cmd += ['--add-data', f'{os.path.join(stage, "codemod")}{sep}codemod']
     # macOS: Homebrew's SDL2 (which ZAPD links) is sdl2-compat, which loads SDL3 at start-up from its own folder
