@@ -245,6 +245,7 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        and shows its progress; on Linux it extracts the AppImage first. Run from the packages on all three, its
        layer and code mod are identical to builder-2's (6,138 entries). On Windows the frozen builder is a console
        program: the window drops the console, so a double-click shows no black box (b99fbc6).
+       Released as the pre-release `unbound-930-builder-3` the same day (the same layer and code mod as builder-2).
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
        roborich or move into the code mod. Delta packs only matter for handing out ML without the builder: a
        player who builds from their own ROM gets the whole layer.
