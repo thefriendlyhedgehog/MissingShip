@@ -238,6 +238,13 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        Released as the pre-release `unbound-930-builder-2` the same night: the three builders, run from OoT USA
        1.0 and Kaze's patch, write the same layer (6,138 entries) and code mod; segments 01, 04 and 11 played on
        the Windows builder's files, 01 and 04 on the macOS builder's.
+       Then a window, 2026-10-17 (`pipeline/builder_gui.py`, Tk, offline): the builder opens it when run with no
+       arguments or `--gui`, and each package has a double-click launcher (macOS "Build The Missing Link.app",
+       Windows ".cmd", Linux ".sh"). It asks for Unbound's folder (or app), the ROM and Kaze's patch, checks them
+       (SoH 9.3.0 or later, `oot.o2r` there, the ROM's CRC), runs the builder with `--stock` into Unbound's `mods`
+       and shows its progress; on Linux it extracts the AppImage first. Run from the packages on all three, its
+       layer and code mod are identical to builder-2's (6,138 entries). On Windows the frozen builder is a console
+       program: the window drops the console, so a double-click shows no black box (b99fbc6).
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
        roborich or move into the code mod. Delta packs only matter for handing out ML without the builder: a
        player who builds from their own ROM gets the whole layer.
