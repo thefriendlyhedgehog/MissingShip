@@ -2,12 +2,14 @@
 
     python3 tools/nodata.py <package>...
     python3 tools/nodata.py --rom <OoT USA 1.0 ROM> --patch <Kaze's v2.0 patch> <package>...
+    python3 tools/nodata.py --git <repository>...      every file in the repository's whole history (all refs)
 
 With no --rom it reads OoT USA 1.0 and ML v2.0 where mspaths says (MS_OOT10_ROM, MS_ML_ROM). tools/package.py runs
 it on every package it makes.
 
 A package is a .zip, .tar.gz, .dmg or folder. Every file in it is scanned, and so is every file inside an archive
-in it (.zip, .o2r, .otr, PyInstaller's base_library.zip), as raw bytes. A file fails when:
+in it (.zip, .o2r, .otr, PyInstaller's base_library.zip), as raw bytes; in a text file, so is every list of 16 or
+more numbers (a C array, a JSON table, a patch), as the bytes it spells. A file fails when:
   - it is a ROM (an N64 header in any byte order), or
   - it holds a run of game data: every file in both ROMs' dmadata, decompressed, is cut into 16-byte blocks, also
     16- and 32-bit byte-swapped (data compiled into a little-endian program), and a run is blocks from the same ROM
@@ -23,7 +25,7 @@ SHA-1. Exits 1 if any package fails.
 """
 import os as _os, sys as _sys
 _sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..', 'pipeline'))
-import argparse, hashlib, io, os, struct, subprocess, sys, tarfile, tempfile, zipfile
+import argparse, hashlib, io, os, re, struct, subprocess, sys, tarfile, tempfile, zipfile
 import numpy as np
 import build_mod
 from mspaths import ML_ROM, OOT10_ROM
@@ -37,6 +39,9 @@ JR_RA = 0x03E00008      # MIPS `jr $ra`: a file with a few of these is code
 MULT = np.uint64(0x9E3779B97F4A7C15)
 ROM_MAGIC = (b'\x80\x37\x12\x40', b'\x37\x80\x40\x12', b'\x40\x12\x37\x80')
 ARCHIVES = ('.zip', '.o2r', '.otr')
+NUMBER = re.compile(rb'(?<![\w.])(0[xX][0-9a-fA-F]+|-?\d+)(?![\w.])')
+BETWEEN = re.compile(rb'[\s,{}+]*')
+MIN_NUMBERS = 16
 
 
 def keys_of(a, b):
@@ -183,6 +188,62 @@ class Index:
         return out
 
 
+def number_lists(text):
+    """(line, bytes) of each list of MIN_NUMBERS or more numbers in a text file, as the big-endian bytes it spells:
+    each number as wide as the list's widest hex number (or its largest decimal) needs."""
+    run, end = [], None
+
+    def spell(run):
+        hexes = [t for t in run if t[:2] in (b'0x', b'0X')]
+        values = [int(t, 0) for t in run]
+        if hexes:
+            digits = max(len(t) - 2 for t in hexes)
+            width = 1 if digits <= 2 else 2 if digits <= 4 else 4 if digits <= 8 else 8
+        else:
+            lo, hi = min(values), max(values)
+            width = 1 if -128 <= lo and hi <= 255 else 2 if -32768 <= lo and hi <= 65535 else 4
+        mask = (1 << (8 * width)) - 1
+        return b''.join((v & mask).to_bytes(width, 'big') for v in values)
+
+    start = 0
+    for m in NUMBER.finditer(text):
+        if run and not BETWEEN.fullmatch(text, end, m.start()):
+            if len(run) >= MIN_NUMBERS:
+                yield text.count(b'\n', 0, start) + 1, spell(run)
+            run = []
+        if not run:
+            start = m.start()
+        run.append(m.group(1))
+        end = m.end()
+    if len(run) >= MIN_NUMBERS:
+        yield text.count(b'\n', 0, start) + 1, spell(run)
+
+
+def git_blobs(repo):
+    """(path@blob, bytes) of every file in the repository's history, each blob once."""
+    listed = subprocess.run(['git', '-C', repo, 'rev-list', '--objects', '--all'], check=True, capture_output=True,
+                            text=True).stdout.splitlines()
+    names = {}
+    for line in listed:
+        sha, _, path = line.partition(' ')
+        if path:
+            names.setdefault(sha, path)
+    cat = subprocess.Popen(['git', '-C', repo, 'cat-file', '--batch'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    try:
+        for sha, path in names.items():
+            cat.stdin.write(sha.encode() + b'\n')
+            cat.stdin.flush()
+            header = cat.stdout.readline().split()
+            size = int(header[2])
+            data = cat.stdout.read(size)
+            cat.stdout.read(1)
+            if header[1] == b'blob':
+                yield f'{path}@{sha[:10]}', data
+    finally:
+        cat.stdin.close()
+        cat.wait()
+
+
 def walk(path):
     """(name, bytes) of every file in a package, and of every file in the archives inside it."""
     if os.path.isdir(path):
@@ -220,17 +281,21 @@ def member(name, data):
                     yield from member(f'{name}/{info.filename}', z.read(info))
 
 
-def check(package, index, rom_names, verbose):
+def check(package, index, rom_names, verbose, git=False):
     problems, tables, files, size = [], [], 0, 0
-    for name, data in walk(package):
+    for name, data in (git_blobs(package) if git else walk(package)):
         files += 1
         size += len(data)
         if data[:4] in ROM_MAGIC and len(data) >= 0x100000:
             problems.append(f'{name}: an N64 ROM')
             continue
-        for start, length, rom, f in index.runs(data):
+        found = [(f'+0x{start:x}', run) for start, *run in index.runs(data)]
+        if b'\0' not in data[:8192]:
+            for line, spelled in number_lists(data):
+                found += [(f'line {line}', run) for start, *run in index.runs(spelled)]
+        for where, (length, rom, f) in found:
             code = (rom, f) in index.code
-            line = f'{name} +0x{start:x}: {length} bytes of {rom_names[rom]} file {f} ({"code" if code else "assets"})'
+            line = f'{name} {where}: {length} bytes of {rom_names[rom]} file {f} ({"code" if code else "assets"})'
             (tables if code and length <= CODE_TABLE else problems).append(line)
     status = 'FAIL' if problems else 'PASS'
     print(f'{status}  {package}: {files} files, {size / 1e6:.1f} MB scanned, '
@@ -255,6 +320,7 @@ def main():
     ap.add_argument('--rom', action='append', help='OoT USA 1.0, or ML v2.0 (repeatable; default: both, from mspaths)')
     ap.add_argument('--patch', help="Kaze's v2.0 patch: adds the ML ROM made from the OoT ROM")
     ap.add_argument('--verbose', action='store_true')
+    ap.add_argument('--git', action='store_true', help='the arguments are git repositories: scan their whole history')
     ap.add_argument('packages', nargs='+')
     a = ap.parse_args()
     a.rom = a.rom or default_roms()
@@ -271,7 +337,7 @@ def main():
             sys.exit(f'nodata: {e}')
         names.append('ML v2.0')
     index = Index(roms)
-    ok = all([check(p, index, names, a.verbose) for p in a.packages])
+    ok = all([check(p, index, names, a.verbose, a.git) for p in a.packages])
     sys.exit(0 if ok else 1)
 
 

@@ -162,6 +162,7 @@ cmake --build build-ml --target soh ZAPD -j8         # the engine, and the ZAPD 
 ```
 
 - Copy `build-ml/soh/soh-macos` to `MissingShip.app/Contents/MacOS/MissingShip`. The binary is not in git: every developer builds it, and players get it from releases.
+- `soh.o2r` (SoH's own assets) isn't in git either: `cmake --build build-ml --target GenerateSohOtr` writes `soh/soh.o2r`; copy it to `MissingShip.app/Contents/Resources/`.
 - A new actor directory needs the `cmake -S . -B build-ml` reconfigure.
 - **Engine changes are commits on `missingship`** in `engine/`, pushed. Then MissingShip commits the new `engine` pointer, and `python3 tools/genpatch.py` refreshes the patches in `docs/` (see `docs/PORTING_ACTORS.md` step 6). The patches are generated review copies, not the source of truth; `tools/genpatch.py --check` fails if they're stale.
 - Every engine change gets a row in `docs/ENGINE_CHANGES.md` (the ledger) in the same commit.
@@ -401,7 +402,7 @@ differences, e.g. `MS_HACK=hacks/selftest python3 tools/codediff.py`.
 
 | Path | What |
 |---|---|
-| `MissingShip.app` | macOS app bundle for development: Info.plist, SoH's assets and `soh.o2r`; the engine binary is built locally, not in git |
+| `MissingShip.app` | macOS app bundle for development: Info.plist and SoH's assets; the engine binary and `soh.o2r` are built locally, not in git |
 | `mod/MissingLink_Scenes.o2r` | the ML archive the pipeline produces (local only, not in git) |
 | `home/` | self-contained SHIP_HOME for development (settings, saves, `oot.o2r`; local only, not in git) |
 | `profile/` | the default settings every new player starts with |

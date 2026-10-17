@@ -5,7 +5,7 @@ The engine lives in the private fork thefriendlyhedgehog/MissingShip-Shipwright 
 `missingship`). The patches in docs/ are generated from the committed fork. They are not the source of truth; they
 exist for review, for tools/checkledger.py, and for applying the changes to a stock SoH checkout.
 
-    soh-missingship.patch           9.2.3..missingship in the fork, minus submodules and .gitmodules
+    soh-missingship.patch           9.2.3..missingship in the fork, minus submodules, .gitmodules and ML_DATA
     libultraship-missingship.patch  the libultraship commit SoH 9.2.3 pins..missingship
     zapd-missingship.patch          the ZAPDTR commit SoH 9.2.3 pins..missingship
 
@@ -26,6 +26,9 @@ for _v in subprocess.run(['git', 'rev-parse', '--local-env-vars'], capture_outpu
 BASE = '9.2.3'
 BRANCH = 'missingship'
 DOCS = _os.path.join(ROOT, 'docs')
+# Fork files that hold ML's art itself (generated from its ROM), left out of the patches: this repo carries no game
+# data (MS-156; tools/nodata.py --git checks the history). The fork has them; the patch names them in no hunk.
+ML_DATA = ['soh/src/code/ml_titlecard_banner.inc']
 
 def git(repo, *args):
     if args[0] == 'diff':   # full blob hashes: abbreviations grow with repo size, so they'd differ between clones
@@ -37,7 +40,8 @@ def pinned(sub):
     return git(SHIPWRIGHT, 'rev-parse', f'{BASE}:{sub}').strip()
 
 patches = {
-    'soh-missingship.patch': git(SHIPWRIGHT, 'diff', BASE, BRANCH, '--', '.', ':!ZAPDTR', ':!libultraship', ':!.gitmodules'),
+    'soh-missingship.patch': git(SHIPWRIGHT, 'diff', BASE, BRANCH, '--', '.', ':!ZAPDTR', ':!libultraship', ':!.gitmodules',
+                                 *(f':!{p}' for p in ML_DATA)),
     'libultraship-missingship.patch': git(_os.path.join(SHIPWRIGHT, 'libultraship'), 'diff', pinned('libultraship'), BRANCH),
     'zapd-missingship.patch': git(_os.path.join(SHIPWRIGHT, 'ZAPDTR'), 'diff', pinned('ZAPDTR'), BRANCH),
 }

@@ -15,7 +15,6 @@ dist/
 *.v64
 *.o2r
 *.otr
-!MissingShip.app/Contents/Resources/soh.o2r
 pipeline/ml_code.bin
 
 # The local development SHIP_HOME: saves, settings, logs, oot.o2r and the installed mod
