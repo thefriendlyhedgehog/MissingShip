@@ -16,7 +16,8 @@ CI builds the engine (soh.o2r, the Windows exe, the Linux AppImage) and freezes 
 a portable settings profile and writes dist/MissingShip-windows.zip and dist/MissingShip-linux.tar.gz. For macOS, freeze
 the builder first (tools/freeze_builder.py, into dist/builder).
 
-No package holds game data (MS-156): on first launch SoH makes oot.o2r from the player's own OoT ROM, then the game runs
+No package holds game data (MS-156): unbound-macos and unbound-ci check theirs with tools/nodata.py when the ROMs it
+reads are here, and remove a package that fails. On first launch SoH makes oot.o2r from the player's own OoT ROM, then the game runs
 the bundled builder (builder/) on Kaze's patch to make mods/MissingLink_Scenes.o2r.
 
 Where the game looks for its files: on Windows, the folder it is started from; on Linux, SHIP_HOME, which the
@@ -632,6 +633,20 @@ def check_unbound_builder(path):
     print(f'builder carries the code mod from {open(cm).read().strip()}')
 
 
+def check_no_game_data(paths):
+    """MS-156: run tools/nodata.py on the packages; remove them all and stop if any carries game data."""
+    sys.path.insert(0, os.path.join(ROOT, 'pipeline'))
+    from mspaths import ML_ROM, OOT10_ROM
+    if not (os.path.exists(OOT10_ROM) and os.path.exists(ML_ROM)):
+        print(f'NOT CHECKED for game data: tools/nodata.py needs OoT USA 1.0 at {OOT10_ROM} and ML v2.0 at {ML_ROM} '
+              '(MS_OOT10_ROM, MS_ML_ROM); check before releasing')
+        return
+    if subprocess.run([sys.executable, os.path.join(ROOT, 'tools', 'nodata.py'), *paths]).returncode:
+        for path in paths:
+            os.remove(path)
+        sys.exit('package.py: game data in a package (above); removed what was made')
+
+
 def main():
     if len(sys.argv) in (3, 4) and sys.argv[1] == 'unbound-app-macos':
         os.makedirs(DIST, exist_ok=True)
@@ -647,7 +662,9 @@ def main():
         return
     os.makedirs(DIST, exist_ok=True)
     if len(sys.argv) == 3 and sys.argv[1] == 'unbound-ci':
-        for path in unbound_ci(sys.argv[2]):
+        made = unbound_ci(sys.argv[2])
+        check_no_game_data(made)
+        for path in made:
             print(f'{os.path.relpath(path, ROOT)}  {os.path.getsize(path) / 1e6:.1f} MB')
         return
     if len(sys.argv) != 2:
@@ -655,6 +672,7 @@ def main():
     if sys.argv[1] == 'unbound-macos':
         check_unbound_builder(MAC_BUILDER)
         path = unbound_macos()
+        check_no_game_data([path])
         print(f'{os.path.relpath(path, ROOT)}  {os.path.getsize(path) / 1e6:.1f} MB')
         return
     if sys.argv[1] == 'macos':
