@@ -1,5 +1,5 @@
 diff --git a/.github/workflows/generate-builds.yml b/.github/workflows/generate-builds.yml
-index 19f25345bc8651763c47f7ef8b35ebcef562dc9f..7b9fdbd16bc6661b54755eba14e979d5ad48dc89 100644
+index 19f25345bc8651763c47f7ef8b35ebcef562dc9f..58097cc88b69fb24ba86ceda9d757c519417ae86 100644
 --- a/.github/workflows/generate-builds.yml
 +++ b/.github/workflows/generate-builds.yml
 @@ -1,12 +1,47 @@
@@ -19,7 +19,7 @@ index 19f25345bc8651763c47f7ef8b35ebcef562dc9f..7b9fdbd16bc6661b54755eba14e979d5
    cancel-in-progress: true
 +env:
 +  # the MissingShip release whose missinglink.o2r (ML's code mod, tools/codemod.py) the builders carry for --stock
-+  CODEMOD_RELEASE: unbound-930-builder-1
++  CODEMOD_RELEASE: unbound-930-builder-2
  jobs:
  
 +  builder-inputs:
