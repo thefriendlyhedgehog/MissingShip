@@ -1,11 +1,11 @@
-# MissingShip — beta
+# MissingShip — pre-release
 
-**The Missing Link** (Kaze Emanuar, v2.0) running on the **Ship of Harkinian** engine (SoH 9.2.3), on Windows,
-Linux and macOS.
+**The Missing Link** (Kaze Emanuar, v2.0) on **Ship of Harkinian**, as a mod for
+[SoH: Unbound](https://github.com/roborich/Shipwright/tree/unbound), on Windows, Linux and macOS.
 
-It is a **mod plus a patched engine**, not an emulator or a recompilation:
-- ML's data (scenes, rooms, collision, textures, text, audio, objects, UI art) is repacked into an SoH `.o2r` archive by `pipeline/`.
-- ML's code (its rewritten actors, its edits to vanilla engine code, and its custom code region at 0x80600000) is **ported to C** in a patched SoH. We diff ML's machine code against the OoT debug ROM, instruction by instruction, and port what changed.
+It is a **mod**, not an emulator or a recompilation:
+- ML's data (scenes, rooms, collision, textures, text, audio, objects, UI art) is repacked into an SoH `.o2r` archive by `pipeline/`. Players make it themselves, from their own ROM, with our builder.
+- ML's code (its rewritten actors, its edits to vanilla engine code, and its custom code region at 0x80600000) is **ported to C**. We diff ML's machine code against the OoT debug ROM, instruction by instruction, and port what changed. On Unbound it is a code mod on skijer's mod API; in the earlier engine beta it is a patched SoH 9.2.3.
 - No ML machine code is executed.
 
 > **No ROMs or game data in git.** ROMs and everything built from them (`oot.o2r`, the mod archive, the
@@ -15,15 +15,17 @@ It is a **mod plus a patched engine**, not an emulator or a recompilation:
 
 ## Status
 
-**Beta.** The whole of The Missing Link is ported and has been played start to finish (MS-010, closed 2026-09-26):
+**Pre-release** ([`unbound-930-builder-3`](https://github.com/thefriendlyhedgehog/MissingShip/releases/tag/unbound-930-builder-3), 2026-10-17). The whole of The Missing Link is ported:
 - all 25 scenes and 72 rooms;
 - every changed or custom actor;
 - Link's model, animations and player-code edits;
 - both dungeons and the boss;
 - the title screen, credits tour and ending.
 
-The owner is now comparing it against a reference playthrough of ML on N64, and any difference becomes a new issue.
-The open issues are long-term only: the drop-in path (#42) and the porting kit (#48–#50).
+The engine beta was played start to finish (MS-010, closed 2026-09-26). On Unbound, a scripted playthrough plays all
+14 segments from the prologue to The End on macOS and Windows. The owner is comparing it against a reference
+playthrough of ML on N64, and any difference becomes a new issue. What is left before a public release is listed in
+the roadmap's Status. The open issues are long-term only: the drop-in path (#42) and the porting kit (#48–#50).
 
 - **Plan and history:** [`docs/ROADMAP.md`](docs/ROADMAP.md).
 - **Every engine change and why:** [`docs/ENGINE_CHANGES.md`](docs/ENGINE_CHANGES.md).
@@ -37,9 +39,34 @@ The open issues are long-term only: the drop-in path (#42) and the porting kit (
 - **Your own Ocarina of Time USA 1.0 ROM** (NTSC 1.0, not Master Quest). None is included.
 - **Kaze's The Missing Link v2.0 patch**, from [his release](https://www.romhacking.net/hacks/5334/): the `.zip` as
   downloaded is fine. (A Missing Link v2.0 ROM you already patched works instead of the ROM and patch.)
+- **For the Unbound route: SoH: Unbound on SoH 9.3.0 or later, with skijer's code mods**, started once with your
+  OoT ROM. Until skijer publishes a release, that is his `unbound-modapi` build (skijer/Shipwright Actions run
+  38509788047).
 - A controller, or the keyboard (SoH's default layout).
 
-### Windows
+### With SoH: Unbound
+
+1. Download the package for your system from
+   [Releases](https://github.com/thefriendlyhedgehog/MissingShip/releases) (`unbound-930-builder-3`):
+   `MissingLink-Unbound-macos.zip`, `-windows.zip` or `-linux.tar.gz`. Unpack it anywhere.
+2. Double-click **Build The Missing Link**: the `.app` on macOS, the `.cmd` on Windows, the `.sh` on Linux.
+3. In the window, choose your Unbound (its folder, or the app on macOS), your OoT ROM and Kaze's patch, then click
+   **Build The Missing Link**. It checks them first, then builds in under a minute, offline. On Linux it unpacks
+   Unbound's AppImage first if that hasn't been done.
+4. Start Unbound. When it asks about `missinglink.o2r` (ML's code mod, not signed yet), choose **Always load this
+   version**.
+
+The builder writes two files into Unbound's `mods/` folder: `MissingLink_Unbound.o2r` (ML's world, made from your
+ROM) and `missinglink.o2r` (ML's code). Each package's `README.txt` also gives the command line. In Unbound, turn on
+**Enhancements → Quality of Life → Saving → Remember Save Location**: ML resumes a save where it was made.
+
+### The engine beta (our SoH 9.2.3 fork)
+
+The earlier route, a patched SoH with ML built in. It gets no new features. Its packages are made with
+`tools/package.py` (see Releases below) and are not published now. The only ones on Releases (`test-build-1`,
+2026-09-26) predate the no-game-data rule and carry the mod, so they must be removed before the repo is public.
+
+#### Windows
 
 1. Download `MissingShip-windows.zip` from the [Releases](https://github.com/thefriendlyhedgehog/MissingShip/releases) page and unzip it anywhere.
 2. Run `MissingShip\MissingShip.exe`.
@@ -50,7 +77,7 @@ Have The Missing Link v2.0 ROM already patched? Pick it at the first prompt: the
 asks for your OoT ROM, which it still needs for the base game's assets (ML's ROM leaves out about a thousand of the
 files the engine uses).
 
-### Linux
+#### Linux
 
 1. Download `MissingShip-linux.tar.gz` from [Releases](https://github.com/thefriendlyhedgehog/MissingShip/releases) and extract it.
 2. Run `./MissingShip.sh`, not the AppImage directly: the script keeps settings and saves in that folder.
@@ -59,7 +86,7 @@ files the engine uses).
 **Steam Controller:** outside Steam it acts as a mouse and keyboard. Add `MissingShip.sh` to Steam
 (*Games → Add a Non-Steam Game*) and launch it from there.
 
-### macOS (Apple Silicon)
+#### macOS (Apple Silicon)
 
 1. Download `MissingShip-macos.zip` from [Releases](https://github.com/thefriendlyhedgehog/MissingShip/releases), unzip it and move `MissingShip.app` to Applications.
 2. Open it once. macOS blocks apps from unidentified developers the first time: go to *System Settings → Privacy & Security* and click **Open Anyway** next to MissingShip.
@@ -68,7 +95,7 @@ files the engine uses).
 Needs an M1 or later Mac with macOS 11 or later. Settings, saves, logs and `oot.o2r` live in
 `~/Library/Application Support/MissingShip` (*Settings → Open App Files Folder* in the menu opens it).
 
-### Where your files are
+#### Where your files are
 
 On Windows and Linux, settings (`shipofharkinian.json`), saves (`Save/`), logs and `oot.o2r` all live next to the
 game, so the folder is portable. On macOS they are in `~/Library/Application Support/MissingShip`. Either way
@@ -76,7 +103,7 @@ MissingShip never touches a normal Ship of Harkinian install. `mods/MissingLink_
 itself, built on first launch. `MissingLink/` keeps your patched ROM, so when an update changes the mod the game
 rebuilds it without asking again. Delete `mods/MissingLink_Scenes.o2r` to make the game build it again.
 
-### Settings
+#### Settings
 
 - **Esc** opens the menu.
 - The menu is SoH's own, trimmed to what applies to ML. Options that do nothing in ML (randomizer, network, and settings for vanilla items, areas and enemies ML removed) are hidden.
@@ -156,6 +183,23 @@ python3 pipeline/ms_cycle.py --no-launch  # build and install only
 
 ### Releases
 
+**ML for SoH: Unbound** (the `unbound-930-builder-N` pre-releases):
+1. ML's code mod: `python3 tools/codemod.py` writes `dist/codemod/missinglink.o2r` and `codemod.txt` from
+   MissingShip-Unbound's `ml-codemod-930` (macOS built here; Windows and Linux from that commit's CI run). When it
+   changes, publish the release with those two files first, then set `CODEMOD_RELEASE` in the engine fork's
+   `generate-builds.yml` to it: CI's builders carry the code mod from that release.
+2. Run **generate-builds** (below). It freezes the Windows and Linux builders. Then
+   `python3 tools/package.py unbound-ci <run id>` writes `dist/MissingLink-Unbound-windows.zip` and
+   `dist/MissingLink-Unbound-linux.tar.gz`.
+3. On this Mac: `tools/freeze_builder.py` (with PyInstaller), then `python3 tools/package.py unbound-macos` writes
+   `dist/MissingLink-Unbound-macos.zip`.
+4. `package.py` checks each package for game data with `tools/nodata.py` (MS-156). It needs OoT USA 1.0 at
+   `roms/oot-usa10.z64` and ML v2.0 at `pipeline/tml_2_0.z64` (or `MS_OOT10_ROM`, `MS_ML_ROM`), and removes a
+   package that fails.
+5. Test each package through its launcher. Builder windows can be driven in tests with `MS_GUI_AUTOTEST=<json>`
+   (`pipeline/builder_gui.py`). Then attach the three packages, `missinglink.o2r` and `codemod.txt` to the release.
+
+**The engine beta:**
 1. Run **generate-builds** on the engine fork (*Actions → generate-builds → Run workflow*, branch `missingship`, or
    `gh workflow run generate-builds.yml --repo thefriendlyhedgehog/MissingShip-Shipwright --ref missingship`).
    It builds `soh.o2r`, the Windows exe and the Linux AppImage, and freezes the mod builder for each from this
@@ -177,7 +221,9 @@ tester's own settings.
 ### Mod builder (MS-154, MS-155)
 
 Players build the mod themselves from their own files, so no download carries game data (milestone *Prod: no game data*).
-The game runs the builder itself on first launch (`soh/Extractor/MissingShipBuilder.cpp` in the engine, ledger row
+Run with no arguments (or `--gui`), the builder opens a window (`pipeline/builder_gui.py`, Tk, offline) that asks for
+Unbound, the ROM and the patch and writes ML into Unbound's `mods/` folder with `--stock`; each Unbound package has a
+double-click launcher for it. In the engine beta, the game runs the builder itself on first launch (`soh/Extractor/MissingShipBuilder.cpp` in the engine, ledger row
 143): after SoH makes `oot.o2r`, it asks for Kaze's patch (adding the OoT ROM just extracted), runs the bundled
 builder with a progress window, and shows the builder's message if it fails. The builder keeps the ML ROM in
 `MissingLink/tml_2_0.z64` (`--save-rom`), and the game records which builder (`version.txt`) and `oot.o2r` made the
@@ -197,9 +243,10 @@ python3 pipeline/build_mod.py <files...> --oot-o2r <oot.o2r> --out <MissingLink_
 - Players get Kaze's patch from [his release](https://www.romhacking.net/hacks/5334/). It is made for OoT **USA 1.0**, and SoH accepts that ROM for `oot.o2r` too, so one ROM covers both.
 - `tools/freeze_builder.py` freezes it with PyInstaller into `dist/builder/MissingShipBuilder/`: no Python needed, with ZAPD and the SoH files the pipeline reads (tables and object XMLs, 2.8 MB) bundled. Run it on each OS. On macOS it also bundles SDL3, which Homebrew's sdl2-compat (linked by ZAPD) loads at start-up.
 
-### ML on SoH: Unbound (in progress)
+### ML on SoH: Unbound
 
-The next home for ML is [SoH: Unbound](https://github.com/roborich/Shipwright/tree/unbound); our copy is the private
+What players get is the builder's `--stock` route below: ML for a stock Unbound with skijer's code mods. The pack
+route and our Unbound branch came first and stay for testing. ML's home is [SoH: Unbound](https://github.com/roborich/Shipwright/tree/unbound); our copy is the private
 `thefriendlyhedgehog/MissingShip-Unbound` (branch `missinglink`). Unbound reads vanilla scenes and text only in its own
 JSON form, so `tools/unbound_layer.py` converts ML's with Unbound's own converter and keeps what ML changes:
 
@@ -334,6 +381,9 @@ Override any path with an env var:
 | `MS_OOT_O2R` | `home/oot.o2r` |
 | `MS_SHIPWRIGHT` | `engine/` (the engine fork submodule) |
 | `MS_ZAPD`, `MS_ZAPD_CWD` | `$MS_SHIPWRIGHT/build-ml/ZAPD/ZAPD.out` (built with the engine, patched ZAPDTR), `$MS_SHIPWRIGHT/soh` |
+| `MS_OOT10_ROM` | `roms/oot-usa10.z64` (OoT USA 1.0, for `tools/nodata.py`) |
+| `MS_UNBOUND_SRC` | `../Unbound-923-src` (Unbound at its last SoH 9.2.3 commit, for the layer tools) |
+| `MS_CODEMOD_SRC`, `MS_CODEMOD` | `../Unbound-skijer930` (ML's code mod checkout), `dist/codemod/missinglink.o2r` |
 
 ZAPD's config (`pipeline/Config_ML.xml`) is a template; each run writes the filled-in copy to `pipeline/out/`.
 
@@ -355,8 +405,8 @@ differences, e.g. `MS_HACK=hacks/selftest python3 tools/codediff.py`.
 | `mod/MissingLink_Scenes.o2r` | the ML archive the pipeline produces (local only, not in git) |
 | `home/` | self-contained SHIP_HOME for development (settings, saves, `oot.o2r`; local only, not in git) |
 | `profile/` | the default settings every new player starts with |
-| `pipeline/` | ROM → `.o2r` pipeline: ZAPD XMLs (`xml/scenes`, `xml/objects`), injectors, maps |
-| `tools/` | hack-vs-baseline analysis: `modcheck`, `aligndiff`, `dumpactor`, `codediff`, `pldiff`, `mlcustom`, …; project checks: `check`, `genpatch`, `survey_actors`, …; audio: `sfxtrace` (which sound effects play a font slot); release packaging: `package`, `deltapack` (a mod as deltas against the player's own base) |
+| `pipeline/` | ROM → `.o2r` pipeline: ZAPD XMLs (`xml/scenes`, `xml/objects`), injectors, maps; the mod builder (`build_mod.py`) and its window (`builder_gui.py`) |
+| `tools/` | hack-vs-baseline analysis: `modcheck`, `aligndiff`, `dumpactor`, `codediff`, `pldiff`, `mlcustom`, …; project checks: `check`, `genpatch`, `survey_actors`, …; audio: `sfxtrace` (which sound effects play a font slot); release packaging: `package`, `freeze_builder`, `codemod` (ML's code mod for every OS), `nodata` (no game data in a package), `deltapack` (a mod as deltas against the player's own base) |
 | `hacks/` | per-hack configs for `tools/` (`ml`, `selftest`) |
 | `dist/` | release packages from `tools/package.py` (not committed) |
 | `docs/ROADMAP.md` | status, history and the remaining long-term work |
@@ -377,8 +427,9 @@ differences, e.g. `MS_HACK=hacks/selftest python3 tools/codediff.py`.
 ## Goals
 
 1. **All of The Missing Link playable on SoH.** Done; now being checked against ML on N64.
-2. **Drop-in for stock SoH, long term.** A stock SoH build can load only data, so every engine change is logged with its route to data or to a generic upstream feature (`docs/ENGINE_CHANGES.md`, `docs/DROPIN_PROPOSALS.md`). No upstream PRs until the project is done.
-3. **A porting kit for other romhacks.** The method and tools here (dma/object/actor diffs against a vanilla baseline, the ZAPD pipeline, the C porting workflow) are meant to grow into a reusable way to bring OoT romhacks to the SoH engine.
+2. **ML for the stock SoH: Unbound players already have**, built by our builder from their own ROM, with ML's code as a code mod. Pre-released; what is left is in the roadmap.
+3. **Drop-in for stock SoH, long term.** A stock SoH build can load only data, so every engine change is logged with its route to data or to a generic upstream feature (`docs/ENGINE_CHANGES.md`, `docs/DROPIN_PROPOSALS.md`). No upstream PRs until the project is done.
+4. **A porting kit for other romhacks.** The method and tools here (dma/object/actor diffs against a vanilla baseline, the ZAPD pipeline, the C porting workflow) are meant to grow into a reusable way to bring OoT romhacks to the SoH engine.
 
 ## Credits
 

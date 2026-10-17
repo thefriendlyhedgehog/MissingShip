@@ -25,22 +25,21 @@ Project memory notes from the local sessions are copied in `docs/notes/`. The pl
 - New ML object: add `pipeline/xml/objects/object_ml_<name>.xml`, name its dma index in ML_OBJECTS in
   `pipeline/ms_cycle.py`, declare paths in `soh/assets/ml_assets.h`.
 
-## Last batch (2026-09-25, built + deployed, NOT yet tested in game)
-- **Ml_Malon** (slot 0xE7, ML dma 236; object 0xE0 = dma 55 -> object_ml_ma1). Race state = switch 0x11 of scene 0x5A,
-  read from the save at Init. Arriving by ML entrance 0x13C: set entrance to 0x58, she speaks first (0x204D won /
-  0x2050 lost). params 0xFFFF = finish line (within 80, not below her, timer > 0 -> switch 0x11, timerState 10,
-  warp 0x13C). Otherwise host: text 0x204A, choice 0 -> 0x204C + warp 0x138 (the race), else 0x204B. After a win:
-  text 0x204F and a cucco (actor 0x0D params 4) at (-778, -485, 308) rot y 0x1680; also spawned when 0x204E shows.
-  All ML entrance numbers go through `MlEntrance_ToSoh`. Where ML places the race is not yet identified.
-- **Ml_Cucco** (slot 0x0D, vanilla En_Poh's): ML's copy of En_Niw with object 0x09 (dma 354, a recoloured
-  object_niw -> object_ml_cucco). Implemented inside ovl_En_Niw (`Ml_Cucco_InitVars`, `NIW_IS_ML`): health 0x77 at
-  Init, all CHICKEN_CRY_M and CRY_A calls removed (CRY_N and DEKU_WAKEUP kept).
-- Earlier untested batch: title cards, Navi muted, text speed 2, save resume location, item page layout, bean
-  seller, Deku Road Skull Kid + Blade Beam heart, grotto scrub shop, hole-hopping scrub (ydan room 2), readable
-  notes, Deep Woods wall-skip.
+## Where things stand (2026-10-17)
+- **The release route is ML for stock SoH: Unbound** (SoH 9.3.0 or later, with skijer's code mods). Players run our
+  builder: `pipeline/build_mod.py --stock`, with a window (`pipeline/builder_gui.py`) and double-click launchers from
+  `tools/package.py`. It writes ML's layer and ML's code mod into Unbound's `mods/` folder. The releases are the
+  `unbound-930-builder-N` pre-releases; how to make one is in the README's Releases section.
+- **Branches of MissingShip-Unbound:**
+  - `ml-codemod-930`: ML's code mod, `mod-sdk/mods/missinglink`, on skijer's 9.3.0 mod API (skijer/Shipwright#33);
+    `tools/codemod.py` builds it for every OS.
+  - `ml-playtest` / `ml-playtest-930`: `mlplay`, the scripted playthrough (`mod-sdk/mlplay-playthrough`, 14
+    segments, with run scripts for macOS, Linux and Windows).
+  - `missinglink`: our Unbound branch and the pack route, kept for testing.
+- **The engine fork** (SoH 9.2.3) keeps the engine beta running and gets no new features.
+- **Windows mods:** a game function's plain name is the mod's import thunk, so compares and stores of game function
+  addresses go through `__imp_<name>` (`ML_HOST_FN` in `missinglink.h`). Calls by the plain name are fine.
+- **No game data in packages:** `tools/nodata.py` (MS-156), which `package.py` runs.
 
 ## Open items
-- Actor todo list: `docs/ML_ACTOR_INVENTORY.md` (rows marked todo).
-- HUD restyle (ML 0x80604E30 / 0x806053E0, colour 0x80089180); dungeon minimap textures (room + 190).
-- Magic Hourglass (0x80600E00, not ported). Link object/animation port.
-- Crate freeze in malon_stable room 3 (MS-011): not reproduced, nothing in the vanilla crate code can hang; waiting on a repro (checklist #9). If it freezes, `sample MissingShip` on the live process.
+What is left before a public release is in `ROADMAP.md` (Status); the long-term issues are MS-070 and MS-091-093.

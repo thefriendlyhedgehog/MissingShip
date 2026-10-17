@@ -1,7 +1,7 @@
 # MissingShip roadmap
 
 Status, how we work, what is left, and the history of every issue.
-Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-nnn`); the history below is generated from them.
+Last updated **2026-10-17**. Issues live on **GitHub Issues** (title prefix `MS-nnn`); the history below is generated from them.
 
 - **Detail lives elsewhere:**
   - `ENGINE_CHANGES.md`: every engine change and its drop-in path (the ledger).
@@ -12,13 +12,32 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
 
 ## Status
 
-**Beta: feature-complete and played start to finish, still in testing.**
-- Every milestone from M0 to M5 is done, and so are the Windows and Linux packages.
-- The full playtest (MS-010) closed on 2026-09-26 with every checklist item verified.
-- The owner is now comparing the port against a reference playthrough of ML on N64. Any difference becomes a new issue with the next free ID (the last used is MS-156).
-- **Next: Prod, no game data.** Owner decision, 2026-09-27: public builds carry no Nintendo data. Players build the ML mod from their own ROM on first launch, as SoH does for `oot.o2r`. Kaze Emanuar has given permission for the port, which covers ML's own work; Nintendo's assets are still never distributed. Since 2026-09-27 the packages carry the builder instead of the mod, and the game builds the mod on first launch (MS-155, MS-156).
+**Pre-release: ML for SoH: Unbound, built by players with our builder.**
+- **What players get** (`unbound-930-builder-3`, 2026-10-17): ML for the stock SoH: Unbound they already have (SoH
+  9.3.0 or later, with skijer's code mods). The builder is a window that works offline on macOS, Windows and Linux.
+  It takes the player's OoT USA 1.0 ROM and Kaze's v2.0 patch, then writes ML's layer and ML's code mod into
+  Unbound's `mods/` folder. No package carries game data (MS-156, `tools/nodata.py`). The scripted playthrough
+  plays all 14 segments, prologue to The End: on macOS and Windows on the builder's files, on Linux through
+  segment 04.
+- **The engine beta** (our SoH 9.2.3 fork) came first. It was played start to finish (MS-010, 2026-09-26; every
+  milestone from M0 to M5) and gets no new features.
+- The owner is comparing the port against a reference playthrough of ML on N64. Any difference becomes a new issue
+  with the next free ID (the last used is MS-156).
+- **Left before a public release:**
+  - Public hosting: the repos are private, and their history still holds data committed before 2026-09-27. The
+    owner chooses between a fresh repo and a rewrite. The `test-build-1` release (2026-09-26, engine beta) carries
+    `mods/MissingLink_Scenes.o2r` and must be deleted first.
+  - An official skijer release with #33: builder-3 points players at his CI run 38509788047, whose artifacts expire
+    2027-01-12.
+  - Three spots that a helper still gets past in the scripted playthrough: rooms 14, 24 and 1.
+  - Code mod signing: Unbound asks players to "Always load" ML's unsigned code mod.
+  - Upstream offers: roborich's libultraship #2 and #3 are open; the rest are held until the project is done.
+  - A Linux play test of the builder's files past segment 04.
+- **No game data** (owner decision, 2026-09-27): public builds carry no Nintendo data, and players build ML from
+  their own ROM. Kaze Emanuar has given permission for the port, which covers ML's own work; Nintendo's assets are
+  still never distributed.
 
-- **Next after that: ML on SoH: Unbound.** Owner decision, 2026-09-27: The Missing Link becomes a mod for
+- **How we got here: ML on SoH: Unbound.** Owner decision, 2026-09-27: The Missing Link becomes a mod for
   [SoH: Unbound](https://github.com/roborich/Shipwright/tree/unbound) (roborich's fork; on SoH 9.3.0 since Unbound 0.11, while our fork stays on 9.2.3). What
   Unbound lacks, we build ourselves in its style, so it can be offered to its author. The work lives in the private repo
   `thefriendlyhedgehog/MissingShip-Unbound` (branch `missinglink`; `unbound` tracks roborich's). Our SoH fork gets no new
@@ -254,9 +273,6 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
 
 | ID | Issue | Notes |
 |---|---|---|
-| [MS-153](https://github.com/thefriendlyhedgehog/MissingShip/issues/117) | Find out what players start from: Kaze's ML v2.0 patch, its base ROM, and whether one ROM can cover SoH's base too | Prod. ML v2.0 ships as a patch for a ROM; with Kaze's permission we may be able to bundle it. |
-| [MS-154](https://github.com/thefriendlyhedgehog/MissingShip/issues/118) | Standalone mod builder for Windows, Linux and macOS | Prod. The pipeline as a per-OS program; continues MS-082. Built and run on all three; the 9.3.0 `--stock` builder run on Windows 2026-10-16, its layer identical to the Mac's. Output is byte-identical only on the same OS: upstream ZAPD leaves two bytes per skeleton limb and one per soundfont drum entry uninitialized, so `oot.o2r` and the mod differ in those bytes between macOS and Linux (found 2026-09-27; 2,759 and 116 entries). Fixed on 2026-09-29: roborich's ZAPDTR already zeroed the limb bytes, and both his fix and our soundfont fix are now in Unbound's ZAPDTR and the fork's pipeline ZAPD (UNBOUND_MAP.md B8). Verified 2026-09-29 by extracting `oot.o2r` headless from the NTSC 1.0 ROM on macOS and Linux: with the fixes, the fork's and Unbound's extractors each give identical archives on both (38,390 entries); the fork's old ZAPD, rebuilt on Linux as a control, differs from the Mac's in 3,280 entries (2,866 limbs, 413 rooms, 1 soundfont). The ML mod, built with `build_mod.py` on both, then differed in one sample (ML's font 1 sfx 1 points past its Audiotable); with a bounds fix in ZAPD it is identical too (5,833 entries). |
-| [MS-155](https://github.com/thefriendlyhedgehog/MissingShip/issues/119) | First launch builds the ML mod: ask for the ML ROM, verify it, run the builder | Prod. |
 | [MS-070](https://github.com/thefriendlyhedgehog/MissingShip/issues/42) | Drop-in path: upstream bugfixes and data-driven proposals | Proposals written in [DROPIN_PROPOSALS.md](DROPIN_PROPOSALS.md) for ledger rows 1–101; rows 102–140 still to review. No upstream PRs until the project is done (owner decision, 2026-09-25). |
 | [MS-091](https://github.com/thefriendlyhedgehog/MissingShip/issues/48) | Porting-kit knowledge base | Deferred until ML is finished; done in a separate effort. |
 | [MS-092](https://github.com/thefriendlyhedgehog/MissingShip/issues/49) | Per-hack workspace layout | Deferred, as above. |
@@ -324,7 +340,7 @@ All 25 ML scenes are named.
 | M5: Front end and polish | MS-060 … MS-063 | Done 2026-09-26: HUD restyle, title screen, opening; the pause cursor rechecked. |
 | M6: Drop-in | MS-016, MS-070 | MS-016 fixed; MS-070 open (proposals written, PRs held). |
 | Platforms | MS-080 … MS-083 | Done 2026-09-27: Windows and Linux packages (engine from GitHub Actions, `tools/package.py`), tested on both. A macOS (Apple Silicon) package from the local build followed. |
-| Prod: no game data | MS-153 … MS-156 | Open: players build the mod from their own ROM; packages and repo carry no game data (packages checked by `tools/nodata.py`, MS-156). Before the repo goes public, its history (which still holds the ROMs and archives committed before 2026-09-27) is cleaned, by a fresh repo or a rewrite; the owner decides which at that point. |
+| Prod: no game data | MS-153 … MS-156 | Done 2026-10-17: players build the mod from their own ROM, and the packages carry no game data (`tools/nodata.py`, MS-156). Still open: before the repo goes public, its history (which still holds the ROMs and archives committed before 2026-09-27) is cleaned, by a fresh repo or a rewrite; the owner decides which at that point. |
 | ML on Unbound | — | Open, started 2026-09-27: see Status. |
 | Porting kit | MS-090 … MS-093 | MS-090 done (per-hack tool config); the rest deferred until ML is finished. |
 
@@ -499,6 +515,9 @@ Every issue, from GitHub. Details, test notes and commits are on each issue.
 | [MS-150](https://github.com/thefriendlyhedgehog/MissingShip/issues/114) | Magic Hourglass rewind just after a door puts Link in the unloaded old room (black screen) | done 2026-09-26 |
 | [MS-151](https://github.com/thefriendlyhedgehog/MissingShip/issues/115) | After the Hollow Root Keep boss, ML's credits tour (pond to the ending card) was cut short | done 2026-09-25 |
 | [MS-152](https://github.com/thefriendlyhedgehog/MissingShip/issues/116) | Monktown Maze (Deep Woods) doesn't show up on the pause world map | done 2026-09-26 |
+| [MS-153](https://github.com/thefriendlyhedgehog/MissingShip/issues/117) | Find out what players start from: Kaze's ML v2.0 patch, its base ROM, and whether one ROM can cover SoH's base too | done 2026-10-17: OoT USA 1.0 plus Kaze's patch (or a patched ML v2.0 ROM), checked by CRC; the patch is not bundled. Every playthrough since 2026-10-11 runs on files built from USA 1.0. |
+| [MS-154](https://github.com/thefriendlyhedgehog/MissingShip/issues/118) | Standalone mod builder for Windows, Linux and macOS | done 2026-10-17: the builder in every release since unbound-930-builder-1; a window and double-click launchers since builder-3. The three OSes write the same layer and code mod. |
+| [MS-155](https://github.com/thefriendlyhedgehog/MissingShip/issues/119) | First launch builds the ML mod: ask for the ML ROM, verify it, run the builder | not planned, 2026-10-17: superseded by ML on Unbound. The engine beta keeps its first-launch builder (ledger row 143); on Unbound, players run the builder window. |
 | [MS-156](https://github.com/thefriendlyhedgehog/MissingShip/issues/120) | Release packages carry no game data | done 2026-10-17: `tools/nodata.py` fingerprints every decompressed file of OoT USA 1.0 and ML v2.0 (also byte-swapped) and scans each package and every archive in it; `package.py` runs it on the Unbound packages and removes one that fails. builder-3's three packages pass: their only matches are seven constant tables (64-264 bytes) in the code mod, from vanilla and ML actor code. The retired engine packages fail as expected: SoH's own `soh.o2r` (two button textures and a fishing-pole texture share OoT art) and math tables of up to 2.5 KB in the engine binary; the Unbound packages ship neither. |
 
 ---
