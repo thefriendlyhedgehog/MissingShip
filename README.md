@@ -63,8 +63,8 @@ ROM) and `missinglink.o2r` (ML's code). Each package's `README.txt` also gives t
 ### The engine beta (our SoH 9.2.3 fork)
 
 The earlier route, a patched SoH with ML built in. It gets no new features. Its packages are made with
-`tools/package.py` (see Releases below) and are not published now. The only ones on Releases (`test-build-1`,
-2026-09-26) predate the no-game-data rule and carry the mod, so they must be removed before the repo is public.
+`tools/package.py` (see Releases below) and are not published now. The one release that had them (`test-build-1`,
+2026-09-26) predated the no-game-data rule and carried the mod; it was deleted on 2026-10-17.
 
 #### Windows
 

@@ -25,8 +25,8 @@ Last updated **2026-10-17**. Issues live on **GitHub Issues** (title prefix `MS-
   with the next free ID (the last used is MS-156).
 - **Left before a public release:**
   - Public hosting: the repos are private, and their history still holds data committed before 2026-09-27. The
-    owner chooses between a fresh repo and a rewrite. The `test-build-1` release (2026-09-26, engine beta) carries
-    `mods/MissingLink_Scenes.o2r` and must be deleted first.
+    owner chooses between a fresh repo and a rewrite. The `test-build-1` release (2026-09-26, engine beta), which
+    carried `mods/MissingLink_Scenes.o2r`, was deleted on 2026-10-17.
   - An official skijer release with #33: builder-3 points players at his CI run 38509788047, whose artifacts expire
     2027-01-12.
   - Three spots that a helper still gets past in the scripted playthrough: rooms 14, 24 and 1.
