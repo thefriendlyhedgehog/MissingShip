@@ -20,7 +20,7 @@ index 0bc35a25b90f72fa38c9169f59a689a4b73d25ad..d080c5a91e500c0e29ebd21acaa653bb
  	std::vector<SkinLimbModif> limbModifications_arr;
  	// ZDisplayList* unk_8_dlist = nullptr;
 diff --git a/ZAPD/ZAudio.cpp b/ZAPD/ZAudio.cpp
-index 03c1efa99341ba516d3a44c5c4d533c08e49474e..d860b9f2c6642a96f6f23bd5928717c88ff57173 100644
+index 03c1efa99341ba516d3a44c5c4d533c08e49474e..0f0c0837588ff1253241c2d6afa708fdb82a997f 100644
 --- a/ZAPD/ZAudio.cpp
 +++ b/ZAPD/ZAudio.cpp
 @@ -1,5 +1,7 @@
@@ -31,7 +31,28 @@ index 03c1efa99341ba516d3a44c5c4d533c08e49474e..d860b9f2c6642a96f6f23bd5928717c8
  #include "Globals.h"
  #include "Utils/BitConverter.h"
  #include <Utils/DiskFile.h>
-@@ -132,8 +134,16 @@ SampleEntry* ZAudio::ParseSampleEntry(const std::vector<uint8_t>& audioBank,
+@@ -114,6 +116,20 @@ SoundFontEntry* ZAudio::ParseSoundFontEntry(const std::vector<uint8_t>& audioBan
+ 	return soundFont;
+ }
+ 
++// A sample's loop and codebook as far as they lie inside the audio bank; past its end they read as zero. The Missing
++// Link has a sample (bank 0, its header at 0x12C0) whose loop and book pointers are 0, so its "book" is the font's own
++// header (order 384, 400 predictors): 1.2M entries, read megabytes past the bank, which crashed the Windows extractor
++// and put whatever memory followed into the archive elsewhere. Its data starts at the audio table's end (see below).
++static int16_t BankInt16(const std::vector<uint8_t>& bank, int32_t offset)
++{
++	return (offset >= 0 && (size_t)offset + 2 <= bank.size()) ? BitConverter::ToInt16BE(bank, offset) : 0;
++}
++
++static int32_t BankInt32(const std::vector<uint8_t>& bank, int32_t offset)
++{
++	return (offset >= 0 && (size_t)offset + 4 <= bank.size()) ? BitConverter::ToInt32BE(bank, offset) : 0;
++}
++
+ SampleEntry* ZAudio::ParseSampleEntry(const std::vector<uint8_t>& audioBank,
+                                       const std::vector<uint8_t>& audioTable,
+                                       AudioTableEntry audioSampleBankEntry, int bankIndex,
+@@ -132,8 +148,16 @@ SampleEntry* ZAudio::ParseSampleEntry(const std::vector<uint8_t>& audioBank,
  		sample->bankId = bankIndex;
  
  
@@ -49,7 +70,45 @@ index 03c1efa99341ba516d3a44c5c4d533c08e49474e..d860b9f2c6642a96f6f23bd5928717c8
  
  		uint32_t origField = (BitConverter::ToUInt32BE(audioBank, sampleOffset + 0));
  		sample->codec = (origField >> 28) & 0x0F;
-@@ -381,6 +391,17 @@ void ZAudio::ParseRawData()
+@@ -141,29 +165,28 @@ SampleEntry* ZAudio::ParseSampleEntry(const std::vector<uint8_t>& audioBank,
+ 		sample->unk_bit26 = (origField >> 22) & 0x01;
+ 		sample->unk_bit25 = (origField >> 21) & 0x01;
+ 
+-		sample->loop.start = BitConverter::ToInt32BE(audioBank, loopOffset + 0);
+-		sample->loop.end = BitConverter::ToInt32BE(audioBank, loopOffset + 4);
+-		sample->loop.count = BitConverter::ToInt32BE(audioBank, loopOffset + 8);
++		sample->loop.start = BankInt32(audioBank, loopOffset + 0);
++		sample->loop.end = BankInt32(audioBank, loopOffset + 4);
++		sample->loop.count = BankInt32(audioBank, loopOffset + 8);
+ 
+ 		if (sample->loop.count != 0)
+ 		{
+ 			for (int i = 0; i < 16; i++)
+ 			{
+ 				// TODO can loop.states be an array of size 16?
+-				int16_t state = BitConverter::ToInt16BE(audioBank, loopOffset + 16 + (i * 2));
++				int16_t state = BankInt16(audioBank, loopOffset + 16 + (i * 2));
+ 				sample->loop.states.push_back(state);
+ 			}
+ 		}
+ 
+-		sample->book.order = BitConverter::ToInt32BE(audioBank, bookOffset + 0);
+-		sample->book.npredictors = BitConverter::ToInt32BE(audioBank, bookOffset + 4);
++		sample->book.order = BankInt32(audioBank, bookOffset + 0);
++		sample->book.npredictors = BankInt32(audioBank, bookOffset + 4);
+ 
+ 		int32_t numBooks = sample->book.npredictors * sample->book.order * 8;
+-		sample->book.books.reserve(numBooks);
++		sample->book.books.reserve(numBooks > 0 ? numBooks : 0);
+ 		for (int i = 0; i < numBooks; i++)
+ 		{
+-			sample->book.books.push_back(
+-				BitConverter::ToInt16BE(audioBank, bookOffset + 8 + (i * 2)));
++			sample->book.books.push_back(BankInt16(audioBank, bookOffset + 8 + (i * 2)));
+ 		}
+ 
+ 		sample->sampleDataOffset = sampleDataOffset;
+@@ -381,6 +404,17 @@ void ZAudio::ParseRawData()
  	// SAMPLE/FONT PARSING
  	for (auto& sft : soundFontTable)
  	{
