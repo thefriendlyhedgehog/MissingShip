@@ -334,7 +334,15 @@ def main(bm):
     """The window; bm is build_mod (the running module, frozen or not)."""
     if sys.platform == 'win32':                         # double-clicked: drop the console window Windows opened
         import ctypes
+        console = sys.stdout is not None and sys.stdout.isatty()
         ctypes.windll.kernel32.FreeConsole()
+        if console:                                     # its handles are gone with it: a print would now fail
+            try:
+                os.makedirs(os.path.dirname(settings_path()), exist_ok=True)
+                sys.stdout = sys.stderr = open(os.path.join(os.path.dirname(settings_path()), 'builder.log'), 'w',
+                                               encoding='utf-8', buffering=1)
+            except OSError:
+                sys.stdout = sys.stderr = open(os.devnull, 'w')
     root = tk.Tk()
     window = Window(bm, root)
     test = os.environ.get('MS_GUI_AUTOTEST')
