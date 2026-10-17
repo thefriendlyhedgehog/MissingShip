@@ -24,9 +24,14 @@ Last updated **2026-10-17**. Issues live on **GitHub Issues** (title prefix `MS-
 - The owner is comparing the port against a reference playthrough of ML on N64. Any difference becomes a new issue
   with the next free ID (the last used is MS-156).
 - **Left before a public release:**
-  - Public hosting: the repos are private, and their history still holds data committed before 2026-09-27. The
-    owner chooses between a fresh repo and a rewrite. The `test-build-1` release (2026-09-26, engine beta), which
-    carried `mods/MissingLink_Scenes.o2r`, was deleted on 2026-10-17.
+  - Public hosting: the repos are private. MissingShip's history was rewritten on 2026-10-17 (owner's choice over a
+    fresh repo): git-filter-repo took out the ROMs, `oot.o2r`, the mod and pipeline dumps, `home/`, the engine
+    binaries and `soh.o2r`, and the title-card banner (ML's art) from old `docs/soh-missingship.patch` versions.
+    469 MB became 2.8 MB, with the same files at HEAD; `tools/nodata.py --git` passes and no secrets were found.
+    Commit SHAs changed, and the docs were remapped. Left: GitHub Support purging the old commits (they stay
+    fetchable by SHA until then), and the engine fork and MissingShip-Unbound if they go public too. The
+    `test-build-1` release (2026-09-26, engine beta), which carried `mods/MissingLink_Scenes.o2r`, was deleted on
+    2026-10-17.
   - An official skijer release with #33: builder-3 points players at his CI run 38509788047, whose artifacts expire
     2027-01-12.
   - Three spots that a helper still gets past in the scripted playthrough: rooms 14, 24 and 1.
@@ -249,9 +254,9 @@ Last updated **2026-10-17**. Issues live on **GitHub Issues** (title prefix `MS-
        actionFunc failed and every actionFunc the mod set was one the game's own compares never match (the Bunny
        Hood's speed, the Magic Hourglass, shops, Floormasters): the code mod now takes the game's own address
        (`ML_HOST_FN`, MissingShip-Unbound `badd23105`, `dd9a7e4f3`); mlplay the same for the file select.
-       (2) The frozen builder read the repo's UTF-8 sources as cp1252: it runs in Python's UTF-8 mode (22f1d2f).
+       (2) The frozen builder read the repo's UTF-8 sources as cp1252: it runs in Python's UTF-8 mode (d1b5632).
        (3) ZAPD crashed extracting ML's audio: four samples' zero loop and book pointers made it read a
-       1.2M-entry codebook past the bank, and the config named two symbol files that don't exist (79e496c;
+       1.2M-entry codebook past the bank, and the config named two symbol files that don't exist (dd31903;
        found with ASan on the Mac). The Windows builder's layer is identical to the Mac's (6,138 entries). It must
        run on a desktop session: Unbound's export dies (0xC0000409) in a session with no desktop, such as SSH.
        Released as the pre-release `unbound-930-builder-2` the same night: the three builders, run from OoT USA
@@ -263,7 +268,7 @@ Last updated **2026-10-17**. Issues live on **GitHub Issues** (title prefix `MS-
        (SoH 9.3.0 or later, `oot.o2r` there, the ROM's CRC), runs the builder with `--stock` into Unbound's `mods`
        and shows its progress; on Linux it extracts the AppImage first. Run from the packages on all three, its
        layer and code mod are identical to builder-2's (6,138 entries). On Windows the frozen builder is a console
-       program: the window drops the console, so a double-click shows no black box (b99fbc6).
+       program: the window drops the console, so a double-click shows no black box (9dc5ac3).
        Released as the pre-release `unbound-930-builder-3` the same day (the same layer and code mod as builder-2).
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
        roborich or move into the code mod. Delta packs only matter for handing out ML without the builder: a
