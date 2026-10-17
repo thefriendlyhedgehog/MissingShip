@@ -266,25 +266,24 @@ UNBOUND_README = """The Missing Link for SoH: Unbound (macOS)
 This builds The Missing Link as a mod for SoH: Unbound from your own files. Nothing from the games is included.
 
 You need
-  - SoH: Unbound, started once with your Ocarina of Time USA 1.0 (NTSC 1.0) ROM, so it has made oot.o2r.
+  - SoH: Unbound on SoH 9.3.0 or later with skijer's code mods (NEI Unbound 2.0), started once with your Ocarina of
+    Time USA 1.0 (NTSC 1.0) ROM, so it has made oot.o2r.
   - Kaze's The Missing Link v2.0 patch from https://www.romhacking.net/hacks/5334/ (the .zip as downloaded is fine)
     and that same OoT ROM; or a Missing Link v2.0 ROM you already patched.
 
-Build it (Terminal, in this folder; about a minute)
-  MissingShipBuilder/MissingShipBuilder --unbound "/Applications/<your Unbound>.app" <OoT ROM> <patch .zip>
-or, with a Missing Link ROM:
-  MissingShipBuilder/MissingShipBuilder --unbound "/Applications/<your Unbound>.app" <Missing Link ROM>
+Build it: double-click "Build The Missing Link.app", choose your Unbound app, your ROM and the patch, and click Build
+(about a minute). If macOS says the app can't be opened, right-click it, choose Open, then Open again.
 
-It reads oot.o2r from Unbound's folder (~/Library/Application Support/com.shipofharkinian.soh) and writes
-mods/MissingLink_Unbound.o2r there. Start Unbound and The Missing Link is loaded. Build it again after updating
-Unbound or this package. --oot-o2r and --out choose other places.
+It writes mods/MissingLink_Unbound.o2r and mods/missinglink.o2r, The Missing Link's behaviour as a code mod (compiled
+code only, for Windows, Linux and macOS), into Unbound's folder (~/Library/Application Support/com.shipofharkinian.soh).
+Start Unbound and The Missing Link is loaded. Build it again after updating Unbound or this package. The builder refuses
+an Unbound on an SoH older than 9.3.0: the code mod calls 9.3.0's functions. The code mod is not signed yet: a build of
+Unbound that loads only signed mods refuses it, and one that asks shows its name and content hash the first time;
+answer "Always load this version".
 
-For a stock Unbound with code mods (skijer's NEI Unbound 2.0, on SoH 9.3.0 or later), add --stock:
+The same from Terminal, in this folder:
   MissingShipBuilder/MissingShipBuilder --unbound "/Applications/<your Unbound>.app" --stock <OoT ROM> <patch .zip>
-It then also writes mods/missinglink.o2r, The Missing Link's behaviour as a code mod (compiled code only, for
-Windows, Linux and macOS). It needs an Unbound on SoH 9.3.0 or later: the builder refuses an older one. It is not
-signed yet: a build of Unbound that loads only signed mods refuses it, and one that asks shows its name and content
-hash the first time; answer "Always load this version".
+or, with a Missing Link ROM, give it in place of <OoT ROM> <patch .zip>. --oot-o2r and --out choose other places.
 
 MissingShipBuilder/unbound.txt names the Unbound build this package was made for, and MissingShipBuilder/codemod.txt
 the code mod's commit.
@@ -301,16 +300,19 @@ You need
     from{home_note}.
   - Kaze's The Missing Link v2.0 patch from https://www.romhacking.net/hacks/5334/ (the .zip as downloaded is fine)
     and that same OoT ROM; or a Missing Link v2.0 ROM you already patched.
-{prepare}
-Build it ({shell}, in this folder; about a minute)
-  {builder} --unbound {game} --stock --oot-o2r "{folder}{sep}oot.o2r" --out "{folder}{sep}mods{sep}MissingLink_Unbound.o2r" <OoT ROM> <patch .zip>
-or, with a Missing Link ROM, give it in place of <OoT ROM> <patch .zip>.
+
+Build it: {easy}.
+Then choose the folder Unbound is in, your ROM and the patch, and click Build (about a minute).
 
 It writes mods{sep}MissingLink_Unbound.o2r and mods{sep}missinglink.o2r, The Missing Link's behaviour as a code mod
 (compiled code only, for Windows, Linux and macOS). Start Unbound and The Missing Link is loaded. Build it again after
 updating Unbound or this package. The builder refuses an Unbound on an SoH older than 9.3.0: the code mod calls 9.3.0's
 functions. The code mod is not signed yet: a build of Unbound that loads only signed mods refuses it, and one that asks
 shows its name and content hash the first time; answer "Always load this version".
+{prepare}
+The same from {shell}, in this folder:
+  {builder} --unbound {game} --stock --oot-o2r "{folder}{sep}oot.o2r" --out "{folder}{sep}mods{sep}MissingLink_Unbound.o2r" <OoT ROM> <patch .zip>
+or, with a Missing Link ROM, give it in place of <OoT ROM> <patch .zip>.
 
 MissingShipBuilder{sep}unbound.txt names the Unbound build this package was made for, and
 MissingShipBuilder{sep}codemod.txt the code mod's commit.
@@ -318,11 +320,14 @@ MissingShipBuilder{sep}codemod.txt the code mod's commit.
 
 UNBOUND_PORTABLE = {
     'windows': dict(os='Windows', home_note='', prepare='', shell='Command Prompt', sep='\\',
+                    easy='double-click "Build The Missing Link.cmd"',
                     builder='MissingShipBuilder\\MissingShipBuilder.exe', game='"<Unbound folder>\\soh.exe"',
                     folder='<Unbound folder>'),
     'linux': dict(os='Linux', home_note=' (or SHIP_HOME, when set)', sep='/',
-                  prepare='\nUnpack Unbound\'s AppImage once, in its folder (the builder runs the game inside it):\n'
-                          '  ./soh.appimage --appimage-extract\n',
+                  easy='run "Build The Missing Link.sh" (double-click it, or ./"Build The Missing Link.sh" in a '
+                       'terminal)',
+                  prepare='\nFrom a terminal, first unpack Unbound\'s AppImage once, in its folder (the builder runs the '
+                          'game inside it;\nthe window does this itself):\n  ./soh.appimage --appimage-extract\n',
                   shell='a terminal', builder='MissingShipBuilder/MissingShipBuilder',
                   game='"<Unbound folder>/squashfs-root/usr/bin/soh.elf"', folder='<Unbound folder>'),
 }
@@ -514,6 +519,32 @@ def unbound_app_macos(pack, source):
     return out
 
 
+# The builder's window (pipeline/builder_gui.py) from a double-click, beside the builder in each package
+WINDOWS_LAUNCHER = """@echo off
+start "" "%~dp0MissingShipBuilder\\MissingShipBuilder.exe" --gui
+"""
+LINUX_LAUNCHER = """#!/bin/sh
+cd "$(dirname "$0")" && exec ./MissingShipBuilder/MissingShipBuilder --gui
+"""
+MAC_LAUNCHER = """#!/bin/sh
+exec "$(cd "$(dirname "$0")/../../.." && pwd)/MissingShipBuilder/MissingShipBuilder" --gui
+"""
+
+
+def mac_launcher(top):
+    """Build The Missing Link.app: a double-clickable app that opens the builder's window."""
+    app = os.path.join(top, 'Build The Missing Link.app', 'Contents')
+    os.makedirs(os.path.join(app, 'MacOS'))
+    with open(os.path.join(app, 'MacOS', 'launcher'), 'w') as f:
+        f.write(MAC_LAUNCHER)
+    os.chmod(os.path.join(app, 'MacOS', 'launcher'), 0o755)
+    with open(os.path.join(app, 'Info.plist'), 'wb') as f:
+        plistlib.dump({'CFBundleExecutable': 'launcher', 'CFBundleIdentifier': 'com.missingship.builder',
+                       'CFBundleName': 'Build The Missing Link', 'CFBundlePackageType': 'APPL',
+                       'CFBundleShortVersionString': '1.0', 'LSMinimumSystemVersion': '11.0',
+                       'NSHighResolutionCapable': True}, f)
+
+
 def unbound_macos():
     """The builder with its SoH: Unbound layer, and how to run it: ML as an ordinary Unbound mod (owner decision
     2026-09-29: a standard romhack tool, not a renamed game)."""
@@ -524,10 +555,13 @@ def unbound_macos():
     shutil.copytree(MAC_BUILDER, os.path.join(top, 'MissingShipBuilder'), symlinks=True)
     with open(os.path.join(top, 'README.txt'), 'w') as f:
         f.write(UNBOUND_README)
+    mac_launcher(top)
     subprocess.run(['xattr', '-cr', top], check=True)
     for path, _ in files_under(top):
         if not os.path.islink(path) and open(path, 'rb').read(4) in (b'\xcf\xfa\xed\xfe', b'\xca\xfe\xba\xbe'):
             subprocess.run(['codesign', '--force', '--sign', '-', path], check=True, capture_output=True)
+    subprocess.run(['codesign', '--force', '--sign', '-', os.path.join(top, 'Build The Missing Link.app')], check=True,
+                   capture_output=True)
     if os.path.exists(out):
         os.remove(out)
     subprocess.run(['ditto', '-c', '-k', '--sequesterRsrc', '--keepParent', top, out], check=True)
@@ -556,6 +590,7 @@ def unbound_ci(arg):
                 for path, rel in files_under(builder):
                     z.write(path, f'{top}/MissingShipBuilder/{rel}')
                 z.writestr(f'{top}/README.txt', readme.replace('\n', '\r\n'))
+                z.writestr(f'{top}/Build The Missing Link.cmd', WINDOWS_LAUNCHER.replace('\n', '\r\n'))
         else:
             out = os.path.join(DIST, 'MissingLink-Unbound-linux.tar.gz')
             with tarfile.open(out, 'w:gz') as t:
@@ -567,6 +602,7 @@ def unbound_ci(arg):
                     mode = 0o755 if rel in ('MissingShipBuilder', '_internal/ZAPD.out') else 0o644
                     add(f'MissingShipBuilder/{rel}', open(path, 'rb').read(), mode)
                 add('README.txt', readme.encode(), 0o644)
+                add('Build The Missing Link.sh', LINUX_LAUNCHER.encode(), 0o755)
         made.append(out)
     return made
 

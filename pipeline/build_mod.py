@@ -18,6 +18,9 @@ with skijer's mod API) it also writes ML's code mod, missinglink.o2r, beside the
 builder carries (tools/codemod.py makes it), checked against the layer it has just made. It refuses an Unbound built
 on an older SoH, which lacks the names the code mod calls.
 
+Run with no arguments (double-clicked) or with --gui, it opens a window instead (builder_gui.py): the player picks
+Unbound and their files, and it builds for a stock Unbound as --stock does.
+
 It runs the same pipeline as ms_cycle.py, in a temporary work folder, replaying pipeline/baseline.json instead of
 reading the debug ROM, with SoH's files and ZAPD from the builder's own folder. The packages ship it frozen per OS,
 so players need no Python. A frozen builder also runs each pipeline step: `<builder> --run-script <step.py>`.
@@ -288,11 +291,18 @@ def build(args):
 
 
 def main():
+    if os.environ.get('MS_LINE_BUFFERED'):                  # the window (builder_gui.py) shows each line as it comes
+        sys.stdout.reconfigure(line_buffering=True)
+        sys.stderr.reconfigure(line_buffering=True)
     if sys.argv[1:2] == ['--run-script']:                   # a pipeline step, inside the frozen builder
         script = sys.argv[2]
         sys.argv = [script] + sys.argv[3:]
         sys.path.insert(0, os.path.dirname(script))
         runpy.run_path(script, run_name='__main__')
+        return
+    if sys.argv[1:] in ([], ['--gui']):                     # double-clicked: the window (builder_gui.py)
+        import builder_gui
+        builder_gui.main(sys.modules[__name__])
         return
     p = argparse.ArgumentParser(description='Build The Missing Link mod archive for MissingShip.')
     p.add_argument('files', nargs='*', help='The Missing Link v2.0 ROM, or an OoT USA 1.0 ROM and Kaze\'s patch '
