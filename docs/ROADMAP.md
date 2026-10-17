@@ -235,6 +235,9 @@ Last updated **2026-09-27**. Issues live on **GitHub Issues** (title prefix `MS-
        1.2M-entry codebook past the bank, and the config named two symbol files that don't exist (79e496c;
        found with ASan on the Mac). The Windows builder's layer is identical to the Mac's (6,138 entries). It must
        run on a desktop session: Unbound's export dies (0xC0000409) in a session with no desktop, such as SSH.
+       Released as the pre-release `unbound-930-builder-2` the same night: the three builders, run from OoT USA
+       1.0 and Kaze's patch, write the same layer (6,138 entries) and code mod; segments 01, 04 and 11 played on
+       the Windows builder's files, 01 and 04 on the macOS builder's.
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
        roborich or move into the code mod. Delta packs only matter for handing out ML without the builder: a
        player who builds from their own ROM gets the whole layer.
