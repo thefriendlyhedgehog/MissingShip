@@ -24,6 +24,9 @@ Last updated **2026-10-17**. Issues live on **GitHub Issues** (title prefix `MS-
 - The owner is comparing the port against a reference playthrough of ML on N64. Any difference becomes a new issue
   with the next free ID (the last used is MS-156).
 - **Left before a public release:**
+  - Testing: from 2026-10-18 players test the pre-release, with no more scripted playthroughs. The owner has played
+    ML through in full on the port. A helper still gets the script past three spots (rooms 14, 24 and 1), and
+    Linux was scripted only through segment 04; testers' issues take over from here.
   - Public hosting: done 2026-10-18, MissingShip is public for testing; the forks stay private. Its history was
     rewritten twice. On 2026-10-17 git-filter-repo took out the ROMs, `oot.o2r`, the mod and pipeline dumps, `home/`,
     the engine binaries and `soh.o2r`, and the title-card banner (ML's art) from old `docs/soh-missingship.patch`
@@ -33,10 +36,8 @@ Last updated **2026-10-17**. Issues live on **GitHub Issues** (title prefix `MS-
     `mods/MissingLink_Scenes.o2r`, was deleted on 2026-10-17.
   - An official skijer release with #33: the README and builder-3 point players at his CI run 38509788047 (through
     nightly.link, no GitHub account needed), whose artifacts expire 2027-01-12.
-  - Three spots that a helper still gets past in the scripted playthrough: rooms 14, 24 and 1.
   - Code mod signing: Unbound asks players to "Always load" ML's unsigned code mod.
   - Upstream offers: roborich's libultraship #2 and #3 are open; the rest are held until the project is done.
-  - A Linux play test of the builder's files past segment 04.
 - **No game data** (owner decision, 2026-09-27): public builds carry no Nintendo data, and players build ML from
   their own ROM. Kaze Emanuar has given permission for the port, which covers ML's own work; Nintendo's assets are
   still never distributed.
