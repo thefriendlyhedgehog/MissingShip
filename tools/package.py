@@ -14,10 +14,19 @@ reads are here, and remove a package that fails.
 """
 import io, os, plistlib, shutil, subprocess, sys, tarfile, zipfile
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'pipeline'))
+import mspaths  # noqa: E402
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DIST = os.path.join(ROOT, 'dist')
-FORK = 'thefriendlyhedgehog/MissingShip-Shipwright'
 MAC_BUILDER = os.path.join(DIST, 'builder', 'MissingShipBuilder')
+
+
+def fork():
+    """owner/name of the engine fork on GitHub (its generate-builds runs), from the engine/ checkout's origin."""
+    url = subprocess.run(['git', '-C', mspaths.SHIPWRIGHT, 'remote', 'get-url', 'origin'], check=True,
+                         capture_output=True, text=True).stdout.strip()
+    return url.split('github.com', 1)[1].lstrip(':/').removesuffix('.git')
 
 
 def artifacts(arg):
@@ -25,7 +34,7 @@ def artifacts(arg):
         return arg
     out = os.path.join(DIST, f'run-{arg}')
     if not os.path.isdir(out):
-        subprocess.run(['gh', 'run', 'download', arg, '--repo', FORK, '--dir', out], check=True)
+        subprocess.run(['gh', 'run', 'download', arg, '--repo', fork(), '--dir', out], check=True)
     return out
 
 
@@ -353,7 +362,7 @@ def unbound_ci(arg):
     else:
         art = os.path.join(DIST, f'run-{arg}-builders')
         if not os.path.isdir(art):
-            subprocess.run(['gh', 'run', 'download', arg, '--repo', FORK, '--dir', art,
+            subprocess.run(['gh', 'run', 'download', arg, '--repo', fork(), '--dir', art,
                             '--name', 'missingship-builder-windows', '--name', 'missingship-builder-linux'], check=True)
     made = []
     for osname in ('windows', 'linux'):

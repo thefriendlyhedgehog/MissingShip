@@ -1,7 +1,7 @@
 """What ML's UI looks like, as Unbound data (docs/UNBOUND_MAP.md U10), for tools/unbound_layer.py.
 
 Our SoH fork edits SoH's UI tables in C; Unbound takes them as data. Everything here is read from the fork's own
-sources (the engine submodule), compared with Unbound's where the fork changed a table, so the two stay in step:
+sources (the engine/ checkout), compared with Unbound's where the fork changed a table, so the two stay in step:
   - item and quest-item names (util.cpp), as English labels;
   - area names for Gameplay Stats (gameplaystats.cpp sMlAreas), as the vanilla scenes' `name`;
   - Gameplay Stats timestamps the item labels don't already rename (SetupDisplayNames), and the count rows ML always

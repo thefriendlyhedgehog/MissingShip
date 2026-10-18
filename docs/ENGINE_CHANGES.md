@@ -10,7 +10,7 @@ feature that data can drive.
 Order of preference for any new fix: **data-side** → **generic data-driven SoH feature (upstream)** →
 **upstreamable bugfix** → ML-specific C (last resort, isolated, commented `MissingShip:`, logged here).
 
-The code for every row lives in the private engine fork `MissingShip-Shipwright` (branch `missingship`, on SoH tag
+The code for every row lives in the engine fork (`engine/`, branch `missingship`, on SoH tag
 9.2.3); `docs/soh-missingship.patch` is generated from it by `tools/genpatch.py`.
 
 What each row needs to leave the fork (bugfix, data-driven feature, data-side retry, or mod code) is in

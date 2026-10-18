@@ -15,23 +15,22 @@ How The Missing Link is ported and packaged. Players need none of this: see the 
 
 ## Reference port (development only)
 
-ML's changes were first ported into a fork of SoH 9.2.3, included as the `engine/` submodule (with its own
-`libultraship` and `ZAPDTR` forks). It is not distributed: it is where each change was worked out and recorded (`docs/ENGINE_CHANGES.md`), and it supplies the ZAPD
-the pipeline runs and the CI workflow that freezes the builders. Each is on its branch `missingship`; one recursive
-clone of this repo gets them all:
+ML's changes were first ported into a private fork of SoH 9.2.3 (with its own `libultraship` and `ZAPDTR` forks),
+which developers with access clone at `engine/`. It is not part of this repo and not distributed: it is where each
+change was worked out and recorded (`docs/ENGINE_CHANGES.md`), and it supplies the ZAPD the pipeline runs and the CI
+workflow that freezes the builders. Without it, the pipeline and the checks that need it are skipped.
 
 ```bash
-git clone --recursive <this repo> && cd MissingShip
-git config core.hooksPath .githooks                  # the pre-push check
-cd engine
-git switch missingship                              # submodules check out detached; work on the branch
-cmake -S . -B build-ml -G Ninja -DCMAKE_BUILD_TYPE=Release
-cmake --build build-ml --target ZAPD -j8             # the ZAPD the pipeline uses
+git config core.hooksPath .githooks                   # the pre-push check
+git clone --recursive -b missingship <the engine fork> engine
+cmake -S engine -B engine/build-ml -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build engine/build-ml --target ZAPD -j8      # the ZAPD the pipeline uses
 ```
 
-- A change there is a commit on `missingship`, pushed; then MissingShip commits the new `engine` pointer and
-  `python3 tools/genpatch.py` refreshes the review patches in `docs/` (`--check` fails if they're stale).
-- Every change gets a row in `docs/ENGINE_CHANGES.md` (the ledger) in the same commit.
+- A change there is a commit on `missingship`, pushed; then `python3 tools/genpatch.py` refreshes the review patches
+  in `docs/` here (`--check` fails if they're stale).
+- Every change gets a row in `docs/ENGINE_CHANGES.md` (the ledger), committed with the refreshed patches.
+- `MS_SHIPWRIGHT` points the tools at a clone elsewhere.
 
 ## Mod archive
 
@@ -113,7 +112,7 @@ The layer names everything it changes, so it applies to either. The tools read t
 (or `MS_UNBOUND_SRC`) and say how to make it when it is missing:
 
 ```bash
-git -C ../Unbound worktree add --detach ../Unbound-923-src 7714a97bf0
+git -C ../Unbound worktree add --detach ../Unbound-923-src d5dd16473d
 ```
 
 ML's files themselves come from our fork's ZAPD, SoH 9.2.3's extractor. SoH 9.3.0 replaced it with Torch, which was
@@ -199,7 +198,7 @@ python3 tools/check.py            # a few seconds
 
 It runs every automated check and prints PASS / FAIL / SKIP. A check whose inputs are missing, such as the ROMs or the `engine/` checkout, is skipped. The checks cover:
 - the scripts compile;
-- the `engine/` fork has no uncommitted or unpushed work;
+- the `engine/` clone has no uncommitted or unpushed work;
 - `docs/*.patch` match the fork;
 - the change log names every patched file;
 - every ML exit remaps correctly;
@@ -228,7 +227,7 @@ Override any path with an env var:
 | `MS_ML_ROM` | `pipeline/tml_2_0.z64` |
 | `MS_DEBUG_ROM` | `roms/oot-mq-debug-pal.z64` |
 | `MS_OOT_O2R` | `home/oot.o2r` |
-| `MS_SHIPWRIGHT` | `engine/` (the reference port submodule) |
+| `MS_SHIPWRIGHT` | `engine/` (a clone of the reference port, untracked) |
 | `MS_ZAPD`, `MS_ZAPD_CWD` | `$MS_SHIPWRIGHT/build-ml/ZAPD/ZAPD.out` (built in `engine/`, patched ZAPDTR), `$MS_SHIPWRIGHT/soh` |
 | `MS_OOT10_ROM` | `roms/oot-usa10.z64` (OoT USA 1.0, for `tools/nodata.py`) |
 | `MS_UNBOUND_SRC` | `../Unbound-923-src` (Unbound at its last SoH 9.2.3 commit, for the layer tools) |

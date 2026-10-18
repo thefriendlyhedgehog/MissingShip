@@ -1,4 +1,0 @@
-[submodule "engine"]
-	path = engine
-	url = https://github.com/thefriendlyhedgehog/MissingShip-Shipwright.git
-	branch = missingship

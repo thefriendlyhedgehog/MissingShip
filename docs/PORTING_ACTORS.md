@@ -130,18 +130,19 @@ Then copy `build-ml/soh/soh-macos` over `MissingShip.app/Contents/MacOS/MissingS
 
 ### 6. Commit, regenerate the patches, update the docs
 
-The engine is our SoH 9.2.3 fork, checked out as the `engine/` submodule on branch `missingship`
-(see DEVELOPMENT.md). Commit the actor there with the issue ID in the subject, push, then pin the new commit in MissingShip:
+The engine is our SoH 9.2.3 fork, cloned at `engine/` on branch `missingship` (see DEVELOPMENT.md). Commit the
+actor there with the issue ID in the subject, push, then refresh the patches in MissingShip:
 
 ```bash
 cd engine
 git add soh/src/overlays/actors/ovl_<Name>/ soh/include/tables/actor_table.h soh/assets/ml_assets.h   # what you touched
 git commit -m "MS-0nn: port <Name>" && git push
-cd .. && python3 tools/genpatch.py && git add engine docs/*.patch     # commit with the docs changes below
+cd .. && python3 tools/genpatch.py && git add docs/*.patch     # commit with the docs changes below
 ```
 
-Only committed work reaches the patches, and `tools/check.py` fails if `engine/` is not at the pinned commit. A change inside `libultraship` or `ZAPDTR` is committed and pushed in that
-submodule first (branch `missingship`), then the new submodule pointer is committed in the engine.
+Only committed work reaches the patches, and `tools/check.py` fails if `engine/` has unpushed work. A change inside
+`libultraship` or `ZAPDTR` is committed and pushed in that submodule of the fork first (branch `missingship`), then
+the new submodule pointer is committed in the engine.
 
 Then:
 - Add the change to `docs/ENGINE_CHANGES.md` and run `python3 tools/checkledger.py`, which fails if any patched file is missing from the ledger.

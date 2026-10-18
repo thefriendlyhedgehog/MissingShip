@@ -2,7 +2,7 @@
 
     python3 tools/codemod.py [--mod childshield] [--out <missinglink.o2r>]
 
-The code mod (ML's C behaviour for a stock Unbound with skijer's mod API) lives in MissingShip-Unbound, branch
+The code mod (ML's C behaviour for a stock Unbound with skijer's mod API) lives in our Unbound fork, branch
 ml-codemod-930, mod-sdk/mods/missinglink (mspaths.CODEMOD_SRC). It is for SoH 9.3.0 hosts only: the checkout must
 hold skijer's 9.3.0 mod API with ML's host hooks (mspaths.CODEMOD_HOST, skijer/Shipwright#33). This takes the
 checkout's commit, builds the macOS binary here, takes the Windows and Linux ones from that commit's build-missinglink
@@ -18,7 +18,6 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, 'pipeline'))
 import mspaths  # noqa: E402
 
-REPO = 'thefriendlyhedgehog/MissingShip-Unbound'
 WORKFLOW = 'build-missinglink.yml'
 MODS = ('missinglink', 'childshield')
 PLATFORMS = ('windows_x64', 'linux_x64', 'darwin')
@@ -28,17 +27,23 @@ def git(src, *args):
     return subprocess.run(['git', '-C', src, *args], check=True, capture_output=True, text=True).stdout.strip()
 
 
-def ci_packages(commit, dest, mod):
+def github_repo(src):
+    """owner/name of the checkout's origin on GitHub (the CI runs are there)."""
+    url = git(src, 'remote', 'get-url', 'origin')
+    return url.split('github.com', 1)[1].lstrip(':/').removesuffix('.git')
+
+
+def ci_packages(repo, commit, dest, mod):
     """The Windows and Linux packages from this commit's green build-missinglink run."""
     runs = json.loads(subprocess.run(
-        ['gh', 'run', 'list', '--repo', REPO, '--workflow', WORKFLOW, '--commit', commit, '--json',
+        ['gh', 'run', 'list', '--repo', repo, '--workflow', WORKFLOW, '--commit', commit, '--json',
          'databaseId,status,conclusion'], check=True, capture_output=True, text=True).stdout)
     green = [r for r in runs if r['status'] == 'completed' and r['conclusion'] == 'success']
     if not green:
         state = ', '.join(f"{r['status']}/{r['conclusion']}" for r in runs) or 'no run'
         sys.exit(f'no green {WORKFLOW} run for {commit[:10]} ({state}): push the branch and let CI finish')
     run = str(green[0]['databaseId'])
-    subprocess.run(['gh', 'run', 'download', run, '--repo', REPO, '--dir', dest], check=True)
+    subprocess.run(['gh', 'run', 'download', run, '--repo', repo, '--dir', dest], check=True)
     found = [os.path.join(dest, f'{mod}-{p}', f'{mod}.o2r') for p in ('windows_x64', 'linux_x64')]
     for f in found:
         if not os.path.isfile(f):
@@ -50,7 +55,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument('--mod', default='missinglink', choices=MODS)
     ap.add_argument('--out', help='default: mspaths.CODEMOD, or dist/codemod/<mod>.o2r beside it')
-    ap.add_argument('--src', default=mspaths.CODEMOD_SRC, help='the MissingShip-Unbound checkout (ml-codemod-930)')
+    ap.add_argument('--src', default=mspaths.CODEMOD_SRC, help='the Unbound fork checkout (ml-codemod-930)')
     args = ap.parse_args()
     mod = args.mod
     out = args.out or (mspaths.CODEMOD if mod == 'missinglink' else
@@ -78,7 +83,7 @@ def main():
             print((r.stdout + r.stderr)[-4000:], file=sys.stderr)
             sys.exit('building the macOS binary failed')
         mac = os.path.join(build, 'packages', 'Release', f'{mod}.o2r')
-        run, ci = ci_packages(commit, os.path.join(work, 'ci'), mod)
+        run, ci = ci_packages(github_repo(src), commit, os.path.join(work, 'ci'), mod)
         print(f'Windows and Linux binaries from CI run {run}')
         os.makedirs(os.path.dirname(out), exist_ok=True)
         subprocess.run([sys.executable, os.path.join(src, 'mod-sdk', 'tools', 'merge_mod_packages.py'), *ci, mac,

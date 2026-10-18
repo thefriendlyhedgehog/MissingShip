@@ -16,8 +16,9 @@ Project memory notes from the local sessions are copied in `docs/notes/`. The pl
 - ML object table in code at +0x10A6C8 (8-byte {vromStart, vromEnd} entries).
 - Many "rewritten" actors are vanilla source recompiled with edits: diff with `tools/aligndiff.py <ml_id> [vanilla_id]`
   (second id when ML moved an actor to another slot), then copy SoH's source and apply the diff.
-- Engine: private fork `MissingShip-Shipwright`, the `engine/` submodule (branch `missingship` on tag 9.2.3; submodules MissingShip-libultraship /
-  MissingShip-ZAPDTR, branch `missingship`). Commit + push engine work there, then commit the `engine` pointer here; `tools/genpatch.py` refreshes docs/*.patch.
+- Engine: the engine fork, cloned at `engine/` (not tracked here; branch `missingship` on tag 9.2.3; its
+  submodules are our libultraship and ZAPDTR forks, branch `missingship`). Commit and push engine work there;
+  `tools/genpatch.py` refreshes docs/*.patch.
 - Before pushing: `python3 tools/check.py` (enable the hook once: `git config core.hooksPath .githooks`).
 - Paths: everything resolves through `pipeline/mspaths.py` (env overrides `MS_*`, see DEVELOPMENT.md).
 - New actor dirs need `cmake -S . -B build-ml` (in `engine/`) before building. Deploy: copy `engine/build-ml/soh/soh-macos` over
@@ -30,7 +31,7 @@ Project memory notes from the local sessions are copied in `docs/notes/`. The pl
   builder: `pipeline/build_mod.py --stock`, with a window (`pipeline/builder_gui.py`) and double-click launchers from
   `tools/package.py`. It writes ML's layer and ML's code mod into Unbound's `mods/` folder. The releases are the
   `unbound-930-builder-N` pre-releases; how to make one is in DEVELOPMENT.md's Releases section.
-- **Branches of MissingShip-Unbound:**
+- **Branches of our Unbound fork:**
   - `ml-codemod-930`: ML's code mod, `mod-sdk/mods/missinglink`, on skijer's 9.3.0 mod API (skijer/Shipwright#33);
     `tools/codemod.py` builds it for every OS.
   - `ml-playtest` / `ml-playtest-930`: `mlplay`, the scripted playthrough (`mod-sdk/mlplay-playthrough`, 14

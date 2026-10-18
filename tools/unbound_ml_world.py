@@ -1,7 +1,7 @@
 """ML's story wiring as Unbound data (docs/UNBOUND_MAP.md U1-U4), for tools/unbound_layer.py.
 
 Our SoH fork does these in C; Unbound takes them as data. Everything here is read from the fork's own sources (the
-engine submodule), so the two stay in step:
+engine/ checkout), so the two stay in step:
   - U1 entrances: the entrances the fork adds to vanilla scenes (entrance_table.h from 0x614) become entrances in
     those scenes, the eight-entry event groups with a cutscene layer 4, and ML's flags on the vanilla entrances it
     uses (ml_entrance_flags.c, ledger row 50) become overrides of those entrances;

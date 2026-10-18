@@ -44,7 +44,7 @@ Last updated **2026-10-17**. Issues live on **GitHub Issues** (title prefix `MS-
 - **How we got here: ML on SoH: Unbound.** Owner decision, 2026-09-27: The Missing Link becomes a mod for
   [SoH: Unbound](https://github.com/roborich/Shipwright/tree/unbound) (roborich's fork; on SoH 9.3.0 since Unbound 0.11, while our fork stays on 9.2.3). What
   Unbound lacks, we build ourselves in its style, so it can be offered to its author. The work lives in the private repo
-  `thefriendlyhedgehog/MissingShip-Unbound` (branch `missinglink`; `unbound` tracks roborich's). Our SoH fork gets no new
+  our Unbound fork (branch `missinglink`; `unbound` tracks roborich's). Our SoH fork gets no new
   features; it keeps the current beta running. Players still bring the OoT ROM and Kaze's patch or ML ROM. Order:
   1. ML's world as an Unbound mod: scenes, text and entrances, without ML's custom behaviour.
   2. Map every engine-ledger row to Unbound: covered, a data feature to add, or behaviour (`base`, later `script`).
@@ -78,7 +78,7 @@ Last updated **2026-10-17**. Issues live on **GitHub Issues** (title prefix `MS-
      9.3.0 bases and reaches ML's title. The layer tools still compare our fork with Unbound at its last 9.2.3 commit
      (`mspaths.UNBOUND_COMPARE`). Portable builds for every
      Mac, Windows and Linux need Unbound's CI on our branch: the owner adds a submodule
-     token to MissingShip-Unbound. Notarizing needs an Apple Developer ID. The earlier route, a builder players run
+     token to our Unbound fork. Notarizing needs an Apple Developer ID. The earlier route, a builder players run
      (macOS done, `tools/package.py unbound-macos`), stays for testers. Still needed for a stock install: roborich
      taking delta files and the ledger features (held offers), and one pack per supported ROM version.
   5. **End goal, owner 2026-10-11: the builder for stock Unbound.** A player who wants ML with Ship's features gets
@@ -97,7 +97,7 @@ Last updated **2026-10-17**. Issues live on **GitHub Issues** (title prefix `MS-
        prebuilt code (no Nintendo data) plus the assets it makes from the player's ROM. Gaps seen in #11: no
        room-load hook, and on Windows only globals marked `HOST_DATA` are reachable (`sDrawItemTable` is not).
        #11 is on Unbound 0.9 (SoH 9.2.3) and unsigned mods load by default (`UNBOUND_MOD_POLICY open`).
-       First actor, 2026-10-11: `ML_TreeBridge` as a code mod on #11's branch (MissingShip-Unbound `ml-codemod`,
+       First actor, 2026-10-11: `ML_TreeBridge` as a code mod on #11's branch (our Unbound fork `ml-codemod`,
        `mod-sdk/mods/missinglink`), the branch's actor code unchanged. ML's Kokiri Forest spawns it by name from the
        layer; it draws ML's model, burns, falls under ML's camera and carries Link. Stock Unbound refused parts of
        ML's layer in the same runs: vanilla-scene entries in `scenes.json` (so the four scenes whose exits name
@@ -173,45 +173,45 @@ Last updated **2026-10-17**. Issues live on **GitHub Issues** (title prefix `MS-
        charge too. Out of reach: the stats' `countsShown` and the countdown icon, the labels on Windows, and a new
        file's preview before its first save. Every case was run on stock, 2026-10-12, through the pond's event chain
        across all eight event entrances. That run found SoH's CreditsFix running some credits cases' destination
-       code twice; the code mod now keeps its destination through the second run (Unbound-modapi `a9fd5d273`).
+       code twice; the code mod now keeps its destination through the second run (Unbound-modapi `2980013a5`).
        Then ML's ten intro cutscenes, 2026-10-12, from `unbound/scenes.json`'s `intro`s: the `--stock` layer ships
        them by entrance as `missinglink/intros`, and the code mod plays them before the game's table runs, refuses
        vanilla's rows and the Requiem, Nocturne and Saria-bridge triggers on those entrances, and keeps SoH's Skip
-       Entrance Cutscenes (Unbound-modapi `854e28a55`).
+       Entrance Cutscenes (Unbound-modapi `5d5f05f82`).
        Then the rest of `scenes.json`, 2026-10-12: all 18 of ML's entrances go on unused vanilla rows built from
        ML's definitions, with the 8 exits to them rewritten to those rows (none falls back to a scene's default
        entrance now), and the `--stock` layer ships ML's flags on 164 vanilla entrances and its 9 continue points
        (`missinglink/entrancechanges`) and its scene names, draw configs, save return points and restrictions
        (`missinglink/scenes`). The code mod applies them; the draw configs come from the layer instead of its own
        table. Run on stock: four scenes' exits, the Continue, five scenes' restrictions, a save return and the names
-       (Unbound-modapi `0d0a4c33c`). The untested cases then ran on stock too: ML's flags on arrival (title cards,
-       music, transitions), all nine continue points, all 21 save returns and the grotto's slot 2 (`dd4f7b27f`).
+       (Unbound-modapi `f18ca63bb`). The untested cases then ran on stock too: ML's flags on arrival (title cards,
+       music, transitions), all nine continue points, all 21 save returns and the grotto's slot 2 (`eba2254de`).
        Then ML's new save from the moment a file is made, 2026-10-12: the mod applies it at `OnSaveFile` after the
        file select first writes a new file and saves again, so the file and its preview data hold ML's start, as on
-       the branch (`d39c96be9`). With that, everything ML's layer carries reaches a stock Unbound with the code mod;
+       the branch (`0cae48a24`). With that, everything ML's layer carries reaches a stock Unbound with the code mod;
        what stays out of reach is listed in the mod's README.
        Then ML's countdown timer icon, 2026-10-13: the Kokiri Sword, set on SoH's `itemMapping` Master Sword entry
-       while a countdown runs (macOS and Linux; `5a7784fd8`). The gameplay stats' `countsShown` stays out of reach.
+       while a countdown runs (macOS and Linux; `92f1e75cb`). The gameplay stats' `countsShown` stays out of reach.
        Then the scene refusal in `Play_Init`, 2026-10-13: it runs at `VB_PLAY_TRANSITION_CS` and picks the layer as
        `Play_Init` does, so the debug map select is refused too; run on stock with the map select, a transition, a
-       warp point, a new file's opening and the title screen (`30dc91a25`), then a file load from the file select (`bd00ec9bd`).
+       warp point, a new file's opening and the title screen (`6c5a24eee`), then a file load from the file select (`8042c506a`).
        Then Text Speed's default and the green A note on frames without the HUD, 2026-10-13: set at
        `OnPlayDrawBegin` instead of after `Interface_Draw`, so SoH's "no UI" effect and the title and credits game
-       modes keep them (A/B on stock; `358407b68`). Rechecked as out of reach: the child-shield rule (ten
+       modes keep them (A/B on stock; `fb62eca7b`). Rechecked as out of reach: the child-shield rule (ten
        direct calls in the player code) and the labels on Windows (no C accessor for SoH's name tables).
        The title and credits case then ran on stock: ML shows no message text outside the normal game mode (its
        title credits are pictures; its credits tour stays in the normal mode, its staff texts appearing whole;
-       `7e0b3c73d`).
+       `79b1b584e`).
        Then the HUD shadows on the pause screen's copy frame, 2026-10-13: drawn at `OnPlayDrawEnd` on that frame,
-       after the copy and under the buttons, as on the branch (A/B on stock; `92f354912`). Rechecked as out of reach:
+       after the copy and under the buttons, as on the branch (A/B on stock; `ba1cf438b`). Rechecked as out of reach:
        the wall push-out skip for every actor (inside `Actor_UpdateBgCheckInfo`), `countsShown` and the water factor.
        Then B Cancels Choices in the gameplay stats, 2026-10-13: the mod changes the whole frame's input on a choice
        prompt, and the stats (its only other reader) now count the press as B, as on the branch (A/B on stock;
-       `3d7490858`). What stock still doesn't reach is listed in the mod's README; none of it has a hook. Of ML's player edits, `talkActor` and
+       `e3f188a0c`). What stock still doesn't reach is listed in the mod's README; none of it has a hook. Of ML's player edits, `talkActor` and
        LOD 0 turned out to be no gap; the wall push-out skip, the child-shield rule and the water factor's other
        uses stay out of reach (called or kept inside the host).
        Then ML's side of the hooks offered to skijer, 2026-10-13, on Unbound-modapi `ml-codemod-hooks` (`ml-codemod`
-       with skijer/Shipwright#23 to #27 merged; `fd5fae4e7`): the child-shield rule (ML's fist-and-shield hand now
+       with skijer/Shipwright#23 to #27 merged; `b84f836af`): the child-shield rule (ML's fist-and-shield hand now
        draws), the wall push-out skip (a room's first frame, the Hourglass rewind, the fog wall's teleport, which no
        longer moves the player's last-frame position), the Bunny Hood's water factor in all its uses, `countsShown`,
        and every label through the mod API's label entries, so on Windows too. The `--stock` layer's labels now carry
@@ -223,7 +223,7 @@ Last updated **2026-10-17**. Issues live on **GitHub Issues** (title prefix `MS-
        skijer/Shipwright#32, with the song cone and the no-camera-data fix. When skijer moved his branch to Unbound
        0.11 (SoH 9.3.0) that night, it was redone on the new base as
        [skijer/Shipwright#33](https://github.com/skijer/Shipwright/pull/33), and the code mod was ported to 9.3.0
-       (MissingShip-Unbound `ml-codemod-930`: 9.3.0's function and field names, TimeSplits' types, Blob padding);
+       (our Unbound fork `ml-codemod-930`: 9.3.0's function and field names, TimeSplits' types, Blob padding);
        it boots, loads every table and plays the playthrough's first four segments on #33's macOS build. skijer
        merged #33 on 2026-10-14 (eed5004cc); the code mod's Windows build links against his build of it until he
        publishes a 9.3.0 release.
@@ -232,7 +232,7 @@ Last updated **2026-10-17**. Issues live on **GitHub Issues** (title prefix `MS-
        shows for at most 4 frames of a sword draw, away from Link (ML's spawner and actor disassembled; no ML
        cutscene or code holds the sword-draw pose). It stays inert in every port; the notes now say why. With that,
        nothing ML does in play is left that stock, with skijer's offered hooks, doesn't reach.
-       Then the code mod for Windows and Linux, 2026-10-13: a workflow on MissingShip-Unbound builds it alone on
+       Then the code mod for Windows and Linux, 2026-10-13: a workflow on our Unbound fork builds it alone on
        Windows (linked against `soh.lib` from skijer's NEI Unbound modder release) and Linux, for `ml-codemod` and
        `ml-codemod-hooks`; with the macOS build, `merge_mod_packages.py` makes one package for all three. Windows needed
        six game globals declared as imports (`ml_pause.c`, `ml_maps.c`). Its link resolves everything the mod takes
@@ -252,7 +252,7 @@ Last updated **2026-10-17**. Issues live on **GitHub Issues** (title prefix `MS-
        (1) In a Windows mod a game function's plain name is the mod's import thunk, so every compare with an
        actionFunc failed and every actionFunc the mod set was one the game's own compares never match (the Bunny
        Hood's speed, the Magic Hourglass, shops, Floormasters): the code mod now takes the game's own address
-       (`ML_HOST_FN`, MissingShip-Unbound `badd23105`, `dd9a7e4f3`); mlplay the same for the file select.
+       (`ML_HOST_FN`, our Unbound fork `d30db5648`, `e461d2699`); mlplay the same for the file select.
        (2) The frozen builder read the repo's UTF-8 sources as cp1252: it runs in Python's UTF-8 mode (32eaa51).
        (3) ZAPD crashed extracting ML's audio: four samples' zero loop and book pointers made it read a
        1.2M-entry codebook past the bank, and the config named two symbol files that don't exist (b2610dd;

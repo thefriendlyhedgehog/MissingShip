@@ -1,7 +1,7 @@
 """Regenerate docs/*.patch from the engine fork (MS-007).
 
-The engine lives in the private fork thefriendlyhedgehog/MissingShip-Shipwright (branch `missingship`, based on SoH tag
-9.2.3), with its libultraship and ZAPDTR submodules pointing at MissingShip-libultraship / MissingShip-ZAPDTR (branch
+The engine lives in our private SoH fork, checked out at engine/ (branch `missingship`, based on SoH tag
+9.2.3), with its libultraship and ZAPDTR submodules pointing at our libultraship fork / our ZAPDTR fork (branch
 `missingship`). The patches in docs/ are generated from the committed fork. They are not the source of truth; they
 exist for review, for tools/checkledger.py, and for applying the changes to a stock SoH checkout.
 

@@ -22,3 +22,6 @@ home/
 
 # The reference port's macOS binary, built locally (DEVELOPMENT.md); never distributed
 MissingShip.app/Contents/MacOS/MissingShip
+
+# The engine fork, cloned here by each developer (DEVELOPMENT.md); not part of this repo
+engine/
