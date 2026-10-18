@@ -8,7 +8,7 @@ mod. No ML machine code runs, and no download holds Nintendo's or ML's data.
 
 **Pre-release** ([`unbound-930-builder-3`](../../releases/tag/unbound-930-builder-3), 2026-10-17). All of The Missing
 Link is ported: its 25 scenes, both dungeons and the boss, every changed or custom actor, Link's model and moves, the
-title screen, credits and ending. A scripted playthrough plays it from the prologue to The End on macOS and Windows.
+title screen, credits and ending.
 
 ## What you need
 
