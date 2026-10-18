@@ -24,14 +24,13 @@ Last updated **2026-10-17**. Issues live on **GitHub Issues** (title prefix `MS-
 - The owner is comparing the port against a reference playthrough of ML on N64. Any difference becomes a new issue
   with the next free ID (the last used is MS-156).
 - **Left before a public release:**
-  - Public hosting: the repos are private. MissingShip's history was rewritten on 2026-10-17 (owner's choice over a
-    fresh repo): git-filter-repo took out the ROMs, `oot.o2r`, the mod and pipeline dumps, `home/`, the engine
-    binaries and `soh.o2r`, and the title-card banner (ML's art) from old `docs/soh-missingship.patch` versions.
-    469 MB became 2.8 MB, with the same files at HEAD; `tools/nodata.py --git` passes and no secrets were found.
-    Commit SHAs changed, and the docs were remapped. Left: GitHub Support purging the old commits (they stay
-    fetchable by SHA until then), and the engine fork and MissingShip-Unbound if they go public too. The
-    `test-build-1` release (2026-09-26, an early test build), which carried `mods/MissingLink_Scenes.o2r`, was deleted on
-    2026-10-17.
+  - Public hosting: done 2026-10-18, MissingShip is public for testing; the forks stay private. Its history was
+    rewritten twice. On 2026-10-17 git-filter-repo took out the ROMs, `oot.o2r`, the mod and pipeline dumps, `home/`,
+    the engine binaries and `soh.o2r`, and the title-card banner (ML's art) from old `docs/soh-missingship.patch`
+    versions: 469 MB became 2.8 MB, with the same files at HEAD. On 2026-10-18 the tool attribution lines left the
+    commit messages. `tools/nodata.py --git` passes, no secrets were found, and the docs' commit IDs were remapped
+    both times. The `test-build-1` release (2026-09-26, an early test build), which carried
+    `mods/MissingLink_Scenes.o2r`, was deleted on 2026-10-17.
   - An official skijer release with #33: the README and builder-3 point players at his CI run 38509788047 (through
     nightly.link, no GitHub account needed), whose artifacts expire 2027-01-12.
   - Three spots that a helper still gets past in the scripted playthrough: rooms 14, 24 and 1.
