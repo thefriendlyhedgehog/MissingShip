@@ -50,8 +50,9 @@ python3 pipeline/ms_cycle.py --no-launch  # rebuild ROM → ZAPD → inject text
 **ML for SoH: Unbound** (the `unbound-930-builder-N` pre-releases):
 1. ML's code mod: `python3 tools/codemod.py` writes `dist/codemod/missinglink.o2r` and `codemod.txt` from
    our Unbound fork's `ml-codemod-930` (macOS built here; Windows and Linux from that commit's CI run). When it
-   changes, publish the release with those two files first, then set `CODEMOD_RELEASE` in the `engine/` fork's
-   `generate-builds.yml` to it: CI's builders carry the code mod from that release.
+   changes, publish those two files first as a `codemod-N` release on our Unbound fork (`--target` the commit
+   `codemod.txt` names), then set `CODEMOD_RELEASE` in the `engine/` fork's `generate-builds.yml` to it: CI's
+   builders carry the code mod from that release. It isn't a release here: players get it only inside a package.
    `python3 tools/codemod.py --mod childshield` does the same for `childshield.o2r` (young Link holds the Hylian
    Shield, ML's rule alone, for players who want only that; compiled code, the hand built from their own
    `oot.o2r`; `mod-sdk/mods/childshield`). It ships on its own, outside the builder.
@@ -67,8 +68,8 @@ python3 pipeline/ms_cycle.py --no-launch  # rebuild ROM → ZAPD → inject text
    `roms/oot-usa10.z64` and ML v2.0 at `pipeline/tml_2_0.z64` (or `MS_OOT10_ROM`, `MS_ML_ROM`), and removes a
    package that fails.
 5. Test each package through its launcher. Builder windows can be driven in tests with `MS_GUI_AUTOTEST=<json>`
-   (`pipeline/builder_gui.py`). Then attach the three packages and `codemod.txt` to the release. The code mod (`missinglink.o2r`) is not attached on
-   its own: every package carries it and the builder writes it into `mods/`.
+   (`pipeline/builder_gui.py`). Then attach the three packages and `codemod.txt` to the release. The code mod
+   (`missinglink.o2r`) is not attached on its own: every package carries it and the builder writes it into `mods/`.
 
 ## Mod builder (MS-154, MS-155)
 
