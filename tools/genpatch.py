@@ -5,7 +5,8 @@ The engine lives in our private SoH fork, checked out at engine/ (branch `missin
 `missingship`). The patches in docs/ are generated from the committed fork. They are not the source of truth; they
 exist for review, for tools/checkledger.py, and for applying the changes to a stock SoH checkout.
 
-    soh-missingship.patch           9.2.3..missingship in the fork, minus submodules, .gitmodules and ML_DATA
+    soh-missingship.patch           9.2.3..missingship in the fork, minus submodules, .gitmodules, the fork's own CI
+                                    (.github, which names our private repos) and ML_DATA
     libultraship-missingship.patch  the libultraship commit SoH 9.2.3 pins..missingship
     zapd-missingship.patch          the ZAPDTR commit SoH 9.2.3 pins..missingship
 
@@ -41,7 +42,7 @@ def pinned(sub):
 
 patches = {
     'soh-missingship.patch': git(SHIPWRIGHT, 'diff', BASE, BRANCH, '--', '.', ':!ZAPDTR', ':!libultraship', ':!.gitmodules',
-                                 *(f':!{p}' for p in ML_DATA)),
+                                 ':!.github', *(f':!{p}' for p in ML_DATA)),
     'libultraship-missingship.patch': git(_os.path.join(SHIPWRIGHT, 'libultraship'), 'diff', pinned('libultraship'), BRANCH),
     'zapd-missingship.patch': git(_os.path.join(SHIPWRIGHT, 'ZAPDTR'), 'diff', pinned('ZAPDTR'), BRANCH),
 }
