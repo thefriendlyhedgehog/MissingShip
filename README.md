@@ -194,6 +194,9 @@ python3 pipeline/ms_cycle.py --no-launch  # build and install only
    MissingShip-Unbound's `ml-codemod-930` (macOS built here; Windows and Linux from that commit's CI run). When it
    changes, publish the release with those two files first, then set `CODEMOD_RELEASE` in the engine fork's
    `generate-builds.yml` to it: CI's builders carry the code mod from that release.
+   `python3 tools/codemod.py --mod childshield` does the same for `childshield.o2r` (young Link holds the Hylian
+   Shield, ML's rule alone, for players who want only that; compiled code, the hand built from their own
+   `oot.o2r`; `mod-sdk/mods/childshield`). It ships on its own, outside the builder.
 2. Run **generate-builds** (below). It freezes the Windows and Linux builders. Then
    `python3 tools/package.py unbound-ci <run id>` writes `dist/MissingLink-Unbound-windows.zip` and
    `dist/MissingLink-Unbound-linux.tar.gz`.
@@ -413,7 +416,7 @@ differences, e.g. `MS_HACK=hacks/selftest python3 tools/codediff.py`.
 | `home/` | self-contained SHIP_HOME for development (settings, saves, `oot.o2r`; local only, not in git) |
 | `profile/` | the default settings every new player starts with |
 | `pipeline/` | ROM → `.o2r` pipeline: ZAPD XMLs (`xml/scenes`, `xml/objects`), injectors, maps; the mod builder (`build_mod.py`) and its window (`builder_gui.py`) |
-| `tools/` | hack-vs-baseline analysis: `modcheck`, `aligndiff`, `dumpactor`, `codediff`, `pldiff`, `mlcustom`, …; project checks: `check`, `genpatch`, `survey_actors`, …; audio: `sfxtrace` (which sound effects play a font slot); release packaging: `package`, `freeze_builder`, `codemod` (ML's code mod for every OS), `nodata` (no game data in a package), `deltapack` (a mod as deltas against the player's own base) |
+| `tools/` | hack-vs-baseline analysis: `modcheck`, `aligndiff`, `dumpactor`, `codediff`, `pldiff`, `mlcustom`, …; project checks: `check`, `genpatch`, `survey_actors`, …; audio: `sfxtrace` (which sound effects play a font slot); release packaging: `package`, `freeze_builder`, `codemod` (ML's code mod, or `childshield`, for every OS), `nodata` (no game data in a package), `deltapack` (a mod as deltas against the player's own base) |
 | `hacks/` | per-hack configs for `tools/` (`ml`, `selftest`) |
 | `dist/` | release packages from `tools/package.py` (not committed) |
 | `docs/ROADMAP.md` | status, history and the remaining long-term work |
