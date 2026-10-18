@@ -75,6 +75,8 @@ Found another? Open an issue with what you saw and where.
 
 ## More
 
+- **Only young Link's Hylian Shield?** [`childshield-1`](../../releases/tag/childshield-1) is ML's shield rule alone, for any
+  SoH: Unbound 9.3 with skijer's code mods: `childshield.o2r` in `mods/`, no builder needed.
 - **Developing:** how the port is built, tested and released, in [`DEVELOPMENT.md`](DEVELOPMENT.md).
 - **Plan and history:** [`docs/ROADMAP.md`](docs/ROADMAP.md).
 - **Every change ML makes to the game, and how it is ported:** [`docs/ENGINE_CHANGES.md`](docs/ENGINE_CHANGES.md).
