@@ -254,9 +254,9 @@ Last updated **2026-10-17**. Issues live on **GitHub Issues** (title prefix `MS-
        actionFunc failed and every actionFunc the mod set was one the game's own compares never match (the Bunny
        Hood's speed, the Magic Hourglass, shops, Floormasters): the code mod now takes the game's own address
        (`ML_HOST_FN`, MissingShip-Unbound `badd23105`, `dd9a7e4f3`); mlplay the same for the file select.
-       (2) The frozen builder read the repo's UTF-8 sources as cp1252: it runs in Python's UTF-8 mode (d1b5632).
+       (2) The frozen builder read the repo's UTF-8 sources as cp1252: it runs in Python's UTF-8 mode (32eaa51).
        (3) ZAPD crashed extracting ML's audio: four samples' zero loop and book pointers made it read a
-       1.2M-entry codebook past the bank, and the config named two symbol files that don't exist (dd31903;
+       1.2M-entry codebook past the bank, and the config named two symbol files that don't exist (b2610dd;
        found with ASan on the Mac). The Windows builder's layer is identical to the Mac's (6,138 entries). It must
        run on a desktop session: Unbound's export dies (0xC0000409) in a session with no desktop, such as SSH.
        Released as the pre-release `unbound-930-builder-2` the same night: the three builders, run from OoT USA
@@ -268,7 +268,7 @@ Last updated **2026-10-17**. Issues live on **GitHub Issues** (title prefix `MS-
        (SoH 9.3.0 or later, `oot.o2r` there, the ROM's CRC), runs the builder with `--stock` into Unbound's `mods`
        and shows its progress; on Linux it extracts the AppImage first. Run from the packages on all three, its
        layer and code mod are identical to builder-2's (6,138 entries). On Windows the frozen builder is a console
-       program: the window drops the console, so a double-click shows no black box (9dc5ac3).
+       program: the window drops the console, so a double-click shows no black box (aac5fa1).
        Released as the pre-release `unbound-930-builder-3` the same day (the same layer and code mod as builder-2).
      - **Unbound's data features we built** (labels, GetItem draws, items, pause, shops, maps) go upstream to
        roborich or move into the code mod. Delta packs only matter for handing out ML without the builder: a
