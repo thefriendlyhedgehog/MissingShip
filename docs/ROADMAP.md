@@ -19,8 +19,8 @@ Last updated **2026-10-17**. Issues live on **GitHub Issues** (title prefix `MS-
   Unbound's `mods/` folder. No package carries game data (MS-156, `tools/nodata.py`). The scripted playthrough
   plays all 14 segments, prologue to The End: on macOS and Windows on the builder's files, on Linux through
   segment 04.
-- **The engine beta** (our SoH 9.2.3 fork) came first. It was played start to finish (MS-010, 2026-09-26; every
-  milestone from M0 to M5) and gets no new features.
+- ML's changes were first worked out in a private SoH 9.2.3 fork (`engine/`), played start to finish there (MS-010,
+  2026-09-26; milestones M0 to M5). It is a development reference only, never distributed.
 - The owner is comparing the port against a reference playthrough of ML on N64. Any difference becomes a new issue
   with the next free ID (the last used is MS-156).
 - **Left before a public release:**
@@ -30,7 +30,7 @@ Last updated **2026-10-17**. Issues live on **GitHub Issues** (title prefix `MS-
     469 MB became 2.8 MB, with the same files at HEAD; `tools/nodata.py --git` passes and no secrets were found.
     Commit SHAs changed, and the docs were remapped. Left: GitHub Support purging the old commits (they stay
     fetchable by SHA until then), and the engine fork and MissingShip-Unbound if they go public too. The
-    `test-build-1` release (2026-09-26, engine beta), which carried `mods/MissingLink_Scenes.o2r`, was deleted on
+    `test-build-1` release (2026-09-26, an early test build), which carried `mods/MissingLink_Scenes.o2r`, was deleted on
     2026-10-17.
   - An official skijer release with #33: the README and builder-3 point players at his CI run 38509788047 (through
     nightly.link, no GitHub account needed), whose artifacts expire 2027-01-12.

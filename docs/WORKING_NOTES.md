@@ -36,7 +36,7 @@ Project memory notes from the local sessions are copied in `docs/notes/`. The pl
   - `ml-playtest` / `ml-playtest-930`: `mlplay`, the scripted playthrough (`mod-sdk/mlplay-playthrough`, 14
     segments, with run scripts for macOS, Linux and Windows).
   - `missinglink`: our Unbound branch and the pack route, kept for testing.
-- **The engine fork** (SoH 9.2.3) keeps the engine beta running and gets no new features.
+- **The engine fork** (SoH 9.2.3, `engine/`) is the development reference: never distributed, no new features.
 - **Windows mods:** a game function's plain name is the mod's import thunk, so compares and stores of game function
   addresses go through `__imp_<name>` (`ML_HOST_FN` in `missinglink.h`). Calls by the plain name are fine.
 - **No game data in packages:** `tools/nodata.py` (MS-156), which `package.py` runs.
