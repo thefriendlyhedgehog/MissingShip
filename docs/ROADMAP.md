@@ -32,8 +32,8 @@ Last updated **2026-10-17**. Issues live on **GitHub Issues** (title prefix `MS-
     fetchable by SHA until then), and the engine fork and MissingShip-Unbound if they go public too. The
     `test-build-1` release (2026-09-26, engine beta), which carried `mods/MissingLink_Scenes.o2r`, was deleted on
     2026-10-17.
-  - An official skijer release with #33: builder-3 points players at his CI run 38509788047, whose artifacts expire
-    2027-01-12.
+  - An official skijer release with #33: the README and builder-3 point players at his CI run 38509788047 (through
+    nightly.link, no GitHub account needed), whose artifacts expire 2027-01-12.
   - Three spots that a helper still gets past in the scripted playthrough: rooms 14, 24 and 1.
   - Code mod signing: Unbound asks players to "Always load" ML's unsigned code mod.
   - Upstream offers: roborich's libultraship #2 and #3 are open; the rest are held until the project is done.

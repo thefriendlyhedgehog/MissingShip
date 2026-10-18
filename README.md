@@ -40,8 +40,13 @@ the roadmap's Status. The open issues are long-term only: the drop-in path (#42)
 - **Kaze's The Missing Link v2.0 patch**, from [his release](https://www.romhacking.net/hacks/5334/): the `.zip` as
   downloaded is fine. (A Missing Link v2.0 ROM you already patched works instead of the ROM and patch.)
 - **For the Unbound route: SoH: Unbound on SoH 9.3.0 or later, with skijer's code mods**, started once with your
-  OoT ROM. Until skijer publishes a release, that is his `unbound-modapi` build (skijer/Shipwright Actions run
-  38509788047).
+  OoT ROM. Until skijer publishes a release with it, that is his `unbound-modapi` build from
+  [Actions run 38509788047](https://github.com/skijer/Shipwright/actions/runs/38509788047), downloadable without a
+  GitHub account: [macOS](https://nightly.link/skijer/Shipwright/actions/runs/38509788047/soh-mac.zip),
+  [Windows](https://nightly.link/skijer/Shipwright/actions/runs/38509788047/soh-windows.zip),
+  [Linux](https://nightly.link/skijer/Shipwright/actions/runs/38509788047/soh-linux.zip) (until 2027-01-12). Not the
+  `soh-unbound-unsafe-*` builds, which are for modders. His NEI Unbound release of 2026-10-06 is on an older SoH, and
+  the builder refuses it.
 - A controller, or the keyboard (SoH's default layout).
 
 ### With SoH: Unbound
@@ -198,7 +203,8 @@ python3 pipeline/ms_cycle.py --no-launch  # build and install only
    `roms/oot-usa10.z64` and ML v2.0 at `pipeline/tml_2_0.z64` (or `MS_OOT10_ROM`, `MS_ML_ROM`), and removes a
    package that fails.
 5. Test each package through its launcher. Builder windows can be driven in tests with `MS_GUI_AUTOTEST=<json>`
-   (`pipeline/builder_gui.py`). Then attach the three packages, `missinglink.o2r` and `codemod.txt` to the release.
+   (`pipeline/builder_gui.py`). Then attach the three packages and `codemod.txt` to the release. The code mod (`missinglink.o2r`) is not attached on
+   its own: every package carries it and the builder writes it into `mods/`.
 
 **The engine beta:**
 1. Run **generate-builds** on the engine fork (*Actions → generate-builds → Run workflow*, branch `missingship`, or

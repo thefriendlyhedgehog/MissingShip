@@ -268,7 +268,8 @@ This builds The Missing Link as a mod for SoH: Unbound from your own files. Noth
 
 You need
   - SoH: Unbound on SoH 9.3.0 or later with skijer's code mods (NEI Unbound 2.0), started once with your Ocarina of
-    Time USA 1.0 (NTSC 1.0) ROM, so it has made oot.o2r.
+    Time USA 1.0 (NTSC 1.0) ROM, so it has made oot.o2r. Until skijer publishes a release with it, that is his
+    unbound-modapi build: https://nightly.link/skijer/Shipwright/actions/runs/38509788047/soh-mac.zip (until 2027-01-12).
   - Kaze's The Missing Link v2.0 patch from https://www.romhacking.net/hacks/5334/ (the .zip as downloaded is fine)
     and that same OoT ROM; or a Missing Link v2.0 ROM you already patched.
 
@@ -298,7 +299,8 @@ This builds The Missing Link as a mod for SoH: Unbound from your own files. Noth
 You need
   - SoH: Unbound on SoH 9.3.0 or later with skijer's code mods (NEI Unbound 2.0), started once with your Ocarina of
     Time USA 1.0 (NTSC 1.0) ROM, so it has made oot.o2r. Unbound keeps oot.o2r and mods/ in the folder it starts
-    from{home_note}.
+    from{home_note}. Until skijer publishes a release with it, that is his unbound-modapi build:
+    https://nightly.link/skijer/Shipwright/actions/runs/38509788047/{skijer_artifact}.zip (until 2027-01-12).
   - Kaze's The Missing Link v2.0 patch from https://www.romhacking.net/hacks/5334/ (the .zip as downloaded is fine)
     and that same OoT ROM; or a Missing Link v2.0 ROM you already patched.
 
@@ -320,11 +322,11 @@ MissingShipBuilder{sep}codemod.txt the code mod's commit.
 """
 
 UNBOUND_PORTABLE = {
-    'windows': dict(os='Windows', home_note='', prepare='', shell='Command Prompt', sep='\\',
+    'windows': dict(os='Windows', home_note='', skijer_artifact='soh-windows', prepare='', shell='Command Prompt', sep='\\',
                     easy='double-click "Build The Missing Link.cmd"',
                     builder='MissingShipBuilder\\MissingShipBuilder.exe', game='"<Unbound folder>\\soh.exe"',
                     folder='<Unbound folder>'),
-    'linux': dict(os='Linux', home_note=' (or SHIP_HOME, when set)', sep='/',
+    'linux': dict(os='Linux', home_note=' (or SHIP_HOME, when set)', skijer_artifact='soh-linux', sep='/',
                   easy='run "Build The Missing Link.sh" (double-click it, or ./"Build The Missing Link.sh" in a '
                        'terminal)',
                   prepare='\nFrom a terminal, first unpack Unbound\'s AppImage once, in its folder (the builder runs the '
