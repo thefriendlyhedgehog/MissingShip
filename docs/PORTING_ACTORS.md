@@ -130,8 +130,8 @@ Then copy `build-ml/soh/soh-macos` over `MissingShip.app/Contents/MacOS/MissingS
 
 ### 6. Commit, regenerate the patches, update the docs
 
-The engine is the private fork `MissingShip-Shipwright`, checked out as the `engine/` submodule on branch `missingship`
-(see the README). Commit the actor there with the issue ID in the subject, push, then pin the new commit in MissingShip:
+The engine is our SoH 9.2.3 fork, checked out as the `engine/` submodule on branch `missingship`
+(see DEVELOPMENT.md). Commit the actor there with the issue ID in the subject, push, then pin the new commit in MissingShip:
 
 ```bash
 cd engine

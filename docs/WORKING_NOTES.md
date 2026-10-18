@@ -19,7 +19,7 @@ Project memory notes from the local sessions are copied in `docs/notes/`. The pl
 - Engine: private fork `MissingShip-Shipwright`, the `engine/` submodule (branch `missingship` on tag 9.2.3; submodules MissingShip-libultraship /
   MissingShip-ZAPDTR, branch `missingship`). Commit + push engine work there, then commit the `engine` pointer here; `tools/genpatch.py` refreshes docs/*.patch.
 - Before pushing: `python3 tools/check.py` (enable the hook once: `git config core.hooksPath .githooks`).
-- Paths: everything resolves through `pipeline/mspaths.py` (env overrides `MS_*`, see README).
+- Paths: everything resolves through `pipeline/mspaths.py` (env overrides `MS_*`, see DEVELOPMENT.md).
 - New actor dirs need `cmake -S . -B build-ml` (in `engine/`) before building. Deploy: copy `engine/build-ml/soh/soh-macos` over
   `MissingShip.app/Contents/MacOS/MissingShip`, then `python3 pipeline/ms_cycle.py` (rebuilds the .o2r and relaunches; `--no-launch` only builds).
 - New ML object: add `pipeline/xml/objects/object_ml_<name>.xml`, name its dma index in ML_OBJECTS in
@@ -29,7 +29,7 @@ Project memory notes from the local sessions are copied in `docs/notes/`. The pl
 - **The release route is ML for stock SoH: Unbound** (SoH 9.3.0 or later, with skijer's code mods). Players run our
   builder: `pipeline/build_mod.py --stock`, with a window (`pipeline/builder_gui.py`) and double-click launchers from
   `tools/package.py`. It writes ML's layer and ML's code mod into Unbound's `mods/` folder. The releases are the
-  `unbound-930-builder-N` pre-releases; how to make one is in the README's Releases section.
+  `unbound-930-builder-N` pre-releases; how to make one is in DEVELOPMENT.md's Releases section.
 - **Branches of MissingShip-Unbound:**
   - `ml-codemod-930`: ML's code mod, `mod-sdk/mods/missinglink`, on skijer's 9.3.0 mod API (skijer/Shipwright#33);
     `tools/codemod.py` builds it for every OS.
