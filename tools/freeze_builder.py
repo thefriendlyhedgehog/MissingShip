@@ -23,7 +23,7 @@ SOH_FILES = ['include/tables/scene_table.h', 'include/tables/entrance_table.h', 
              # the fork's tables and text the SoH: Unbound layer compares with Unbound's (tools/unbound_ml_*.py)
              'assets/ml_assets.h', 'soh/Enhancements/MlScrubShopText.cpp', 'soh/Enhancements/TimeDisplay/TimeDisplay.cpp',
              'soh/Enhancements/gameplaystats.cpp', 'soh/Enhancements/timesplits/TimeSplits.cpp', 'soh/util.cpp',
-             'src/code/ml_entrance_flags.c', 'src/code/ml_entrance_map.c', 'src/code/ml_titlecard_banner.inc',
+             'src/code/ml_entrance_flags.c', 'src/code/ml_entrance_map.c',
              'src/code/z_draw.c', 'src/code/z_inventory.c', 'src/code/z_map_data.c', 'src/code/z_parameter.c',
              'src/code/z_scene_table.c', 'src/code/z_sram.c', 'src/overlays/actors/ovl_Door_Ana/z_door_ana.c',
              'src/overlays/actors/ovl_En_GirlA/z_en_girla.c', 'src/overlays/misc/ovl_kaleido_scope',

@@ -195,7 +195,7 @@ def number_lists(text):
 
     def spell(run):
         hexes = [t for t in run if t[:2] in (b'0x', b'0X')]
-        values = [int(t, 0) for t in run]
+        values = [int(t, 16 if t.lstrip(b'+-')[:2] in (b'0x', b'0X') else 10) for t in run]   # decimal may be 01
         if hexes:
             digits = max(len(t) - 2 for t in hexes)
             width = 1 if digits <= 2 else 2 if digits <= 4 else 4 if digits <= 8 else 8

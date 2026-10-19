@@ -150,9 +150,10 @@ def our_message(path):
     text = raw.encode('latin-1').decode('unicode_escape')
     return {'box': 0, 'ypos': 0, 'text': text}   # TEXTBOX_TYPE_BLACK, TEXTBOX_POS_VARIABLE, as the fork's line
 # ML's title-card ribbon (ML custom code +0x3BE0, 160x8 IA16), which our Unbound branch draws by this path while ML is
-# mounted (Unbound's soh/soh/missinglink/MlTitleCard.c). Read from the fork's generated copy.
+# mounted (Unbound's soh/soh/missinglink/MlTitleCard.c). Read from the player's ML ROM (mspaths.ML_ROM): it is ML's
+# art, so no package carries it (MS-156).
 ML_BANNER = 'textures/ml_titlecard/gMlTitleCardBannerTex'
-ML_BANNER_INC = os.path.join(SOH, 'src', 'code', 'ml_titlecard_banner.inc')
+ML_BANNER_DMA, ML_BANNER_AT = 507, 0x3BE0
 RENAMES = {**{t['replaces']: name for name, t in ML_TYPES.items()}, **ML_CODE_ACTORS}
 
 # ML's changes to vanilla actors' InitVars (docs/UNBOUND_MAP.md, U9). They apply to every copy, including the Skulltulas
@@ -256,8 +257,11 @@ def ml_scenes():
 
 def ml_banner(vanilla):
     """ML's ribbon as a texture resource: a vanilla texture's resource header with LUS's GrayscaleAlpha16bpp (9)."""
-    src = '\n'.join(l for l in open(ML_BANNER_INC).read().splitlines() if not l.lstrip().startswith('//'))
-    pixels = bytes(int(b, 16) for b in re.findall(r'0x([0-9A-Fa-f]{2})\b', src))
+    from yaz0 import get_file
+    rom = open(mspaths.ML_ROM, 'rb').read()
+    entry = 0x12F70 + 16 * ML_BANNER_DMA                 # ML's dmadata, as pipeline/inject_obj_patches.py reads it
+    custom = get_file(rom, *struct.unpack('>IIII', rom[entry:entry + 16]))
+    pixels = custom[ML_BANNER_AT:ML_BANNER_AT + 160 * 8 * 2]
     assert len(pixels) == 160 * 8 * 2, len(pixels)
     header = vanilla.read('textures/g_pn_31/gKokiriForestTitleCardENGTex')[:0x40]
     return header + struct.pack('<IIII', 9, 160, 8, len(pixels)) + pixels
