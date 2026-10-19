@@ -56,6 +56,12 @@ python3 pipeline/ms_cycle.py --no-launch  # rebuild ROM → ZAPD → inject text
    `python3 tools/codemod.py --mod childshield` does the same for `childshield.o2r` (young Link holds the Hylian
    Shield, ML's rule alone, for players who want only that; compiled code, the hand built from their own
    `oot.o2r`; `mod-sdk/mods/childshield`). It ships on its own, outside the builder.
+   **Signing:** Unbound's builds load signed mods without asking. skijer's sign-mod workflow builds and signs them
+   from public sources: `python3 tools/codemods.py` copies both mods' sources into `codemods/` (with `UNBOUND_REF`,
+   the Unbound commit to build against; `tools/check.py` keeps them in step). Push, then open a **Sign a mod**
+   issue on skijer's Unbound repository with this repository, that commit and the folder `codemods`. Its answer is
+   a release with the signed `.o2r` files, which then replace the ones above. Check them first with skijer's
+   `mod-sdk/tools/scan_mod_sources.py`, `cppcheck --error-exitcode=1` and `semgrep --config p/c --severity ERROR`.
 2. Run **generate-builds** on the `engine/` fork (*Actions → generate-builds → Run workflow*, branch `missingship`,
    or `gh workflow run generate-builds.yml --repo <the engine/ fork> --ref missingship`).
    It freezes the Windows and Linux builders from this repo's `main`; it is manual only, and the repo secret

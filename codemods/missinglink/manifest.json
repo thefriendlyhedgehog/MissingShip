@@ -1,0 +1,14 @@
+{
+    "name": "missinglink",
+    "author": "MissingShip",
+    "version": "0.1",
+    "description": "The Missing Link's behaviour as a code mod: every actor ML's rooms place by name, ML's changes to vanilla actors' flags, its edits to vanilla actors' code (the Blade Beam, Business Scrubs, title screen and the rest), its player code (the Magic Hourglass, triple jump, Soul-Charged sword and the rest), its code patches elsewhere (the HUD, title cards, text speed, B Cancels Choices, sounds, sparkles, world map, title setup and scene refusal), and the registries stock does not read (items, shops, GetItem, the new save, ML's entrances and its flags on vanilla ones, cutscene destinations, intro cutscenes, continue points, its scenes' names, draw configs, save return points and item restrictions, dungeon maps, the pause menu and labels). Needs ML's layer, MissingLink_Unbound.o2r.",
+    "requires": [
+        "objects/object_ml_treebridge/gMlTreeBridgeDL",
+        "objects/object_ml_gkeep/gMlGrottoDL",
+        "objects/object_ml_crackwall/gMlCrackWallCol",
+        "objects/object_ml_songblock/gMlSongBlockCol",
+        "objects/object_ml_prologue/gMlPrologue0TLUT",
+        "missinglink/scenes"
+    ]
+}

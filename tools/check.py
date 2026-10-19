@@ -10,6 +10,7 @@ Each check prints PASS, FAIL or SKIP (a missing optional input, e.g. the debug R
              engine/ is at the commit MissingShip pins
   patches    docs/*.patch match the engine fork                     (tools/genpatch.py --check)
   ledger     every patched file is named in ENGINE_CHANGES.md        (tools/checkledger.py)
+  codemods   codemods/ (the sources signing builds) match ml-codemod-930 (tools/codemods.py --check)
   exits      every ML exit remaps to the right SoH entrance          (tools/checkexits.py)
   hashes     every resource reference in the mod archive resolves, except any texture the pipeline records as
              deliberately skipped in pipeline/unresolved.json (none since MS-015)   (tools/checkhashes.py)
@@ -19,7 +20,7 @@ Each check prints PASS, FAIL or SKIP (a missing optional input, e.g. the debug R
 """
 import os as _os, sys as _sys
 _sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..', 'pipeline'))
-from mspaths import ROOT, PIPE, SHIPWRIGHT, ML_ROM, DEBUG_ROM, OOT_O2R
+from mspaths import ROOT, PIPE, SHIPWRIGHT, ML_ROM, DEBUG_ROM, OOT_O2R, CODEMOD_SRC
 import collections, glob, json, re, subprocess, sys
 
 # A git hook runs us with GIT_DIR etc. exported (an absolute .git/worktrees/<name> in a worktree), which would make
@@ -79,6 +80,13 @@ else:
     report('patches', 'SKIP', 'needs the engine checkout')
 rc, out = run(_os.path.join(TOOLS, 'checkledger.py'))
 report('ledger', 'FAIL' if rc else 'PASS', last_line(out))
+
+# codemods -----------------------------------------------------------------------------------------------------
+if not _os.path.isdir(_os.path.join(CODEMOD_SRC, '.git')):
+    report('codemods', 'SKIP', f'no code mod checkout at {CODEMOD_SRC} (set MS_CODEMOD_SRC)')
+else:
+    rc, out = run(_os.path.join(TOOLS, 'codemods.py'), '--check')
+    report('codemods', 'FAIL' if rc else 'PASS', last_line(out))
 
 # exits / hashes -----------------------------------------------------------------------------------------------
 if not _os.path.exists(ML_ROM) or not engine:
