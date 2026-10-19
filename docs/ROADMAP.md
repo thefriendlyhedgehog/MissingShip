@@ -236,6 +236,9 @@ Last updated **2026-10-17**. Issues live on **GitHub Issues** (title prefix `MS-
        shows for at most 4 frames of a sword draw, away from Link (ML's spawner and actor disassembled; no ML
        cutscene or code holds the sword-draw pose). It stays inert in every port; the notes now say why. With that,
        nothing ML does in play is left that stock, with skijer's offered hooks, doesn't reach.
+       Corrected 2026-10-19 (the owner's report): Link's cutscene cue 26 is that pose, and Monktown Valley's and Deku
+       Grove's arrival cutscenes hold it while the figure, Saria's soul, speaks from the sword. The code mod draws her
+       now (`ml_mthunder.c`), from ML's `object_link_child` DLs the builder extracts (`gMlChildSoulFigure*`).
        Then the code mod for Windows and Linux, 2026-10-13: a workflow on our Unbound fork builds it alone on
        Windows (linked against `soh.lib` from skijer's NEI Unbound modder release) and Linux, for `ml-codemod` and
        `ml-codemod-hooks`; with the macOS build, `merge_mod_packages.py` makes one package for all three. Windows needed

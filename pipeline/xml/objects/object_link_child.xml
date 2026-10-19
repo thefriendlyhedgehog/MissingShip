@@ -74,6 +74,17 @@
         <DList Name="gMlChildSoulSwordHiltDL" Offset="0x2D9E8"/>
         <DList Name="gMlChildSoulSwordBladeDL" Offset="0x2DE80"/>
 
+        <!-- Saria's soul, appended by ML: the figure ML's actor 0x57 (params 0xBEEF) draws while Link holds the
+             sword-drawing pose in Monktown Valley's and Deku Grove's arrival cutscenes. It draws the opaque DL, then the
+             translucent one, with its eyes on segment 8, and pulses the prim colours of the green and white parts. -->
+        <DList Name="gMlChildSoulFigureDL" Offset="0x345D0"/>
+        <DList Name="gMlChildSoulFigureXluDL" Offset="0x344D0"/>
+        <DList Name="gMlChildSoulFigureGreenDL" Offset="0x31130"/>
+        <DList Name="gMlChildSoulFigureWhiteDL" Offset="0x33728"/>
+        <Texture Name="gMlChildSoulFigureEyesOpenTex" OutName="soul_eyes_open" Format="rgba16" Width="32" Height="32" Offset="0x2F440"/>
+        <Texture Name="gMlChildSoulFigureEyesHalfTex" OutName="soul_eyes_half" Format="rgba16" Width="32" Height="32" Offset="0x345F0"/>
+        <Texture Name="gMlChildSoulFigureEyesClosedTex" OutName="soul_eyes_closed" Format="rgba16" Width="32" Height="32" Offset="0x34DF0"/>
+
         <!-- The boomerang's textures and palettes (the hourglass pickup's layout, 0x5000 up). The palettes are 16, 32 and
              64 colours with the vertices right after; declared, so ZAPD doesn't size them at 256 and swallow the first
              vertices (MS-129). -->
