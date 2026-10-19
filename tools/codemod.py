@@ -1,6 +1,7 @@
 """ML's code mod for every OS, for the builder to hand out beside a --stock layer.
 
     python3 tools/codemod.py [--mod childshield] [--out <missinglink.o2r>]
+    python3 tools/codemod.py --signed <tag> [--mod childshield]
 
 The code mod (ML's C behaviour for a stock Unbound with skijer's mod API) lives in our Unbound fork, branch
 ml-codemod-930, mod-sdk/mods/missinglink (mspaths.CODEMOD_SRC). It is for SoH 9.3.0 hosts only: the checkout must
@@ -11,14 +12,19 @@ with codemod.txt beside it naming the commit. It holds compiled code only: no RO
 
 --mod childshield does the same for the branch's other shipped mod (young Link holds the Hylian Shield, ML's rule
 alone), into dist/codemod/childshield.o2r with childshield.txt beside it.
+
+--signed <tag> takes the package from a release of skijer's sign-mod workflow instead (SIGN_REPO, answering a "Sign a
+mod" issue for codemods/: DEVELOPMENT.md), after checking that its signature names this repository and a commit whose
+codemods/<mod> matches ml-codemod-930's mod-sdk/mods/<mod>. Unbound loads a signed package without asking.
 """
-import argparse, json, os, subprocess, sys, tempfile, zipfile
+import argparse, json, os, shutil, subprocess, sys, tempfile, zipfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, 'pipeline'))
 import mspaths  # noqa: E402
 
 WORKFLOW = 'build-missinglink.yml'
+SIGN_REPO = 'skijer/Shipwright'
 MODS = ('missinglink', 'childshield')
 PLATFORMS = ('windows_x64', 'linux_x64', 'darwin')
 
@@ -51,11 +57,40 @@ def ci_packages(repo, commit, dest, mod):
     return run, found
 
 
+def signed(tag, mod, out, src):
+    """The signed package from skijer's sign-mod release <tag>, checked against our sources; returns its note."""
+    with tempfile.TemporaryDirectory(prefix='signed-') as work:
+        subprocess.run(['gh', 'release', 'download', tag, '--repo', SIGN_REPO, '--pattern', f'{mod}.o2r', '--dir', work],
+                       check=True)
+        package = os.path.join(work, f'{mod}.o2r')
+        with zipfile.ZipFile(package) as z:
+            signature = json.loads(z.read('unbound-signature.json'))
+            binaries = json.loads(z.read('manifest.json')).get('binaries', {})
+        repo = github_repo(ROOT)
+        if signature.get('repository') != repo:
+            sys.exit(f'{tag}\'s {mod}.o2r is signed for {signature.get("repository")}, not {repo}')
+        commit = signature['commit']
+        prefix = f'mod-sdk/mods/{mod}'
+        ours = git(src, 'rev-parse', f'ml-codemod-930:{prefix}')
+        theirs = git(ROOT, 'rev-parse', f'{commit}:codemods/{mod}')
+        if ours != theirs:
+            sys.exit(f'{tag} was signed from {commit[:10]}, whose codemods/{mod} isn\'t ml-codemod-930\'s {prefix}')
+        missing = [p for p in PLATFORMS if p not in binaries]
+        if missing:
+            sys.exit(f'{tag}\'s {mod}.o2r lacks {", ".join(missing)}')
+        os.makedirs(os.path.dirname(out), exist_ok=True)
+        shutil.move(package, out)
+    branch_commit = git(src, 'rev-parse', 'ml-codemod-930')
+    return (f'{branch_commit} ml-codemod-930, signed: {repo}@{commit[:7]} '
+            f'({SIGN_REPO} {tag}, {signature["workflow_run"]})')
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument('--mod', default='missinglink', choices=MODS)
     ap.add_argument('--out', help='default: mspaths.CODEMOD, or dist/codemod/<mod>.o2r beside it')
     ap.add_argument('--src', default=mspaths.CODEMOD_SRC, help='the Unbound fork checkout (ml-codemod-930)')
+    ap.add_argument('--signed', metavar='TAG', help=f'take the package from this {SIGN_REPO} sign-mod release')
     args = ap.parse_args()
     mod = args.mod
     out = args.out or (mspaths.CODEMOD if mod == 'missinglink' else
@@ -64,6 +99,13 @@ def main():
     mod_dir = os.path.join('mod-sdk', 'mods', mod)
     if not os.path.isdir(os.path.join(src, mod_dir)):
         sys.exit(f'{src} has no {mod_dir}: name the checkout with --src or MS_CODEMOD_SRC')
+    note = 'codemod.txt' if mod == 'missinglink' else f'{mod}.txt'
+    if args.signed:
+        text = signed(args.signed, mod, out, src)
+        with open(os.path.join(os.path.dirname(out), note), 'w') as f:
+            f.write(text + '\n')
+        print(f'{os.path.relpath(out, ROOT)}: {text}')
+        return
     if git(src, 'status', '--porcelain', '--', mod_dir):
         sys.exit(f'{mod_dir} has uncommitted changes in {src}: commit and push them first')
     commit, branch = git(src, 'rev-parse', 'HEAD'), git(src, 'rev-parse', '--abbrev-ref', 'HEAD')
@@ -95,7 +137,6 @@ def main():
         os.remove(out + '.tmp')
         sys.exit(f'the merged package lacks {", ".join(missing)}')
     os.replace(out + '.tmp', out)
-    note = 'codemod.txt' if mod == 'missinglink' else f'{mod}.txt'
     with open(os.path.join(os.path.dirname(out), note), 'w') as f:
         f.write(f'{commit} {branch} (CI run {run})\n')
     print(f'{os.path.relpath(out, ROOT)}: {", ".join(sorted(binaries))}, {os.path.getsize(out) / 1e3:.0f} kB')

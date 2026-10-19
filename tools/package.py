@@ -57,14 +57,14 @@ You need
     and that same OoT ROM; or a Missing Link v2.0 ROM you already patched.
 
 Build it: double-click "Build The Missing Link.app", choose your Unbound app, your ROM and the patch, and click Build
-(about a minute). If macOS says the app can't be opened, right-click it, choose Open, then Open again.
+(about a minute). The builder isn't notarized by Apple: if macOS says it can't check the app, open System Settings >
+Privacy & Security and click "Open Anyway" beside its name.
 
 It writes mods/MissingLink_Unbound.o2r and mods/missinglink.o2r, The Missing Link's behaviour as a code mod (compiled
 code only, for Windows, Linux and macOS), into Unbound's folder (~/Library/Application Support/com.shipofharkinian.soh).
 Start Unbound and The Missing Link is loaded. Build it again after updating Unbound or this package. The builder refuses
-an Unbound on an SoH older than 9.3.0: the code mod calls 9.3.0's functions. The code mod is not signed yet: a build of
-Unbound that loads only signed mods refuses it, and one that asks shows its name and content hash the first time;
-answer "Always load this version".
+an Unbound on an SoH older than 9.3.0: the code mod calls 9.3.0's functions. The code mod is signed by Unbound's
+signing workflow, so Unbound loads it without asking.
 
 The same from Terminal, in this folder:
   MissingShipBuilder/MissingShipBuilder --unbound "/Applications/<your Unbound>.app" --stock <OoT ROM> <patch .zip>
@@ -93,8 +93,7 @@ Then choose the folder Unbound is in, your ROM and the patch, and click Build (a
 It writes mods{sep}MissingLink_Unbound.o2r and mods{sep}missinglink.o2r, The Missing Link's behaviour as a code mod
 (compiled code only, for Windows, Linux and macOS). Start Unbound and The Missing Link is loaded. Build it again after
 updating Unbound or this package. The builder refuses an Unbound on an SoH older than 9.3.0: the code mod calls 9.3.0's
-functions. The code mod is not signed yet: a build of Unbound that loads only signed mods refuses it, and one that asks
-shows its name and content hash the first time; answer "Always load this version".
+functions. The code mod is signed by Unbound's signing workflow, so Unbound loads it without asking.
 {prepare}
 The same from {shell}, in this folder:
   {builder} --unbound {game} --stock --oot-o2r "{folder}{sep}oot.o2r" --out "{folder}{sep}mods{sep}MissingLink_Unbound.o2r" <OoT ROM> <patch .zip>

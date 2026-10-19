@@ -60,7 +60,9 @@ python3 pipeline/ms_cycle.py --no-launch  # rebuild ROM → ZAPD → inject text
    from public sources: `python3 tools/codemods.py` copies both mods' sources into `codemods/` (with `UNBOUND_REF`,
    the Unbound commit to build against; `tools/check.py` keeps them in step). Push, then open a **Sign a mod**
    issue on skijer's Unbound repository with this repository, that commit and the folder `codemods`. Its answer is
-   a release with the signed `.o2r` files, which then replace the ones above. Check them first with skijer's
+   a release with the signed `.o2r` files: `python3 tools/codemod.py --signed <its tag>` (and `--mod childshield`)
+   puts them in `dist/codemod/` in place of the ones above, after checking the signature names this repository and
+   sources that match `ml-codemod-930`. Publish the code mod's `codemod-N` release from those. Check them first with skijer's
    `mod-sdk/tools/scan_mod_sources.py`, `cppcheck --error-exitcode=1` and `semgrep --config p/c --severity ERROR`.
 2. Run **generate-builds** on the `engine/` fork (*Actions → generate-builds → Run workflow*, branch `missingship`,
    or `gh workflow run generate-builds.yml --repo <the engine/ fork> --ref missingship`).

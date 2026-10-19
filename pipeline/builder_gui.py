@@ -290,9 +290,7 @@ class Window:
         self.progress.stop()
         took = int(time.time() - self.started) if self.started else 0
         if rc == 0:
-            text = (f'Done in {took} s. The Missing Link is in Unbound\'s mods folder: start SoH: Unbound to play. '
-                    'When Unbound asks about missinglink.o2r (ML\'s code mod, not signed yet), choose "Always load '
-                    'this version".')
+            text = f'Done in {took} s. The Missing Link is in Unbound\'s mods folder: start SoH: Unbound to play.'
             self.open_button.grid(row=0, column=1, padx=(8, 0))
         else:
             text = f'The build failed: {last or "see the log below"}'
