@@ -82,7 +82,7 @@ rc, out = run(_os.path.join(TOOLS, 'checkledger.py'))
 report('ledger', 'FAIL' if rc else 'PASS', last_line(out))
 
 # codemods -----------------------------------------------------------------------------------------------------
-if not _os.path.isdir(_os.path.join(CODEMOD_SRC, '.git')):
+if not _os.path.exists(_os.path.join(CODEMOD_SRC, '.git')):   # a folder, or a file in a worktree
     report('codemods', 'SKIP', f'no code mod checkout at {CODEMOD_SRC} (set MS_CODEMOD_SRC)')
 else:
     rc, out = run(_os.path.join(TOOLS, 'codemods.py'), '--check')
