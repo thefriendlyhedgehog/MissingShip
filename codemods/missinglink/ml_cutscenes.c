@@ -23,6 +23,9 @@
  *   that entrance is then refused with its flag put back, and the arrival triggers keyed to it don't run.
  * - Continue points: where the game over's Continue resumes after Link arrived by an entrance (`continueAt` in
  *   missinglink/entrancechanges), set after vanilla's boss-room rule as the branch does.
+ * - The credits in widescreen: ML framed its credits flybys for 4:3, and wider views show past the edges of its
+ *   scenes. In play ML reaches a scene's cutscene layers only through the credits chain (the Fishing Pond ride, then
+ *   each slot's event layer, to the ending card in Deep Woods), so while one is loaded the sides beyond 4:3 are black.
  */
 #include "soh/ModApi/ModApi.h"
 
@@ -30,6 +33,7 @@
 #include "macros.h"
 #include "variables.h"
 #include "soh/unbound/SceneDB.h"
+#include "soh/OTRGlobals.h"
 #include "soh/Enhancements/game-interactor/GameInteractor_Hooks.h"
 #include <libultraship/bridge/resourcebridge.h>
 
@@ -331,6 +335,31 @@ static void MlIntros_OnGameStateMainStart(void) {
     sMlIntroChecked = false;
 }
 
+// After the world and the actors (the ending card's text is inside 4:3), before the HUD, text and transitions.
+static void MlCredits_OnPlayDrawEnd(void) {
+    s32 left = OTRGetRectDimensionFromLeftEdge(0);
+    s32 right = OTRGetRectDimensionFromRightEdge(SCREEN_WIDTH);
+
+    if ((gPlayState == NULL) || (gSaveContext.gameMode != GAMEMODE_NORMAL) || !IS_CUTSCENE_LAYER ||
+        ((left >= 0) && (right <= SCREEN_WIDTH))) {
+        return;
+    }
+    OPEN_DISPS(gPlayState->state.gfxCtx);
+    gDPPipeSync(OVERLAY_DISP++);
+    gDPSetCycleType(OVERLAY_DISP++, G_CYC_FILL);
+    gDPSetRenderMode(OVERLAY_DISP++, G_RM_NOOP, G_RM_NOOP2);
+    gDPSetFillColor(OVERLAY_DISP++, (GPACK_RGBA5551(0, 0, 0, 1) << 16) | GPACK_RGBA5551(0, 0, 0, 1));
+    if (left < 0) {
+        gDPFillWideRectangle(OVERLAY_DISP++, left, 0, -1, SCREEN_HEIGHT - 1);
+    }
+    if (right > SCREEN_WIDTH) {
+        gDPFillWideRectangle(OVERLAY_DISP++, SCREEN_WIDTH, 0, right, SCREEN_HEIGHT - 1);
+    }
+    gDPPipeSync(OVERLAY_DISP++);
+    gDPSetCycleType(OVERLAY_DISP++, G_CYC_1CYCLE);
+    CLOSE_DISPS(gPlayState->state.gfxCtx);
+}
+
 static void MlCutscenes_OnLoadGame(int32_t fileNum) {
     MlEntrances_Apply();
 }
@@ -342,6 +371,7 @@ void MlCutscenes_Register(const SOHModApi* api) {
     SOH_REGISTER_HOOK(api, OnLoadGame, MlCutscenes_OnLoadGame);
     SOH_REGISTER_HOOK(api, AfterSceneCommands, MlIntros_AfterSceneCommands);
     SOH_REGISTER_HOOK(api, OnGameStateMainStart, MlIntros_OnGameStateMainStart);
+    SOH_REGISTER_HOOK(api, OnPlayDrawEnd, MlCredits_OnPlayDrawEnd);
     api->RegisterVB(VB_PLAY_ENTRANCE_CS, MlIntros_EntranceCs);
     api->RegisterVB(VB_PLAY_TRANSITION_CS, MlIntros_TransitionCs);
     api->RegisterVB(VB_BE_ABLE_TO_SAVE, MlContinue_AbleToSave);
