@@ -13,6 +13,7 @@
  *   in the air and offers to. Here it has its own id, so while it is held its id is En_Niw's during the update.
  * - The triple jump: a running jump plays the next of ML's three jumps. The branch swaps the animation inside
  *   LinkAnimation_Change; here the swap follows vanilla's change in the same update, before the jump's first frame.
+ *   The same hook holds Link in the horse idle while Epona carries him off from the Fishing Pond.
  * - The Soul-Charged Kokiri Sword and its glow (ML's sword display lists, patched while slingshot ammo is 40).
  * - ML's child hands (the fist and Hylian Shield hand; closed hands for the hookshot and hammer slots), and ML's
  *   child-shield rule (VB_BE_CHILD_WITH_HYLIAN_SHIELD): ML nops vanilla's "^ PLAYER_SHIELD_HYLIAN", so a child holds
@@ -361,6 +362,28 @@ static void MlPlayerAnim_JumpUpdate(Player* player) {
     }
 }
 
+// ---- riding Epona off from the Fishing Pond (the branch's MlPlayerAnim.c) ----
+//
+// After the pond intro (ML entrance 0x420) ML_EventSpawner carries Link on young Epona, and ML's animation hook makes
+// every animation Link starts there the horse idle; without it he stands inside her.
+
+static void MlPlayerAnim_RideUpdate(Player* player, PlayState* play) {
+    static s32 sRideEntrance = -1;
+
+    if (play->sceneNum != SCENE_FISHING_POND) {
+        return;
+    }
+    if (sRideEntrance < 0) {
+        sRideEntrance = MlEntrance_Index("SCENE_FISHING_POND/ml/fishing_pond_event");
+    }
+    if ((gSaveContext.entranceIndex != sRideEntrance) ||
+        MlPlayer_AnimIs(player->skelAnime.animation, gPlayerAnim_link_uma_wait_2)) {
+        return;
+    }
+    LinkAnimation_Change(play, &player->skelAnime, (LinkAnimationHeader*)gPlayerAnim_link_uma_wait_2, 1.0f, 0.0f,
+                         Animation_GetLastFrame(gPlayerAnim_link_uma_wait_2), player->skelAnime.mode, 0.0f);
+}
+
 // ---- Soul-Charged Kokiri Sword (the branch's MlSoulSword.c, ledger row 99) ----
 //
 // ML marks the upgrade with slingshot ammo 40. While it is set, ML rewrites object_link_child every frame: the sheath,
@@ -451,6 +474,7 @@ static void MlPlayer_OnPlayerUpdate(void) {
     MlPlayerAnim_JumpStart(player, gPlayState);
     MlSoulSword_Update(player, unsheathing);
     MlPlayerAnim_JumpUpdate(player);
+    MlPlayerAnim_RideUpdate(player, gPlayState);
 }
 
 // ---- music ----

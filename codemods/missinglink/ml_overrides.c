@@ -5,7 +5,8 @@
  * MissingShip tools/unbound_layer.py ML_OVERRIDES); stock Unbound refuses a vanilla name there ("already names an
  * actor"), so the MissingShip builder's --stock layer leaves them out and this mod applies them. Same table, same
  * effect: the flags change on the actor's ActorDB entry, so every copy spawns with them, including the Skulltulas ML's
- * crates and soil patch spawn; Bg_Treemouth's room placements are not spawned.
+ * crates and soil patch spawn; Bg_Treemouth's room placements are not spawned. Not in the layer's overrides: a
+ * Skullwalltula is never spawned without its object, as on the N64 (ML's crates).
  */
 #include "functions.h"
 #include "macros.h"
@@ -48,6 +49,20 @@ static void MlOverrides_SpawnEntry(bool* should, va_list args) {
     }
 }
 
+// ML places every large crate (Obj_Kibako2) with params 0, which asks it to let out a Gold Skulltula when broken. On
+// the N64 that spawn fails unless the room has object_st loaded, and none of ML's crate rooms do; SoH spawns an actor
+// without its object anyway, so every crate let one out. Skullwalltulas keep vanilla's rule.
+static void MlOverrides_SpawnWithoutObject(bool* should, va_list args) {
+    va_list copy;
+    va_copy(copy, args);
+    s16 actorId = (s16)va_arg(copy, int); // an s16, promoted
+    va_end(copy);
+
+    if (actorId == ACTOR_EN_SW) {
+        *should = false;
+    }
+}
+
 void MlOverrides_Register(const SOHModApi* api) {
     char message[96];
 
@@ -64,4 +79,5 @@ void MlOverrides_Register(const SOHModApi* api) {
         entry->flags = (entry->flags | o->set) & ~o->clear;
     }
     api->RegisterVB(VB_SPAWN_ACTOR_ENTRY, MlOverrides_SpawnEntry);
+    api->RegisterVB(VB_SPAWN_ACTOR_WITHOUT_OBJECT, MlOverrides_SpawnWithoutObject);
 }
