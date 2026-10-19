@@ -16,12 +16,10 @@ title screen, credits and ending.
 - **Kaze's The Missing Link v2.0 patch**, from [his release](https://www.romhacking.net/hacks/5334/): the `.zip` as
   downloaded is fine. (A Missing Link v2.0 ROM you already patched works instead of the ROM and patch.)
 - **SoH: Unbound on SoH 9.3.0 or later, with skijer's code mods**, started once with your OoT ROM. Until skijer
-  publishes a release with them, that is his `unbound-modapi` build, downloadable without a GitHub account:
-  [macOS](https://nightly.link/skijer/Shipwright/actions/runs/38509788047/soh-mac.zip),
-  [Windows](https://nightly.link/skijer/Shipwright/actions/runs/38509788047/soh-windows.zip),
-  [Linux](https://nightly.link/skijer/Shipwright/actions/runs/38509788047/soh-linux.zip) (until 2027-01-12). Not the
-  `soh-unbound-unsafe-*` builds, which are for modders. His NEI Unbound release of 2026-10-06 is on an older SoH, and
-  the builder refuses it.
+  publishes a release with them, download the build for your system (`soh-mac`, `soh-windows` or `soh-linux`) from
+  the **Build Artifacts** list on [his Unbound mod API page](https://github.com/skijer/Shipwright/pull/11), no GitHub
+  account needed. It is rebuilt with each change and every Monday. Not the builds under **UNSAFE, MODDING ONLY**,
+  which are for modders. His NEI Unbound release of 2026-10-06 is on an older SoH, and the builder refuses it.
 - A controller, or the keyboard (SoH's default layout).
 
 ## Install

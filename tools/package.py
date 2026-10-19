@@ -51,8 +51,8 @@ This builds The Missing Link as a mod for SoH: Unbound from your own files. Noth
 
 You need
   - SoH: Unbound on SoH 9.3.0 or later with skijer's code mods (NEI Unbound 2.0), started once with your Ocarina of
-    Time USA 1.0 (NTSC 1.0) ROM, so it has made oot.o2r. Until skijer publishes a release with it, that is his
-    unbound-modapi build: https://nightly.link/skijer/Shipwright/actions/runs/38509788047/soh-mac.zip (until 2027-01-12).
+    Time USA 1.0 (NTSC 1.0) ROM, so it has made oot.o2r. Until skijer publishes a release with it, download soh-mac
+    from the Build Artifacts list on https://github.com/skijer/Shipwright/pull/11 (not the UNSAFE, MODDING ONLY ones).
   - Kaze's The Missing Link v2.0 patch from https://www.romhacking.net/hacks/5334/ (the .zip as downloaded is fine)
     and that same OoT ROM; or a Missing Link v2.0 ROM you already patched.
 
@@ -82,8 +82,8 @@ This builds The Missing Link as a mod for SoH: Unbound from your own files. Noth
 You need
   - SoH: Unbound on SoH 9.3.0 or later with skijer's code mods (NEI Unbound 2.0), started once with your Ocarina of
     Time USA 1.0 (NTSC 1.0) ROM, so it has made oot.o2r. Unbound keeps oot.o2r and mods/ in the folder it starts
-    from{home_note}. Until skijer publishes a release with it, that is his unbound-modapi build:
-    https://nightly.link/skijer/Shipwright/actions/runs/38509788047/{skijer_artifact}.zip (until 2027-01-12).
+    from{home_note}. Until skijer publishes a release with it, download {skijer_artifact} from the Build Artifacts
+    list on https://github.com/skijer/Shipwright/pull/11 (not the UNSAFE, MODDING ONLY ones).
   - Kaze's The Missing Link v2.0 patch from https://www.romhacking.net/hacks/5334/ (the .zip as downloaded is fine)
     and that same OoT ROM; or a Missing Link v2.0 ROM you already patched.
 

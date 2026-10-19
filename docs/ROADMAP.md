@@ -34,9 +34,12 @@ Last updated **2026-10-17**. Issues live on **GitHub Issues** (title prefix `MS-
     commit messages. `tools/nodata.py --git` passes, no secrets were found, and the docs' commit IDs were remapped
     both times. The `test-build-1` release (2026-09-26, an early test build), which carried
     `mods/MissingLink_Scenes.o2r`, was deleted on 2026-10-17.
-  - An official skijer release with #33: the README and builder-3 point players at his CI run 38509788047 (through
-    nightly.link, no GitHub account needed), whose artifacts expire 2027-01-12.
-  - Code mod signing: Unbound asks players to "Always load" ML's unsigned code mod.
+  - An official skijer release with #33: until then the README points players at the safe builds in the Build
+    Artifacts list of skijer/Shipwright#11, his permalink, rebuilt with each merge and every Monday (skijer,
+    2026-10-19; the unsafe builds are for modders). Our signed mods load in its 2026-10-17 build (7376c9f).
+  - Code mod signing: done 2026-10-19, by skijer's sign-mod workflow from `codemods/` (skijer/Shipwright#39).
+    `childshield-2` is signed. ML's signed code mod reaches players with `unbound-930-builder-4`, whose Windows and
+    Linux builders wait for Actions minutes (2026-11-01); until then builder-3's unsigned one asks to "Always load".
   - Upstream offers: roborich's libultraship #2 and #3 are open; the rest are held until the project is done.
 - **No game data** (owner decision, 2026-09-27): public builds carry no Nintendo data, and players build ML from
   their own ROM. Kaze Emanuar has given permission for the port, which covers ML's own work; Nintendo's assets are
