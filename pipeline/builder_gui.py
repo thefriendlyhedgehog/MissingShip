@@ -243,7 +243,7 @@ class Window:
             if unbound.extract:
                 self.lines.put(f'Unpacking {os.path.basename(unbound.extract)} (once)…')
                 r = subprocess.run([unbound.extract, '--appimage-extract'], cwd=os.path.dirname(unbound.extract),
-                                   stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+                                   stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
                 if r.returncode != 0 or not os.path.isfile(unbound.game):
                     self.lines.put(('done', 1, 'Unpacking the AppImage failed.'))
                     return
@@ -252,8 +252,9 @@ class Window:
                     '--out', os.path.join(unbound.mods(), 'MissingLink_Unbound.o2r'), '--verbose'] + files
             cmd = [sys.executable] + ([] if getattr(sys, 'frozen', False) else [self.bm.__file__]) + args
             flags = 0x08000000 if sys.platform == 'win32' else 0    # CREATE_NO_WINDOW: no console for the steps
-            self.proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
-                                         encoding='utf-8', errors='replace', creationflags=flags,
+            # stdin too: on Windows the freed console's handle is invalid, and inheriting it fails (WinError 6)
+            self.proc = subprocess.Popen(cmd, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                         text=True, encoding='utf-8', errors='replace', creationflags=flags,
                                          env=dict(os.environ, MS_LINE_BUFFERED='1'))
             last = ''
             for line in self.proc.stdout:
