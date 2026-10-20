@@ -1,10 +1,12 @@
 /*
  * The Missing Link's behaviour as a code mod (MissingShip, docs/ROADMAP.md step 5).
  *
- * ML's world (scenes, objects, text) is its layer, MissingLink_Unbound.o2r, which the builder makes from the player's
- * ROM. This mod adds what ML does in code. Each ML actor registers under the name ML's rooms place it by.
+ * ML's world (scenes, objects, text) is its layer, MissingLink_Unbound.o2r, which this mod's porter (ml_porter.c)
+ * makes in the game from the player's own ROM and Kaze's patch (or the builder makes outside it). This mod adds what
+ * ML does in code. Each ML actor registers under the name ML's rooms place it by.
  */
 #include "missinglink.h"
+#include "ml_porter.h"
 
 static const SOHModRequirements sRequirements = { sizeof(SOHModRequirements), NULL, 0 };
 
@@ -19,6 +21,10 @@ SOH_MOD_EXPORT const SOHModRequirements* ModGetRequirements(void) {
 }
 
 SOH_MOD_EXPORT void ModInit(void) {
+    // Without ML's layer only the porter runs: it offers to make the layer from the player's files.
+    if (!MlPorter_Register(sApi)) {
+        return;
+    }
     MlOverrides_Register(sApi);
     MlScenes_Register(sApi);
     MlWorld_Register(sApi);

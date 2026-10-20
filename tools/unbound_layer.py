@@ -2,7 +2,8 @@
 
     python3 tools/unbound_layer.py --unbound <Unbound's soh binary> --oot-o2r <oot.o2r> --mod <MissingLink_Scenes.o2r>
                                    [--soh-o2r <Unbound's soh.o2r>] [--out <MissingLink_Unbound.o2r>]
-                                   [--pack [--also-base <another extractor version's oot.o2r>]... | --stock]
+                                   [--pack [--also-base <another extractor version's oot.o2r>]... | --stock
+                                    [--code-mod <missinglink.o2r>] [--porter <layer.pack> [--also-base <oot.o2r>]...]]
 
 Unbound reads vanilla scenes and text only in its own JSON form, converted from oot.o2r at start-up, so ML's
 vanilla-format scene overrides are not read there. This converts them with Unbound's own converter
@@ -42,6 +43,13 @@ With --pack the result is the layer as a pack of deltas (tools/deltapack.py, Unb
 copies from oot.o2r and Unbound's conversion of it, which every player's game has. It carries none of the game's data,
 so it is what we distribute; make it from an oot.o2r that Unbound's own extractor wrote, with --also-base for each
 other SoH 9.x extractor's oot.o2r of the same ROM (they lay some files out differently).
+
+With --stock --porter <pack> the stock layer is also written as the pack ML's code mod carries, from which it makes the
+layer in the game (its porter, ml_porter.c): deltas against the player's oot.o2r, Unbound's conversion of it and the
+player's ML ROM (deltapack.py --ml-rom, from mspaths.ML_ROM), so the code mod holds none of ML's art; each --also-base
+(another USA release's oot.o2r, as the player may have made theirs from one) adds the variants for it. Every stock layer
+carries missinglink/layer.json, naming its files (LAYER_MARK): the porter compares it with its pack's to tell whether
+the mounted layer is the one it makes.
 
 With --stock the layer is for a stock Unbound, which reads neither packs nor our branch's entries for vanilla scenes:
 it ships no unbound/scenes.json (tools/unbound_stock.py), with a report of what stock Unbound does not read, and needs
@@ -267,6 +275,30 @@ def ml_banner(vanilla):
     return header + struct.pack('<IIII', 9, 160, 8, len(pixels)) + pixels
 
 
+LAYER_MARK = 'missinglink/layer.json'
+
+
+PORTER_PACK = 'missinglink/porter/layer.pack'      # in ML's code mod: what its porter makes the layer from
+
+
+def mark_layer(path, code_mod=None):
+    """Adds LAYER_MARK to the layer at `path`: "layer", a CRC-64 over its files' names and contents in name order; and
+    with the code mod written beside it (the builder), "codemod", the CRC-64 of that code mod's pack, so its porter
+    takes this layer as its own though another Unbound's conversion made it differ from the pack's."""
+    with zipfile.ZipFile(path) as z:
+        if LAYER_MARK in z.namelist():
+            raise SystemExit(f'{path} already has {LAYER_MARK}')
+        crc = deltapack.crc64(b''.join(n.encode() + b'\0' + struct.pack('<Q', deltapack.crc64(z.read(n)))
+                                       for n in sorted(z.namelist())))
+    mark = {'layer': f'{crc:016x}'}
+    if code_mod is not None:
+        with zipfile.ZipFile(code_mod) as z:
+            if PORTER_PACK in z.namelist():
+                mark['codemod'] = f'{deltapack.crc64(z.read(PORTER_PACK)):016x}'
+    with zipfile.ZipFile(path, 'a', zipfile.ZIP_DEFLATED) as z:
+        z.writestr(LAYER_MARK, json.dumps(mark) + '\n')
+
+
 def blob(data):
     """`data` as an LUS Blob resource (libultraship BlobFactory): a 64-byte OTR header (little-endian, custom, type
     'OBLB', version 0), the size, the bytes. The resource manager hands its bytes to C as they are, where a .json file
@@ -427,15 +459,22 @@ def main():
     ap.add_argument('--out', default=os.path.join(ROOT, 'mod', 'MissingLink_Unbound.o2r'))
     ap.add_argument('--pack', action='store_true', help="write the layer as a pack of deltas against the player's "
                                                         "oot.o2r and Unbound's conversion of it (what we distribute)")
+    ap.add_argument('--code-mod', help='with --stock: the code mod written beside the layer (its pack goes in the mark)')
+    ap.add_argument('--porter', metavar='PACK', help='with --stock: also write the layer as the pack ML\'s code mod '
+                    'makes it from in the game (needs the ML ROM, mspaths.ML_ROM)')
     ap.add_argument('--stock', action='store_true', help='for a stock Unbound: no unbound/scenes.json or actor files '
                                                          '(ML\'s code mod carries those), exits to the entrances ML '
                                                          'adds rewritten (tools/unbound_stock.py)')
     ap.add_argument('--also-base', action='append', default=[], metavar='OOT_O2R',
-                    help='with --pack, an oot.o2r another SoH extractor version wrote from the same ROM: the pack '
-                         'then works over it too (Unbound takes any 9.x oot.o2r)')
+                    help='with --pack or --porter, another oot.o2r the player may have (another SoH extractor '
+                         'version, or another USA release): the pack then works over it too')
     args = ap.parse_args()
     if args.stock and args.pack:
         ap.error('--stock and --pack: stock Unbound does not read packs')
+    if args.porter and not args.stock:
+        ap.error('--porter is for a stock layer (--stock)')
+    if args.also_base and not (args.pack or args.porter):
+        ap.error('--also-base is for --pack or --porter')
     # the converter runs in a temporary folder, so every path must be absolute
     args.oot_o2r, args.mod, args.out = map(os.path.abspath, (args.oot_o2r, args.mod, args.out))
     args.unbound, soh_o2r = unbound_game(args.unbound)
@@ -463,12 +502,19 @@ def main():
         out = os.path.join(work, 'layer.o2r') if args.pack else args.out
         stats, report = layer(os.path.join(work, 'vanilla.o2r'), os.path.join(work, 'ml.o2r'), out, world, ui, maps,
                               pause, getitem, shops, items, unbound_src, args.stock)
-        if args.pack:             # vanilla.o2r is what the player's game converts oot.o2r to (oot-unbound.o2r)
-            also = []
-            for i, other in enumerate(args.also_base):
-                converted = os.path.join(work, f'vanilla-{i}.o2r')
-                export(args.unbound, soh_o2r, os.path.abspath(other), converted, work)
-                also.append([os.path.abspath(other), converted])
+        also = []                 # vanilla.o2r is what the player's game converts oot.o2r to (oot-unbound.o2r)
+        for i, other in enumerate(args.also_base if args.pack or args.porter else []):
+            converted = os.path.join(work, f'vanilla-{i}.o2r')
+            export(args.unbound, soh_o2r, os.path.abspath(other), converted, work)
+            also.append([os.path.abspath(other), converted])
+        if args.stock:
+            mark_layer(out, args.code_mod)
+            if args.porter:
+                views = deltapack.rom_archive(mspaths.ML_ROM, os.path.join(work, 'ml-rom.zip'))
+                deltapack.make(out, os.path.abspath(args.porter),
+                               [args.oot_o2r, os.path.join(work, 'vanilla.o2r'), views],
+                               also=[a + [views] for a in also])
+        if args.pack:
             deltapack.make(out, args.out, [args.oot_o2r, os.path.join(work, 'vanilla.o2r')], also=also)
     finally:
         shutil.rmtree(work, ignore_errors=True)

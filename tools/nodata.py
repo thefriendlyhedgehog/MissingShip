@@ -20,12 +20,17 @@ more numbers (a C array, a JSON table, a patch), as the bytes it spells. A file 
     file (boot, code, the overlays) of up to CODE_TABLE bytes is a constant table the C code carries (a speed or
     angle list in an actor ported to the code mod; SoH's own source has the same): it is listed, not failed.
 
+ML's code mod's porter pack (PORTER_PACK, ml_porter.c) is ML's layer as deltas: the player's own ROM supplies ML's
+art, and the pack carries ML's structure (owner, 2026-10-19: ML's own work may ship as long as players still need ML
+from Kaze's page). In it, runs of ML's data are ML's pieces, allowed up to PORTER_BUDGET bytes in all; a run of OoT
+data passes there only if ML's ROM has the same bytes (ML's own copy, as in its re-encoded display lists).
+
 The ROMs never leave the machine: the fingerprints are 64-bit hashes, cached in the user cache folder by the ROM's
 SHA-1. Exits 1 if any package fails.
 """
 import os as _os, sys as _sys
 _sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..', 'pipeline'))
-import argparse, hashlib, io, os, re, struct, subprocess, sys, tarfile, tempfile, zipfile
+import argparse, hashlib, io, os, re, struct, subprocess, sys, tarfile, tempfile, zipfile, zlib
 import numpy as np
 import build_mod
 from mspaths import ML_ROM, OOT10_ROM
@@ -38,10 +43,12 @@ CODE_TABLE = 1024       # the longest run from a code file that passes
 JR_RA = 0x03E00008      # MIPS `jr $ra`: a file with a few of these is code
 MULT = np.uint64(0x9E3779B97F4A7C15)
 ROM_MAGIC = (b'\x80\x37\x12\x40', b'\x37\x80\x40\x12', b'\x40\x12\x37\x80')
-ARCHIVES = ('.zip', '.o2r', '.otr')
+ARCHIVES = ('.zip', '.o2r', '.otr', '.pack')     # .pack: the porter's pack in ML's code mod (a zip)
 NUMBER = re.compile(rb'(?<![\w.])(0[xX][0-9a-fA-F]+|-?\d+)(?![\w.])')
 BETWEEN = re.compile(rb'[\s,{}+]*')
 MIN_NUMBERS = 16
+PORTER_PACK = 'missinglink/porter/layer.pack'     # inside ML's code mod: its porter's pack (ml_porter.c)
+PORTER_BUDGET = 16 * 1024                           # ML's bytes the pack may carry, in runs this finds
 
 
 def keys_of(a, b):
@@ -281,32 +288,44 @@ def member(name, data):
                     yield from member(f'{name}/{info.filename}', z.read(info))
 
 
-def check(package, index, rom_names, verbose, git=False):
-    problems, tables, files, size = [], [], 0, 0
+def check(package, index, rom_names, verbose, git=False, ml=None):
+    """ml: (the ML ROM's number in the index, an Index of the ML ROM alone), for the porter's pack."""
+    problems, tables, pieces, files, size = [], [], [], 0, 0
     for name, data in (git_blobs(package) if git else walk(package)):
         files += 1
         size += len(data)
         if data[:4] in ROM_MAGIC and len(data) >= 0x100000:
             problems.append(f'{name}: an N64 ROM')
             continue
-        found = [(f'+0x{start:x}', run) for start, *run in index.runs(data)]
+        found = [(f'+0x{start:x}', run, data[start:start + run[0]]) for start, *run in index.runs(data)]
         if b'\0' not in data[:8192]:
             for line, spelled in number_lists(data):
-                found += [(f'line {line}', run) for start, *run in index.runs(spelled)]
-        for where, (length, rom, f) in found:
+                found += [(f'line {line}', run, spelled[start:start + run[0]]) for start, *run in index.runs(spelled)]
+        in_pack = ml is not None and PORTER_PACK in name
+        for where, (length, rom, f), bytes_ in found:
             code = (rom, f) in index.code
             line = f'{name} {where}: {length} bytes of {rom_names[rom]} file {f} ({"code" if code else "assets"})'
+            if in_pack and (rom == ml[0] or sum(r[1] for r in ml[1].runs(bytes_)) >= length):
+                pieces.append((length, line))       # ML's own bytes, which the porter's pack may carry
+                continue
             (tables if code and length <= CODE_TABLE else problems).append(line)
+    carried = sum(n for n, _ in pieces)
+    if carried > PORTER_BUDGET:
+        problems.append(f'{package}: the porter\'s pack carries {carried} bytes of ML\'s data in runs, more than '
+                        f'{PORTER_BUDGET}: make ML\'s art come from the ROM (deltapack.py ROM views)')
     status = 'FAIL' if problems else 'PASS'
     print(f'{status}  {package}: {files} files, {size / 1e6:.1f} MB scanned, '
           + (f'{len(problems)} runs of game data' if problems else 'no game data')
-          + (f', {len(tables)} constant tables from game code' if tables else ''))
+          + (f', {len(tables)} constant tables from game code' if tables else '')
+          + (f', {carried} bytes of ML\'s own in the porter\'s pack' if pieces else ''))
     for p in problems[:None if verbose else 20]:
         print(f'      {p}')
     if len(problems) > 20 and not verbose:
         print(f'      ... and {len(problems) - 20} more (--verbose lists them all)')
     for t in tables if verbose else []:
         print(f'      table: {t}')
+    for _, piece in pieces if verbose else []:
+        print(f'      ML piece: {piece}')
     return not problems
 
 
@@ -337,7 +356,9 @@ def main():
             sys.exit(f'nodata: {e}')
         names.append('ML v2.0')
     index = Index(roms)
-    ok = all([check(p, index, names, a.verbose, a.git) for p in a.packages])
+    n = next((i for i, r in enumerate(roms) if zlib.crc32(r) == build_mod.ML_CRC), None)
+    ml = (n, Index([roms[n]])) if n is not None else None
+    ok = all([check(p, index, names, a.verbose, a.git, ml) for p in a.packages])
     sys.exit(0 if ok else 1)
 
 

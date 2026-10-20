@@ -5,6 +5,9 @@
     deltapack.py apply <pack.o2r> <out.o2r> <base.o2r> [<base.o2r> ...]    rebuild the pack's files as the game would
     deltapack.py scan  <pack.o2r> <base.o2r> [<base.o2r> ...]              base bytes the pack still carries, per folder
 
+    --ml-rom <ML v2.0 ROM>  (make, apply, scan) the ML ROM's files are sources too, as ROM_VIEWS: what ML's code mod
+                            copies from when it makes the layer in the game (its porter, ml_porter.c)
+
 A romhack is distributed as a patch: it copies what it can from the player's own ROM and carries only the hack's own
 bytes. A pack does the same for an .o2r, file by file, against the archives the player's game already mounts (oot.o2r
 and Unbound's converted base oot-unbound.o2r), so it can be shared without Nintendo's data. Bases are listed lowest
@@ -32,13 +35,19 @@ variant per base instead, if that keeps at least VARIANT_GAIN more of the base o
 deltas.json lists the pack's deltas ({"files": [...]}); the game mounts the pack only when every source of every one is
 there, so a player with another base gets the game without the mod.
 
+ROM views: with --ml-rom, the ML ROM's files (its dmadata at ML_DMADATA, Yaz0 decompressed) are sources under
+ROM_PREFIX, each as it is and as SoH's resources hold its bytes: ROM_PREFIX<i> the file, ROM_PREFIX w16/<i> its 16-bit
+words swapped (animations), w32/<i> its 32-bit words swapped (display lists), vtx0/<i> and vtx8/<i> its vertices
+(16 bytes from offset 0 or 8: six 16-bit fields swapped, the colour kept). So the pack carries none of ML's art: the
+player's ML ROM, made from Kaze's patch, supplies it. ml_porter.c computes the same views.
+
 Integers are little-endian; crc is libultraship's CRC-64 (update_crc64 from all ones). A source is the first file at
 one of its paths, searching the mounted archives from the top, whose copied bytes match; so a pack made against one
 base still works where the file sits in another archive (the browser build mounts only oot-unbound.o2r, which carries
 every untouched vanilla file) or under another name (a sample another extractor version names differently), bytes
 another version writes differently are never copied, and a pack whose base differs is not mounted.
 """
-import collections, hashlib, json, os, struct, sys, zipfile
+import array, collections, hashlib, json, os, struct, sys, tempfile, zipfile
 
 MAGIC = b'LUSD'
 VERSION = 1
@@ -55,6 +64,10 @@ MAX_CHANGED = 0.01          # a file another extractor version writes with up to
 # SoH, which Unbound reuses, has them; across ten extractions (two extractors, macOS and Linux, before and after the
 # fixes) every entry that differed was one of these types.
 UNSTABLE_TYPES = {b'OSLB', b'OROM', b'OSFT'}      # SkeletonLimb, Room, SoundFont, as the resource header spells them
+
+ROM_PREFIX = 'missinglink-rom/'    # never a path in a real archive
+ML_DMADATA = 0x12F70                # ML v2.0's dmadata (its file table), 16 bytes per file
+ROM_VIEWS = ('', 'w16/', 'w32/', 'vtx0/', 'vtx8/')
 
 _POLY, _MASK = 0x42F0E1EBA9EA3693, (1 << 64) - 1
 _TABLE = []
@@ -80,6 +93,48 @@ def _path(p):
 
 def _interesting(block):
     return len(set(block)) > 4        # padding and flat fills match everywhere and prove nothing
+
+
+def rom_files(rom):
+    """The ML ROM's files, decompressed, by dmadata index: every entry up to the first all-zero one, but those that
+    hold no file (deleted, or empty)."""
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'pipeline'))
+    from yaz0 import get_file
+    files = {}
+    for i in range(0x10000):
+        vs, ve, rs, re_ = struct.unpack('>IIII', rom[ML_DMADATA + 16 * i:ML_DMADATA + 16 * i + 16])
+        if vs == ve == rs == re_ == 0:
+            break
+        if rs != 0xFFFFFFFF and ve > vs:
+            files[i] = get_file(rom, vs, ve, rs, re_)
+    return files
+
+
+def rom_view(data, view):
+    """One file of the ML ROM as ROM view `view` (ROM_VIEWS) shows it."""
+    if view == '':
+        return data
+    if view in ('w16/', 'w32/'):
+        w = 2 if view == 'w16/' else 4
+        a = array.array('H' if w == 2 else 'I', data[:len(data) // w * w])
+        assert a.itemsize == w
+        a.byteswap()
+        return a.tobytes()
+    off = 0 if view == 'vtx0/' else 8
+    out = bytearray(data)
+    for p in range(off, len(data) - 15, 16):
+        out[p:p + 12:2], out[p + 1:p + 12:2] = data[p + 1:p + 12:2], data[p:p + 12:2]
+    return bytes(out)
+
+
+def rom_archive(ml_rom, path):
+    """The ML ROM's views as an archive at `path`, to pass as a base."""
+    rom = open(ml_rom, 'rb').read()
+    with zipfile.ZipFile(path, 'w', zipfile.ZIP_STORED) as z:
+        for i, data in rom_files(rom).items():
+            for view in ROM_VIEWS:
+                z.writestr(f'{ROM_PREFIX}{view}{i}', rom_view(data, view))
+    return path
 
 
 class Base:
@@ -444,6 +499,14 @@ def scan(pack, bases):
 
 
 def main():
+    if '--ml-rom' in sys.argv:              # the ML ROM's views join the first set of bases
+        i = sys.argv.index('--ml-rom')
+        if i + 1 >= len(sys.argv):
+            sys.exit(__doc__)
+        views = rom_archive(sys.argv[i + 1], os.path.join(tempfile.mkdtemp(prefix='deltapack-'), 'ml-rom.zip'))
+        rest = sys.argv[i + 2:]
+        cut = rest.index('--also') if '--also' in rest else len(rest)
+        sys.argv[i:] = rest[:cut] + [views] + rest[cut:]
     cmd = sys.argv[1] if len(sys.argv) > 1 else ''
     if cmd == 'make' and len(sys.argv) >= 5:
         sets = [[]]

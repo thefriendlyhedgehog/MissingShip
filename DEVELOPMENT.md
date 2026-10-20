@@ -188,6 +188,23 @@ name, ML's edits inside vanilla actors and ML's player code (a few player edits 
 mod's README). The code mod calls the host by SoH 9.3.0's names (skijer/Shipwright#33), so it is built for 9.3.0
 hosts only and the builder refuses `--stock` for an Unbound built on an older SoH (its `soh.o2r`'s `portVersion`).
 
+The code mod can also make the stock layer itself, in the game: its porter (`ml_porter.c`). It carries
+`missinglink/porter/layer.pack`, the stock layer as deltas against the player's `oot.o2r`, Unbound's conversion of
+it (`oot-unbound.o2r`) and views of the player's ML ROM (`tools/deltapack.py --ml-rom`). The pack holds none of the
+game's art and none of ML's, only 54 short runs of ML's bytes (3.7 KB, re-encoded display lists). `tools/nodata.py`
+allows up to 16 KB of those in the pack and nothing else. When no layer is mounted, or the mounted layer's
+`missinglink/layer.json` names other files than the pack's, the porter asks the player for their OoT USA 1.0 ROM and
+Kaze's patch (the zip or the `.bps`) or an ML ROM (skijer's file picker, `"permissions": ["files"]`). It checks
+their CRCs, rebuilds the layer in memory, saves it to `mods/` (SaveToModsFolder; the game confirms) and restarts.
+An update first saves an empty layer over the old one and restarts, because the game keeps the mounted file open.
+A layer the builder wrote names the code mod's pack in its mark (`"codemod"`), so the porter leaves it alone.
+`python3 tools/porterpack.py --unbound <skijer's PR #11 app> --oot-o2r <its USA 1.0 oot.o2r> --also-base ...` makes
+the pack against the build players run, with a variant for SoH 9.2.3's USA 1.0 `oot.o2r` (`--also-base`). It writes
+the pack to the code mod's assets on `ml-codemod-930`. Rev A and Rev B can't be covered: their scenes lack bytes the
+layer keeps from 1.0, so a variant would carry OoT's data. The porter reads the `oot.o2r`'s `version` file and tells
+a player with another release to make a new one from their USA 1.0 ROM. `mlplay`'s `porter` command runs the porter without its dialogs.
+Test homes set `gEnhancements.MissingLink.PorterAsks` to 0, so the porter doesn't ask.
+
 Without `--pack` the builder writes the whole layer, which holds the game's data too: for testing only. On macOS it
 reads `oot.o2r` from and writes `mods/MissingLink_Unbound.o2r` to Unbound's folder
 (`~/Library/Application Support/com.shipofharkinian.soh`, or `SHIP_HOME`; `--oot-o2r` and `--out` choose others).
@@ -261,7 +278,7 @@ differences, e.g. `MS_HACK=hacks/selftest python3 tools/codediff.py`.
 | `mod/MissingLink_Scenes.o2r` | ML's archive, the pipeline's output (local only, not in git) |
 | `home/` | development SHIP_HOME (`oot.o2r` for the pipeline; local only, not in git) |
 | `pipeline/` | ROM → `.o2r` pipeline: ZAPD XMLs (`xml/scenes`, `xml/objects`), injectors, maps; the mod builder (`build_mod.py`) and its window (`builder_gui.py`) |
-| `tools/` | hack-vs-baseline analysis: `modcheck`, `aligndiff`, `dumpactor`, `codediff`, `pldiff`, `mlcustom`, …; project checks: `check`, `genpatch`, `survey_actors`, …; audio: `sfxtrace` (which sound effects play a font slot); release packaging: `package`, `freeze_builder`, `codemod` (ML's code mod, or `childshield`, for every OS), `nodata` (no game data in a package), `deltapack` (a mod as deltas against the player's own base) |
+| `tools/` | hack-vs-baseline analysis: `modcheck`, `aligndiff`, `dumpactor`, `codediff`, `pldiff`, `mlcustom`, …; project checks: `check`, `genpatch`, `survey_actors`, …; audio: `sfxtrace` (which sound effects play a font slot); release packaging: `package`, `freeze_builder`, `codemod` (ML's code mod, or `childshield`, for every OS), `porterpack` (the code mod's porter pack), `nodata` (no game data in a package), `deltapack` (a mod as deltas against the player's own base) |
 | `hacks/` | per-hack configs for `tools/` (`ml`, `selftest`) |
 | `dist/` | release packages from `tools/package.py` (not committed) |
 | `docs/ROADMAP.md` | status, history and the remaining long-term work |

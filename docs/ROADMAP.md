@@ -40,6 +40,15 @@ Last updated **2026-10-17**. Issues live on **GitHub Issues** (title prefix `MS-
   - Code mod signing: done 2026-10-19, by skijer's sign-mod workflow from `codemods/` (skijer/Shipwright#39).
     `childshield-2` is signed. ML's signed code mod reaches players with `unbound-930-builder-4`, whose Windows and
     Linux builders wait for Actions minutes (2026-11-01); until then builder-3's unsigned one asks to "Always load".
+  - One file to install (owner, 2026-10-20): ML's code mod makes the layer itself in the game (its porter,
+    `ml_porter.c`, on skijer's file API). The player puts `missinglink.o2r` in `mods/` and starts the game. It asks
+    for their OoT ROM and Kaze's patch, writes `MissingLink_Unbound.o2r` to `mods/` and restarts. On an update it
+    clears the old layer first. The code mod carries the layer as deltas against the player's own files
+    (`tools/porterpack.py`, USA 1.0 `oot.o2r` by skijer's build and by SoH 9.2.3; `tools/nodata.py` passes it). It
+    refuses an `oot.o2r` from Rev A or B with what to do, since covering those would put OoT's bytes in the pack. In
+    skijer's Mac build (7376c9f) the porter writes the stock layer file for file (5,873 files), and ML starts on it
+    after the restart. Left: the owner's run through the dialogs, Windows and Linux, signing the new code mod, and a
+    release that ships only `missinglink.o2r` (the builder stays for testers).
   - Upstream offers: roborich's libultraship #2 and #3 are open; the rest are held until the project is done.
 - **No game data** (owner decision, 2026-09-27): public builds carry no Nintendo data, and players build ML from
   their own ROM. Kaze Emanuar has given permission for the port, which covers ML's own work; Nintendo's assets are

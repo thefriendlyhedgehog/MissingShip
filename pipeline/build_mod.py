@@ -163,7 +163,8 @@ def unbound_layer(args, step, env, oot, mod, work):
     print('MissingShip builder: making the SoH: Unbound ' + ('pack' if args.pack else 'layer'))
     r = subprocess.run(step + [os.path.join(tools, 'unbound_layer.py'), '--unbound', os.path.abspath(args.unbound),
                                '--unbound-src', src, '--oot-o2r', oot, '--mod', mod, '--out', layer] +
-                       (['--pack'] if args.pack else []) + (['--stock'] if args.stock else []) +
+                       (['--pack'] if args.pack else []) +
+                       (['--stock', '--code-mod', code_mod(args)] if args.stock else []) +
                        [x for other in args.also_base for x in ('--also-base', os.path.abspath(other))],
                        env=env, capture_output=True, text=True)
     if r.returncode != 0 or not os.path.exists(layer):

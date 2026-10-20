@@ -2,8 +2,9 @@
 
 MissingShip's first step toward running The Missing Link on stock Unbound with this branch's mod API
 (MissingShip `docs/ROADMAP.md`, step 5). ML's world (scenes, objects, text) stays its layer,
-`MissingLink_Unbound.o2r`, which the MissingShip builder makes from the player's ROM. This mod adds what ML does in
-code, one actor at a time, each registered under the name ML's rooms place it by.
+`MissingLink_Unbound.o2r`, made from the player's ROM: by this mod's porter in the game (`ml_porter.c`, from the
+pack in `assets/missinglink/porter/`, MissingShip `tools/porterpack.py`), or by the MissingShip builder. This mod adds
+what ML does in code, one actor at a time, each registered under the name ML's rooms place it by.
 
 | Part | State |
 |---|---|
@@ -57,7 +58,10 @@ the draw configs from `unbound/scenes.json`. Stock Unbound refuses or ignores th
 layer leaves the actor files out and this mod carries the same tables (the draw configs since 2026-10-12 from the
 layer's `missinglink/scenes`).
 
-The manifest `requires` ML's layer, so without it the loader skips this mod.
+Without ML's layer only the porter starts: it asks for the player's OoT USA 1.0 ROM and Kaze's patch (or an ML ROM)
+with skijer's file picker (the manifest's `"permissions": ["files"]`), makes the layer, saves it to `mods/` and
+restarts. Over an older layer it offers the update, clearing that one first. The rest of the mod starts whenever a
+layer is mounted.
 
 ## Tested, 2026-10-11 (macOS, this branch at 27bb6c445)
 
