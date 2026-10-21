@@ -196,7 +196,11 @@ allows up to 16 KB of those in the pack and nothing else. When no layer is mount
 `missinglink/layer.json` names other files than the pack's, the porter asks the player for their OoT USA 1.0 ROM and
 Kaze's patch (the zip or the `.bps`) or an ML ROM (skijer's file picker, `"permissions": ["files"]`). It checks
 their CRCs, rebuilds the layer in memory, saves it to `mods/` (SaveToModsFolder; the game confirms) and restarts.
-An update first saves an empty layer over the old one and restarts, because the game keeps the mounted file open.
+An update first saves an empty layer over the old one and restarts: the old layer hides the vanilla files the deltas
+copy from. The next start asks to finish the update. skijer/Shipwright#41 adds `ReadGameArchiveFiles`, which reads
+the game's archives under any mod. Once it is in `UNBOUND_REF`, the porter can build over the old layer and save the
+new one as `.pending`, so an update needs one restart and one file pick. Tested on a Mac build of the PR: the layer is
+identical.
 A layer the builder wrote names the code mod's pack in its mark (`"codemod"`), so the porter leaves it alone.
 `python3 tools/porterpack.py --unbound <skijer's PR #11 app> --oot-o2r <its USA 1.0 oot.o2r> --also-base ...` makes
 the pack against the build players run, with a variant for SoH 9.2.3's USA 1.0 `oot.o2r` (`--also-base`). It writes

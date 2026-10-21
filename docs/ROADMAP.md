@@ -47,8 +47,9 @@ Last updated **2026-10-17**. Issues live on **GitHub Issues** (title prefix `MS-
     (`tools/porterpack.py`, USA 1.0 `oot.o2r` by skijer's build and by SoH 9.2.3; `tools/nodata.py` passes it). It
     refuses an `oot.o2r` from Rev A or B with what to do, since covering those would put OoT's bytes in the pack. In
     skijer's Mac build (7376c9f) the porter writes the stock layer file for file (5,873 files), and ML starts on it
-    after the restart. Left: the owner's run through the dialogs, Windows and Linux, signing the new code mod, and a
-    release that ships only `missinglink.o2r` (the builder stays for testers).
+    after the restart. Windows and Linux make the same layer. Updates take two restarts until skijer/Shipwright#41
+    (`ReadGameArchiveFiles`) is merged; with it, one. Left: the owner's run through the dialogs, signing the new code
+    mod, and a release that ships only `missinglink.o2r` (the builder stays for testers).
   - Upstream offers: roborich's libultraship #2 and #3 are open; the rest are held until the project is done.
 - **No game data** (owner decision, 2026-09-27): public builds carry no Nintendo data, and players build ML from
   their own ROM. Kaze Emanuar has given permission for the port, which covers ML's own work; Nintendo's assets are

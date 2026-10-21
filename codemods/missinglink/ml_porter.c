@@ -43,6 +43,7 @@ typedef enum {
 static const SOHModApi* sApi;
 static LayerState sState;
 static bool sOffered;
+static bool sCleared;   // the mounted layer is the empty one an update leaves (PORTER_CLEARED)
 
 static void Log(const char* fmt, ...) {
     char line[768];
@@ -765,9 +766,17 @@ static void Clear(void) {
     }
     if (sApi->SaveToModsFolder(PORTER_LAYER, w.data, w.size)) {
         Log("[MissingLink] porter: cleared %s for the update", PORTER_LAYER);
-        sApi->RequestRestart("to update The Missing Link (it asks to restart once more after that)");
+        sApi->RequestRestart("to clear the old version of The Missing Link");
     }
     MlZipWriter_Free(&w);
+}
+
+// The player's answer, logged, so a test run shows what was asked and what was chosen.
+static bool Ask(const char* title, const char* message) {
+    bool yes = sApi->AskPlayer(title, message);
+
+    Log("[MissingLink] porter: asked \"%s\": %s", title, yes ? "yes" : "no");
+    return yes;
 }
 
 static void Porter_OnGameFrameUpdate(void) {
@@ -779,17 +788,26 @@ static void Porter_OnGameFrameUpdate(void) {
         Log("[MissingLink] porter: not asking (%s is 0)", PORTER_ASKS);
         return;
     }
-    if (sState == LAYER_NONE) {
-        if (sApi->AskPlayer("Make The Missing Link",
-                            "The Missing Link isn't made yet. It's made here from your own files: your Ocarina of "
-                            "Time USA 1.0 ROM and Kaze's v2.0 patch, from " PATCH_PAGE " (the .zip as downloaded is "
-                            "fine), or a Missing Link v2.0 ROM.\n\nMake it now? It takes a few seconds, then "
-                            "Unbound restarts.")) {
+    if ((sState == LAYER_NONE) && sCleared) {
+        if (Ask("Finish updating The Missing Link",
+                "The old version of The Missing Link is cleared. To make the new one, choose the same files as "
+                "before: your Ocarina of Time USA 1.0 ROM and Kaze's v2.0 patch (or a Missing Link v2.0 ROM).\n\n"
+                "Choose them now? It takes a few seconds, then Unbound closes. Open it again to play.")) {
             Make();
         }
-    } else if (sApi->AskPlayer("Update The Missing Link",
-                               "The Missing Link's layer in your mods folder is older than its code mod. Update it? "
-                               "Unbound restarts, then it asks for your files and restarts once more.")) {
+    } else if (sState == LAYER_NONE) {
+        if (Ask("Make The Missing Link",
+                "The Missing Link isn't made yet. It's made here from your own files: your Ocarina of Time USA 1.0 "
+                "ROM and Kaze's v2.0 patch, from " PATCH_PAGE " (the .zip as downloaded is fine), or a Missing "
+                "Link v2.0 ROM.\n\nMake it now? It takes a few seconds, then Unbound closes. Open it again to "
+                "play.")) {
+            Make();
+        }
+    } else if (Ask("Update The Missing Link",
+                   "This version of The Missing Link needs its world made again from your files.\n\nUpdate now? "
+                   "Unbound closes to clear the old version. Open it again and choose the same files as before: "
+                   "your Ocarina of Time USA 1.0 ROM and Kaze's v2.0 patch. Then it closes once more, and The "
+                   "Missing Link starts the next time you open it.")) {
         Clear();
     }
 }
@@ -850,10 +868,14 @@ bool MlPorter_Register(const SOHModApi* api) {
     } else if (IsMounted(PORTER_OLD)) {
         sState = (packData == NULL) ? LAYER_READY : LAYER_OLD;
     }
+    sCleared = (sState == LAYER_NONE) && IsMounted(PORTER_CLEARED);
     free(mark);
     free(packData);
     Log("[MissingLink] porter: layer %s",
-        (sState == LAYER_READY) ? "ready" : (sState == LAYER_OLD) ? "older than the code mod" : "not made yet");
+        (sState == LAYER_READY) ? "ready"
+        : (sState == LAYER_OLD) ? "older than the code mod"
+        : sCleared              ? "cleared for an update, not made yet"
+                                : "not made yet");
     if (sState != LAYER_READY) {
         SOH_REGISTER_HOOK(api, OnGameFrameUpdate, Porter_OnGameFrameUpdate);
     }
