@@ -289,8 +289,10 @@ static void MlIntros_AfterSceneCommands(int16_t sceneNum) {
         (gSaveContext.respawnFlag <= 0)) {
         Flags_SetEventChkInf(flag);
         sMlOwnIntro = true;
-        if (GameInteractor_Should(VB_PLAY_ENTRANCE_CS, true, flag, (s32)gSaveContext.entranceIndex)) {
-            snprintf(sMlIntroSegment, sizeof(sMlIntroSegment), "%s%s", ML_OTR_PREFIX, cutscene);
+        // The cutscene goes with the flag and entrance (SoH 9.3.0): Skip Entrance Cutscenes runs its clock through it.
+        snprintf(sMlIntroSegment, sizeof(sMlIntroSegment), "%s%s", ML_OTR_PREFIX, cutscene);
+        if (GameInteractor_Should(VB_PLAY_ENTRANCE_CS, true, flag, (s32)gSaveContext.entranceIndex,
+                                  sMlIntroSegment)) {
             Cutscene_SetSegment(play, sMlIntroSegment);
             gSaveContext.cutsceneTrigger = 2;
             gSaveContext.showTitleCard = false;
