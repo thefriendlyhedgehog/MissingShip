@@ -204,6 +204,11 @@ the pack to the code mod's assets on `ml-codemod-930`. Rev A and Rev B can't be 
 layer keeps from 1.0, so a variant would carry OoT's data. The porter reads the `oot.o2r`'s `version` file and tells
 a player with another release to make a new one from their USA 1.0 ROM. `mlplay`'s `porter` command runs the porter without its dialogs.
 Test homes set `gEnhancements.MissingLink.PorterAsks` to 0, so the porter doesn't ask.
+`.github/workflows/codemods.yml` builds `codemods/` for Windows, Linux and macOS the way skijer's sign-mod does, minus
+the signature: the same scans, his signing CMake, Unbound at `UNBOUND_REF` and one universal `.o2r` per mod (artifact
+`universal-unsigned`). It runs on public minutes on each push that changes the mods, so a sign request goes in only
+after that build and the tests pass. It also builds `testmods/portercheck`, which runs the porter without its dialogs
+on any OS (`PORTERCHECK="<layer>|<file>|..."`), so the tests can make the layer unattended in skijer's build.
 
 Without `--pack` the builder writes the whole layer, which holds the game's data too: for testing only. On macOS it
 reads `oot.o2r` from and writes `mods/MissingLink_Unbound.o2r` to Unbound's folder

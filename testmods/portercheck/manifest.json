@@ -1,0 +1,6 @@
+{
+    "name": "portercheck",
+    "author": "MissingShip",
+    "version": "0.1",
+    "description": "Test only, never shipped: runs ML's porter without its dialogs (PORTERCHECK=\"<layer>|<file>|...\") and logs [PORTERCHECK]."
+}

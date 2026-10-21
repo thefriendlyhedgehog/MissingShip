@@ -1,0 +1,162 @@
+name: codemods
+# Builds codemods/ (and the test mods in testmods/) for Windows, Linux and macOS the way skijer's sign-mod workflow
+# does, without signing: the same scans, his signing CMake, Unbound at UNBOUND_REF, soh.lib from his newest Windows
+# SDK artifact, and one universal .o2r per mod. A dry run before a sign request, and the build the tests use.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'codemods/**'
+      - 'testmods/**'
+      - 'UNBOUND_REF'
+      - '.github/workflows/codemods.yml'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+env:
+  UNBOUND_REPOSITORY: skijer/Shipwright
+  TOOLS_REF: unbound-modapi
+jobs:
+  scan:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        path: submitted
+    - name: Unbound at UNBOUND_REF
+      run: echo "UNBOUND_REF=$(tr -d '[:space:]' < submitted/UNBOUND_REF)" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v6
+      with:
+        repository: ${{ env.UNBOUND_REPOSITORY }}
+        ref: ${{ env.TOOLS_REF }}
+        path: trusted
+        sparse-checkout: mod-sdk
+    - uses: actions/checkout@v6
+      with:
+        repository: ${{ env.UNBOUND_REPOSITORY }}
+        ref: ${{ env.UNBOUND_REF }}
+        path: external/Unbound
+        submodules: true
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install the scanners
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cppcheck
+        python -m pip install semgrep pillow
+    - name: Check the sources
+      run: python trusted/mod-sdk/tools/scan_mod_sources.py --mods-directory submitted/codemods --submitted-root submitted
+    - name: Check the preprocessed sources
+      run: |
+        cmake -S trusted/mod-sdk/ci/signing -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+              -DUNBOUND_ROOT="$GITHUB_WORKSPACE/external/Unbound" \
+              -DUNBOUND_SIGNED_MODS_DIR="$GITHUB_WORKSPACE/submitted/codemods"
+        python trusted/mod-sdk/tools/scan_mod_sources.py --mods-directory submitted/codemods \
+               --submitted-root submitted --compile-commands build/compile_commands.json
+    - name: Cppcheck
+      run: cppcheck --error-exitcode=1 --quiet submitted/codemods
+    - name: Semgrep
+      run: semgrep scan --config p/c --severity ERROR --error --metrics off submitted/codemods
+
+  build:
+    needs: scan
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: windows_x64
+          - os: ubuntu-22.04
+            platform: linux_x64
+          - os: macos-14
+            platform: darwin
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        path: submitted
+    - name: Unbound at UNBOUND_REF
+      shell: bash
+      run: echo "UNBOUND_REF=$(tr -d '[:space:]' < submitted/UNBOUND_REF)" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v6
+      with:
+        repository: ${{ env.UNBOUND_REPOSITORY }}
+        ref: ${{ env.TOOLS_REF }}
+        path: trusted
+        sparse-checkout: mod-sdk
+    - uses: actions/checkout@v6
+      with:
+        repository: ${{ env.UNBOUND_REPOSITORY }}
+        ref: ${{ env.UNBOUND_REF }}
+        path: external/Unbound
+        submodules: true
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install Python dependencies
+      run: python -m pip install pillow
+    - name: Get soh.lib
+      if: runner.os == 'Windows'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        RUN=$(gh api "repos/$UNBOUND_REPOSITORY/actions/artifacts?name=unbound-mod-sdk-windows&per_page=20" \
+              --jq '[.artifacts[] | select(.expired | not)][0].workflow_run.id // empty')
+        test -n "$RUN" || { echo "::error::no unexpired unbound-mod-sdk-windows artifact in $UNBOUND_REPOSITORY"; exit 1; }
+        echo "soh.lib from $UNBOUND_REPOSITORY run $RUN"
+        gh run download "$RUN" --repo "$UNBOUND_REPOSITORY" --name unbound-mod-sdk-windows --dir external/soh-lib
+    - name: Build
+      shell: bash
+      run: |
+        mkdir -p mods
+        cp -R submitted/codemods/* submitted/testmods/* mods/
+        IMPORT_LIBRARY=""
+        if [ "$RUNNER_OS" = "Windows" ]; then
+          IMPORT_LIBRARY="-DUNBOUND_IMPORT_LIBRARY=$GITHUB_WORKSPACE/external/soh-lib/soh.lib"
+        fi
+        cmake -S trusted/mod-sdk/ci/signing -B build -DCMAKE_BUILD_TYPE=Release \
+              -DUNBOUND_ROOT="$GITHUB_WORKSPACE/external/Unbound" \
+              -DUNBOUND_SIGNED_MODS_DIR="$GITHUB_WORKSPACE/mods" $IMPORT_LIBRARY
+        cmake --build build --config Release --parallel
+    - uses: actions/upload-artifact@v7
+      with:
+        name: mods-${{ matrix.platform }}
+        if-no-files-found: error
+        path: build/packages/Release/*.o2r
+
+  package:
+    needs: build
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        repository: ${{ env.UNBOUND_REPOSITORY }}
+        ref: ${{ env.TOOLS_REF }}
+        path: trusted
+        sparse-checkout: mod-sdk/tools
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install Python dependencies
+      run: python -m pip install lief
+    - uses: actions/download-artifact@v7
+      with:
+        pattern: mods-*
+        path: platform-packages
+    - name: Merge into one package per mod
+      run: |
+        mkdir -p universal
+        for mod in $(find platform-packages -name '*.o2r' -exec basename {} \; | sort -u); do
+          python trusted/mod-sdk/tools/merge_mod_packages.py platform-packages/*/"$mod" --output "universal/$mod"
+        done
+    - name: Check what the binaries import
+      run: python trusted/mod-sdk/tools/check_mod_binary.py universal/*.o2r
+    - uses: actions/upload-artifact@v7
+      with:
+        name: universal-unsigned
+        path: universal/*.o2r
