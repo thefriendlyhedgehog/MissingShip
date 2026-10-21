@@ -59,9 +59,11 @@ UNBOUND_SRC = _env('MS_UNBOUND_SRC', os.path.join(os.path.dirname(ROOT), 'Unboun
 # ML's C behaviour as a code mod for a stock Unbound with skijer's mod API (our Unbound fork, branch ml-codemod-930,
 # mod-sdk/mods/missinglink). tools/codemod.py packs it for every OS; the builder writes it beside a --stock layer.
 # Only SoH 9.3.0 hosts: the code mod calls 9.3.0's names, so the checkout must hold skijer's 9.3.0 mod API with
-# ML's host hooks (skijer/Shipwright#33, merged as CODEMOD_HOST). The 9.2.3 branch (ml-codemod) is retired.
+# ML's host hooks (skijer/Shipwright#33, merged as eed5004cc). The 9.2.3 branch (ml-codemod) is retired.
+# CODEMOD_HOST is skijer's unbound-modapi at or after the build players run (PR #11, 7376c9f): the porter lists
+# mounted paths with ListArchiveFiles, which came after #33.
 CODEMOD_SRC = _env('MS_CODEMOD_SRC', os.path.join(os.path.dirname(ROOT), 'Unbound-skijer930'))
-CODEMOD_HOST = 'eed5004cc00cde05284fe6dd89957faf36d54604'
+CODEMOD_HOST = '948bff278abee70c4e44a4e471068d2eda7ad82b'
 CODEMOD = _env('MS_CODEMOD', os.path.join(ROOT, 'dist', 'codemod', 'missinglink.o2r'))
 
 
