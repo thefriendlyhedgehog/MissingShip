@@ -8,9 +8,11 @@
  *
  * On the first frame without the pack's layer the porter asks to make it, asks for the files, rebuilds every file of
  * the layer (each checked by CRC-64 against the one the pack was made from), saves it in the mods folder and asks to
- * restart. Over an older layer it first replaces that with an empty one and restarts: the game reads a file at a path
- * from the top archive, so with the old layer mounted the pack's sources under it can't be read. It writes nothing
- * else, so there is nothing to clean up.
+ * restart. The game reads a file at a path from the top archive, so a mounted layer hides the game's files under it,
+ * which the pack copies from. The layer therefore keeps the game's copy of each file it covers (PORTER_GAME), and an
+ * update reads them from there: it makes the new layer over the old one, which SaveToModsFolder installs at the next
+ * start. Over an older layer without those copies it first replaces that with an empty one and restarts. It writes
+ * nothing else, so there is nothing to clean up.
  *
  * missinglink.porter.build and missinglink.porter.free (services) do the same without dialogs, for tests.
  */
@@ -30,6 +32,8 @@
 #define PORTER_LAYER "MissingLink_Unbound.o2r"
 #define PORTER_LIST "deltas.json"                     // the pack's index, not a file of the layer
 #define PORTER_CLEARED "missinglink/cleared.txt"      // the empty layer an update leaves for one start
+#define PORTER_GAME "missinglink/game/"               // in the layer: the game's copy of each file it covers
+#define PORTER_FILES "missinglink/layer-files.txt"    // in the layer: its files, one per line
 #define PATCH_PAGE "https://www.romhacking.net/hacks/5334/"
 #define PORTER_ASKS "gEnhancements.MissingLink.PorterAsks"   // not in the menu
 #define OOT_VERSION "version"   // in oot.o2r (and oot-unbound.o2r): a count, then each ROM's header CRC, big-endian
@@ -112,6 +116,128 @@ static uint8_t* ReadMounted(const char* path, uint64_t* size) {
     return file.found ? file.data : NULL;
 }
 
+// A sorted list of paths, for lookups.
+typedef struct {
+    char* text;
+    char** paths;
+    size_t count;
+} FileList;
+
+static int ComparePaths(const void* a, const void* b) {
+    return strcmp(*(char* const*)a, *(char* const*)b);
+}
+
+// From one path per line; the list keeps a copy.
+static void FileList_FromText(FileList* list, const uint8_t* data, size_t size) {
+    size_t lines = 0;
+
+    memset(list, 0, sizeof(*list));
+    list->text = malloc(size + 1);
+    if (list->text == NULL) {
+        return;
+    }
+    memcpy(list->text, data, size);
+    list->text[size] = '\0';
+    for (size_t i = 0; i < size; i++) {
+        lines += (data[i] == '\n');
+    }
+    list->paths = malloc((lines + 1) * sizeof(char*));
+    if (list->paths == NULL) {
+        return;
+    }
+    for (char* line = strtok(list->text, "\n"); line != NULL; line = strtok(NULL, "\n")) {
+        list->paths[list->count++] = line;
+    }
+    qsort(list->paths, list->count, sizeof(char*), ComparePaths);
+}
+
+static bool FileList_Has(const FileList* list, const char* path) {
+    return (list->count > 0) && (bsearch(&path, list->paths, list->count, sizeof(char*), ComparePaths) != NULL);
+}
+
+static void FileList_Free(FileList* list) {
+    free(list->paths);
+    free(list->text);
+    memset(list, 0, sizeof(*list));
+}
+
+typedef struct {
+    char* text;
+    size_t size;
+    bool failed;
+} PathText;
+
+static bool AddPathLine(const char* path, void* userData) {
+    PathText* t = userData;
+    size_t len = strlen(path);
+    char* grown = realloc(t->text, t->size + len + 1);
+
+    if (grown == NULL) {
+        t->failed = true;
+        return false;
+    }
+    t->text = grown;
+    memcpy(t->text + t->size, path, len);
+    t->text[t->size + len] = '\n';
+    t->size += len + 1;
+    return true;
+}
+
+// Every path the mounted archives hold, listed once while a layer is made, so lookups skip the paths nothing holds
+// (each lookup searches every archive). Unlisted (an older host, or no memory): every path may be held.
+static FileList sMounted;
+static bool sMountedListed;
+
+static void Mounted_List(void) {
+    PathText t = { NULL, 0, false };
+
+    sMountedListed = false;
+    if (!SOH_MOD_API_HAS(sApi, ListArchiveFiles)) {
+        return;
+    }
+    sApi->ListArchiveFiles("*", AddPathLine, &t);
+    if (!t.failed && (t.text != NULL)) {
+        FileList_FromText(&sMounted, (const uint8_t*)t.text, t.size);
+        sMountedListed = (sMounted.paths != NULL);
+    }
+    free(t.text);
+}
+
+static void Mounted_Free(void) {
+    FileList_Free(&sMounted);
+    sMountedListed = false;
+}
+
+static bool MayBeMounted(const char* path) {
+    return !sMountedListed || FileList_Has(&sMounted, path);
+}
+
+// The mounted layer's files (PORTER_FILES); empty without that list.
+static void FileList_Load(FileList* list) {
+    uint64_t size = 0;
+    uint8_t* data = MayBeMounted(PORTER_FILES) ? ReadMounted(PORTER_FILES, &size) : NULL;
+
+    memset(list, 0, sizeof(*list));
+    if (data != NULL) {
+        FileList_FromText(list, data, size);
+        free(data);
+    }
+}
+
+// The game's own file at `path` (malloc'd), or NULL. Under a layer the porter made, from that layer's copy of it.
+static uint8_t* ReadGame(const char* path, uint64_t* size) {
+    char kept[512];
+    uint8_t* data = NULL;
+
+    if ((snprintf(kept, sizeof(kept), "%s%s", PORTER_GAME, path) < (int)sizeof(kept)) && MayBeMounted(kept)) {
+        data = ReadMounted(kept, size);
+    }
+    if ((data == NULL) && MayBeMounted(path)) {
+        data = ReadMounted(path, size);
+    }
+    return data;
+}
+
 static bool IsMounted(const char* path) {
     uint64_t size;
     uint8_t* data = ReadMounted(path, &size);
@@ -157,7 +283,7 @@ static const CacheEntry* CacheGet(Cache* cache, const char* path) {
         return NULL;
     }
     strcpy(e->path, path);
-    e->data = ReadMounted(path, &e->size);
+    e->data = ReadGame(path, &e->size);
     e->next = cache->buckets[b];
     cache->buckets[b] = e;
     return e;
@@ -417,7 +543,7 @@ static uint8_t* Rebuild(Porter* p, uint8_t* rec, uint32_t recSize, uint32_t* out
 static bool OotIs10(void) {
     static const uint8_t sUsa10[4] = { 0xEC, 0x70, 0x11, 0xB7 };
     uint64_t size = 0;
-    uint8_t* version = ReadMounted(OOT_VERSION, &size);
+    uint8_t* version = ReadGame(OOT_VERSION, &size);
     bool ok = (version == NULL) || (size < 5) || (memcmp(version + 1, sUsa10, sizeof(sUsa10)) == 0);
 
     free(version);
@@ -426,8 +552,54 @@ static bool OotIs10(void) {
 
 #define NOT_USA10 "your oot.o2r was made from another release of Ocarina of Time than USA 1.0"
 
-// The layer (a zip archive, malloc'd) from the ML ROM in .z64 order, or NULL and why.
-static uint8_t* BuildLayer(const uint8_t* mlRom, size_t mlSize, uint64_t* outSize, char* error, size_t errorSize) {
+// The game's copy of each file of the layer, and the layer's file list, so that the next update can read the game's
+// files this layer will hide. Over an older layer, a file it covers without a copy of the game's is ML's own: no copy.
+static bool AddGameCopies(const MlZip* pack, MlZipWriter* w) {
+    FileList old;
+    MlZipEntry entry;
+    size_t cursor = 0;
+    char* list = NULL;
+    size_t listSize = 0;
+    bool ok = true;
+
+    FileList_Load(&old);
+    while (ok && MlZip_Next(pack, &cursor, &entry)) {
+        char kept[512];
+        size_t nameLen = strlen(entry.name);
+        uint64_t size = 0;
+        uint8_t* data;
+        char* grown;
+
+        if (strcmp(entry.name, PORTER_LIST) == 0) {
+            continue;
+        }
+        grown = realloc(list, listSize + nameLen + 1);
+        if ((grown == NULL) || (snprintf(kept, sizeof(kept), "%s%s", PORTER_GAME, entry.name) >= (int)sizeof(kept))) {
+            ok = (grown != NULL);
+            list = (grown != NULL) ? grown : list;
+            continue;
+        }
+        list = grown;
+        memcpy(list + listSize, entry.name, nameLen);
+        list[listSize + nameLen] = '\n';
+        listSize += nameLen + 1;
+        data = MayBeMounted(kept) ? ReadMounted(kept, &size) : NULL;
+        if ((data == NULL) && !FileList_Has(&old, entry.name) && MayBeMounted(entry.name)) {
+            data = ReadMounted(entry.name, &size);
+        }
+        if (data != NULL) {
+            ok = MlZipWriter_Add(w, kept, data, size);
+            free(data);
+        }
+    }
+    ok = ok && MlZipWriter_Add(w, PORTER_FILES, (const uint8_t*)list, listSize);
+    free(list);
+    FileList_Free(&old);
+    return ok;
+}
+
+static uint8_t* BuildLayerListed(const uint8_t* mlRom, size_t mlSize, uint64_t* outSize, char* error,
+                                 size_t errorSize) {
     Porter p;
     MlZipWriter w;
     MlZip pack;
@@ -484,6 +656,9 @@ static uint8_t* BuildLayer(const uint8_t* mlRom, size_t mlSize, uint64_t* outSiz
     if ((error[0] == '\0') && (files == 0)) {
         Fail(&p, "%s", "the pack holds no files");
     }
+    if ((error[0] == '\0') && !AddGameCopies(&pack, &w)) {
+        Fail(&p, "%s", "the game's files couldn't be kept in the layer");
+    }
     CacheFree(&p.cache);
     MlRomFiles_Free(&p.rom);
     free(packData);
@@ -494,6 +669,16 @@ static uint8_t* BuildLayer(const uint8_t* mlRom, size_t mlSize, uint64_t* outSiz
     }
     *outSize = w.size;
     return w.data;
+}
+
+// The layer (a zip archive, malloc'd) from the ML ROM in .z64 order, or NULL and why.
+static uint8_t* BuildLayer(const uint8_t* mlRom, size_t mlSize, uint64_t* outSize, char* error, size_t errorSize) {
+    uint8_t* layer;
+
+    Mounted_List();
+    layer = BuildLayerListed(mlRom, mlSize, outSize, error, errorSize);
+    Mounted_Free();
+    return layer;
 }
 
 // --- the player's files (pipeline/build_mod.py ml_rom) ---
@@ -689,7 +874,7 @@ static bool Pick(const char* title, const char* filterName, const char* patterns
     return sApi->PickUserFile(title, filterName, patterns, file);
 }
 
-static void Make(void) {
+static void Make(bool update) {
     SOHUserFile picked[2];
     const uint8_t* files[2];
     uint64_t sizes[2];
@@ -748,7 +933,7 @@ static void Make(void) {
     if (sApi->SaveToModsFolder(PORTER_LAYER, layer, layerSize)) {
         Log("[MissingLink] porter: wrote %s (%u kB)", PORTER_LAYER, (unsigned)(layerSize / 1024));
         free(layer);
-        sApi->RequestRestart("to load The Missing Link");
+        sApi->RequestRestart(update ? "to load the new version of The Missing Link" : "to load The Missing Link");
         return;
     }
     free(layer);
@@ -793,7 +978,7 @@ static void Porter_OnGameFrameUpdate(void) {
                 "The old version of The Missing Link is cleared. To make the new one, choose the same files as "
                 "before: your Ocarina of Time USA 1.0 ROM and Kaze's v2.0 patch (or a Missing Link v2.0 ROM).\n\n"
                 "Choose them now? It takes a few seconds, then Unbound closes. Open it again to play.")) {
-            Make();
+            Make(false);
         }
     } else if (sState == LAYER_NONE) {
         if (Ask("Make The Missing Link",
@@ -801,7 +986,14 @@ static void Porter_OnGameFrameUpdate(void) {
                 "ROM and Kaze's v2.0 patch, from " PATCH_PAGE " (the .zip as downloaded is fine), or a Missing "
                 "Link v2.0 ROM.\n\nMake it now? It takes a few seconds, then Unbound closes. Open it again to "
                 "play.")) {
-            Make();
+            Make(false);
+        }
+    } else if (IsMounted(PORTER_FILES)) {   // a layer the porter made, with the game's files it covers
+        if (Ask("Update The Missing Link",
+                "This version of The Missing Link needs its world made again from your files: your Ocarina of Time "
+                "USA 1.0 ROM and Kaze's v2.0 patch (or a Missing Link v2.0 ROM), the same as before.\n\nUpdate now? "
+                "It takes a few seconds, then Unbound closes. Open it again to play.")) {
+            Make(true);
         }
     } else if (Ask("Update The Missing Link",
                    "This version of The Missing Link needs its world made again from your files.\n\nUpdate now? "
