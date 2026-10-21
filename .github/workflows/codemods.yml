@@ -154,8 +154,14 @@ jobs:
         for mod in $(find platform-packages -name '*.o2r' -exec basename {} \; | sort -u); do
           python trusted/mod-sdk/tools/merge_mod_packages.py platform-packages/*/"$mod" --output "universal/$mod"
         done
-    - name: Check what the binaries import
-      run: python trusted/mod-sdk/tools/check_mod_binary.py universal/*.o2r
+    - uses: actions/checkout@v6
+      with:
+        path: submitted
+        sparse-checkout: codemods
+    - name: Check what the binaries import (the code mods; the test mods read files and are never signed)
+      run: |
+        python trusted/mod-sdk/tools/check_mod_binary.py \
+          $(for d in submitted/codemods/*/; do echo "universal/$(basename "$d").o2r"; done)
     - uses: actions/upload-artifact@v7
       with:
         name: universal-unsigned
