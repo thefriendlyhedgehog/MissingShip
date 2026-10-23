@@ -311,12 +311,21 @@ typedef struct {
     Cache cache;
     char* error;
     size_t errorSize;
+    bool gameOnly;      // checking the game's files before the player's are chosen: ML ROM sources count as there
 } Porter;
 
-static void Fail(Porter* p, const char* fmt, const char* a) {
+static void Fail(Porter* p, const char* fmt, ...) {
+    va_list args;
+
     if (p->error[0] == '\0') {
-        snprintf(p->error, p->errorSize, fmt, a);
+        va_start(args, fmt);
+        vsnprintf(p->error, p->errorSize, fmt, args);
+        va_end(args);
     }
+}
+
+static bool IsRomPath(const char* path) {
+    return strncmp(path, ML_ROM_PREFIX, strlen(ML_ROM_PREFIX)) == 0;
 }
 
 static uint32_t Le32(const uint8_t* q) {
@@ -328,7 +337,7 @@ static uint64_t Le64(const uint8_t* q) {
 }
 
 static bool SourceAt(Porter* p, const char* path, const uint8_t** data, uint64_t* size) {
-    if (strncmp(path, ML_ROM_PREFIX, strlen(ML_ROM_PREFIX)) == 0) {
+    if (IsRomPath(path)) {
         const MlRomFile* view = MlRomFiles_View(&p->rom, path);
 
         if (view == NULL) {
@@ -389,46 +398,61 @@ static bool CopiedCrc(const uint8_t* ops, size_t opsSize, uint32_t s, const uint
 
 #define MAX_DELTA_SOURCES 255
 
-// One variant of a delta, from its sources; NULL (and why, in p->error) if they aren't all there.
-static uint8_t* RebuildVariant(Porter* p, const uint8_t* body, size_t bodySize, uint32_t* outSize, const char* name) {
-    const uint8_t* srcData[MAX_DELTA_SOURCES];
-    uint64_t srcSize[MAX_DELTA_SOURCES];
+// Why the game's file at `path` isn't source s of a delta, for the log.
+static void SourceWhy(Porter* p, const char* path, const uint8_t* ops, size_t opsSize, uint32_t s, uint64_t madeFrom,
+                      char* why, size_t whySize) {
+    const uint8_t* data;
+    uint64_t dataSize, crc;
+
+    if (!SourceAt(p, path, &data, &dataSize)) {
+        snprintf(why, whySize, "%s isn't there", path);
+    } else if (!CopiedCrc(ops, opsSize, s, data, dataSize, &crc)) {
+        snprintf(why, whySize, "%s (%llu bytes) is shorter than the one it was made from", path,
+                 (unsigned long long)dataSize);
+    } else {
+        snprintf(why, whySize, "%s (%llu bytes) isn't the one it was made from (copies %016llx, made from %016llx)",
+                 path, (unsigned long long)dataSize, (unsigned long long)crc, (unsigned long long)madeFrom);
+    }
+}
+
+// Finds each source of one variant of a delta (`body`), in `srcData`/`srcSize`, and where its ops start; false, with
+// each missing source in the log and the first in p->error, if they aren't all there. Checking the game alone
+// (p->gameOnly), ML ROM sources count as there.
+static bool VariantSources(Porter* p, const uint8_t* body, size_t bodySize, const uint8_t** srcData,
+                           uint64_t* srcSize, size_t* opsAt, const char* name, uint32_t v, uint32_t variants) {
+    const uint8_t* srcHeaders[MAX_DELTA_SOURCES];
     size_t q = 13;
-    uint32_t size, sources;
-    uint64_t want;
-    uint8_t* out;
-    size_t done = 0;
+    uint32_t sources;
+    bool all = true;
 
     if (bodySize < 13) {
-        return NULL;
+        return false;
     }
-    size = Le32(body);
-    want = Le64(body + 4);
     sources = body[12];
     // Each source: its paths, then the CRC of what is copied from it; the ops follow the last one.
-    const uint8_t* srcHeaders[MAX_DELTA_SOURCES];
     for (uint32_t s = 0; s < sources; s++) {
         uint32_t paths;
 
         if (q >= bodySize) {
-            return NULL;
+            return false;
         }
         srcHeaders[s] = body + q;
         paths = body[q++];
         for (uint32_t k = 0; k < paths; k++) {
             if (q + 2 > bodySize) {
-                return NULL;
+                return false;
             }
             q += 2 + (size_t)(body[q] | (body[q + 1] << 8));
         }
         q += 8;
         if (q > bodySize) {
-            return NULL;
+            return false;
         }
     }
     const uint8_t* ops = body + q;
     size_t opsSize = bodySize - q;
 
+    *opsAt = q;
     for (uint32_t s = 0; s < sources; s++) {
         const uint8_t* h = srcHeaders[s];
         uint32_t paths = *h++;
@@ -439,29 +463,64 @@ static uint8_t* RebuildVariant(Porter* p, const uint8_t* body, size_t bodySize, 
         for (uint32_t k = 0; k < paths; k++) {
             crcAt += 2 + (size_t)(crcAt[0] | (crcAt[1] << 8));
         }
-        for (uint32_t k = 0; (k < paths) && !found; k++) {
-            uint32_t len = h[0] | (h[1] << 8);
-            const uint8_t* data;
-            uint64_t dataSize, crc;
+        // The first pass looks for the source; the second, only if it isn't there, logs why each path isn't it.
+        for (uint32_t pass = 0; (pass < 2) && !found; pass++) {
+            const uint8_t* at = h;
 
-            if (len >= sizeof(path)) {
-                return NULL;
-            }
-            memcpy(path, h + 2, len);
-            path[len] = '\0';
-            h += 2 + (size_t)len;
-            if (SourceAt(p, path, &data, &dataSize) && CopiedCrc(ops, opsSize, s, data, dataSize, &crc) &&
-                (crc == Le64(crcAt))) {
-                srcData[s] = data;
-                srcSize[s] = dataSize;
-                found = true;
+            for (uint32_t k = 0; (k < paths) && !found; k++) {
+                uint32_t len = at[0] | (at[1] << 8);
+                const uint8_t* data;
+                uint64_t dataSize, crc;
+
+                if (len >= sizeof(path)) {
+                    return false;
+                }
+                memcpy(path, at + 2, len);
+                path[len] = '\0';
+                at += 2 + (size_t)len;
+                if (pass == 1) {
+                    char why[600];
+
+                    SourceWhy(p, path, ops, opsSize, s, Le64(crcAt), why, sizeof(why));
+                    Log("[MissingLink] porter: %s: copy %u of %u doesn't fit: %s", name, v + 1, variants, why);
+                    if (k == 0) {
+                        Fail(p, "%s: your game's %s isn't the one it was made from", name, path);
+                    }
+                } else if (p->gameOnly && IsRomPath(path)) {
+                    found = true;
+                } else if (SourceAt(p, path, &data, &dataSize) && CopiedCrc(ops, opsSize, s, data, dataSize, &crc) &&
+                           (crc == Le64(crcAt))) {
+                    srcData[s] = data;
+                    srcSize[s] = dataSize;
+                    found = true;
+                }
             }
         }
-        if (!found) {
-            Fail(p, "%s: a file it copies from isn't the one it was made from", name);
-            return NULL;
-        }
+        all = all && found;
     }
+    return all;
+}
+
+// One variant of a delta, from its sources; NULL (and why, in p->error) if they aren't all there.
+static uint8_t* RebuildVariant(Porter* p, const uint8_t* body, size_t bodySize, uint32_t* outSize, const char* name,
+                               uint32_t v, uint32_t variants) {
+    const uint8_t* srcData[MAX_DELTA_SOURCES];
+    uint64_t srcSize[MAX_DELTA_SOURCES];
+    size_t opsAt;
+    uint32_t size, sources;
+    uint64_t want;
+    uint8_t* out;
+    size_t done = 0;
+
+    if (!VariantSources(p, body, bodySize, srcData, srcSize, &opsAt, name, v, variants)) {
+        return NULL;
+    }
+    size = Le32(body);
+    want = Le64(body + 4);
+    sources = body[12];
+    const uint8_t* ops = body + opsAt;
+    size_t opsSize = bodySize - opsAt;
+
     out = malloc(size > 0 ? size : 1);
     if (out == NULL) {
         return NULL;
@@ -501,22 +560,16 @@ static uint8_t* RebuildVariant(Porter* p, const uint8_t* body, size_t bodySize, 
     return out;
 }
 
-// A file of the pack as the layer holds it: itself, or the first variant of its delta whose sources are all there.
-static uint8_t* Rebuild(Porter* p, uint8_t* rec, uint32_t recSize, uint32_t* outSize, const char* name) {
+// Calls `use` on each variant of a delta record in order until it returns true; false if none does.
+typedef bool (*VariantFunc)(Porter* p, const uint8_t* body, size_t size, const char* name, uint32_t v,
+                            uint32_t variants, void* userData);
+
+static bool EachVariant(Porter* p, const uint8_t* rec, uint32_t recSize, const char* name, VariantFunc use,
+                        void* userData) {
     size_t q = 6;
 
-    if ((recSize < 6) || (memcmp(rec, "LUSD", 4) != 0)) {
-        *outSize = recSize;
-        return rec;
-    }
-    if (rec[4] != 1) {
-        Fail(p, "%s: a delta of a newer kind", name);
-        free(rec);
-        return NULL;
-    }
     for (uint32_t v = 0, count = rec[5]; v < count; v++) {
         uint32_t len;
-        uint8_t* out;
 
         if (q + 4 > recSize) {
             break;
@@ -525,13 +578,62 @@ static uint8_t* Rebuild(Porter* p, uint8_t* rec, uint32_t recSize, uint32_t* out
         if (len > recSize - q - 4) {
             break;
         }
-        out = RebuildVariant(p, rec + q + 4, len, outSize, name);
-        if (out != NULL) {
+        if (use(p, rec + q + 4, len, name, v, count, userData)) {
+            if (v > 0) {
+                Log("[MissingLink] porter: %s: made from copy %u of %u", name, v + 1, count);
+            }
             p->error[0] = '\0';
-            free(rec);
-            return out;
+            return true;
         }
         q += 4 + (size_t)len;
+    }
+    return false;
+}
+
+typedef struct {
+    uint8_t* out;
+    uint32_t size;
+} Rebuilt;
+
+static bool RebuildOne(Porter* p, const uint8_t* body, size_t size, const char* name, uint32_t v, uint32_t variants,
+                       void* userData) {
+    Rebuilt* r = userData;
+
+    r->out = RebuildVariant(p, body, size, &r->size, name, v, variants);
+    return r->out != NULL;
+}
+
+static bool SourcesThere(Porter* p, const uint8_t* body, size_t size, const char* name, uint32_t v,
+                         uint32_t variants, void* userData) {
+    const uint8_t* srcData[MAX_DELTA_SOURCES];
+    uint64_t srcSize[MAX_DELTA_SOURCES];
+    size_t opsAt;
+
+    (void)userData;
+    return VariantSources(p, body, size, srcData, srcSize, &opsAt, name, v, variants);
+}
+
+static bool IsDelta(const uint8_t* rec, uint32_t recSize) {
+    return (recSize >= 6) && (memcmp(rec, "LUSD", 4) == 0);
+}
+
+// A file of the pack as the layer holds it: itself, or the first variant of its delta whose sources are all there.
+static uint8_t* Rebuild(Porter* p, uint8_t* rec, uint32_t recSize, uint32_t* outSize, const char* name) {
+    Rebuilt r = { NULL, 0 };
+
+    if (!IsDelta(rec, recSize)) {
+        *outSize = recSize;
+        return rec;
+    }
+    if (rec[4] != 1) {
+        Fail(p, "%s: a delta of a newer kind", name);
+        free(rec);
+        return NULL;
+    }
+    if (EachVariant(p, rec, recSize, name, RebuildOne, &r)) {
+        free(rec);
+        *outSize = r.size;
+        return r.out;
     }
     Fail(p, "%s: can't be rebuilt", name);
     free(rec);
@@ -551,6 +653,111 @@ static bool OotIs10(void) {
 }
 
 #define NOT_USA10 "your Unbound was set up from another release of Ocarina of Time than USA 1.0"
+
+// Whether a mounted path starts with `prefix`; false without the list of mounted paths.
+static bool MountedPrefix(const char* prefix) {
+    size_t len = strlen(prefix);
+
+    for (size_t i = 0; sMountedListed && (i < sMounted.count); i++) {
+        if (strncmp(sMounted.paths[i], prefix, len) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// What the game's files are, in the log: the ROMs its oot.o2r was made from (`version`), the Ship of Harkinian that
+// made it (`portVersion`: an endianness byte, then major, minor and patch, big-endian), and Master Quest's files.
+static void LogGame(void) {
+    uint64_t size = 0, portSize = 0;
+    uint8_t* version = ReadGame(OOT_VERSION, &size);
+    uint8_t* port = ReadGame("portVersion", &portSize);
+    char roms[96] = "";
+    char made[32] = "an unknown version";
+
+    for (uint64_t at = 1; (version != NULL) && (at + 4 <= size) && (strlen(roms) + 24 < sizeof(roms)); at += 4) {
+        uint32_t crc = ((uint32_t)version[at] << 24) | ((uint32_t)version[at + 1] << 16) |
+                       ((uint32_t)version[at + 2] << 8) | version[at + 3];
+
+        snprintf(roms + strlen(roms), sizeof(roms) - strlen(roms), "%s%08X%s", (at > 1) ? ", " : "", crc,
+                 (crc == 0xEC7011B7) ? " (USA 1.0)" : "");
+    }
+    if ((port != NULL) && (portSize >= 7)) {
+        snprintf(made, sizeof(made), "%u.%u.%u", (port[1] << 8) | port[2], (port[3] << 8) | port[4],
+                 (port[5] << 8) | port[6]);
+    }
+    Log("[MissingLink] porter: the game: oot.o2r from ROM %s, made by Ship of Harkinian %s; Master Quest's "
+        "oot-mq.o2r %s; %u files mounted",
+        (roms[0] != '\0') ? roms : "unknown", made,
+        !sMountedListed ? "unknown" : MountedPrefix("scenes/mq/") ? "mounted" : "not mounted",
+        (unsigned)sMounted.count);
+    free(version);
+    free(port);
+}
+
+// Whether the game's files are the ones the pack copies from, before the player's files are asked for: each delta
+// has a variant whose sources from the game are all there (its ML ROM sources count as there). If not, why.
+static bool GameFits(char* error, size_t errorSize) {
+    Porter p;
+    MlZip pack;
+    MlZipEntry entry;
+    size_t cursor = 0;
+    uint64_t packSize;
+    uint8_t* packData;
+    bool fits = true;
+
+    memset(&p, 0, sizeof(p));
+    p.error = error;
+    p.errorSize = errorSize;
+    p.gameOnly = true;
+    error[0] = '\0';
+    Mounted_List();
+    LogGame();
+    packData = ReadMounted(PORTER_PACK, &packSize);
+    if ((packData != NULL) && MlZip_Open(&pack, packData, packSize)) {
+        while (fits && MlZip_Next(&pack, &cursor, &entry)) {
+            uint32_t size = entry.size;
+            uint8_t* rec;
+
+            if (strcmp(entry.name, PORTER_LIST) == 0) {
+                continue;
+            }
+            rec = MlZip_Read(&pack, &entry);
+            if ((rec != NULL) && IsDelta(rec, size) && (rec[4] == 1)) {
+                fits = EachVariant(&p, rec, size, entry.name, SourcesThere, NULL);
+            }
+            free(rec);
+        }
+    }
+    CacheFree(&p.cache);
+    free(packData);
+    Mounted_Free();
+    Log("[MissingLink] porter: the game's files %s", fits ? "fit" : "don't fit");
+    return fits;
+}
+
+#define REMAKE_OOT                                                                                                     \
+    "Close Unbound, move oot.o2r and oot-unbound.o2r out of its folder (and oot-mq.o2r, if it's there), and start "   \
+    "it again with your Ocarina of Time USA 1.0 ROM: it makes them again. The Missing Link then asks for its files. " \
+    "You can put oot-mq.o2r back after."
+
+// Instead of asking for the files, when the game's files aren't the ones the pack copies from: an oot.o2r made by
+// another Ship of Harkinian, or a mod covering one of them.
+static bool TellGameDoesntFit(void) {
+    char error[512], text[1536];
+
+    if (GameFits(error, sizeof(error))) {
+        return false;
+    }
+    Log("[MissingLink] porter: %s", error);
+    snprintf(text, sizeof(text),
+             "The Missing Link is made from copies of files in your Unbound's oot.o2r, and one isn't the one it was "
+             "made from:\n%s.\n\nThat happens when oot.o2r was made by another version of Ship of Harkinian, or "
+             "when another mod replaces that file.\n\n" REMAKE_OOT,
+             error);
+    sApi->TellPlayer("Making The Missing Link", text);
+    return true;
+}
 
 // The game's copy of each file of the layer, and the layer's file list, so that the next update can read the game's
 // files this layer will hide. Over an older layer, a file it covers without a copy of the game's is ML's own: no copy.
@@ -614,6 +821,7 @@ static uint8_t* BuildLayerListed(const uint8_t* mlRom, size_t mlSize, uint64_t* 
     p.error = error;
     p.errorSize = errorSize;
     error[0] = '\0';
+    LogGame();
     if (!OotIs10()) {
         Fail(&p, "%s", NOT_USA10);
         free(packData);
@@ -934,7 +1142,8 @@ static void Make(bool update) {
         Log("[MissingLink] porter: %s", error);
         snprintf(text, sizeof(text),
                  "The Missing Link couldn't be made: %s.\n\nThis version of it is made for the Unbound build named on "
-                 "its page; with another, use that build.",
+                 "its page; with another, use that build. If oot.o2r was made by another version of Ship of "
+                 "Harkinian, or another mod replaces that file: " REMAKE_OOT,
                  error);
         sApi->TellPlayer("Making The Missing Link", text);
         return;
@@ -979,10 +1188,19 @@ static void Porter_OnGameFrameUpdate(void) {
     }
     sOffered = true;
     if (!CVarGetInteger(PORTER_ASKS, 1)) {     // off in test homes, which make the layer through the service
+        char error[512];
+
         Log("[MissingLink] porter: not asking (%s is 0)", PORTER_ASKS);
+        if (OotIs10() && ((sState == LAYER_NONE) || IsMounted(PORTER_FILES)) && !GameFits(error, sizeof(error))) {
+            Log("[MissingLink] porter: %s", error);
+        }
         return;
     }
     if ((sState == LAYER_NONE) && TellNotUsa10()) {
+        return;
+    }
+    // Over no layer, or one that keeps the game's files it covers, the game's files can be checked before asking.
+    if (((sState == LAYER_NONE) || IsMounted(PORTER_FILES)) && TellGameDoesntFit()) {
         return;
     }
     if ((sState == LAYER_NONE) && sCleared) {

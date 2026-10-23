@@ -215,6 +215,11 @@ their full paths and need no copy. `mlplay`'s `newfile mq` makes a Master Quest 
 layer keeps from 1.0, so a variant would carry OoT's data. The porter reads the `oot.o2r`'s `version` file and tells
 a player with another release to make a new one from their USA 1.0 ROM. `mlplay`'s `porter` command runs the porter without its dialogs.
 Test homes set `gEnhancements.MissingLink.PorterAsks` to 0, so the porter doesn't ask.
+Before asking for files, the porter checks the game's files against the pack (each delta has a variant whose game
+sources are all there; ML ROM sources count as there). If one doesn't fit (an `oot.o2r` from an older Ship of
+Harkinian, or a mod covering that file), it names the file and tells the player to have Unbound make `oot.o2r` again.
+Its log names the game (the ROM CRCs in `version`, the SoH in `portVersion`, whether `oot-mq.o2r` is mounted) and, for
+each variant that doesn't fit, the file it copies from, its size and both CRCs. Test homes run the check and log it.
 `.github/workflows/codemods.yml` builds `codemods/` for Windows, Linux and macOS the way skijer's sign-mod does, minus
 the signature: the same scans, his signing CMake, Unbound at `UNBOUND_REF` and one universal `.o2r` per mod (artifact
 `universal-unsigned`). It runs on public minutes on each push that changes the mods, so a sign request goes in only
