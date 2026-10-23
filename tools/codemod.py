@@ -14,7 +14,7 @@ with codemod.txt beside it naming the commit. It holds compiled code only: no RO
 alone), into dist/codemod/childshield.o2r with childshield.txt beside it.
 
 --signed <tag> takes the package from a release of skijer's sign-mod workflow instead (SIGN_REPO, answering a "Sign a
-mod" issue for codemods/: DEVELOPMENT.md), after checking that its signature names this repository and a commit whose
+mod" issue for codemods/: DEVELOPMENT.md; his store's release is "mods"), after checking that its signature names this repository and a commit whose
 codemods/<mod> matches ml-codemod-930's mod-sdk/mods/<mod>. Unbound loads a signed package without asking.
 """
 import argparse, json, os, shutil, subprocess, sys, tempfile, zipfile
@@ -60,9 +60,14 @@ def ci_packages(repo, commit, dest, mod):
 def signed(tag, mod, out, src):
     """The signed package from skijer's sign-mod release <tag>, checked against our sources; returns its note."""
     with tempfile.TemporaryDirectory(prefix='signed-') as work:
-        subprocess.run(['gh', 'release', 'download', tag, '--repo', SIGN_REPO, '--pattern', f'{mod}.o2r', '--dir', work],
-                       check=True)
-        package = os.path.join(work, f'{mod}.o2r')
+        # A signing release names it <mod>.o2r; the store's release ("mods") <mod>-api<major>.o2r, the newest major
+        # last in name order.
+        subprocess.run(['gh', 'release', 'download', tag, '--repo', SIGN_REPO, '--pattern', f'{mod}.o2r',
+                        '--pattern', f'{mod}-api*.o2r', '--dir', work], check=True)
+        found = sorted(os.listdir(work), key=lambda n: (len(n), n))
+        if not found:
+            sys.exit(f'{tag} has no {mod}.o2r')
+        package = os.path.join(work, found[-1])
         with zipfile.ZipFile(package) as z:
             signature = json.loads(z.read('unbound-signature.json'))
             binaries = json.loads(z.read('manifest.json')).get('binaries', {})
