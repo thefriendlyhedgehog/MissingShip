@@ -551,6 +551,14 @@ static bool OotIs10(void) {
 }
 
 #define NOT_USA10 "your oot.o2r was made from another release of Ocarina of Time than USA 1.0"
+#define NOT_MQ "Master Quest's files (oot-mq.o2r) are in Unbound's folder"
+
+// True with Master Quest's files mounted (oot-mq.o2r, or an oot-unbound.o2r made with it) and no layer that keeps the
+// game's copies: Unbound then converts some of the game's files the pack copies from differently (text/eng).
+static bool MasterQuestInTheWay(void) {
+    return !IsMounted(PORTER_FILES) &&
+           (IsMounted("scenes/mq/ydan_scene/ydan_scene") || IsMounted("scenes/ydan_mq/collision.json"));
+}
 
 // The game's copy of each file of the layer, and the layer's file list, so that the next update can read the game's
 // files this layer will hide. Over an older layer, a file it covers without a copy of the game's is ML's own: no copy.
@@ -614,6 +622,11 @@ static uint8_t* BuildLayerListed(const uint8_t* mlRom, size_t mlSize, uint64_t* 
     p.error = error;
     p.errorSize = errorSize;
     error[0] = '\0';
+    if (MasterQuestInTheWay()) {
+        Fail(&p, "%s", NOT_MQ);
+        free(packData);
+        return NULL;
+    }
     if (!OotIs10()) {
         Fail(&p, "%s", NOT_USA10);
         free(packData);
@@ -964,6 +977,20 @@ static bool Ask(const char* title, const char* message) {
     return yes;
 }
 
+// Instead of asking for the files, while Master Quest's files are in the way.
+static bool TellMasterQuest(void) {
+    if (!MasterQuestInTheWay()) {
+        return false;
+    }
+    Log("[MissingLink] porter: %s", NOT_MQ);
+    sApi->TellPlayer("Making The Missing Link",
+                     "The Missing Link is made over Ocarina of Time USA 1.0 alone, but " NOT_MQ ".\n\nClose "
+                     "Unbound, move oot-mq.o2r and oot-unbound.o2r out of its folder, and start it again (with your "
+                     "USA 1.0 ROM, if it asks for one). The Missing Link then asks again. Once it is made, you can put "
+                     "oot-mq.o2r back.");
+    return true;
+}
+
 static void Porter_OnGameFrameUpdate(void) {
     if (sOffered || (sState == LAYER_READY)) {
         return;
@@ -971,6 +998,9 @@ static void Porter_OnGameFrameUpdate(void) {
     sOffered = true;
     if (!CVarGetInteger(PORTER_ASKS, 1)) {     // off in test homes, which make the layer through the service
         Log("[MissingLink] porter: not asking (%s is 0)", PORTER_ASKS);
+        return;
+    }
+    if ((sState == LAYER_NONE) && TellMasterQuest()) {
         return;
     }
     if ((sState == LAYER_NONE) && sCleared) {
