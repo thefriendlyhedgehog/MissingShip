@@ -206,7 +206,9 @@ two steps: the porter saves an empty layer over it and restarts, and the next st
 A layer the builder wrote names the code mod's pack in its mark (`"codemod"`), so the porter leaves it alone.
 `python3 tools/porterpack.py --unbound <skijer's PR #11 app> --oot-o2r <its USA 1.0 oot.o2r> --also-base ...` makes
 the pack against the build players run, with a variant for SoH 9.2.3's USA 1.0 `oot.o2r` (`--also-base`). It writes
-the pack to the code mod's assets on `ml-codemod-930`. Rev A and Rev B can't be covered: their scenes lack bytes the
+the pack to the code mod's assets on `ml-codemod-930`. Each message table (`text/<lang>/messages.json`) also gets a
+last variant that copies its text only from the ML ROM, as the text of a JSON string (`deltapack.py` text views): with
+Master Quest's `oot-mq.o2r`, Unbound converts the game's text from that ROM, and the first variant's source differs. Rev A and Rev B can't be covered: their scenes lack bytes the
 layer keeps from 1.0, so a variant would carry OoT's data. The porter reads the `oot.o2r`'s `version` file and tells
 a player with another release to make a new one from their USA 1.0 ROM. `mlplay`'s `porter` command runs the porter without its dialogs.
 Test homes set `gEnhancements.MissingLink.PorterAsks` to 0, so the porter doesn't ask.

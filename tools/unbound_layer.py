@@ -511,9 +511,11 @@ def main():
             mark_layer(out, args.code_mod)
             if args.porter:
                 views = deltapack.rom_archive(mspaths.ML_ROM, os.path.join(work, 'ml-rom.zip'))
+                text = deltapack.rom_archive(mspaths.ML_ROM, os.path.join(work, 'ml-rom-text.zip'),
+                                             deltapack.TEXT_VIEWS)
                 deltapack.make(out, os.path.abspath(args.porter),
                                [args.oot_o2r, os.path.join(work, 'vanilla.o2r'), views],
-                               also=[a + [views] for a in also])
+                               also=[a + [views] for a in also], text_base=text)
         if args.pack:
             deltapack.make(out, args.out, [args.oot_o2r, os.path.join(work, 'vanilla.o2r')], also=also)
     finally:

@@ -10,7 +10,7 @@
 
 #define ML_DMADATA 0x12F70  // ML v2.0's dmadata (deltapack.py ML_DMADATA)
 
-static const char* const sViewNames[5] = { "", "w16/", "w32/", "vtx0/", "vtx8/" };
+static const char* const sViewNames[ML_ROM_VIEWS] = { "", "w16/", "w32/", "vtx0/", "vtx8/", "json/" };
 
 static uint32_t ReadBe32(const uint8_t* p) {
     return ((uint32_t)p[0] << 24) | ((uint32_t)p[1] << 16) | ((uint32_t)p[2] << 8) | (uint32_t)p[3];
@@ -283,10 +283,57 @@ fail:
     return false;
 }
 
+// A byte of ML's message text as a JSON string holds it (deltapack.py JSON_TEXT): itself, or an escape; its length.
+static uint32_t JsonByte(uint8_t b, char out[6]) {
+    static const char sShort[] = { '"', '"', '\\', '\\', '\b', 'b', '\f', 'f', '\n', 'n', '\r', 'r', '\t', 't' };
+    static const char sHex[] = "0123456789abcdef";
+
+    for (uint32_t k = 0; k < sizeof(sShort); k += 2) {
+        if (b == (uint8_t)sShort[k]) {
+            out[0] = '\\';
+            out[1] = sShort[k + 1];
+            return 2;
+        }
+    }
+    if ((b >= 0x20) && (b < 0x7F)) {
+        out[0] = (char)b;
+        return 1;
+    }
+    memcpy(out, "\\u00", 4);
+    out[4] = sHex[b >> 4];
+    out[5] = sHex[b & 15];
+    return 6;
+}
+
+// The file as the text of a JSON string (the "json/" view), so a converted message table copies its text from it.
+static bool MakeJsonView(MlRomFile* view, const MlRomFile* file) {
+    char piece[6];
+    uint32_t size = 0;
+
+    for (uint32_t i = 0; i < file->size; i++) {
+        size += JsonByte(file->data[i], piece);
+    }
+    view->data = malloc(size > 0 ? size : 1);
+    if (view->data == NULL) {
+        return false;
+    }
+    view->size = 0;
+    for (uint32_t i = 0; i < file->size; i++) {
+        uint32_t n = JsonByte(file->data[i], piece);
+
+        memcpy(view->data + view->size, piece, n);
+        view->size += n;
+    }
+    return true;
+}
+
 // One file as a ROM view shows it (deltapack.py rom_view).
 static bool MakeView(MlRomFile* view, const MlRomFile* file, int32_t kind) {
     uint32_t size = file->size;
 
+    if (kind == 5) {
+        return MakeJsonView(view, file);
+    }
     if (kind == 1) {
         size &= ~1u;
     } else if (kind == 2) {
@@ -322,7 +369,7 @@ const MlRomFile* MlRomFiles_View(MlRomFiles* files, const char* path) {
         return NULL;
     }
     rest = path + strlen(ML_ROM_PREFIX);
-    for (int32_t k = 1; k < 5; k++) {
+    for (int32_t k = 1; k < ML_ROM_VIEWS; k++) {
         if (strncmp(rest, sViewNames[k], strlen(sViewNames[k])) == 0) {
             kind = k;
             rest += strlen(sViewNames[k]);
@@ -353,7 +400,7 @@ const MlRomFile* MlRomFiles_View(MlRomFiles* files, const char* path) {
 }
 
 void MlRomFiles_Free(MlRomFiles* files) {
-    for (int32_t k = 0; k < 5; k++) {
+    for (int32_t k = 0; k < ML_ROM_VIEWS; k++) {
         if (files->views[k] != NULL) {
             for (uint32_t i = 0; i < files->count; i++) {
                 free(files->views[k][i].data);

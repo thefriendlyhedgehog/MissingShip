@@ -12,7 +12,8 @@ title screen, credits and ending.
 
 ## What you need
 
-- **Your own Ocarina of Time USA 1.0 ROM** (NTSC 1.0, not Master Quest). None is included.
+- **Your own Ocarina of Time USA 1.0 ROM** (NTSC 1.0). None is included. Unbound can have Master Quest's
+  `oot-mq.o2r` too.
 - **Kaze's The Missing Link v2.0 patch**, from [his release](https://www.romhacking.net/hacks/5334/): the `.zip` as
   downloaded is fine. (A Missing Link v2.0 ROM you already patched works instead of the ROM and patch.)
 - **SoH: Unbound with skijer's mod API**, started once with your USA 1.0 ROM. Until skijer publishes a release with
@@ -34,8 +35,7 @@ title screen, credits and ending.
 ML's world, `MissingLink_Unbound.o2r` (about 24 MB, in `mods/`), is made on your computer from your own files: nothing
 of Nintendo's or ML's is downloaded. `missinglink.o2r` is signed, so Unbound loads it without asking. When a new
 version comes out (NEI-Store's **Update**, or a new download), ML asks to update: choose the same two files, then
-close and reopen Unbound. If your Unbound was set up from another release of Ocarina of Time, or Master Quest's
-`oot-mq.o2r` is in its folder when ML is first made, ML says what to do.
+close and reopen Unbound. If your Unbound was set up from another release of Ocarina of Time, ML says what to do.
 
 ## Settings
 

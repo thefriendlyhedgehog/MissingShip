@@ -550,15 +550,7 @@ static bool OotIs10(void) {
     return ok;
 }
 
-#define NOT_USA10 "your oot.o2r was made from another release of Ocarina of Time than USA 1.0"
-#define NOT_MQ "Master Quest's files (oot-mq.o2r) are in Unbound's folder"
-
-// True with Master Quest's files mounted (oot-mq.o2r, or an oot-unbound.o2r made with it) and no layer that keeps the
-// game's copies: Unbound then converts some of the game's files the pack copies from differently (text/eng).
-static bool MasterQuestInTheWay(void) {
-    return !IsMounted(PORTER_FILES) &&
-           (IsMounted("scenes/mq/ydan_scene/ydan_scene") || IsMounted("scenes/ydan_mq/collision.json"));
-}
+#define NOT_USA10 "your Unbound was set up from another release of Ocarina of Time than USA 1.0"
 
 // The game's copy of each file of the layer, and the layer's file list, so that the next update can read the game's
 // files this layer will hide. Over an older layer, a file it covers without a copy of the game's is ML's own: no copy.
@@ -622,11 +614,6 @@ static uint8_t* BuildLayerListed(const uint8_t* mlRom, size_t mlSize, uint64_t* 
     p.error = error;
     p.errorSize = errorSize;
     error[0] = '\0';
-    if (MasterQuestInTheWay()) {
-        Fail(&p, "%s", NOT_MQ);
-        free(packData);
-        return NULL;
-    }
     if (!OotIs10()) {
         Fail(&p, "%s", NOT_USA10);
         free(packData);
@@ -887,6 +874,20 @@ static bool Pick(const char* title, const char* filterName, const char* patterns
     return sApi->PickUserFile(title, filterName, patterns, file);
 }
 
+// Instead of asking for the files, when the game wasn't set up from OoT USA 1.0 (Master Quest alone, or another
+// release).
+static bool TellNotUsa10(void) {
+    if (OotIs10()) {
+        return false;
+    }
+    Log("[MissingLink] porter: %s", NOT_USA10);
+    sApi->TellPlayer("Making The Missing Link",
+                     "The Missing Link is made over Ocarina of Time USA 1.0, but " NOT_USA10 ".\n\nClose Unbound, "
+                     "move oot.o2r, oot-mq.o2r and oot-unbound.o2r out of its folder, and start it again with your "
+                     "USA 1.0 ROM. The Missing Link then asks again. You can put oot-mq.o2r back after.");
+    return true;
+}
+
 static void Make(bool update) {
     SOHUserFile picked[2];
     const uint8_t* files[2];
@@ -899,12 +900,7 @@ static void Make(bool update) {
     uint8_t* layer;
     uint64_t layerSize = 0;
 
-    if (!OotIs10()) {
-        Log("[MissingLink] porter: %s", NOT_USA10);
-        sApi->TellPlayer("Making The Missing Link",
-                         "The Missing Link is made over Ocarina of Time USA 1.0, but " NOT_USA10 ".\n\nClose Unbound, "
-                         "move oot.o2r and oot-unbound.o2r out of its folder, and start it again with your USA 1.0 "
-                         "ROM. The Missing Link then asks again.");
+    if (TellNotUsa10()) {
         return;
     }
     // The ROM first; then whichever of the two is still missing, once.
@@ -977,20 +973,6 @@ static bool Ask(const char* title, const char* message) {
     return yes;
 }
 
-// Instead of asking for the files, while Master Quest's files are in the way.
-static bool TellMasterQuest(void) {
-    if (!MasterQuestInTheWay()) {
-        return false;
-    }
-    Log("[MissingLink] porter: %s", NOT_MQ);
-    sApi->TellPlayer("Making The Missing Link",
-                     "The Missing Link is made over Ocarina of Time USA 1.0 alone, but " NOT_MQ ".\n\nClose "
-                     "Unbound, move oot-mq.o2r and oot-unbound.o2r out of its folder, and start it again (with your "
-                     "USA 1.0 ROM, if it asks for one). The Missing Link then asks again. Once it is made, you can put "
-                     "oot-mq.o2r back.");
-    return true;
-}
-
 static void Porter_OnGameFrameUpdate(void) {
     if (sOffered || (sState == LAYER_READY)) {
         return;
@@ -1000,7 +982,7 @@ static void Porter_OnGameFrameUpdate(void) {
         Log("[MissingLink] porter: not asking (%s is 0)", PORTER_ASKS);
         return;
     }
-    if ((sState == LAYER_NONE) && TellMasterQuest()) {
+    if ((sState == LAYER_NONE) && TellNotUsa10()) {
         return;
     }
     if ((sState == LAYER_NONE) && sCleared) {

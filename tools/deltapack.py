@@ -41,6 +41,11 @@ words swapped (animations), w32/<i> its 32-bit words swapped (display lists), vt
 (16 bytes from offset 0 or 8: six 16-bit fields swapped, the colour kept). So the pack carries none of ML's art: the
 player's ML ROM, made from Kaze's patch, supplies it. ml_porter.c computes the same views.
 
+Text views (TEXT_VIEWS): json/<i>, the file as the text of a JSON string (JSON_TEXT), which a converted message table
+(text/<lang>/messages.json) copies its messages from. make's text_base gives each message table a last variant from
+them alone, for a player whose game converts its text from another ROM than the base's (with Master Quest's
+oot-mq.o2r, Unbound takes its text from that).
+
 Integers are little-endian; crc is libultraship's CRC-64 (update_crc64 from all ones). A source is the first file at
 one of its paths, searching the mounted archives from the top, whose copied bytes match; so a pack made against one
 base still works where the file sits in another archive (the browser build mounts only oot-unbound.o2r, which carries
@@ -68,6 +73,11 @@ UNSTABLE_TYPES = {b'OSLB', b'OROM', b'OSFT'}      # SkeletonLimb, Room, SoundFon
 ROM_PREFIX = 'missinglink-rom/'    # never a path in a real archive
 ML_DMADATA = 0x12F70                # ML v2.0's dmadata (its file table), 16 bytes per file
 ROM_VIEWS = ('', 'w16/', 'w32/', 'vtx0/', 'vtx8/')
+TEXT_VIEWS = ('json/',)
+# Each byte as a JSON string holds it, as tools/unbound_layer.py writes a message table (json.dumps; Unbound's exporter
+# gives each byte of a message one code point).
+JSON_TEXT = [{0x22: b'\\"', 0x5C: b'\\\\', 0x08: b'\\b', 0x0C: b'\\f', 0x0A: b'\\n', 0x0D: b'\\r', 0x09: b'\\t'}.get(
+    b, bytes([b]) if 0x20 <= b < 0x7F else b'\\u%04x' % b) for b in range(256)]
 
 _POLY, _MASK = 0x42F0E1EBA9EA3693, (1 << 64) - 1
 _TABLE = []
@@ -114,6 +124,8 @@ def rom_view(data, view):
     """One file of the ML ROM as ROM view `view` (ROM_VIEWS) shows it."""
     if view == '':
         return data
+    if view == 'json/':
+        return b''.join(JSON_TEXT[b] for b in data)
     if view in ('w16/', 'w32/'):
         w = 2 if view == 'w16/' else 4
         a = array.array('H' if w == 2 else 'I', data[:len(data) // w * w])
@@ -127,12 +139,12 @@ def rom_view(data, view):
     return bytes(out)
 
 
-def rom_archive(ml_rom, path):
+def rom_archive(ml_rom, path, views=ROM_VIEWS):
     """The ML ROM's views as an archive at `path`, to pass as a base."""
     rom = open(ml_rom, 'rb').read()
     with zipfile.ZipFile(path, 'w', zipfile.ZIP_STORED) as z:
         for i, data in rom_files(rom).items():
-            for view in ROM_VIEWS:
+            for view in views:
                 z.writestr(f'{ROM_PREFIX}{view}{i}', rom_view(data, view))
     return path
 
@@ -413,11 +425,16 @@ def own_bytes(variants):
     return max(sum(len(op[1]) for op in parse_variant(v)[3] if op[0] == 1) for v in variants)
 
 
-def make(mod, pack, bases, sources=None, also=()):
+def is_text(path):
+    return path.startswith('text/') and path.endswith('/messages.json')
+
+
+def make(mod, pack, bases, sources=None, also=(), text_base=None):
     base = Base(bases, also)
     if sources is not None:
         base.sources = sources
     common = Finder(base)
+    text = Finder(Base([text_base])) if text_base else None     # the ML ROM's text views alone
     each = None                         # one Finder per base, made when a file first needs per-base variants
     stats = collections.defaultdict(lambda: [0, 0])
     own, deltas = 0, []
@@ -442,6 +459,10 @@ def make(mod, pack, bases, sources=None, also=()):
                     if all(v is not None for v in per) and \
                             own_bytes(per) + VARIANT_GAIN <= (own_bytes(variants) if variants else len(dst)):
                         variants, kind = per, 'split'
+                if text and is_text(info.filename):
+                    last = text.variant(dst, info.filename)
+                    if last is not None:
+                        variants, kind = variants + [last], 'delta' if kind == 'own' else kind
                 if variants:
                     rec = record(variants)
             # Stored whole only when that is smaller and the delta keeps little of the base out: keeping the base's
@@ -449,7 +470,8 @@ def make(mod, pack, bases, sources=None, also=()):
             if len(rec) >= len(dst) and len(inserts(rec)) + VARIANT_GAIN > len(dst):
                 rec, kind = dst, 'own'
             if kind != 'own':
-                if any(rebuild(rec, b) != dst for b in [base] + base.also):       # over every version given
+                if any(rebuild(rec, b) != dst for b in [base] + base.also) or \
+                        (text and is_text(info.filename) and rebuild(rec, text.base) != dst):
                     sys.exit(f'{info.filename}: the delta does not rebuild')
                 deltas.append(info.filename)
             own += len(inserts(rec))

@@ -35,10 +35,12 @@ typedef struct {
     uint32_t size;
 } MlRomFile;
 
+#define ML_ROM_VIEWS 6
+
 typedef struct {
     MlRomFile* files;       // by ML's dmadata index; data NULL where no file is
     uint32_t count;
-    MlRomFile* views[5];    // the ROM views (ROM_VIEWS in deltapack.py), made as they are asked for
+    MlRomFile* views[ML_ROM_VIEWS];  // the ROM views (ROM_VIEWS and TEXT_VIEWS in deltapack.py), made as asked for
 } MlRomFiles;
 
 // ML's files from its ROM (.z64 order, CRC checked by the caller), decompressed.
