@@ -6,7 +6,7 @@
 It is a port, not an emulator: ML's world is rebuilt from your own ROM, and ML's code is rewritten in C as a code
 mod. No ML machine code runs, and no download holds Nintendo's or ML's data.
 
-**Pre-release** ([`unbound-930-builder-3`](../../releases/tag/unbound-930-builder-3), 2026-10-17). All of The Missing
+**Pre-release** ([`unbound-930-porter-1`](../../releases/tag/unbound-930-porter-1), 2026-10-23). All of The Missing
 Link is ported: its 25 scenes, both dungeons and the boss, every changed or custom actor, Link's model and moves, the
 title screen, credits and ending.
 
@@ -15,27 +15,26 @@ title screen, credits and ending.
 - **Your own Ocarina of Time USA 1.0 ROM** (NTSC 1.0, not Master Quest). None is included.
 - **Kaze's The Missing Link v2.0 patch**, from [his release](https://www.romhacking.net/hacks/5334/): the `.zip` as
   downloaded is fine. (A Missing Link v2.0 ROM you already patched works instead of the ROM and patch.)
-- **SoH: Unbound on SoH 9.3.0 or later, with skijer's code mods**, started once with your OoT ROM. Until skijer
-  publishes a release with them, download the build for your system (`soh-mac`, `soh-windows` or `soh-linux`) from
-  the **Build Artifacts** list on [his Unbound mod API page](https://github.com/skijer/Shipwright/pull/11), no GitHub
-  account needed. It is rebuilt with each change and every Monday. Not the builds under **UNSAFE, MODDING ONLY**,
-  which are for modders. His NEI Unbound release of 2026-10-06 is on an older SoH, and the builder refuses it.
+- **SoH: Unbound with skijer's mod API**, started once with your USA 1.0 ROM. Until skijer publishes a release with
+  it, download the newest build for your system (`soh-mac`, `soh-windows` or `soh-linux`) from the **Build Artifacts**
+  list on [his Unbound mod API page](https://github.com/skijer/Shipwright/pull/11), no GitHub account needed. Not the
+  builds under **UNSAFE, MODDING ONLY**, which are for modders. His NEI Unbound release of 2026-10-06 is on an older
+  SoH, which ML doesn't run on.
 - A controller, or the keyboard (SoH's default layout).
 
 ## Install
 
-1. Download the package for your system from [Releases](../../releases): `MissingLink-Unbound-macos.zip`,
-   `-windows.zip` or `-linux.tar.gz`. Unpack it anywhere.
-2. Double-click **Build The Missing Link**: the `.app` on macOS, the `.cmd` on Windows, the `.sh` on Linux.
-3. In the window, choose your Unbound (its folder, or the app on macOS), your OoT ROM and Kaze's patch, then click
-   **Build The Missing Link**. It checks them first, then builds in under a minute, offline. On Linux it unpacks
-   Unbound's AppImage first if that hasn't been done.
-4. Start Unbound. When it asks about `missinglink.o2r` (ML's code mod, not signed yet), choose **Always load this
-   version**.
+1. Get `missinglink.o2r`, ML's code mod, either way:
+   - **In Unbound:** **Network → NEI-Store → Packs → Other mods**. Tick only `missinglink` (the others there start
+     ticked), click **Install selected**, then **Close Unbound now**.
+   - **Or by hand:** download it from [Releases](../../releases) into Unbound's `mods/` folder.
+2. Start Unbound. It asks to make The Missing Link: choose **Yes**, then your OoT ROM, then Kaze's patch.
+3. A few seconds later it asks to restart: choose **Close now** and open Unbound again. The Missing Link starts.
 
-The builder writes two files into Unbound's `mods/` folder: `MissingLink_Unbound.o2r` (ML's world, made from your
-ROM) and `missinglink.o2r` (ML's code). Build again after updating Unbound or the package. Each package's
-`README.txt` also gives the command line, for those who want it.
+ML's world, `MissingLink_Unbound.o2r` (about 24 MB, in `mods/`), is made on your computer from your own files: nothing
+of Nintendo's or ML's is downloaded. `missinglink.o2r` is signed, so Unbound loads it without asking. When a new
+version comes out (NEI-Store's **Update**, or a new download), ML asks to update: choose the same two files, then
+close and reopen Unbound. If your Unbound was set up from another release of Ocarina of Time, ML says what to do.
 
 ## Settings
 
@@ -73,9 +72,13 @@ Found another? Open an issue with what you saw and where.
 
 ## More
 
-- **Only young Link's Hylian Shield?** [`childshield-2`](../../releases/tag/childshield-2) is ML's shield rule alone, for any
-  SoH: Unbound 9.3 with skijer's code mods: `childshield.o2r` in `mods/`, no builder needed. It is signed, so Unbound
-  loads it without asking.
+- **Only young Link's Hylian Shield?** `childshield.o2r`
+  ([`unbound-930-porter-1`](../../releases/tag/unbound-930-porter-1), or `childshield` in NEI-Store) is ML's shield
+  rule alone, for any SoH: Unbound with skijer's mod API. It is signed, so Unbound loads it without asking. Not needed
+  with The Missing Link, which has it.
+- **Testers:** the builder ([`unbound-930-builder-3`](../../releases/tag/unbound-930-builder-3)) still makes ML from the
+  command line or its window. Its layer updates in two steps, and its code mod crashes at the end of the prologue with
+  **Skip Entrance Cutscenes** on; replace its `missinglink.o2r` with this one.
 - **Developing:** how the port is built, tested and released, in [`DEVELOPMENT.md`](DEVELOPMENT.md).
 - **Plan and history:** [`docs/ROADMAP.md`](docs/ROADMAP.md).
 - **Every change ML makes to the game, and how it is ported:** [`docs/ENGINE_CHANGES.md`](docs/ENGINE_CHANGES.md).
