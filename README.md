@@ -69,6 +69,10 @@ The randomizer and other options for vanilla's own items and areas don't apply t
 - SoH's boot logo replaces ML's two boot checks (the Expansion Pak and emulator-accuracy error screens), which don't
   apply here. ML's title screen itself is ported.
 
+**Other mods:** packs made for vanilla Ocarina of Time's world, textures or music (scene and texture packs, custom
+music packs such as `soh-z64-song-pack.otr`) don't apply to ML, which replaces that world, and can crash the game. A
+player's audio crashes came from such a music pack, with and without ML. To try ML, leave them out.
+
 Found another? Open an issue with what you saw and where.
 
 ## More
