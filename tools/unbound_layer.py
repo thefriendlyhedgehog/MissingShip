@@ -79,6 +79,11 @@ sys.path.insert(0, os.path.join(ROOT, 'pipeline'))
 from mspaths import PIPE, SOH   # the fork's files: engine/soh, or the builder's copy
 import mspaths
 SKIP = ('version', 'portVersion', 'unbound.json')     # archive metadata: the base provides it
+# The vanilla dungeons with a Master Quest variant, as Unbound's scene folders (SceneDB::GetScenePath): a Master Quest
+# save file loads scenes/<dir>_mq/scene.json instead. ML has no Master Quest, so ML's scene.json of each of these goes
+# there too; its rooms and collision are named by their full scenes/<dir>/ paths, so they need no copy.
+MQ_DIRS = ('ydan', 'ddan', 'bdan', 'Bmori1', 'HIDAN', 'MIZUsin', 'jyasinzou', 'HAKAdan', 'HAKAdanCH', 'ice_doukutu',
+           'men', 'ganontika')
 MANIFEST = {'format': 'unbound', 'formatVersion': 2, 'requires': {'formatVersion': 2}}   # `base` is format 2
 
 # ML's changes to vanilla actors, as types that extend them (docs/UNBOUND_MAP.md, C). Each is placed wherever ML's
@@ -314,7 +319,7 @@ STOCK_REGISTRIES = ('cutscenes', 'getitem', 'items', 'labels', 'maps', 'pause', 
 
 def layer(vanilla, ml, out, world, ui, maps, pause, getitem, shops, items, unbound_src=None, stock=False):
     stats = dict.fromkeys(('added', 'changed', 'scene documents', 'messages', 'actors placed by name', 'exits named',
-                           'exit padding dropped'), 0)
+                           'exit padding dropped', 'Master Quest scenes'), 0)
     report = None
     with zipfile.ZipFile(vanilla) as v, zipfile.ZipFile(ml) as m, zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED) as z:
         names = game_names(world, unbound_src) if stock else {}
@@ -395,8 +400,14 @@ def layer(vanilla, ml, out, world, ui, maps, pause, getitem, shops, items, unbou
             z.writestr('missinglink/intros', blob(json.dumps(intros, indent=1).encode()))
             z.writestr('missinglink/entrancechanges', blob(json.dumps(changed, indent=1).encode()))
             z.writestr('missinglink/scenes', blob(json.dumps(scenes, indent=1).encode()))
+        changed_mq = {n.split('/')[1] for n in scene_docs if n.split('/')[1] in MQ_DIRS}
+        if any(f'scenes/{d}/scene.json' not in scene_docs for d in changed_mq):
+            raise SystemExit(f'a Master Quest dungeon whose rooms ML changes keeps its scene.json: {sorted(changed_mq)}')
         for n, doc in scene_docs.items():
             z.writestr(n, json.dumps(doc, indent=1))
+            if n.split('/')[1] in MQ_DIRS and n.endswith('/scene.json'):
+                z.writestr(n.replace('/scene.json', '_mq/scene.json'), json.dumps({'$replace': True, **doc}, indent=1))
+                stats['Master Quest scenes'] += 1
         z.writestr('unbound.json', json.dumps(MANIFEST, indent=1))
         # Tells our Unbound branch that ML is mounted, which switches on ML's changes to the game's own code (Unbound's
         # unbound-docs/missinglink-actors.md): ML's En_M_Thunder in actor slot 0x57, the Blade Beam spawner, ...
