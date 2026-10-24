@@ -6,7 +6,7 @@
 It is a port, not an emulator: ML's world is rebuilt from your own ROM, and ML's code is rewritten in C as a code
 mod. No ML machine code runs, and no download holds Nintendo's or ML's data.
 
-**Pre-release** ([`unbound-930-porter-2`](../../releases/tag/unbound-930-porter-2), 2026-10-23). All of The Missing
+**Pre-release** ([`unbound-930-porter-3`](../../releases/tag/unbound-930-porter-3), 2026-10-24). All of The Missing
 Link is ported: its 25 scenes, both dungeons and the boss, every changed or custom actor, Link's model and moves, the
 title screen, credits and ending.
 
@@ -79,7 +79,7 @@ from Unbound's folder: besides the crash, ML writes in it each scene, exit and p
 ## More
 
 - **Only young Link's Hylian Shield?** `childshield.o2r`
-  ([`unbound-930-porter-2`](../../releases/tag/unbound-930-porter-2), or `childshield` in NEI-Store) is ML's shield
+  ([`unbound-930-porter-3`](../../releases/tag/unbound-930-porter-3), or `childshield` in NEI-Store) is ML's shield
   rule alone, for any SoH: Unbound with skijer's mod API. It is signed, so Unbound loads it without asking. Not needed
   with The Missing Link, which has it.
 - **Testers:** the builder ([`unbound-930-builder-3`](../../releases/tag/unbound-930-builder-3)) still makes ML from the
