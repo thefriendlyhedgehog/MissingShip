@@ -73,7 +73,8 @@ The randomizer and other options for vanilla's own items and areas don't apply t
 music packs such as `soh-z64-song-pack.otr`) don't apply to ML, which replaces that world, and can crash the game. A
 player's audio crashes came from such a music pack, with and without ML. To try ML, leave them out.
 
-Found another? Open an issue with what you saw and where.
+Found another? Open an issue with what you saw and where. If the game crashed, attach `logs/Ship of Harkinian.log`
+from Unbound's folder: besides the crash, ML writes in it each scene, exit and piece of music as they come.
 
 ## More
 

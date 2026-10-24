@@ -21,6 +21,8 @@ SOH_MOD_EXPORT const SOHModRequirements* ModGetRequirements(void) {
 }
 
 SOH_MOD_EXPORT void ModInit(void) {
+    // Lines for crash reports, with or without ML's layer (ml_diag.c).
+    MlDiag_Register(sApi);
     // Without ML's layer only the porter runs: it offers to make the layer from the player's files.
     if (!MlPorter_Register(sApi)) {
         return;

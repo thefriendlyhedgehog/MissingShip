@@ -52,6 +52,7 @@ void MlCucco_Register(const SOHModApi* api);
 void MlBossVa_Register(const SOHModApi* api);
 void MlBossVaShot_Register(const SOHModApi* api);
 void MlLight_Register(const SOHModApi* api);
+void MlDiag_Register(const SOHModApi* api);
 void MlFogWall_Register(const SOHModApi* api);
 void MlMThunder_Register(const SOHModApi* api);
 void MlEnDns_Register(const SOHModApi* api);
