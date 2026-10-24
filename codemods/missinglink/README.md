@@ -63,6 +63,13 @@ with skijer's file picker (the manifest's `"permissions": ["files"]`), makes the
 restarts. Over an older layer it offers the update, clearing that one first. The rest of the mod starts whenever a
 layer is mounted.
 
+Other mods (`ml_othermods.c`, 2026-10-24): ML is tested only with this mod and its layer, and other mods have crashed
+it (custom music packs, skijer's MM masks). Each start logs the other mods mounted: code mods by their binaries
+(`bin/<platform>/<mod>`), custom music (`custom/`) and texture or model packs (`alt/`), which the game's own archives
+don't hold. When that list changes, the first frame tells the player that ML may crash with them; the list told is kept
+in `gEnhancements.MissingLink.OtherModsSeen`, and nothing is shown where the porter doesn't ask either
+(`gEnhancements.MissingLink.PorterAsks` 0, test homes).
+
 ## Tested, 2026-10-11 (macOS, this branch at 27bb6c445)
 
 - The mod registers `ML_TreeBridge` (actor 472), and ML's Kokiri Forest room spawns it by name with its params and

@@ -69,9 +69,11 @@ The randomizer and other options for vanilla's own items and areas don't apply t
 - SoH's boot logo replaces ML's two boot checks (the Expansion Pak and emulator-accuracy error screens), which don't
   apply here. ML's title screen itself is ported.
 
-**Other mods:** packs made for vanilla Ocarina of Time's world, textures or music (scene and texture packs, custom
-music packs such as `soh-z64-song-pack.otr`) don't apply to ML, which replaces that world, and can crash the game. A
-player's audio crashes came from such a music pack, with and without ML. To try ML, leave them out.
+**Other mods:** ML needs only `missinglink.o2r` and the `MissingLink_Unbound.o2r` it makes, and is tested only with
+those. Other mods can crash it: other code mods (skijer's MM masks has), and packs made for vanilla Ocarina of Time's
+world, textures or music (scene and texture packs, custom music packs such as `soh-z64-song-pack.otr`), which don't
+apply to ML. Players' audio crashes came from such music packs, with and without ML. To try ML, leave them out.
+`childshield` isn't needed: ML has its shield.
 
 Found another? Open an issue with what you saw and where. If the game crashed, attach `logs/Ship of Harkinian.log`
 from Unbound's folder: besides the crash, ML writes in it each scene, exit and piece of music as they come.
