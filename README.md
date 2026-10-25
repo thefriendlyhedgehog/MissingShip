@@ -72,8 +72,9 @@ The randomizer and other options for vanilla's own items and areas don't apply t
 **Other mods:** ML needs only `missinglink.o2r` and the `MissingLink_Unbound.o2r` it makes, and is tested only with
 those. Other mods can crash it: other code mods (skijer's MM masks has), and packs made for vanilla Ocarina of Time's
 world, textures or music (scene and texture packs, custom music packs such as `soh-z64-song-pack.otr`), which don't
-apply to ML. Players' audio crashes came from such music packs, with and without ML. To try ML, leave them out.
-`childshield` isn't needed: ML has its shield.
+apply to ML. Players' audio crashes came from such music packs, with and without ML. To try ML, leave them out:
+when ML starts with others, it names them and says so (again only when they change). `childshield` isn't needed: ML
+has its shield.
 
 Found another? Open an issue with what you saw and where. If the game crashed, attach `logs/Ship of Harkinian.log`
 from Unbound's folder: besides the crash, ML writes in it each scene, exit and piece of music as they come.
