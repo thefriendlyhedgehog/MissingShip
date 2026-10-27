@@ -11,6 +11,9 @@ sword out, as he does the Deku Shield, instead of ducking under it on his back. 
   triangles, draws it scaled by 0.8 and moved into the child's fist, then the child's closed right hand. That is the
   transform ML's own hand uses (its handle is the adult's x 0.8 + (-10.8, -54.8, -7.9), within a unit). The package
   holds compiled code only: no model, texture or other game data.
+- Raised, it sends Deku Scrubs' nuts and Octoroks' rocks back, as the Deku Shield does and the Hylian Shield does for
+  an adult: vanilla tests the Hylian Shield with Link's age in each projectile's flight, so their updates count him as
+  an adult while he holds it.
 - If a model pack has replaced the adult shield hand (the list isn't vanilla's shape), the mod logs it and changes
   nothing, so the shield stays on his back as in vanilla.
 

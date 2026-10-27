@@ -11,12 +11,17 @@
  * the adult's x 0.8 + (-10.8, -54.8, -7.9), within a unit). The adult list is copied as it is in memory, with every
  * state command kept, so textures, culling and combiners are vanilla's. If the list isn't vanilla's shape (a model
  * pack replaced it), nothing changes and the rule stays vanilla's.
+ *
+ * Raised, it sends Deku Scrubs' nuts (En_Nutsball) and Octoroks' rocks (En_Okuta) back, as the Deku Shield does and
+ * the Hylian Shield does for an adult. Vanilla tests the Hylian Shield with LINK_IS_ADULT in each projectile's flight,
+ * the only thing the projectile reads his age for, so its update runs with Link counted as an adult.
  */
 #include "soh/ModApi/ModApi.h"
 
 #include "functions.h"
 #include "macros.h"
 #include "variables.h"
+#include "soh/ActorDB.h"
 #include "soh/ResourceManagerHelpers.h"
 #include "objects/object_link_boy/object_link_boy.h"
 #include "objects/object_link_child/object_link_child.h"
@@ -157,6 +162,36 @@ static void ChildShield_ChildWithHylianShield(bool* should, va_list args) {
     }
 }
 
+static ActorFunc sEnNutsballUpdate;
+static ActorFunc sEnOkutaUpdate;
+
+// runs a projectile's update with a child holding the Hylian Shield counted as an adult, so it bounces back off it
+static void ChildShield_UpdateProjectile(ActorFunc update, Actor* thisx, PlayState* play) {
+    Player* player = GET_PLAYER(play);
+    u8 age = gSaveContext.linkAge;
+
+    if (!sReady || !LINK_IS_CHILD || (player == NULL) || (player->currentShield != PLAYER_SHIELD_HYLIAN)) {
+        update(thisx, play);
+        return;
+    }
+    gSaveContext.linkAge = LINK_AGE_ADULT;
+    update(thisx, play);
+    gSaveContext.linkAge = age;
+}
+
+static void ChildShield_EnNutsballUpdate(Actor* thisx, PlayState* play) {
+    ChildShield_UpdateProjectile(sEnNutsballUpdate, thisx, play);
+}
+
+// params 0x10 is the rock; the Octorok itself (0) runs as vanilla
+static void ChildShield_EnOkutaUpdate(Actor* thisx, PlayState* play) {
+    if (thisx->params == 0x10) {
+        ChildShield_UpdateProjectile(sEnOkutaUpdate, thisx, play);
+    } else {
+        sEnOkutaUpdate(thisx, play);
+    }
+}
+
 SOH_MOD_EXPORT void ModSetApi(const SOHModApi* api) {
     sApi = api;
 }
@@ -170,4 +205,11 @@ SOH_MOD_EXPORT void ModInit(void) {
     Build();
     SOH_REGISTER_HOOK(sApi, OnLoadGame, ChildShield_OnLoadGame);
     sApi->RegisterVB(VB_BE_CHILD_WITH_HYLIAN_SHIELD, ChildShield_ChildWithHylianShield);
+
+    ActorDBEntry* entry = ActorDB_Retrieve(ACTOR_EN_NUTSBALL);
+    sEnNutsballUpdate = entry->update;
+    entry->update = ChildShield_EnNutsballUpdate;
+    entry = ActorDB_Retrieve(ACTOR_EN_OKUTA);
+    sEnOkutaUpdate = entry->update;
+    entry->update = ChildShield_EnOkutaUpdate;
 }
