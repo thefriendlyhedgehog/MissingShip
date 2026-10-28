@@ -69,7 +69,7 @@ void MlOverrides_Register(const SOHModApi* api) {
     for (size_t i = 0; i < ARRAY_COUNT(sFlagOverrides); i++) {
         const MlFlagOverride* o = &sFlagOverrides[i];
         int id = ActorDB_RetrieveId(o->name);
-        ActorDBEntry* entry = id < 0 ? NULL : ActorDB_Retrieve(id);
+        ActorDBEntry* entry = id < 0 ? NULL : MlPatch_Actor(id);
 
         if (entry == NULL || !entry->valid) {
             snprintf(message, sizeof(message), "[MissingLink] no actor %s to override", o->name);

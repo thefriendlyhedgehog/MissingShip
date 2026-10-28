@@ -257,6 +257,13 @@ static void MlEnKo_SetFrown(s32 frown) {
     sMlFrown = frown;
 }
 
+// Leaving ML's world: the smile goes back on the game's texture, which stays loaded
+void MlVanillaNpcs_LeaveWorld(void) {
+    if (sMlFrown) {
+        MlEnKo_SetFrown(false);
+    }
+}
+
 static ActorFunc sEnKoUpdate;
 
 static void MlEnKo_Update(Actor* thisx, PlayState* play) {
@@ -633,43 +640,43 @@ static void MlEnWonderTalk_Update(Actor* thisx, PlayState* play) {
 void MlVanillaNpcs_Register(const SOHModApi* api) {
     ActorDBEntry* entry;
 
-    entry = ActorDB_Retrieve(ACTOR_EN_DAIKU);
+    entry = MlPatch_Actor(ACTOR_EN_DAIKU);
     sEnDaikuUpdate = entry->update;
     entry->update = MlEnDaiku_Update;
 
-    entry = ActorDB_Retrieve(ACTOR_EN_HS);
+    entry = MlPatch_Actor(ACTOR_EN_HS);
     sEnHsUpdate = entry->update;
     entry->update = MlEnHs_Update;
 
-    entry = ActorDB_Retrieve(ACTOR_EN_HY);
+    entry = MlPatch_Actor(ACTOR_EN_HY);
     sEnHyUpdate = entry->update;
     entry->update = MlEnHy_Update;
 
-    entry = ActorDB_Retrieve(ACTOR_EN_KO);
+    entry = MlPatch_Actor(ACTOR_EN_KO);
     sEnKoUpdate = entry->update;
     entry->update = MlEnKo_Update;
 
-    entry = ActorDB_Retrieve(ACTOR_EN_MS);
+    entry = MlPatch_Actor(ACTOR_EN_MS);
     sEnMsInit = entry->init;
     sEnMsUpdate = entry->update;
     entry->init = MlEnMs_Init;
     entry->update = MlEnMs_Update;
 
-    entry = ActorDB_Retrieve(ACTOR_EN_NIW_LADY);
+    entry = MlPatch_Actor(ACTOR_EN_NIW_LADY);
     sEnNiwLadyUpdate = entry->update;
     entry->update = MlEnNiwLady_Update;
 
-    entry = ActorDB_Retrieve(ACTOR_EN_OSSAN);
+    entry = MlPatch_Actor(ACTOR_EN_OSSAN);
     sEnOssanInit = entry->init;
     sEnOssanUpdate = entry->update;
     entry->init = MlEnOssan_Init;
     entry->update = MlEnOssan_Update;
 
-    entry = ActorDB_Retrieve(ACTOR_EN_SSH);
+    entry = MlPatch_Actor(ACTOR_EN_SSH);
     sEnSshUpdate = entry->update;
     entry->update = MlEnSsh_Update;
 
-    entry = ActorDB_Retrieve(ACTOR_EN_WONDER_TALK);
+    entry = MlPatch_Actor(ACTOR_EN_WONDER_TALK);
     sEnWonderTalkUpdate = entry->update;
     entry->init = MlEnWonderTalk_Init;
     entry->update = MlEnWonderTalk_Update;

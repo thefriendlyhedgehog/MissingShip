@@ -493,7 +493,7 @@ static void MlMThunder_ShouldUpdate(void* actor, bool* result) {
 }
 
 void MlMThunder_Register(const SOHModApi* api) {
-    ActorDBEntry* entry = ActorDB_Retrieve(ACTOR_EN_M_THUNDER);
+    ActorDBEntry* entry = MlPatch_Actor(ACTOR_EN_M_THUNDER);
 
     entry->desc = "The Missing Link: Blade Beam and spin charge";
     entry->category = ACTORCAT_ITEMACTION;

@@ -55,7 +55,7 @@ static void MlEnElf_Draw(Actor* thisx, PlayState* play) {
 }
 
 void MlEnElf_Register(const SOHModApi* api) {
-    ActorDBEntry* entry = ActorDB_Retrieve(ACTOR_EN_ELF);
+    ActorDBEntry* entry = MlPatch_Actor(ACTOR_EN_ELF);
 
     entry->init = MlEnElf_Init;
     entry->update = MlEnElf_Update;

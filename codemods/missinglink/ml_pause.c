@@ -284,6 +284,9 @@ static void MlPause_ApplySlotAges(void) {
 }
 
 static void MlPause_ApplyAges(void) {
+    MlPatch_Watch(gSlotAgeReqs, 24);
+    MlPatch_Watch(gItemAgeReqs, ITEM_NONE);
+    MlPatch_Watch(gEquipAgeReqs, 16);
     MlPause_ApplySlotAges();
     for (s32 i = 0; i < ITEM_NONE; i++) {
         if (sMlPause.itemAges[i] >= 0) {
@@ -614,6 +617,7 @@ void MlPause_Register(const SOHModApi* api) {
     MlPause_ApplyAges();
     if (sMlPause.ammoSlotCount >= 0) {
         // vanilla's count loop draws nothing; ML's counts are drawn after the icons
+        ML_PATCH_WATCH(gAmmoItems);
         memset(gAmmoItems, ITEM_NONE, sizeof(gAmmoItems));
     }
     SOH_REGISTER_HOOK(api, OnKaleidoscopeUpdate, MlPause_OnKaleidoscopeUpdate);

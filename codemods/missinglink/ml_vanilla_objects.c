@@ -267,35 +267,35 @@ static void MlEnOkarinaEffect_Destroy(Actor* thisx, PlayState* play) {
 void MlVanillaObjects_Register(const SOHModApi* api) {
     ActorDBEntry* entry;
 
-    entry = ActorDB_Retrieve(ACTOR_BG_JYA_1FLIFT);
+    entry = MlPatch_Actor(ACTOR_BG_JYA_1FLIFT);
     entry->update = MlBgJya1flift_Update;
 
-    entry = ActorDB_Retrieve(ACTOR_BG_MIZU_SHUTTER);
+    entry = MlPatch_Actor(ACTOR_BG_MIZU_SHUTTER);
     sBgMizuShutterUpdate = entry->update;
     entry->update = MlBgMizuShutter_Update;
 
-    entry = ActorDB_Retrieve(ACTOR_BG_SPOT16_BOMBSTONE);
+    entry = MlPatch_Actor(ACTOR_BG_SPOT16_BOMBSTONE);
     sBgSpot16BombstoneUpdate = entry->update;
     entry->update = MlBgSpot16Bombstone_Update;
     api->RegisterVB(VB_PLAY_ONEPOINT_CS, MlBgSpot16Bombstone_ShouldPlayCs);
 
-    entry = ActorDB_Retrieve(ACTOR_DOOR_WARP1);
+    entry = MlPatch_Actor(ACTOR_DOOR_WARP1);
     sDoorWarp1Update = entry->update;
     entry->update = MlDoorWarp1_Update;
 
-    entry = ActorDB_Retrieve(ACTOR_EN_COW);
+    entry = MlPatch_Actor(ACTOR_EN_COW);
     entry->draw = MlEnCow_Draw;
 
-    entry = ActorDB_Retrieve(ACTOR_EN_WEATHER_TAG);
+    entry = MlPatch_Actor(ACTOR_EN_WEATHER_TAG);
     sEnWeatherTagInit = entry->init;
     entry->init = MlEnWeatherTag_Init;
 
-    entry = ActorDB_Retrieve(ACTOR_OBJ_MAKEKINSUTA);
+    entry = MlPatch_Actor(ACTOR_OBJ_MAKEKINSUTA);
     sObjMakekinsutaUpdate = entry->update;
     entry->update = MlObjMakekinsuta_Update;
     entry->instanceSize = sizeof(MlObjMakekinsuta);
 
-    entry = ActorDB_Retrieve(ACTOR_EN_OKARINA_EFFECT);
+    entry = MlPatch_Actor(ACTOR_EN_OKARINA_EFFECT);
     entry->init = MlEnOkarinaEffect_Init;
     entry->destroy = MlEnOkarinaEffect_Destroy;
 

@@ -432,6 +432,7 @@ static void MlHud_OnPlayDrawBegin(void) {
     // Message_Draw draws the staff on every frame (also those Interface_Draw skips). A colour set in SoH's cosmetics
     // editor still applies.
     if (!CVarGetInteger("gCosmetics.HUD.AButton.Changed", 0)) {
+        ML_PATCH_WATCH(sOcarinaNoteABtnPrim);
         sOcarinaNoteABtnPrim = (Color_RGB8){ 80, 255, 150 };
     }
 

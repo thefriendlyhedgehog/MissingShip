@@ -13,6 +13,7 @@
 #include "macros.h"
 #include "variables.h"
 #include "soh/ActorDB.h"
+#include "ml_patch.h"
 #include "overlays/actors/ovl_En_Rd/z_en_rd.h"
 #include "objects/object_rd/object_rd.h"
 #include "soh/Enhancements/game-interactor/GameInteractor_Hooks.h"
@@ -951,7 +952,7 @@ static void EnRd_Draw(Actor* thisx, PlayState* play) {
 }
 
 void MlEnRd_Register(const SOHModApi* api) {
-    ActorDBEntry* entry = ActorDB_Retrieve(ACTOR_EN_RD);
+    ActorDBEntry* entry = MlPatch_Actor(ACTOR_EN_RD);
 
     entry->init = EnRd_Init;
     entry->destroy = EnRd_Destroy;

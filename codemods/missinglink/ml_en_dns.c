@@ -140,7 +140,7 @@ static void MlEnDns_Update(Actor* thisx, PlayState* play) {
 }
 
 void MlEnDns_Register(const SOHModApi* api) {
-    ActorDBEntry* entry = ActorDB_Retrieve(ACTOR_EN_DNS);
+    ActorDBEntry* entry = MlPatch_Actor(ACTOR_EN_DNS);
 
     entry->init = MlEnDns_Init;
     entry->update = MlEnDns_Update;

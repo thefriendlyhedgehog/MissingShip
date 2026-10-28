@@ -75,11 +75,15 @@ Randomizer, Master Quest, Boss Rush and the speedrun quests read vanilla's world
 layer is mounted a new file skips the file select's quest choice and is Original Quest (as the game does when only one
 quest is shown), and a file of another quest doesn't open: the error sound plays and the player is told why (only
 logged where the porter doesn't ask).
-On a host with mod quests (`RegisterQuest`, offered to skijer as `modapi-offer/mod-quests`), ML registers "The
-Missing Link" (label `ML`) as a quest that replaces the world and adopts Original Quest files: the host hides the
-game's own quests, makes new files ML's straight away and greys out other quests' files, and ML only says why such a
-file doesn't open. Built against a host without it (`SOH_MOD_QUEST_REPLACES_WORLD` undefined), the guard above stays.
-ML's world mounted only for ML's files would need SceneDB, audio and text rebuilt on a file change: not offered yet.
+On a host with mod quests (`RegisterQuest`, offered to skijer for his mod API), ML is "The Missing
+Link" (label `ML`) on the file select's quest carousel beside Original Quest, Master Quest, Randomizer and Boss Rush,
+drawn with ML's title logo, and the guard above is off. The host puts ML's layer on top of the game's files only while
+an ML file is played and sinks it under them otherwise, live, with no restart; ML's hooks run only in its world. What
+ML writes into the game's own tables (actor slots, entrance rows, item slots and capacities, GetItem models, age rules,
+ammo items, map tables, Link's hand display lists, the A note's colour, the run speed limit, the Kokiri frown) is kept
+in `ml_patch.c` and swapped with the game's on the host's `OnQuestWorldChange`. Original Quest files made before
+become ML's the first time. Built against a host without it (`SOH_MOD_QUEST_ADOPTS_ORIGINAL_FILES` undefined), the
+guard above stays.
 
 ## Tested, 2026-10-11 (macOS, this branch at 27bb6c445)
 

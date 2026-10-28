@@ -554,6 +554,7 @@ static void MlPlayer_BeforeUpdate(Player* player, PlayState* play, MlPlayerFrame
     }
 
     // ML's Bunny Hood doubles the run speed limit (func_8083DF68)
+    ML_PATCH_WATCH(R_RUN_SPEED_LIMIT);
     R_RUN_SPEED_LIMIT = (player->currentMask == PLAYER_MASK_BUNNY) ? 1100 : 550;
 
     // ML never starts a conversation with text 0xE0, which only Saria's song gives Navi (Player_StartTalking and its
@@ -685,7 +686,7 @@ static void MlPlayer_OnLoadGame(int32_t fileNum) {
 }
 
 void MlPlayer_Register(const SOHModApi* api) {
-    ActorDBEntry* entry = ActorDB_Retrieve(ACTOR_PLAYER);
+    ActorDBEntry* entry = MlPatch_Actor(ACTOR_PLAYER);
 
     sMlCuccoId = ActorDB_RetrieveId("ML_Cucco");
     sPlayerInit = entry->init;
@@ -696,6 +697,12 @@ void MlPlayer_Register(const SOHModApi* api) {
     // ML's child hands (ledger rows 77 and 95): a child holding the Hylian Shield draws ML's fist-and-shield hand (one
     // LOD for both; ML lets a child use the shield), and the child entries of the hookshot and hammer hands are the
     // closed right hand and the left fist
+    ML_PATCH_WATCH(sPlayerRightHandShieldDLs[PLAYER_SHIELD_HYLIAN * 4 + 1]);
+    ML_PATCH_WATCH(sPlayerRightHandShieldDLs[PLAYER_SHIELD_HYLIAN * 4 + 3]);
+    ML_PATCH_WATCH(sPlayerRightHandHookshotDLs[1]);
+    ML_PATCH_WATCH(sPlayerRightHandHookshotDLs[3]);
+    ML_PATCH_WATCH(sPlayerLeftHandHammerDLs[1]);
+    ML_PATCH_WATCH(sPlayerLeftHandHammerDLs[3]);
     sPlayerRightHandShieldDLs[PLAYER_SHIELD_HYLIAN * 4 + 1] = (Gfx*)gMlChildRightFistAndHylianShieldDL;
     sPlayerRightHandShieldDLs[PLAYER_SHIELD_HYLIAN * 4 + 3] = (Gfx*)gMlChildRightFistAndHylianShieldDL;
     sPlayerRightHandHookshotDLs[1] = (Gfx*)gLinkChildRightHandClosedNearDL;

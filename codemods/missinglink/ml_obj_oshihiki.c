@@ -36,7 +36,7 @@ static void MlObjOshihiki_Init(Actor* thisx, PlayState* play) {
 }
 
 void MlObjOshihiki_Register(const SOHModApi* api) {
-    ActorDBEntry* entry = ActorDB_Retrieve(ACTOR_OBJ_OSHIHIKI);
+    ActorDBEntry* entry = MlPatch_Actor(ACTOR_OBJ_OSHIHIKI);
 
     entry->init = MlObjOshihiki_Init;
     api->Log("[MissingLink] Obj_Oshihiki's slot takes ML's colours");

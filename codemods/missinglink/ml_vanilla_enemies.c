@@ -504,7 +504,7 @@ static void MlEnPeehat_Init(Actor* thisx, PlayState* play) {
 void MlVanillaEnemies_Register(const SOHModApi* api) {
     ActorDBEntry* entry;
 
-    entry = ActorDB_Retrieve(ACTOR_EN_BOM_CHU);
+    entry = MlPatch_Actor(ACTOR_EN_BOM_CHU);
     sEnBomChuUpdate = entry->update;
     entry->update = MlEnBomChu_Update;
     SOH_REGISTER_HOOK(api, ShouldActorUpdate, MlEnBomChu_ShouldActorUpdate);
@@ -512,29 +512,29 @@ void MlVanillaEnemies_Register(const SOHModApi* api) {
     SOH_REGISTER_HOOK_FOR_ID(api, OnActorDestroy, ACTOR_EN_BOM_CHU, MlEnBomChu_OnActorDestroy);
     SOH_REGISTER_HOOK(api, OnPlayDestroy, MlEnBomChu_OnPlayDestroy);
 
-    entry = ActorDB_Retrieve(ACTOR_EN_DEKUBABA);
+    entry = MlPatch_Actor(ACTOR_EN_DEKUBABA);
     sEnDekubabaUpdate = entry->update;
     entry->update = MlEnDekubaba_Update;
 
-    entry = ActorDB_Retrieve(ACTOR_EN_DEKUNUTS);
+    entry = MlPatch_Actor(ACTOR_EN_DEKUNUTS);
     sEnDekunutsUpdate = entry->update;
     entry->update = MlEnDekunuts_Update;
 
-    entry = ActorDB_Retrieve(ACTOR_EN_DODOJR);
+    entry = MlPatch_Actor(ACTOR_EN_DODOJR);
     sEnDodojrUpdate = entry->update;
     entry->update = MlEnDodojr_Update;
 
-    entry = ActorDB_Retrieve(ACTOR_EN_FLOORMAS);
+    entry = MlPatch_Actor(ACTOR_EN_FLOORMAS);
     sEnFloormasInit = entry->init;
     sEnFloormasUpdate = entry->update;
     entry->init = MlEnFloormas_Init;
     entry->update = MlEnFloormas_Update;
 
-    entry = ActorDB_Retrieve(ACTOR_EN_NUTSBALL);
+    entry = MlPatch_Actor(ACTOR_EN_NUTSBALL);
     sEnNutsballUpdate = entry->update;
     entry->update = MlEnNutsball_Update;
 
-    entry = ActorDB_Retrieve(ACTOR_EN_PEEHAT);
+    entry = MlPatch_Actor(ACTOR_EN_PEEHAT);
     sEnPeehatInit = entry->init;
     entry->init = MlEnPeehat_Init;
 

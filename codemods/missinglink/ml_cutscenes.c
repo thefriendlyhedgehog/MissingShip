@@ -67,6 +67,7 @@ void MlEntrances_Apply(void) {
             if ((index < 0) || (index + row >= EntranceDB_GetEntryCount())) {
                 break;
             }
+            MlPatch_Entrance(index + row);
             gEntranceTable[index + row].scene = MlJson_Int(MlJson_Get(fields, "scene"), 0);
             gEntranceTable[index + row].spawn = MlJson_Int(MlJson_Get(fields, "spawn"), 0);
             gEntranceTable[index + row].field = MlJson_Int(MlJson_Get(fields, "field"), 0);
@@ -81,6 +82,7 @@ void MlEntrances_Apply(void) {
         if ((index < 0) || (index >= EntranceDB_GetEntryCount())) {
             continue;
         }
+        MlPatch_Entrance(index);
         gEntranceTable[index].field =
             MlEntrances_Flag(gEntranceTable[index].field, changes, "continueBgm", ENTRANCE_INFO_CONTINUE_BGM_FLAG, 15);
         gEntranceTable[index].field = MlEntrances_Flag(gEntranceTable[index].field, changes, "showTitleCard",

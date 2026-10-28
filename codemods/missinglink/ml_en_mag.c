@@ -199,7 +199,7 @@ static void MlEnMag_Draw(Actor* thisx, PlayState* play) {
 }
 
 void MlEnMag_Register(const SOHModApi* api) {
-    ActorDBEntry* entry = ActorDB_Retrieve(ACTOR_EN_MAG);
+    ActorDBEntry* entry = MlPatch_Actor(ACTOR_EN_MAG);
 
     sEnMagInit = entry->init;
     sEnMagUpdate = entry->update;

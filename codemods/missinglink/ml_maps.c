@@ -184,6 +184,25 @@ static void MlMaps_ApplyDungeon(s32 d, const MlJson* doc, const PauseMapMarkData
     s32 lastMarkedRoom = -1;
     s32 vanillaRooms = m->dgnMinimapCount[d];
 
+    ML_PATCH_WATCH(m->roomCompassOffsetX[d]);
+    ML_PATCH_WATCH(m->roomCompassOffsetY[d]);
+    ML_PATCH_WATCH(m->roomPalette[d]);
+    ML_PATCH_WATCH(m->dgnMinimapCount[d]);
+    ML_PATCH_WATCH(m->floorID[d]);
+    ML_PATCH_WATCH(m->floorCoordY[d]);
+    ML_PATCH_WATCH(m->paletteRoom[d]);
+    ML_PATCH_WATCH(m->dgnCompassInfo[d]);
+    ML_PATCH_WATCH(m->maxPaletteCount[d]);
+    if (d < ML_BOSS_DUNGEONS) {
+        ML_PATCH_WATCH(m->bossFloor[d]);
+    }
+    ML_PATCH_WATCH(m->switchEntryCount[d]);
+    ML_PATCH_WATCH(m->switchFromRoom[d]);
+    ML_PATCH_WATCH(m->switchFromFloor[d]);
+    ML_PATCH_WATCH(m->switchToRoom[d]);
+    ML_PATCH_WATCH(gMapMarkDataTableVanilla[d]);
+    ML_PATCH_WATCH(gMapMarkDataTableMq[d]);
+
     ML_JSON_FOR_EACH(room, rooms) {
         s32 r = atoi(room->key);
         const MlJson* compass = MlJson_Get(room, "compass");
@@ -310,6 +329,8 @@ static void MlMaps_Load(void) {
     s32 dungeons = 0;
     s32 noMinimap = 0;
 
+    ML_PATCH_WATCH(gPauseMapMarkDataTable);
+    ML_PATCH_WATCH(gPauseMapMarkDataTableMasterQuest);
     MlMaps_PauseTemplates(gPauseMapMarkDataTable, templates);
     MlMaps_PauseTemplates(gPauseMapMarkDataTableMasterQuest, templatesMq);
     ML_JSON_FOR_EACH(scene, doc) {

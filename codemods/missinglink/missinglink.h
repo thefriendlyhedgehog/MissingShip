@@ -4,6 +4,10 @@
 // The Missing Link's behaviour as a code mod: one Register function per actor, called from ModInit.
 
 #include "soh/ModApi/ModApi.h"
+#include "ml_patch.h"
+
+// ML's quest on the file select, and the key its files are saved with (ml_quests.c)
+#define ML_QUEST_KEY "missinglink"
 
 // A game function's own address. In a Windows mod a game function's plain name is the mod's import thunk (a jump to
 // it), so `this->actionFunc == EnMd_Walk` never holds there, and an actionFunc set to it is one the game's own

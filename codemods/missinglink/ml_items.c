@@ -54,6 +54,9 @@ static void MlItems_Load(void) {
     const MlJson* doc = MlJson_Load("items");
     const MlJson* bottles;
 
+    MlPatch_Watch(gItemSlots, sizeof(sMlVanillaSlots));
+    MlPatch_Watch(gUpgradeMasks, sizeof(sMlVanillaMasks));
+    MlPatch_Watch(gUpgradeCapacities, sizeof(sMlVanillaCapacities));
     memcpy(sMlVanillaSlots, gItemSlots, sizeof(sMlVanillaSlots));
     memcpy(sMlVanillaMasks, gUpgradeMasks, sizeof(sMlVanillaMasks));
     memcpy(sMlVanillaCapacities, gUpgradeCapacities, sizeof(sMlVanillaCapacities));
@@ -216,7 +219,7 @@ static const ActorFunc sMlBottleUpdates[] = {
 
 static void MlItems_WrapBottleActors(void) {
     for (u32 i = 0; i < ARRAY_COUNT(sMlBottleActors); i++) {
-        ActorDBEntry* entry = ActorDB_Retrieve(sMlBottleActors[i]);
+        ActorDBEntry* entry = MlPatch_Actor(sMlBottleActors[i]);
 
         sMlBottleActorUpdates[i] = entry->update;
         entry->update = sMlBottleUpdates[i];
@@ -303,6 +306,7 @@ static void MlGetItem_Load(void) {
             strcpy(paths[i], "__OTR__");
             strcat(paths[i], path);
         }
+        ML_PATCH_WATCH(sDrawItemTable[gid]);
         sDrawItemTable[gid].drawFunc = sDrawItemTable[drawAs].drawFunc;
         for (s32 i = 0; i < 8; i++) {
             sDrawItemTable[gid].dlists[i] = (i < count) ? (Gfx*)paths[i] : NULL;
@@ -425,7 +429,7 @@ void MlItems_Register(const SOHModApi* api) {
         MlItems_WrapBottleActors();
     }
     {
-        ActorDBEntry* entry = ActorDB_Retrieve(ACTOR_EN_GIRLA);
+        ActorDBEntry* entry = MlPatch_Actor(ACTOR_EN_GIRLA);
 
         sMlEnGirlAUpdate = entry->update;
         entry->update = MlShops_EnGirlAUpdate;

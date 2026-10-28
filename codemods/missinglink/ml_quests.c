@@ -6,9 +6,10 @@
  *  - a file of another quest doesn't open: the error sound plays and the player is told why.
  * Only while ML's layer is mounted (registered after the porter); the porter alone leaves the file select as it is.
  *
- * A host with mod quests (RegisterQuest) does both itself: ML is "The Missing Link" on the quest menu, the game's own
- * quests are hidden, and files of other quests are greyed out. ML only tells the player why such a file doesn't open.
- * Files made before (Original Quest, no mod quest) open as ML's.
+ * A host with mod quests (RegisterQuest) needs neither: ML is "The Missing Link" on the quest menu, drawn with ML's
+ * title logo, beside the game's own quests. ML's layer covers the game's files only while an ML file is played, ML's
+ * hooks run only then, and its changes to the game's tables are put back for the other files (ml_patch.c). Files made
+ * before (Original Quest, no mod quest) become ML's the first time.
  */
 #include "missinglink.h"
 
@@ -23,10 +24,14 @@
 
 static const SOHModApi* sApi;
 
-#ifdef SOH_MOD_QUEST_REPLACES_WORLD
-static const SOHModQuest sQuest = { sizeof(SOHModQuest), "missinglink", "The Missing Link", "ML",
-                                    SOH_MOD_QUEST_REPLACES_WORLD | SOH_MOD_QUEST_ADOPTS_ORIGINAL_FILES };
-static bool sHostHasQuests;
+#ifdef SOH_MOD_QUEST_ADOPTS_ORIGINAL_FILES
+static const SOHModQuest sQuest = { sizeof(SOHModQuest),
+                                    ML_QUEST_KEY,
+                                    "The Missing Link",
+                                    "ML",
+                                    SOH_MOD_QUEST_ADOPTS_ORIGINAL_FILES,
+                                    "MissingLink_Unbound.o2r",
+                                    "objects/object_ml_mag/gMlTitleLogoTex" };
 #endif
 
 static void Log(const char* fmt, ...) {
@@ -74,14 +79,12 @@ static bool IsQuestMenu(s16 configMode) {
     }
 }
 
-static void RefuseFile(s16 file, u8 quest, bool playError) {
+static void RefuseFile(s16 file, u8 quest) {
     char message[512];
 
     Log("[MissingLink] quests: file %d is %s, not opened", file + 1, QuestName(quest));
-    if (playError) {
-        Audio_PlaySfxGeneral(NA_SE_SY_FSEL_ERROR, &gSfxDefaultPos, 4, &gSfxDefaultFreqAndVolScale,
-                             &gSfxDefaultFreqAndVolScale, &gSfxDefaultReverb);
-    }
+    Audio_PlaySfxGeneral(NA_SE_SY_FSEL_ERROR, &gSfxDefaultPos, 4, &gSfxDefaultFreqAndVolScale,
+                         &gSfxDefaultFreqAndVolScale, &gSfxDefaultReverb);
     if (!CVarGetInteger(PORTER_ASKS, 1) || !SOH_MOD_API_HAS(sApi, TellPlayer)) {
         return;
     }
@@ -103,19 +106,6 @@ static void MlQuests_OnFileChooseMain(void* gameState) {
     if (this->menuMode != FS_MENU_MODE_CONFIG) {
         return;
     }
-#ifdef SOH_MOD_QUEST_REPLACES_WORLD
-    // The host greys the file out and plays the error sound; ML says why. Another mod's quest isn't ML's to explain.
-    if (sHostHasQuests) {
-        if ((this->configMode == CM_MAIN_MENU) && (this->buttonIndex <= FS_BTN_MAIN_FILE_3) &&
-            CHECK_BTN_ANY(input->press.button, BTN_A | BTN_START)) {
-            meta = Save_GetSaveMetaInfo(this->buttonIndex);
-            if (meta->valid && (meta->modQuest[0] == '\0') && (meta->quest != QUEST_NORMAL)) {
-                RefuseFile(this->buttonIndex, meta->quest, false);
-            }
-        }
-        return;
-    }
-#endif
     if (IsQuestMenu(this->configMode) && (this->buttonIndex <= FS_BTN_MAIN_FILE_3)) {
         // As FileChoose_RotateToQuest does when only one quest is shown.
         Log("[MissingLink] quests: file %d starts as Original Quest", this->buttonIndex + 1);
@@ -136,14 +126,20 @@ static void MlQuests_OnFileChooseMain(void* gameState) {
         return;
     }
     input->press.button &= ~(BTN_A | BTN_START);
-    RefuseFile(this->buttonIndex, meta->quest, true);
+    RefuseFile(this->buttonIndex, meta->quest);
 }
 
 void MlQuests_Register(const SOHModApi* api) {
     sApi = api;
-#ifdef SOH_MOD_QUEST_REPLACES_WORLD
-    sHostHasQuests = SOH_MOD_API_HAS(api, RegisterQuest) && api->RegisterQuest(&sQuest);
-    Log("[MissingLink] quests: %s", sHostHasQuests ? "ML is a mod quest" : "the host has no mod quests");
+#ifdef SOH_MOD_QUEST_ADOPTS_ORIGINAL_FILES
+    // Before RegisterQuest: the host runs ML's later hooks only in ML's world, and this one swaps the tables
+    MlPatch_Register(api);
+    if (SOH_MOD_API_HAS(api, RegisterQuest) && api->RegisterQuest(&sQuest)) {
+        MlPatch_Start();
+        Log("[MissingLink] quests: ML is a mod quest, its world on top only for ML's files");
+        return;
+    }
 #endif
+    Log("[MissingLink] quests: the host has no mod quests, ML's world is every file's");
     SOH_REGISTER_HOOK(api, OnFileChooseMain, MlQuests_OnFileChooseMain);
 }
