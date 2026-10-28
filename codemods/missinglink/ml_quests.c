@@ -5,6 +5,10 @@
  *  - a new file skips the quest choice and is Original Quest, as the game does when only one quest is shown;
  *  - a file of another quest doesn't open: the error sound plays and the player is told why.
  * Only while ML's layer is mounted (registered after the porter); the porter alone leaves the file select as it is.
+ *
+ * A host with mod quests (RegisterQuest) does both itself: ML is "The Missing Link" on the quest menu, the game's own
+ * quests are hidden, and files of other quests are greyed out. ML only tells the player why such a file doesn't open.
+ * Files made before (Original Quest, no mod quest) open as ML's.
  */
 #include "missinglink.h"
 
@@ -18,6 +22,12 @@
 #define PORTER_ASKS "gEnhancements.MissingLink.PorterAsks" // ml_porter.c
 
 static const SOHModApi* sApi;
+
+#ifdef SOH_MOD_QUEST_REPLACES_WORLD
+static const SOHModQuest sQuest = { sizeof(SOHModQuest), "missinglink", "The Missing Link", "ML",
+                                    SOH_MOD_QUEST_REPLACES_WORLD | SOH_MOD_QUEST_ADOPTS_ORIGINAL_FILES };
+static bool sHostHasQuests;
+#endif
 
 static void Log(const char* fmt, ...) {
     char line[256];
@@ -64,12 +74,14 @@ static bool IsQuestMenu(s16 configMode) {
     }
 }
 
-static void RefuseFile(s16 file, u8 quest) {
+static void RefuseFile(s16 file, u8 quest, bool playError) {
     char message[512];
 
     Log("[MissingLink] quests: file %d is %s, not opened", file + 1, QuestName(quest));
-    Audio_PlaySfxGeneral(NA_SE_SY_FSEL_ERROR, &gSfxDefaultPos, 4, &gSfxDefaultFreqAndVolScale,
-                         &gSfxDefaultFreqAndVolScale, &gSfxDefaultReverb);
+    if (playError) {
+        Audio_PlaySfxGeneral(NA_SE_SY_FSEL_ERROR, &gSfxDefaultPos, 4, &gSfxDefaultFreqAndVolScale,
+                             &gSfxDefaultFreqAndVolScale, &gSfxDefaultReverb);
+    }
     if (!CVarGetInteger(PORTER_ASKS, 1) || !SOH_MOD_API_HAS(sApi, TellPlayer)) {
         return;
     }
@@ -91,6 +103,19 @@ static void MlQuests_OnFileChooseMain(void* gameState) {
     if (this->menuMode != FS_MENU_MODE_CONFIG) {
         return;
     }
+#ifdef SOH_MOD_QUEST_REPLACES_WORLD
+    // The host greys the file out and plays the error sound; ML says why. Another mod's quest isn't ML's to explain.
+    if (sHostHasQuests) {
+        if ((this->configMode == CM_MAIN_MENU) && (this->buttonIndex <= FS_BTN_MAIN_FILE_3) &&
+            CHECK_BTN_ANY(input->press.button, BTN_A | BTN_START)) {
+            meta = Save_GetSaveMetaInfo(this->buttonIndex);
+            if (meta->valid && (meta->modQuest[0] == '\0') && (meta->quest != QUEST_NORMAL)) {
+                RefuseFile(this->buttonIndex, meta->quest, false);
+            }
+        }
+        return;
+    }
+#endif
     if (IsQuestMenu(this->configMode) && (this->buttonIndex <= FS_BTN_MAIN_FILE_3)) {
         // As FileChoose_RotateToQuest does when only one quest is shown.
         Log("[MissingLink] quests: file %d starts as Original Quest", this->buttonIndex + 1);
@@ -111,10 +136,14 @@ static void MlQuests_OnFileChooseMain(void* gameState) {
         return;
     }
     input->press.button &= ~(BTN_A | BTN_START);
-    RefuseFile(this->buttonIndex, meta->quest);
+    RefuseFile(this->buttonIndex, meta->quest, true);
 }
 
 void MlQuests_Register(const SOHModApi* api) {
     sApi = api;
+#ifdef SOH_MOD_QUEST_REPLACES_WORLD
+    sHostHasQuests = SOH_MOD_API_HAS(api, RegisterQuest) && api->RegisterQuest(&sQuest);
+    Log("[MissingLink] quests: %s", sHostHasQuests ? "ML is a mod quest" : "the host has no mod quests");
+#endif
     SOH_REGISTER_HOOK(api, OnFileChooseMain, MlQuests_OnFileChooseMain);
 }

@@ -74,8 +74,12 @@ Quests (`ml_quests.c`, 2026-10-28): ML's world replaces the game's for every fil
 Randomizer, Master Quest, Boss Rush and the speedrun quests read vanilla's world, items and checks, so while ML's
 layer is mounted a new file skips the file select's quest choice and is Original Quest (as the game does when only one
 quest is shown), and a file of another quest doesn't open: the error sound plays and the player is told why (only
-logged where the porter doesn't ask). The mod API has no way to add ML as a quest of its own, which would also need
-ML's world mounted only for ML's files; that is a request to skijer.
+logged where the porter doesn't ask).
+On a host with mod quests (`RegisterQuest`, offered to skijer as `modapi-offer/mod-quests`), ML registers "The
+Missing Link" (label `ML`) as a quest that replaces the world and adopts Original Quest files: the host hides the
+game's own quests, makes new files ML's straight away and greys out other quests' files, and ML only says why such a
+file doesn't open. Built against a host without it (`SOH_MOD_QUEST_REPLACES_WORLD` undefined), the guard above stays.
+ML's world mounted only for ML's files would need SceneDB, audio and text rebuilt on a file change: not offered yet.
 
 ## Tested, 2026-10-11 (macOS, this branch at 27bb6c445)
 
