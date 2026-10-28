@@ -70,6 +70,13 @@ don't hold. When that list changes, the first frame tells the player that ML may
 in `gEnhancements.MissingLink.OtherModsSeen`, and nothing is shown where the porter doesn't ask either
 (`gEnhancements.MissingLink.PorterAsks` 0, test homes).
 
+Quests (`ml_quests.c`, 2026-10-28): ML's world replaces the game's for every file, and ML plays only Original Quest.
+Randomizer, Master Quest, Boss Rush and the speedrun quests read vanilla's world, items and checks, so while ML's
+layer is mounted a new file skips the file select's quest choice and is Original Quest (as the game does when only one
+quest is shown), and a file of another quest doesn't open: the error sound plays and the player is told why (only
+logged where the porter doesn't ask). The mod API has no way to add ML as a quest of its own, which would also need
+ML's world mounted only for ML's files; that is a request to skijer.
+
 ## Tested, 2026-10-11 (macOS, this branch at 27bb6c445)
 
 - The mod registers `ML_TreeBridge` (actor 472), and ML's Kokiri Forest room spawns it by name with its params and

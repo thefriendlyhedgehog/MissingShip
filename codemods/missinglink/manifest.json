@@ -1,7 +1,7 @@
 {
     "name": "missinglink",
     "author": "MissingShip",
-    "version": "0.4",
+    "version": "0.5",
     "description": "The Missing Link (Kaze Emanuar's v2.0) on SoH: Unbound. The first time, it makes ML's world from your Ocarina of Time USA 1.0 ROM and Kaze's v2.0 patch (romhacking.net/hacks/5334): it asks for them, saves MissingLink_Unbound.o2r in the mods folder and asks to restart. Install it on its own: packs made for vanilla Ocarina of Time's world, textures or music don't apply to ML.",
     "permissions": [
         "files"

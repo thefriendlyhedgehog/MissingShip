@@ -54,6 +54,7 @@ void MlBossVaShot_Register(const SOHModApi* api);
 void MlLight_Register(const SOHModApi* api);
 void MlDiag_Register(const SOHModApi* api);
 void MlOtherMods_Register(const SOHModApi* api);
+void MlQuests_Register(const SOHModApi* api);
 void MlFogWall_Register(const SOHModApi* api);
 void MlMThunder_Register(const SOHModApi* api);
 void MlEnDns_Register(const SOHModApi* api);

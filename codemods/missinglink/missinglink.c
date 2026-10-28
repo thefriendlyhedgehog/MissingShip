@@ -29,6 +29,8 @@ SOH_MOD_EXPORT void ModInit(void) {
     if (!MlPorter_Register(sApi)) {
         return;
     }
+    // ML's files are Original Quest; other quests' files don't open (ml_quests.c).
+    MlQuests_Register(sApi);
     MlOverrides_Register(sApi);
     MlScenes_Register(sApi);
     MlWorld_Register(sApi);
