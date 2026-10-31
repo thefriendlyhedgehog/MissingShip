@@ -129,6 +129,17 @@ play; the others are fidelity (the water factor), SoH's windows, or fixes ML alr
 | `VB_SHOW_GAMEPLAY_STATS_COUNT` | the stats window lists only ML's enemies and ammo | merged, [skijer/Shipwright#33](https://github.com/skijer/Shipwright/pull/33) |
 | `SetLabel`, `SetTimeSplits`, `SetTimeSplitGroup`, `ClearTimeSplitGroups`, `SetItemIcon` | ML's names, split list and icons in SoH's windows, on Windows too | merged, [skijer/Shipwright#33](https://github.com/skijer/Shipwright/pull/33) |
 
+Later offers to skijer: `ReadGameArchiveFiles` (#41, 2026-10-21) was closed by us once ML's layer kept the game's files
+instead; an automatic restart (#42) was closed by skijer as a security risk (a mod that restarts the game could run
+files it just rewrote), so restarts stay "Close now / Later". Mod quests went up as
+[skijer/Shipwright#45](https://github.com/skijer/Shipwright/pull/45) on 2026-10-28, at his invitation: a mod adds its own
+stop to the file select's quest carousel, with its own logo and save label, and its world switches live, no restart.
+Built on Windows and Linux; tested on macOS with ML.
+
+| Hook | For | PR |
+|---|---|---|
+| `RegisterQuest`, `GetQuest`, `GetQuestWorld`, `OnQuestWorldChange` | ML as its own quest next to Original, Rando and Boss Rush; ML and vanilla files in one session | open, [skijer/Shipwright#45](https://github.com/skijer/Shipwright/pull/45) |
+
 B3 and B6 stay with roborich/libultraship (#2, #3) and B8 with roborich's ZAPDTR; skijer's branch takes those submodules from roborich.
 
 Pipeline rows (128 grass floors, 129 sky seams, 139 split samples) are data changes already inside the mod archive

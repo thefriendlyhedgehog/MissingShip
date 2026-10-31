@@ -4,7 +4,6 @@ description: "Kevin's project to port older OoT romhacks (Missing Link, Nimpize)
 metadata: 
   node_type: memory
   type: project
-  originSessionId: c90fe9a6-ad2e-4ae3-ba84-7caccc4ca425
   modified: 2026-09-18T00:14:41.218Z
 ---
 

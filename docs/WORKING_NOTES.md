@@ -26,16 +26,23 @@ Project memory notes from the local sessions are copied in `docs/notes/`. The pl
 - New ML object: add `pipeline/xml/objects/object_ml_<name>.xml`, name its dma index in ML_OBJECTS in
   `pipeline/ms_cycle.py`, declare paths in `soh/assets/ml_assets.h`.
 
-## Where things stand (2026-10-17)
-- **The release route is ML for stock SoH: Unbound** (SoH 9.3.0 or later, with skijer's code mods). Players run our
-  builder: `pipeline/build_mod.py --stock`, with a window (`pipeline/builder_gui.py`) and double-click launchers from
-  `tools/package.py`. It writes ML's layer and ML's code mod into Unbound's `mods/` folder. The releases are the
-  `unbound-930-builder-N` pre-releases; how to make one is in DEVELOPMENT.md's Releases section.
+## Where things stand (2026-10-31)
+- **The release route is ML for stock SoH: Unbound** (SoH 9.3.0 or later, skijer's mod API 2). Players install one
+  file, `missinglink.o2r` (NEI-Store or Releases); its porter asks for the ROM and ML's patch, writes ML's layer
+  `MissingLink_Unbound.o2r` into `mods/` and asks for a restart. Current pre-release: `unbound-930-porter-5`
+  (missinglink 0.4, childshield 0.2), made with `tools/porterpack.py`. The builder (`unbound-930-builder-N`) is retired.
+- **Code mods** are in `codemods/` (missinglink, childshield), synced from `ml-codemod-930`. skijer signs them through
+  his signing issue (`/sign <commit>`); signed files go to his store release `mods`.
+- **Held:** missinglink 0.5 (ML's files are Original Quest; Rando, MQ, Boss Rush and speedrun files don't open) and
+  ML as a mod quest. On a host with mod quests, ML is its own stop on the quest carousel with its title logo, its world
+  covers the game's files only while an ML file is played, and `ml_patch.c` puts back what ML wrote into the game's
+  tables. The host side is offered as skijer/Shipwright#45 (opened 2026-10-28, no review yet); both ship together
+  once it merges.
 - **Branches of our Unbound fork:**
-  - `ml-codemod-930`: ML's code mod, `mod-sdk/mods/missinglink`, on skijer's 9.3.0 mod API (skijer/Shipwright#33);
-    `tools/codemod.py` builds it for every OS.
-  - `ml-playtest` / `ml-playtest-930`: `mlplay`, the scripted playthrough (`mod-sdk/mlplay-playthrough`, 14
-    segments, with run scripts for macOS, Linux and Windows).
+  - `ml-codemod-930`: ML's code mod, `mod-sdk/mods/missinglink`, on skijer's mod API, plus the mod quests host
+    commits (the same change as #45); `tools/codemod.py` builds it for every OS.
+  - `ml-playtest` / `ml-playtest-930`: `mlplay`, the scripted playthrough and test driver (`reset`, `newfile`, `seed`,
+    `shot`).
   - `missinglink`: our Unbound branch and the pack route, kept for testing.
 - **The engine fork** (SoH 9.2.3, `engine/`) is the development reference: never distributed, no new features.
 - **Windows mods:** a game function's plain name is the mod's import thunk, so compares and stores of game function

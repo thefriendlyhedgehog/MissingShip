@@ -4,7 +4,6 @@ description: "MissingShip's governing goal (set by the user 2026-09-23): the ENT
 metadata:
   node_type: memory
   type: project
-  originSessionId: c90fe9a6-ad2e-4ae3-ba84-7caccc4ca425
   modified: 2026-09-23T23:39:08.125Z
 ---
 
